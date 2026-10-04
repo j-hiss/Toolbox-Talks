@@ -11,9 +11,9 @@ This app documents safety meetings. It does not by itself certify OSHA complianc
 
 ## Status
 - **Prototype:** complete (`prototype/index.html`, open it in a browser). It is the reference behavior.
-- **Real app:** project set up. Core logic (talk library, climate, 52-week plan, attendance statuses) is ported with
-  tests. The first database tables (companies, members, roles, teams, people) are in place with company isolation
-  proven by a test. Screens are next, ported one at a time from the prototype.
+- **Real app:** sign-in (emailed 6-digit code), first-time company setup, and Admin (people, teams, roles, company
+  info) are built. Home shows this week's talk from the company's own 52-week plan. Core logic is tested and company
+  isolation is proven by a database test. Next: the talk flow (read, attendance, signatures) and the PDF record.
 
 ## Run it on your Mac (free, nothing in the cloud)
 
@@ -39,7 +39,18 @@ npm run db:start      # starts local Supabase (first run downloads it, a few min
 npx supabase status   # copy the API URL and anon key into .env.local (first time only)
 npm run dev           # the web app at http://localhost:3000
 ```
-To try it on your phone, connect it to the same Wi-Fi and open `http://<your-mac's-name>.local:3000`.
+**Signing in locally:** enter any email on the sign-in screen. The email doesn't really go out; local Supabase
+catches it. Open the test inbox at http://127.0.0.1:54324 to get the 6-digit code. The first account you create
+sets up a company and becomes its owner.
+
+**Which database address to use.** The app talks to local Supabase at the address in `.env.local`, and
+`127.0.0.1` means "this device". That's right for the browser on your Mac and the iPhone simulator, but not for:
+- **Your real phone on the same Wi-Fi:** set `NEXT_PUBLIC_SUPABASE_URL=http://<your-mac's-name>.local:54321`, restart
+  `npm run dev`, then open `http://<your-mac's-name>.local:3000` on the phone.
+- **The Android emulator:** it reaches your Mac at `10.0.2.2`, so use `NEXT_PUBLIC_SUPABASE_URL=http://10.0.2.2:54321`
+  and run `CAP_LOCAL=1 npm run android` (lets the test app use plain `http` to your Mac; never ship that build).
+
+Your Mac's name is in System Settings → General → Sharing (shown as `something.local`).
 
 `npm run db:stop` shuts local Supabase down when you're done.
 

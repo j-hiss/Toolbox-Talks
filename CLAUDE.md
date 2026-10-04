@@ -56,6 +56,8 @@ canonical. Fix a stale line reference when you touch it.
 - **Records are append-only.** A saved attendance record (talk version, roster, statuses, signatures, timestamps,
   presenter) is never edited in place. A correction is a new linked record with a reason. The PDF regenerated from
   a record must match what was signed.
+- **People are deactivated, never deleted.** Saved records point at people; removing someone takes them off
+  rosters and keeps their history.
 - **Honest status, never hidden.** Every person on the roster ends as `signed`, `not_signed`, or `absent`. Flags are
   never dropped to make a report look better. Zero records for a week is "missed", not "fine".
 - **No compliance claims.** The app documents safety meetings. It never says or implies a company is "OSHA

@@ -92,6 +92,9 @@ async function main() {
     const companies = await as(userA, "select id from public.companies");
     check("A sees only A's company", companies.rows.length === 1 && companies.rows[0].id === coA, `${companies.rows.length} visible`);
     check("A sees only A's teams", (await as(userA, "select id from public.teams")).rows.length === 0);
+    const rolesA = await as(userA, "select company_id from public.roles");
+    check("New company gets its default roles, and A sees only A's", rolesA.rows.length === 6 && rolesA.rows.every((r) => r.company_id === coA), `${rolesA.rows.length} visible`);
+    check("A cannot add a role to B", await fails(() => as(userA, "insert into public.roles (company_id, name) values ($1, 'Intruder')", [coB])));
     check("A cannot add a person to B", await fails(() => as(userA, "insert into public.people (company_id, full_name) values ($1, 'intruder')", [coB])));
     const upd = await as(userA, "update public.people set full_name = 'renamed' where company_id = $1", [coB]);
     check("A cannot change B's people", upd.rowCount === 0, `${upd.rowCount} rows changed`);
@@ -117,7 +120,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 13;
+  const EXPECTED = 15;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);
