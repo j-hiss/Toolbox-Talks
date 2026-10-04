@@ -1,0 +1,50 @@
+name: CI
+
+# Red/green signal on every push and pull request. Carried over from the Contrax Railyard lessons:
+#  - A check that can't fail is decoration, so a missing test script is a FAILURE, not a skip.
+#  - A false red (config, not code) trains people to ignore the badge, so placeholders are provided for env checks.
+#
+# Until the app exists there is no package.json, and the job says so and passes. The moment package.json lands,
+# the job requires `typecheck` and `test` scripts and runs both.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: App present?
+        id: app
+        run: |
+          if [ -f package.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; echo "No package.json yet: prototype + docs only. Nothing to test."; fi
+
+      - uses: actions/setup-node@v4
+        if: steps.app.outputs.present == 'true'
+        with: { node-version: 22, cache: npm }
+
+      - name: Require typecheck and test scripts
+        if: steps.app.outputs.present == 'true'
+        run: |
+          node -e 'const s=require("./package.json").scripts||{};const miss=["typecheck","test"].filter(k=>!s[k]);if(miss.length){console.error("package.json is missing required scripts: "+miss.join(", ")+". CI will not go green without them.");process.exit(1)}'
+
+      - name: Install
+        if: steps.app.outputs.present == 'true'
+        run: npm ci
+
+      - name: Typecheck
+        if: steps.app.outputs.present == 'true'
+        run: npm run typecheck
+
+      - name: Test
+        if: steps.app.outputs.present == 'true'
+        run: npm test

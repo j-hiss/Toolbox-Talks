@@ -1,0 +1,1103 @@
+<title>Tailgate Talks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: single-column phone app, sticky step bar, one big action button per screen */
+  :root{
+  --warn-bg:#fbe6e4;
+  --bg:#f3f2ee; --surface:#ffffff; --fg:#1b1d1f; --muted:#5d6166; --line:#d9d7d0;
+  --hivis:#f5c400; --hivis-ink:#1b1d1f; --ok:#1f7a45; --warn:#b4231b;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141517; --surface:#1d1f22; --fg:#ecebe6; --muted:#9a9ea4; --line:#33363a;
+  --hivis:#f5c400; --hivis-ink:#141517; --ok:#4cc27e; --warn:#ff6a5f; --warn-bg:#3a1f1d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141517; --surface:#1d1f22; --fg:#ecebe6; --muted:#9a9ea4; --line:#33363a;
+  --hivis:#f5c400; --hivis-ink:#141517; --ok:#4cc27e; --warn:#ff6a5f; --warn-bg:#3a1f1d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+.app{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:0 32px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;border-bottom:1px solid var(--line);margin-inline:-16px;padding-inline:16px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand h1{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:.02em;text-transform:uppercase;margin:0;display:flex;align-items:center;gap:10px}
+.stripe{width:28px;height:18px;border-radius:2px;background:repeating-linear-gradient(-45deg,var(--hivis) 0 6px,var(--fg) 6px 12px)}
+.navs{display:flex;gap:6px}
+.navbtn{font:700 14px var(--body);background:none;border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:6px 10px;cursor:pointer}
+.steps{display:flex;gap:6px;margin-top:10px}
+.steps span{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.steps span.on{background:var(--hivis)}
+.eyebrow{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:var(--muted);margin:22px 0 6px}
+h2{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.05;margin:0 0 8px;text-wrap:balance;text-transform:uppercase}
+p{margin:0 0 12px}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.talk{display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;color:var(--fg);cursor:pointer;font:inherit}
+.talk:hover,.talk:focus-visible{border-color:var(--hivis);outline:none;box-shadow:0 0 0 2px var(--hivis)}
+.talk>span:only-child{padding-block:2px}
+.group{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:15px;color:var(--muted);margin:22px 0 -4px;padding-bottom:6px;border-bottom:2px solid var(--hivis)}
+.weeks{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.wk{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.wk.now{border-color:var(--hivis);box-shadow:0 0 0 2px var(--hivis)}
+.wkdate{display:flex;flex-direction:column;min-width:96px}
+.wkdate small{color:var(--muted);font-size:13px}
+.wk select{min-width:0;width:100%;font:inherit;font-size:15px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.tag{grid-column:2;justify-self:start;font-family:var(--display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;background:var(--hivis);color:var(--hivis-ink);border-radius:4px;padding:1px 6px}
+.tag.edit{background:none;border:1px solid var(--line);color:var(--muted)}
+.langs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.lang{font:700 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.lang.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.lang:disabled{opacity:.5;cursor:not-allowed}
+.lang small{font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.05em}
+.lang:focus-visible{outline:3px solid var(--hivis);outline-offset:2px}
+.playrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.btn.play{width:auto;margin:6px 0 0;padding:10px 16px;font-size:17px;background:var(--fg);color:var(--bg)}
+.saying{background:var(--hivis);color:var(--hivis-ink);border-radius:4px;box-shadow:0 0 0 4px var(--hivis)}
+.voicerow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:10px;font-size:14px;color:var(--muted)}
+.voicerow select{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);min-width:0;max-width:100%}
+.voicerow #voice{flex:1 1 160px}
+.voicerow .btn.ghost{font-size:14px;padding:6px 12px}
+.brand{flex-wrap:wrap}
+.form{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.form label{font-weight:700;font-size:14px;margin-top:8px}
+.form label small{font-weight:400;color:var(--muted)}
+.form input,.form textarea,.form select,.arow input,.arow select,#site{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%;min-width:0}
+.form textarea{resize:vertical}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.two>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.two label{margin-top:8px}
+.hint{color:var(--muted);font-size:14px;margin:6px 0}
+.banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--hivis);background:var(--surface);border-radius:8px;padding:12px 14px;margin:10px 0}
+.banner.warn{border-color:var(--warn);background:var(--warn-bg);margin-top:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 4px 4px 12px;font-weight:700;font-size:14px}
+.chip button{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;width:28px;height:28px;border-radius:50%;cursor:pointer}
+.chip button:hover{background:var(--bg);color:var(--warn)}
+.rows{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.arow{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px}
+.arow.add{border-style:dashed;margin-top:8px}
+.arow input{font-weight:700}
+.arow2{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.arow2 select{flex:1 1 140px;width:auto}
+.arow2 label{font-size:13px;color:var(--muted)}
+.count{font-size:13px;color:var(--muted)}
+.btn.ghost.sm{font-size:14px;padding:8px 12px;margin:0;width:auto}
+.btn.danger{border-color:var(--warn);color:var(--warn)}
+.tally{float:right;letter-spacing:.02em;text-transform:none;font-family:var(--body);font-weight:700;font-size:13px}
+.crew .who{display:flex;flex-direction:column;flex:1;min-width:0}
+.crew .who small,.sighead .who small{font-weight:400;color:var(--muted);font-size:13px}
+.sighead .who{display:flex;flex-direction:column}
+.crew label.off{background:var(--warn-bg);border-color:var(--warn)}
+.crew label.presenting{opacity:.75}
+.tag.flag{background:var(--warn);color:#fff}
+.summary{margin:4px 0 10px}
+.record td small{display:block;color:var(--muted);font-size:13px;font-weight:400}
+.record tr.flagrow td{background:var(--warn-bg)}
+.record tr.flagrow td:first-child{padding-left:8px}
+.hist .right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;white-space:nowrap}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:10px 0 6px}
+.tab{font-family:var(--display);font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.04em;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:8px 14px;cursor:pointer;margin-bottom:-1px}
+.tab.on{color:var(--fg);border-bottom-color:var(--hivis)}
+.tab:focus-visible,.chipbtn:focus-visible{outline:3px solid var(--hivis);outline-offset:2px}
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.filters .chips{margin:0}
+.filters select{font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.chipbtn{font:700 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chipbtn.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi span{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:13px;color:var(--muted)}
+.kpi b{font-family:var(--display);font-size:34px;line-height:1}
+.kpi small{color:var(--muted);font-size:12px}
+.kpi.bad{border-color:var(--warn)}.kpi.bad b{color:var(--warn)}
+.scrollx{overflow-x:auto;margin-top:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.scrollx table{width:100%;border-collapse:collapse;font-size:14px}
+.scrollx th{text-align:left;font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:12px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.scrollx td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.scrollx tr:last-child td{border-bottom:0}
+.scrollx td small{display:block;color:var(--muted);font-size:12px}
+.emp td:not(:first-child),.emp th:not(:first-child){text-align:right;white-space:nowrap}
+.emp tr.flagrow td{background:var(--warn-bg)}
+.cov td:first-child{white-space:nowrap}
+.cell{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;border-radius:6px;padding:4px 8px;border:1px solid transparent;text-align:left;min-width:0}
+.cell.ok{background:var(--bg);border-color:var(--line);color:var(--fg);cursor:pointer}
+.cell.ok:hover{border-color:var(--hivis)}
+.cell.miss{background:var(--warn-bg);color:var(--warn);font-weight:700}
+.cell.open{color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:6px;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--hivis)}
+.talk .code{font-family:var(--display);font-weight:700;font-size:13px;background:var(--hivis);color:var(--hivis-ink);border-radius:4px;padding:3px 6px;white-space:nowrap}
+.talk b{display:block;font-size:17px}
+.talk small{color:var(--muted)}
+.script{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;margin-top:12px}
+.script h3{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:18px;margin:16px 0 6px}
+.script h3:first-child{margin-top:0}
+.script ul{margin:0 0 8px;padding-left:20px}
+.script li{margin-bottom:6px}
+.ask{border-left:4px solid var(--hivis);padding:8px 12px;background:var(--bg);border-radius:0 6px 6px 0;margin-top:8px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:14px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.pill.industry{font:inherit;font-size:14px;background:var(--hivis);color:var(--hivis-ink);border-color:var(--hivis);font-weight:700;cursor:pointer}
+.crew{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.crew label{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-weight:700;cursor:pointer}
+.crew input{width:22px;height:22px;accent-color:var(--hivis)}
+.addrow{display:flex;gap:8px;margin-top:10px}
+.addrow input{flex:1;min-width:0;font:inherit;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.btn{font-family:var(--display);font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:.04em;border:0;border-radius:8px;padding:16px;width:100%;cursor:pointer;background:var(--hivis);color:var(--hivis-ink);margin-top:18px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--fg);font-size:16px;padding:12px;width:auto;margin:0}
+.btn:focus-visible,.navbtn:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.sigcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px}
+.sighead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.sighead b{font-size:18px}
+canvas{display:block;width:100%;height:150px;background:#fff;border:2px dashed var(--line);border-radius:6px;touch-action:none}
+.sigline{font-size:13px;color:var(--muted);margin-top:4px}
+.done{color:var(--ok);font-weight:700}
+.record{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;margin-top:12px}
+.record table{width:100%;border-collapse:collapse;font-size:15px}
+.record td{padding:8px 0;border-bottom:1px solid var(--line);vertical-align:middle}
+.record td:last-child{text-align:right}
+.record img{height:40px;max-width:140px;background:#fff;border-radius:3px}
+.stamp{display:inline-block;font-family:var(--display);font-weight:800;text-transform:uppercase;color:var(--ok);border:2px solid var(--ok);border-radius:4px;padding:2px 8px;letter-spacing:.06em}
+.hist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.hist button{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;color:var(--fg);font:inherit;cursor:pointer}
+.hist small{color:var(--muted);display:block}
+.num{font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:var(--muted);margin-top:16px}
+.example{font-family:var(--display);font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:6px}
+@media (prefers-reduced-motion:no-preference){.screen{animation:in .18s ease-out}@keyframes in{from{transform:translateY(6px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1><span class="stripe" aria-hidden="true"></span>Tailgate Talks</h1>
+      <span class="navs"><button class="navbtn" id="navPlan">Plan</button><button class="navbtn" id="navRecords">Records</button><button class="navbtn" id="navAdmin">Admin</button></span>
+    </div>
+    <div class="steps" id="steps" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const TALKS = [
+  {id:"fall",ind:["con"],code:"1926.501",title:"Fall Protection",mins:6,
+   hook:"Falls are the number one killer in construction. There's no such thing as \"just a quick trip to the edge.\"",
+   sections:[
+    {h:"The rule",items:["If you're 6 feet or more above a lower level, you need fall protection. That's the federal construction line.","That can be a guardrail, a safety net, or a personal fall arrest system. Your supervisor will tell you which one this job uses."]},
+    {h:"Before you clip in",items:["Inspect your harness every time: frayed webbing, cracked buckles, a deployed impact indicator. Any of those and it goes out of service today.","Anchor point rated for 5,000 lbs per worker, or designed by a qualified person. A vent pipe is not an anchor.","Check your clearance. A 6-foot lanyard can need nearly 18 feet below you before it stops you."]},
+    {h:"Holes and skylights",items:["Every hole over 2 inches gets covered, secured, and marked HOLE or COVER.","Skylights are holes. People fall through them every year."]}
+   ],
+   ask:"Who knows where today's anchor points and edge protection are? Point them out before we start."},
+  {id:"heat",ind:["all"],code:"HEAT",title:"Heat Illness: Water, Rest, Shade",mins:5,
+   hook:"Roofs, attics, pavement and enclosed spaces can run far hotter than the air temperature. Heat illness can take down the strongest person on the crew.",
+   sections:[
+    {h:"Water, rest, shade",items:["Drink about a cup of water every 15 to 20 minutes, even if you're not thirsty.","Take breaks in the shade. Longer breaks as the heat index climbs.","New or returning workers need about a week to build up to full workload. Most heat deaths happen in the first few days."]},
+    {h:"Know the signs",items:["Heat exhaustion: heavy sweating, dizziness, headache, cramps, nausea. Move them to shade, cool them down, give water.","Heat stroke: confusion, slurred speech, passing out, hot skin, seizures. This is a 911 call. Cool them with water and ice while you wait."]},
+    {h:"Look out for each other",items:["People with heat stroke often don't know they're in trouble. Watch your partner."]}
+   ],
+   ask:"Where's the water and shade on this job today, and who's calling 911 if we need it?"},
+  {id:"ladder",ind:["con"],code:"1926.1053",title:"Ladder Setup and Use",mins:5,
+   hook:"Most ladder falls happen getting on or off at the top, not from way up high.",
+   sections:[
+    {h:"Setup",items:["Extend the ladder at least 3 feet above the landing so you have something to grab.","Use the 4-to-1 rule: for every 4 feet up, the base goes 1 foot out.","Secure it at the top. Firm, level footing at the bottom."]},
+    {h:"Climbing",items:["Face the ladder and keep three points of contact.","No carrying bundles in your hands. Use a hoist or a hand line.","Stay off the top step of a stepladder, and keep metal ladders away from power lines."]},
+    {h:"Inspect it",items:["Broken rungs, bent rails, missing feet: tag it out and get it off the job."]}
+   ],
+   ask:"Who set up the ladder today? Let's check it together before anyone climbs."}
+  ,{id:"loto",ind:["mfg"],code:"1910.147",title:"Lockout/Tagout",mins:6,
+   hook:"Machines that start up during cleaning or repair cause amputations and deaths every year. A lock is the only thing that keeps the power off while you're inside.",
+   sections:[
+    {h:"Six steps",items:["Tell the operators the machine is going down.","Shut it down the normal way.","Isolate every energy source: electrical, air, hydraulic, gravity, steam.","Put your own lock and tag on each isolation point.","Release stored energy. Bleed air lines, block raised parts, discharge capacitors.","Verify. Try to start it. Nothing should move."]},
+    {h:"The rules that don't bend",items:["One person, one lock. If three people are working on it, there are three locks.","Only the person who put the lock on takes it off.","Never rely on an e-stop or a switch someone else is watching."]}
+   ],
+   ask:"Which machine on this floor has more than one energy source? Walk us through where they are."},
+  {id:"guard",ind:["mfg"],code:"1910.212",title:"Machine Guarding",mins:4,
+   hook:"Guards are there because a machine moves faster than you can pull your hand back.",
+   sections:[
+    {h:"Guards stay on",items:["Never remove, bypass or tape over a guard or interlock.","If a guard is missing or damaged, stop and report it before you run the machine."]},
+    {h:"Around moving parts",items:["No loose sleeves, gloves near rotating parts, jewelry, or loose long hair.","Never reach around, over or under a guard.","Jammed? Lock it out before you clear it. Every time."]}
+   ],
+   ask:"Has anyone seen a guard propped open or missing this week? Where?"},
+  {id:"hazcom",ind:["ag","mfg"],code:"1910.1200",title:"Chemical Labels and SDS",mins:5,
+   hook:"Every chemical on site comes with instructions for staying safe. Most people never read them.",
+   sections:[
+    {h:"Read before you handle",items:["Check the label: the signal word, the pictograms, and the PPE it calls for.","Know where the Safety Data Sheets are kept. Section 4 tells you first aid, Section 8 tells you PPE."]},
+    {h:"Handling",items:["Never move a chemical into an unlabeled container. Drink bottles are the worst offender.","Know where the nearest eyewash and water are before you open anything.","Wash your hands before you eat, drink or smoke."]}
+   ],
+   ask:"Where are the SDS binders and the eyewash station from where we're standing?"},
+  {id:"nh3",ind:["ag"],code:"1910.111",title:"Anhydrous Ammonia Safety",mins:6,
+   hook:"Anhydrous ammonia pulls water out of whatever it touches, including your eyes, skin and lungs. Seconds matter.",
+   sections:[
+    {h:"Gear up",items:["Chemical splash goggles and ammonia-rated gloves, every time you connect or disconnect.","Stand upwind when you open valves or break connections."]},
+    {h:"Before you hook up",items:["Inspect hoses, valves and couplers. Cracks, bulges or a strong smell mean stop.","Bleed pressure from hoses before you disconnect.","Carry clean water on the tank and on you."]},
+    {h:"If you're exposed",items:["Flush with water right away for at least 15 minutes. Remove clothing that got hit.","Get medical help. Eye exposure always gets checked by a doctor."]}
+   ],
+   ask:"Where's the water on this rig, and how much is in it right now?"},
+  {id:"fork",ind:["wh","mfg"],code:"1910.178",title:"Forklift Safety",mins:5,
+   hook:"Forklifts weigh several tons and the operator can't always see you.",
+   sections:[
+    {h:"Operators",items:["Only trained and evaluated operators drive. Evaluations repeat at least every 3 years.","Do a pre-shift check: forks, chains, tires, horn, brakes, leaks.","Wear the seatbelt. If it tips, stay in the seat, hold on, and lean away from the fall."]},
+    {h:"Everyone else",items:["Make eye contact with the driver before you walk into their path.","No riders. Nobody stands on the forks.","Parked means forks down, controls neutral, brake set."]}
+   ],
+   ask:"Where are the blind corners in this building?"},
+  {id:"lift",ind:["wh","con","ag"],code:"ERGO",title:"Lifting Without Getting Hurt",mins:4,
+   hook:"Back injuries are among the most common injuries on the job, and they can follow you for life.",
+   sections:[
+    {h:"Plan the lift",items:["Check the weight first. Heavy or awkward means get help or use equipment.","Clear your path before you pick it up."]},
+    {h:"Do the lift",items:["Feet apart, bend your knees, keep your back straight.","Keep the load close to your body.","Don't twist. Turn your feet instead."]}
+   ],
+   ask:"What's the heaviest thing we'll move today, and how are we moving it?"}
+  ,{id:"cold",ind:["all"],code:"COLD",title:"Cold Stress",mins:5,
+   hook:"Cold doesn't have to mean snow. Wind, rain and wet clothes can pull heat out of your body even on a mild day.",
+   sections:[
+    {h:"Dress for it",items:["Wear layers you can take off as you warm up. Cotton next to the skin stays wet; synthetics and wool don't.","Cover your head, hands and feet. Keep a dry pair of socks and gloves in the truck.","Wind makes it colder than the thermometer says."]},
+    {h:"Know the signs",items:["Frostbite: numb, white or grayish skin on fingers, toes, ears or nose. Warm it slowly. Don't rub it.","Hypothermia: uncontrolled shivering, then confusion, slurred speech, clumsiness and drowsiness. Call 911, get them somewhere warm, and swap wet clothes for dry ones."]},
+    {h:"On the job",items:["Take warm-up breaks somewhere out of the wind.","Warm, sweet drinks help. Skip alcohol; it makes you lose heat faster."]}
+   ],
+   ask:"Where can we warm up today, and who has spare dry gloves?"},
+  {id:"fatigue",ind:["all"],code:"HEALTH",title:"Fatigue and Sleep",mins:4,
+   hook:"Being awake 17 to 19 hours can slow you down about as much as having a couple of drinks. Tired people get hurt.",
+   sections:[
+    {h:"The basics",items:["Most adults need at least 7 hours of sleep. Long shifts and early starts eat into that fast.","Eat real food and drink water through the day. Energy drinks wear off right when you need focus."]},
+    {h:"On the job",items:["Watch for nodding off, missed steps, or short tempers in yourself and others.","Save the riskiest work for when you're sharpest, not the end of a long shift.","If you're too tired to drive home safely, say so. That's a safety call, not a weakness."]}
+   ],
+   ask:"Who's coming off a long stretch of shifts this week?"},
+  {id:"slips",ind:["all"],code:"1910.22",title:"Slips, Trips and Falls",mins:4,
+   hook:"Falls on the same level are one of the most common injuries in every industry. Most come down to housekeeping.",
+   sections:[
+    {h:"Keep it clear",items:["Cords, hoses and scrap don't belong in walkways. Route them along the edges or overhead.","Clean up spills right away, or mark them until you can."]},
+    {h:"Watch your step",items:["Wear footwear with grip that fits the surface you work on.","Use handrails on stairs. Don't carry so much that you can't see your feet.","Take extra care on wet, muddy, icy or oily surfaces."]}
+   ],
+   ask:"What's the biggest trip hazard on site right now? Let's fix it before we start."},
+  {id:"ppe",ind:["all"],code:"1910.132",title:"PPE: Wear It Right",mins:4,
+   hook:"Personal protective equipment only works if it fits, it's in good shape, and it's actually on.",
+   sections:[
+    {h:"Every day",items:["Know what today's task requires: eyes, ears, hands, head, feet, hi-vis.","Inspect it before you use it. Cracked glasses, worn gloves and damaged hard hats get replaced, not taped."]},
+    {h:"Fit matters",items:["Gloves that are too big get caught. Earplugs that aren't seated don't protect.","If your PPE doesn't fit or makes the job harder, say so. There's usually a better option."]}
+   ],
+   ask:"Is anyone missing PPE or using something worn out? Speak up now."},
+  {id:"emerg",ind:["all"],code:"EMERG",title:"If Something Goes Wrong",mins:4,
+   hook:"In an emergency, nobody has time to figure out where the first aid kit is. Decide now.",
+   sections:[
+    {h:"Know before you need it",items:["The exact address of this site, so you can give it to 911.","Where the first aid kit, fire extinguisher and AED are, if there is one.","Where we meet if we evacuate, so we can count heads."]},
+    {h:"Fire extinguisher: P.A.S.S.",items:["Pull the pin. Aim at the base of the fire. Squeeze the handle. Sweep side to side.","If it's spreading or the room is filling with smoke, get out and call 911."]}
+   ],
+   ask:"Without looking it up, what's the address here? Where's the first aid kit?"}
+  ,{id:"storm",ind:["all"],code:"STORM",title:"Hurricane and Storm Prep",mins:5,
+   hook:"Hurricane season runs June 1 through November 30. A loose sheet of plywood or a bundle of shingles becomes a missile in a storm.",
+   sections:[
+    {h:"Before a storm",items:["Secure or bring down loose materials, tools and debris. Anything that can blow away will.","Lower and secure lifts and booms within the manufacturer's wind limits.","Know the company's call: when work stops and how you'll be told."]},
+    {h:"High wind and lightning",items:["Stop work at height when the wind picks up. A gust can knock you off balance or turn a panel into a sail.","When you hear thunder, get off roofs, lifts and open ground and into a building or a hard-top vehicle. Wait 30 minutes after the last thunder."]},
+    {h:"After the storm",items:["Treat every downed line as live. Stay far away and call the utility.","Watch for weakened structures, standing water, and debris with nails. Cleanup brings its own hazards."]}
+   ],
+   ask:"If a storm warning comes in today, what do we secure first, and who makes the call to stop?"}
+];
+const ES={
+fall:{title:"Protección contra caídas",hook:"Las caídas son la causa número uno de muertes en la construcción. No existe tal cosa como \"solo una vueltita rápida al borde\".",sections:[
+ {h:"La regla",items:["Si estás a 6 pies o más sobre un nivel más bajo, necesitas protección contra caídas. Esa es la regla federal para la construcción.","Puede ser una baranda, una red de seguridad o un sistema personal de detención de caídas. Tu supervisor te dirá cuál se usa en este trabajo."]},
+ {h:"Antes de engancharte",items:["Revisa tu arnés cada vez: correas deshilachadas, hebillas rotas o un indicador de impacto activado. Si tiene cualquiera de esas, se saca de servicio hoy.","El punto de anclaje debe aguantar 5,000 libras por trabajador, o estar diseñado por una persona calificada. Un tubo de ventilación no es un anclaje.","Revisa el espacio libre. Una línea de 6 pies puede necesitar casi 18 pies debajo de ti para detenerte."]},
+ {h:"Huecos y tragaluces",items:["Todo hueco de más de 2 pulgadas se cubre, se asegura y se marca HOLE o COVER (hueco o tapa).","Los tragaluces son huecos. Cada año hay gente que se cae a través de ellos."]}],
+ ask:"¿Quién sabe dónde están hoy los puntos de anclaje y la protección de bordes? Señálenlos antes de empezar."},
+heat:{title:"Enfermedades por calor: agua, descanso y sombra",hook:"Los techos, áticos, el pavimento y los espacios cerrados pueden estar mucho más calientes que el aire. El calor puede tumbar hasta al más fuerte del equipo.",sections:[
+ {h:"Agua, descanso y sombra",items:["Toma más o menos una taza de agua cada 15 a 20 minutos, aunque no tengas sed.","Descansa en la sombra. Los descansos deben ser más largos cuando sube el índice de calor.","Los trabajadores nuevos o que regresan necesitan como una semana para acostumbrarse a la carga completa. La mayoría de las muertes por calor pasan en los primeros días."]},
+ {h:"Conoce las señales",items:["Agotamiento por calor: sudor abundante, mareo, dolor de cabeza, calambres, náuseas. Llévalo a la sombra, refréscalo y dale agua.","Golpe de calor: confusión, habla arrastrada, desmayo, piel caliente, convulsiones. Esto es para llamar al 911. Enfríalo con agua y hielo mientras esperas."]},
+ {h:"Cuídense entre todos",items:["Quien sufre un golpe de calor muchas veces no se da cuenta. Vigila a tu compañero."]}],
+ ask:"¿Dónde están el agua y la sombra hoy, y quién llama al 911 si hace falta?"},
+ladder:{title:"Instalación y uso de escaleras",hook:"La mayoría de las caídas de escalera pasan al subir o bajar en la parte de arriba, no desde muy alto.",sections:[
+ {h:"Instalación",items:["Extiende la escalera por lo menos 3 pies sobre el nivel de llegada para tener de dónde agarrarte.","Usa la regla de 4 a 1: por cada 4 pies de altura, la base va 1 pie hacia afuera.","Asegúrala arriba. Abajo, que quede en suelo firme y nivelado."]},
+ {h:"Al subir",items:["Mira hacia la escalera y mantén tres puntos de contacto.","No subas con bultos en las manos. Usa un polipasto o una cuerda.","No te pares en el último escalón de una escalera de tijera, y mantén las escaleras de metal lejos de las líneas eléctricas."]},
+ {h:"Revísala",items:["Peldaños rotos, rieles doblados, patas faltantes: márcala fuera de servicio y sácala del trabajo."]}],
+ ask:"¿Quién instaló la escalera hoy? Revisémosla juntos antes de que alguien suba."},
+loto:{title:"Bloqueo y etiquetado (Lockout/Tagout)",hook:"Las máquinas que arrancan durante una limpieza o reparación causan amputaciones y muertes cada año. Un candado es lo único que mantiene la energía apagada mientras estás adentro.",sections:[
+ {h:"Seis pasos",items:["Avisa a los operadores que la máquina se va a apagar.","Apágala de la forma normal.","Aísla todas las fuentes de energía: eléctrica, aire, hidráulica, gravedad, vapor.","Pon tu propio candado y etiqueta en cada punto de aislamiento.","Libera la energía acumulada. Purga las líneas de aire, bloquea las piezas levantadas, descarga los capacitores.","Verifica. Intenta arrancarla. Nada debe moverse."]},
+ {h:"Reglas que no se doblan",items:["Una persona, un candado. Si tres personas trabajan en ella, hay tres candados.","Solo quien puso el candado lo quita.","Nunca confíes en un paro de emergencia o un interruptor que otra persona está vigilando."]}],
+ ask:"¿Qué máquina de este piso tiene más de una fuente de energía? Explícanos dónde están."},
+guard:{title:"Guardas de máquinas",hook:"Las guardas existen porque una máquina se mueve más rápido de lo que puedes retirar la mano.",sections:[
+ {h:"Las guardas se quedan puestas",items:["Nunca quites, puentees ni tapes con cinta una guarda o un interruptor de seguridad.","Si falta una guarda o está dañada, detente y repórtalo antes de usar la máquina."]},
+ {h:"Cerca de piezas en movimiento",items:["Nada de mangas sueltas, guantes cerca de piezas que giran, joyas ni pelo largo suelto.","Nunca metas la mano alrededor, por encima ni por debajo de una guarda.","¿Se atoró? Bloquéala antes de destrabarla. Siempre."]}],
+ ask:"¿Alguien ha visto esta semana una guarda abierta o que falte? ¿Dónde?"},
+hazcom:{title:"Etiquetas de químicos y hojas SDS",hook:"Cada químico en el trabajo viene con instrucciones para usarlo con seguridad. La mayoría de la gente nunca las lee.",sections:[
+ {h:"Lee antes de usar",items:["Revisa la etiqueta: la palabra de advertencia, los pictogramas y el equipo de protección que pide.","Sabe dónde están las Hojas de Datos de Seguridad (SDS). La Sección 4 dice los primeros auxilios y la Sección 8 dice el equipo de protección."]},
+ {h:"Manejo",items:["Nunca pases un químico a un envase sin etiqueta. Las botellas de bebida son lo peor.","Sabe dónde están el lavaojos y el agua más cercanos antes de abrir cualquier cosa.","Lávate las manos antes de comer, beber o fumar."]}],
+ ask:"Desde donde estamos, ¿dónde están las carpetas SDS y el lavaojos?"},
+nh3:{title:"Seguridad con amoníaco anhidro",hook:"El amoníaco anhidro le saca el agua a todo lo que toca, incluyendo tus ojos, tu piel y tus pulmones. Los segundos cuentan.",sections:[
+ {h:"Equípate",items:["Gafas contra salpicaduras químicas y guantes aptos para amoníaco, cada vez que conectes o desconectes.","Colócate del lado de donde viene el viento cuando abras válvulas o desconectes."]},
+ {h:"Antes de conectar",items:["Revisa mangueras, válvulas y acoples. Grietas, abultamientos o un olor fuerte significan alto.","Libera la presión de las mangueras antes de desconectar.","Lleva agua limpia en el tanque y contigo."]},
+ {h:"Si te expones",items:["Enjuágate con agua de inmediato por lo menos 15 minutos. Quítate la ropa que haya recibido el químico.","Busca atención médica. Si fue en los ojos, siempre debe revisarlo un médico."]}],
+ ask:"¿Dónde está el agua en este equipo y cuánta tiene ahora mismo?"},
+fork:{title:"Seguridad con montacargas",hook:"Los montacargas pesan varias toneladas y el operador no siempre te puede ver.",sections:[
+ {h:"Operadores",items:["Solo manejan operadores entrenados y evaluados. Las evaluaciones se repiten por lo menos cada 3 años.","Haz la revisión antes del turno: horquillas, cadenas, llantas, claxon, frenos, fugas.","Usa el cinturón. Si se vuelca, quédate en el asiento, agárrate fuerte e inclínate hacia el lado contrario de la caída."]},
+ {h:"Todos los demás",items:["Haz contacto visual con el operador antes de cruzar por su camino.","No se lleva a nadie de pasajero. Nadie se para en las horquillas.","Estacionado significa horquillas abajo, controles en neutral y freno puesto."]}],
+ ask:"¿Dónde están las esquinas ciegas en este edificio?"},
+lift:{title:"Cargar sin lastimarte",hook:"Las lesiones de espalda están entre las más comunes en el trabajo, y te pueden seguir toda la vida.",sections:[
+ {h:"Planea la carga",items:["Revisa el peso primero. Si es pesado o incómodo, pide ayuda o usa equipo.","Despeja tu camino antes de levantarlo."]},
+ {h:"Al levantar",items:["Pies separados, dobla las rodillas, espalda recta.","Mantén la carga cerca del cuerpo.","No gires la cintura. Mejor mueve los pies."]}],
+ ask:"¿Qué es lo más pesado que vamos a mover hoy y cómo lo vamos a mover?"},
+cold:{title:"Estrés por frío",hook:"El frío no tiene que ser nieve. El viento, la lluvia y la ropa mojada pueden sacarle el calor a tu cuerpo hasta en un día templado.",sections:[
+ {h:"Vístete para el frío",items:["Usa capas que te puedas quitar cuando entres en calor. El algodón pegado a la piel se queda mojado; la lana y las telas sintéticas no.","Cúbrete la cabeza, las manos y los pies. Deja un par de calcetines y guantes secos en la camioneta.","El viento hace que se sienta más frío de lo que marca el termómetro."]},
+ {h:"Conoce las señales",items:["Congelación: piel entumecida, blanca o grisácea en dedos, orejas o nariz. Caliéntala despacio. No la frotes.","Hipotermia: temblor que no se controla, luego confusión, habla arrastrada, torpeza y sueño. Llama al 911, llévalo a un lugar caliente y cámbiale la ropa mojada por ropa seca."]},
+ {h:"En el trabajo",items:["Toma descansos para calentarte en un lugar sin viento.","Las bebidas calientes y dulces ayudan. Evita el alcohol; hace que pierdas calor más rápido."]}],
+ ask:"¿Dónde podemos calentarnos hoy y quién tiene guantes secos de repuesto?"},
+fatigue:{title:"Cansancio y sueño",hook:"Estar despierto de 17 a 19 horas te puede hacer tan lento como haber tomado un par de tragos. La gente cansada se lastima.",sections:[
+ {h:"Lo básico",items:["La mayoría de los adultos necesitan por lo menos 7 horas de sueño. Los turnos largos y las madrugadas te las quitan rápido.","Come comida de verdad y toma agua durante el día. Las bebidas energéticas se te pasan justo cuando más necesitas concentrarte."]},
+ {h:"En el trabajo",items:["Fíjate si alguien cabecea, se salta pasos o anda de mal humor, incluyéndote a ti.","Deja el trabajo más riesgoso para cuando estés más alerta, no para el final de un turno largo.","Si estás demasiado cansado para manejar a casa con seguridad, dilo. Es una decisión de seguridad, no una debilidad."]}],
+ ask:"¿Quién viene saliendo de varios turnos largos esta semana?"},
+slips:{title:"Resbalones, tropiezos y caídas",hook:"Las caídas al mismo nivel son de las lesiones más comunes en todas las industrias. La mayoría se deben al orden y la limpieza.",sections:[
+ {h:"Mantén despejado",items:["Los cables, mangueras y desperdicios no van en los pasillos. Pásalos por las orillas o por arriba.","Limpia los derrames de inmediato, o márcalos hasta que puedas limpiarlos."]},
+ {h:"Fíjate dónde pisas",items:["Usa calzado con buen agarre para la superficie donde trabajas.","Usa los pasamanos en las escaleras. No cargues tanto que no puedas ver tus pies.","Ten más cuidado en superficies mojadas, con lodo, hielo o aceite."]}],
+ ask:"¿Cuál es el peor peligro de tropiezo en el trabajo ahora mismo? Arreglémoslo antes de empezar."},
+ppe:{title:"Equipo de protección: úsalo bien",hook:"El equipo de protección personal solo funciona si te queda bien, está en buen estado y lo traes puesto.",sections:[
+ {h:"Todos los días",items:["Sabe lo que pide la tarea de hoy: ojos, oídos, manos, cabeza, pies, ropa de alta visibilidad.","Revísalo antes de usarlo. Lentes rotos, guantes gastados y cascos dañados se cambian, no se parchan con cinta."]},
+ {h:"La talla importa",items:["Los guantes muy grandes se atoran. Los tapones de oído mal puestos no protegen.","Si tu equipo no te queda o te complica el trabajo, dilo. Casi siempre hay una mejor opción."]}],
+ ask:"¿A alguien le falta equipo de protección o está usando algo gastado? Díganlo ahora."},
+emerg:{title:"Si algo sale mal",hook:"En una emergencia nadie tiene tiempo para buscar el botiquín. Decídanlo ahora.",sections:[
+ {h:"Sábelo antes de necesitarlo",items:["La dirección exacta de este lugar, para dársela al 911.","Dónde están el botiquín, el extintor y el desfibrilador (DEA), si hay uno.","Dónde nos juntamos si hay que evacuar, para contar a todos."]},
+ {h:"Extintor: P.A.S.S.",items:["Jala el seguro. Apunta a la base del fuego. Aprieta la manija. Barre de lado a lado.","Si el fuego se está extendiendo o el cuarto se llena de humo, sal y llama al 911."]}],
+ ask:"Sin buscarlo, ¿cuál es la dirección de aquí? ¿Dónde está el botiquín?"}
+};
+ES.storm={title:"Preparación para huracanes y tormentas",hook:"La temporada de huracanes va del 1 de junio al 30 de noviembre. Una hoja de plywood suelta o un bulto de tejas se vuelve un proyectil en una tormenta.",sections:[
+ {h:"Antes de una tormenta",items:["Asegura o baja los materiales sueltos, las herramientas y los desperdicios. Todo lo que pueda volar, va a volar.","Baja y asegura las plataformas y brazos elevadores dentro de los límites de viento del fabricante.","Conoce la decisión de la empresa: cuándo se para el trabajo y cómo te van a avisar."]},
+ {h:"Viento fuerte y rayos",items:["Para el trabajo en alturas cuando sube el viento. Una ráfaga te puede desbalancear o convertir un panel en una vela.","Cuando oigas truenos, bájate de techos, plataformas y terreno abierto, y métete a un edificio o a un vehículo de techo duro. Espera 30 minutos después del último trueno."]},
+ {h:"Después de la tormenta",items:["Trata todo cable caído como si tuviera corriente. Mantente lejos y llama a la compañía de luz.","Cuidado con estructuras debilitadas, agua estancada y escombros con clavos. La limpieza trae sus propios peligros."]}],
+ ask:"Si hoy llega un aviso de tormenta, ¿qué aseguramos primero y quién decide parar?"};
+TALKS.forEach(t=>{t.es=ES[t.id];});
+
+// ---- Location: ZIP code -> state -> local climate ----
+const ZIP3=[[6,9,"PR"],[10,27,"MA"],[28,29,"RI"],[30,38,"NH"],[39,49,"ME"],[50,54,"VT"],[55,55,"MA"],[56,59,"VT"],[60,69,"CT"],[70,89,"NJ"],[100,149,"NY"],[5,5,"NY"],[150,196,"PA"],[197,199,"DE"],[200,205,"DC"],[206,219,"MD"],[220,246,"VA"],[247,268,"WV"],[270,289,"NC"],[290,299,"SC"],[300,319,"GA"],[398,399,"GA"],[320,349,"FL"],[350,369,"AL"],[370,385,"TN"],[386,397,"MS"],[400,427,"KY"],[430,458,"OH"],[460,479,"IN"],[480,499,"MI"],[500,528,"IA"],[530,549,"WI"],[550,567,"MN"],[570,577,"SD"],[580,588,"ND"],[590,599,"MT"],[600,629,"IL"],[630,658,"MO"],[660,679,"KS"],[680,693,"NE"],[700,714,"LA"],[716,729,"AR"],[730,749,"OK"],[750,799,"TX"],[885,885,"TX"],[800,816,"CO"],[820,831,"WY"],[832,838,"ID"],[840,847,"UT"],[850,865,"AZ"],[870,884,"NM"],[889,898,"NV"],[900,961,"CA"],[967,968,"HI"],[970,979,"OR"],[980,994,"WA"],[995,999,"AK"]];
+const HURRICANE=["FL","TX","LA","MS","AL","GA","SC","NC","VA","MD","DE","NJ","NY","CT","RI","MA","NH","ME","HI","PR"];
+const HOT_LONG=["FL","TX","LA","MS","AL","GA","SC","AZ","NV","HI","PR"];
+const MILD_WINTER=["FL","TX","LA","MS","AL","GA","SC","AZ","CA"];
+function climateFor(zip){
+  const base={label:"No location set",cold:"full",hotLong:false,hurricane:false};
+  if(!/^\d{5}$/.test(zip||""))return base;
+  const z3=parseInt(zip.slice(0,3),10);const hit=ZIP3.find(r=>z3>=r[0]&&z3<=r[1]);
+  if(!hit)return base;const st=hit[2];
+  let cold=MILD_WINTER.includes(st)?"light":"full";
+  if(["HI","PR"].includes(st)||(st==="FL"&&z3>=330))cold="none";   // South and Southwest Florida, Hawaii, Puerto Rico
+  return {label:"ZIP "+zip+" · "+st,state:st,cold,hotLong:HOT_LONG.includes(st),hurricane:HURRICANE.includes(st)};
+}
+function talkFits(t){const c=state.climate;if(t.id==="storm")return c.hurricane;if(t.id==="cold")return c.cold!=="none";return true;}
+const LANGS=[
+ {id:"en",label:"English",voice:"en-US",ready:true},
+ {id:"es",label:"Español",voice:"es-US",ready:true},
+ {id:"pt",label:"Português",ready:false},
+ {id:"ht",label:"Kreyòl",ready:false},
+ {id:"vi",label:"Tiếng Việt",ready:false},
+ {id:"zh",label:"中文",ready:false}
+];
+const UI={
+ en:{ask:"Ask the crew",play:"Read it out loud",stop:"Stop reading",reading:"Reading out loud…",noVoice:"Read-out-loud isn't available on this device.",signNote:"Each person signs with a finger. By signing, they confirm they attended this talk.",signHere:"Sign above"},
+ es:{ask:"Pregunta al equipo",play:"Leerlo en voz alta",stop:"Dejar de leer",reading:"Leyendo en voz alta…",noVoice:"La lectura en voz alta no está disponible en este dispositivo.",signNote:"Cada persona firma con el dedo. Al firmar, confirma que asistió a esta charla.",signHere:"Firma arriba"}
+};
+
+const INDUSTRIES=[
+  {id:"con",name:"Construction",sub:"Jobsites, trades, roofing, general contracting"},
+  {id:"mfg",name:"Manufacturing",sub:"Plants, shops, production lines"},
+  {id:"ag",name:"Agriculture & Fertilizer",sub:"Farms, ag retail, chemical application"},
+  {id:"wh",name:"Warehouse & Logistics",sub:"Distribution, shipping, material handling"}
+];
+
+const state={voice:{},rate:0.95,zip:null,climate:null,lang:"en",industry:null,screen:"pick",talk:null,session:null,org:null,sigs:{},records:[],viewing:null};
+// one example record so the Records screen isn't empty
+state.records.push({id:1,talkId:"heat",lang:"en",talk:"Heat Illness: Water, Rest, Shade",industry:"con",when:new Date(Date.now()-86400000),site:"Example jobsite: Warehouse expansion",example:true,
+  company:{name:"Example Company LLC",licenses:"State Contractor License #EX0000000",address:"100 Main St, Anytown, ST 00000",phone:"(555) 555-0100"},
+  team:{name:"Crew 1 (example)",lead:"Alex Cruz (example)"},presenter:{name:"Sam Rivera (example)",role:"Superintendent"},
+  attendees:[{name:"Alex Cruz (example)",role:"Team lead",status:"signed"},{name:"Worker A (example)",role:"Crew member",status:"signed"},{name:"Worker B (example)",role:"Crew member",status:"unsigned"},{name:"Worker C (example)",role:"Crew member",status:"absent"}]});
+
+const $=s=>document.querySelector(s);
+const view=$("#view");
+const fmt=d=>d.toLocaleString([], {month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ---- Weekly year plan ----
+function mondayOf(d){const x=new Date(d);x.setHours(0,0,0,0);const k=(x.getDay()+6)%7;x.setDate(x.getDate()-k);return x;}
+const isoDay=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function talksFor(ind){return TALKS.filter(t=>(t.ind.includes(ind)||t.ind.includes("all"))&&talkFits(t));}
+function buildPlan(ind){
+  const c=state.climate;
+  const pool=talksFor(ind).filter(t=>!["heat","cold","storm"].includes(t.id));
+  const start=cycleStart();const weeks=[];let i=0;
+  for(let w=0;w<52;w++){
+    const d=new Date(start);d.setDate(d.getDate()+7*w);const m=d.getMonth();
+    let id;
+    const dd=d.getDate();
+    const peakHeat=c.hotLong?[4,5,6,7,8,9]:[5,6,7], shoulder=c.hotLong?[3]:[4,8];
+    if(c.hurricane&&((m===4&&dd>=25)||(m===5&&dd<=7)||(m===7&&dd<=7)||(m===8&&dd>=8&&dd<=14)||(m===9&&dd>=8&&dd<=14)))id="storm"; // before season, and ahead of the Aug–Sep peak
+    else if(peakHeat.includes(m)&&w%2===0)id="heat";
+    else if(shoulder.includes(m)&&w%3===0)id="heat";
+    else if(c.cold==="full"&&[11,0,1].includes(m)&&w%3===0)id="cold";
+    else if(c.cold==="light"&&m===0&&dd<=7)id="cold";
+    else id=pool[i++%pool.length].id;
+    const key=isoDay(d);
+    weeks.push({date:d,key,id:state.overrides[key]||id,changed:!!state.overrides[key]});
+  }
+  return weeks;
+}
+function cycleStart(){
+  const s=mondayOf(new Date((state.org&&state.org.programStart||isoDay(new Date()))+"T00:00:00"));const now=mondayOf(new Date());
+  const wks=Math.floor(Math.round((now-s)/864e5)/7);if(wks>0)s.setDate(s.getDate()+Math.floor(wks/52)*364);return s;
+}
+function thisWeek(){const weeks=buildPlan(state.industry);const key=isoDay(mondayOf(new Date()));const i=weeks.findIndex(w=>w.key===key);return i<0?null:Object.assign({},weeks[i],{n:i+1});}
+function saveOverrides(){try{localStorage.setItem("tt-plan-"+state.industry,JSON.stringify(state.overrides))}catch(e){}}
+function loadOverrides(){state.overrides={};try{state.overrides=JSON.parse(localStorage.getItem("tt-plan-"+state.industry)||"{}")}catch(e){}}
+const weekLabel=d=>{const e=new Date(d);e.setDate(e.getDate()+4);return d.toLocaleDateString([], {month:"short",day:"numeric"})+" – "+e.toLocaleDateString([], {month:"short",day:"numeric"});};
+
+function climateNote(){
+  const c=state.climate;if(!c.state)return "Add your ZIP code so heat, cold and storm talks land in the right weeks.";
+  const bits=[];
+  bits.push(c.hotLong?"Long heat season, May through October":"Heat talks focus on June through August");
+  bits.push(c.cold==="none"?"no cold-weather talks":c.cold==="light"?"one cold-weather talk in January":"cold-weather talks December through February");
+  bits.push(c.hurricane?"hurricane prep before and during storm season":"no hurricane talks");
+  return bits.join(" · ")+".";
+}
+function chooseZip(){
+  setSteps(0);
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Set up</div>
+    <h2>Where do you work?</h2>
+    <p>Your ZIP code lets us time weather talks to your area. Southwest Florida gets hurricane prep and no cold-weather talks. Minnesota gets the opposite.</p>
+    <form id="zf" class="addrow"><input id="zip" inputmode="numeric" maxlength="5" pattern="\\d{5}" placeholder="ZIP code" autocomplete="postal-code" value="${esc(state.lastZip||"")}"><button class="btn ghost" type="submit">Save</button></form>
+    <p class="sigline" id="zerr" aria-live="polite"></p>
+    <button class="btn ghost" id="skip" style="margin-top:14px">Skip for now</button>
+  </div>`;
+  const done=z=>{state.zip=z;state.climate=climateFor(z);try{localStorage.setItem("tt-zip",z)}catch(e){}const b=state.back||"pick";state.back=null;go(b);};
+  $("#zf").onsubmit=e=>{e.preventDefault();const z=$("#zip").value.trim();
+    if(!/^\d{5}$/.test(z)){$("#zerr").textContent="Enter a 5-digit ZIP code.";return;}
+    if(!climateFor(z).state){$("#zerr").textContent="We don't recognize that ZIP code. Check it, or skip for now.";return;}
+    done(z);};
+  $("#skip").onclick=()=>done("");
+}
+
+function plan(){
+  if(!state.industry)return chooseIndustry();
+  if(state.zip===null)return chooseZip();
+  setSteps(0);
+  const ind=INDUSTRIES.find(i=>i.id===state.industry);
+  const weeks=buildPlan(state.industry);const opts=talksFor(state.industry);
+  const thisKey=isoDay(mondayOf(new Date()));
+  let html="",curMonth="";
+  weeks.forEach((w,n)=>{
+    const mo=w.date.toLocaleDateString([], {month:"long",year:"numeric"});
+    if(mo!==curMonth){if(curMonth)html+="</div>";html+=`<div class="group">${mo}</div><div class="weeks">`;curMonth=mo;}
+    html+=`<div class="wk${w.key===thisKey?" now":""}"><div class="wkdate num"><b>Week ${n+1}</b><small>${weekLabel(w.date)}</small></div>
+      <select id="wk-${w.key}" data-key="${w.key}" aria-label="Talk for week of ${weekLabel(w.date)}">${opts.map(t=>`<option value="${t.id}"${t.id===w.id?" selected":""}>${t.title}</option>`).join("")}</select>
+      ${w.key===thisKey?'<span class="tag">This week</span>':w.changed?'<span class="tag edit">Changed</span>':""}</div>`;
+  });
+  html+="</div>";
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">${ind.name}</div>
+    <h2>52-week talk plan</h2>
+    <p>One talk per week, timed to your local weather. Week 1 starts the week of ${weeks[0].date.toLocaleDateString([], {month:"short",day:"numeric",year:"numeric"})} (change it in Admin). Tap any week to swap its talk.</p>
+    <p class="meta"><button class="pill industry" id="loc">📍 ${esc(state.climate.label)} · Change</button><button class="pill industry" id="reset">Reset to default plan</button></p>
+    <p class="meta">${climateNote()}</p>
+    ${html}
+    <p class="note">With ${opts.length} talks in this library, topics repeat about every ${opts.length-2} weeks. Adding more talks makes the year more varied.</p>
+  </div>`;
+  view.querySelectorAll("select[data-key]").forEach(sel=>sel.onchange=()=>{state.overrides[sel.dataset.key]=sel.value;saveOverrides();plan();});
+  $("#reset").onclick=()=>{state.overrides={};saveOverrides();plan();};
+  $("#loc").onclick=()=>{state.lastZip=state.zip;state.zip=null;state.back="plan";go("pick");};
+}
+
+function setSteps(n){document.querySelectorAll("#steps span").forEach((s,i)=>s.classList.toggle("on",i<n));}
+function go(s){stopSpeech();state.screen=s;render();window.scrollTo(0,0);}
+
+function render(){
+  const s=state.screen;
+  $("#navRecords").textContent = s==="records"||s==="record" ? "New talk" : "Records";
+  $("#navPlan").textContent = s==="plan" ? "Today" : "Plan";
+  $("#navAdmin").textContent = s==="admin"||s==="reports" ? "Done" : "Admin";
+  if(s==="admin")admin(); else if(s==="reports")reports(); else if(s==="plan")plan(); else if(s==="pick")pick(); else if(s==="read")read(); else if(s==="crew")crew(); else if(s==="sign")sign(); else if(s==="record")record(); else records();
+}
+
+function chooseIndustry(){
+  setSteps(0);
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Set up</div>
+    <h2>What industry are you in?</h2>
+    <p>We'll show the talks that fit your work. You can change this anytime.</p>
+    <div class="list">${INDUSTRIES.map(i=>`<button class="talk" data-ind="${i.id}"><span><b>${i.name}</b><small>${i.sub}</small></span></button>`).join("")}</div>
+  </div>`;
+  view.querySelectorAll("[data-ind]").forEach(b=>b.onclick=()=>{state.industry=b.dataset.ind;try{localStorage.setItem("tt-industry",state.industry)}catch(e){}loadOverrides();go("pick");});
+}
+
+function pick(){
+  if(!state.industry)return chooseIndustry();
+  if(state.zip===null)return chooseZip();
+  const ind=INDUSTRIES.find(i=>i.id===state.industry);
+  const list=TALKS.filter(t=>t.ind.includes(state.industry));
+  const all=TALKS.filter(t=>t.ind.includes("all")&&talkFits(t));
+  const wk=thisWeek();const cur=wk&&TALKS.find(t=>t.id===wk.id);
+  const card=t=>`<button class="talk" data-id="${t.id}"><span class="code">${t.code}</span><span><b>${t.title}</b><small>About ${t.mins} min to read aloud</small></span></button>`;
+  setSteps(1);
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Step 1 of 4</div>
+    <h2>Pick today's talk</h2>
+    <p class="meta"><span class="pill">${new Date().toLocaleDateString([], {weekday:"long",month:"short",day:"numeric"})}</span>${state.org.company.name?`<span class="pill">${esc(state.org.company.name)}</span>`:""}<button class="pill industry" id="chg">${ind.name} · Change</button></p>
+    ${cur?`<div class="group">Week ${wk.n} of 52 · This week's scheduled talk</div><div class="list">${card(cur)}</div>`:`<p class="hint">Your 52-week plan starts the week of ${new Date(state.org.programStart+"T00:00:00").toLocaleDateString([], {month:"short",day:"numeric"})}.</p>`}
+    <div class="group">Or pick another · ${ind.name}</div>
+    <div class="list">${list.map(card).join("")}</div>
+    <div class="group">Every job</div>
+    <div class="list">${all.map(card).join("")}</div>
+  </div>`;
+  $("#chg").onclick=()=>{state.industry=null;go("pick");};
+  view.querySelectorAll(".talk").forEach(b=>b.onclick=()=>{state.talk=TALKS.find(t=>t.id===b.dataset.id);state.sigs={};state.session=null;go("read");});
+}
+
+// ---- Read out loud (device text-to-speech) ----
+let speaking=false;
+function stopSpeech(){speaking=false;try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}document.querySelectorAll(".saying").forEach(e=>e.classList.remove("saying"));}
+// Rank the phone's voices so the most natural one is used first
+const NOVELTY=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley/i;
+function voiceScore(v,code){
+  let n=0;const nm=v.name;
+  if(/premium/i.test(nm))n+=6; if(/enhanced|natural|neural|online/i.test(nm))n+=5;
+  if(/google|siri|microsoft/i.test(nm))n+=3;
+  if(v.lang.toLowerCase().replace("_","-")===code.toLowerCase())n+=2;
+  if(v.localService===false)n+=1;
+  return n;
+}
+function voicesFor(code){
+  try{const p=code.slice(0,2).toLowerCase();
+    return window.speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith(p)&&!NOVELTY.test(v.name))
+      .sort((a,b)=>voiceScore(b,code)-voiceScore(a,code));}catch(e){return [];}
+}
+function pickVoice(code){
+  const vs=voicesFor(code);const saved=state.voice[state.lang];
+  return vs.find(v=>v.name===saved)||vs[0]||null;
+}
+function saveVoicePrefs(){try{localStorage.setItem("tt-voice",JSON.stringify({voice:state.voice,rate:state.rate}))}catch(e){}}
+function fillVoiceMenu(){
+  const sel=$("#voice");if(!sel)return;const L=LANGS.find(l=>l.id===state.lang);
+  const vs=voicesFor(L.voice);const cur=pickVoice(L.voice);
+  sel.innerHTML=vs.length?vs.map((v,i)=>`<option value="${esc(v.name)}"${cur&&v.name===cur.name?" selected":""}>${esc(v.name.replace(/\s*\(.*\)$/,""))}${i===0?" (best match)":""}</option>`).join(""):'<option>Phone default</option>';
+}
+function readAloud(){
+  const L=LANGS.find(l=>l.id===state.lang),u=UI[state.lang];
+  const btn=$("#play"),st=$("#playst");
+  if(speaking){stopSpeech();btn.textContent="▶ "+u.play;st.textContent="";return;}
+  if(!("speechSynthesis" in window)){st.textContent=u.noVoice;return;}
+  const parts=[...view.querySelectorAll("[data-say]")];let i=0;speaking=true;
+  btn.textContent="■ "+u.stop;st.textContent=u.reading;
+  const next=()=>{
+    document.querySelectorAll(".saying").forEach(e=>e.classList.remove("saying"));
+    if(!speaking||i>=parts.length){speaking=false;btn.textContent="▶ "+u.play;st.textContent="";return;}
+    const el=parts[i++];el.classList.add("saying");el.scrollIntoView({block:"center",behavior:"smooth"});
+    const ut=new SpeechSynthesisUtterance(el.textContent);ut.lang=L.voice;ut.rate=state.rate;ut.pitch=1;
+    const v=pickVoice(L.voice);if(v)ut.voice=v;
+    const isHead=/^H[23]$/.test(el.tagName);
+    ut.onend=()=>{ if(!speaking)return; setTimeout(next, isHead?650:380); };   // short pauses so it sounds like a person reading
+    ut.onerror=()=>{speaking=false;btn.textContent="▶ "+u.play;st.textContent=u.noVoice;};
+    window.speechSynthesis.speak(ut);
+  };
+  next();
+}
+
+function read(){
+  setSteps(2);const base=state.talk;const t=state.lang==="es"&&base.es?base.es:base;const u=UI[state.lang];
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Step 2 of 4 · Read to the crew</div>
+    <div class="langs" role="group" aria-label="Language">${LANGS.map(l=>`<button class="lang${l.id===state.lang?" on":""}" data-lang="${l.id}" ${l.ready?"":"disabled"} aria-pressed="${l.id===state.lang}">${l.label}${l.ready?"":"<small>Soon</small>"}</button>`).join("")}</div>
+    <h2 data-say>${t.title}</h2>
+    <div class="playrow"><button class="btn play" id="play">▶ ${u.play}</button><span class="sigline" id="playst" aria-live="polite"></span></div>
+    <div class="voicerow">
+      <label for="voice">Voice</label><select id="voice"></select>
+      <label for="rate">Speed</label><select id="rate"><option value="0.85">Slower</option><option value="0.95">Normal</option><option value="1.05">Faster</option></select>
+      <button class="btn ghost" id="sample">Preview</button>
+    </div>
+    <div class="script">
+      <p><b data-say>${t.hook}</b></p>
+      ${t.sections.map(s=>`<h3 data-say>${s.h}</h3><ul>${s.items.map(i=>`<li data-say>${i}</li>`).join("")}</ul>`).join("")}
+      <h3>${u.ask}</h3><div class="ask" data-say>${t.ask}</div>
+    </div>
+    <button class="btn" id="next">Done reading · Take attendance</button>
+  </div>`;
+  view.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{if(b.disabled)return;stopSpeech();state.lang=b.dataset.lang;try{localStorage.setItem("tt-lang",state.lang)}catch(e){}read();});
+  $("#play").onclick=readAloud;
+  fillVoiceMenu();$("#rate").value=String(state.rate);
+  $("#voice").onchange=e=>{state.voice[state.lang]=e.target.value;saveVoicePrefs();};
+  $("#rate").onchange=e=>{state.rate=parseFloat(e.target.value);saveVoicePrefs();};
+  $("#sample").onclick=()=>{if(!("speechSynthesis" in window)){$("#playst").textContent=u.noVoice;return;}stopSpeech();
+    const L=LANGS.find(l=>l.id===state.lang);const ut=new SpeechSynthesisUtterance(t.hook);ut.lang=L.voice;ut.rate=state.rate;const v=pickVoice(L.voice);if(v)ut.voice=v;window.speechSynthesis.speak(ut);};
+  $("#next").onclick=()=>go("crew");
+}
+
+// ---- Company admin: company info, roles, people, teams ----
+const CREW_ROLE="Crew member";
+const uid=()=>Math.random().toString(36).slice(2,9);
+function exampleOrg(){
+  const tA="tA",tB="tB";const p=(name,role,team)=>({id:uid(),name,role,teamId:team});
+  const people=[p("Sam Rivera (example)","Superintendent",null),p("Pat Lee (example)","Safety Manager",null),
+    p("Alex Cruz (example)","Team Lead",tA),p("Worker A (example)",CREW_ROLE,tA),p("Worker B (example)",CREW_ROLE,tA),p("Worker C (example)",CREW_ROLE,tA),
+    p("Jordan Diaz (example)","Team Lead",tB),p("Worker D (example)",CREW_ROLE,tB),p("Worker E (example)",CREW_ROLE,tB)];
+  return {example:true,
+    company:{name:"Example Company LLC",licenses:"State Contractor License #EX0000000",address:"100 Main St, Anytown, ST 00000",phone:"(555) 555-0100",email:""},
+    roles:["Owner","Safety Manager","Superintendent","Supervisor","Foreman","Team Lead"],
+    people,teams:[{id:tA,name:"Crew 1 (example)",leadId:people[2].id},{id:tB,name:"Crew 2 (example)",leadId:people[6].id}],
+    programStart:isoDay(mondayOf(new Date())),jobsite:"Example jobsite: 100 Main St"};
+}
+function blankOrg(){return {example:false,company:{name:"",licenses:"",address:"",phone:"",email:""},roles:["Owner","Safety Manager","Superintendent","Supervisor","Foreman","Team Lead"],people:[],teams:[],programStart:state.org.programStart,jobsite:""};}
+function saveOrg(){try{localStorage.setItem("tt-org",JSON.stringify(state.org))}catch(e){}}
+function loadOrg(){let o=null;try{o=JSON.parse(localStorage.getItem("tt-org")||"null")}catch(e){}state.org=o||exampleOrg();}
+const person=id=>state.org.people.find(p=>p.id===id);
+const teamOf=id=>state.org.teams.find(t=>t.id===id);
+const presenters=()=>state.org.people.filter(p=>p.role!==CREW_ROLE);
+const opt=(v,label,sel)=>`<option value="${esc(String(v))}"${sel?" selected":""}>${esc(label)}</option>`;
+
+function confirmBtn(btn,label,fn){btn.onclick=()=>{if(btn.dataset.armed){fn();return;}btn.dataset.armed="1";btn.textContent=label;btn.classList.add("danger");setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=btn.dataset.orig;btn.classList.remove("danger");}},4000);};btn.dataset.orig=btn.textContent;}
+
+// ---- Admin reports ----
+function adminTabs(active){return `<div class="tabs" role="tablist"><button role="tab" class="tab${active==="setup"?" on":""}" aria-selected="${active==="setup"}" data-tab="admin">Setup</button><button role="tab" class="tab${active==="reports"?" on":""}" aria-selected="${active==="reports"}" data-tab="reports">Reports</button></div>`;}
+function wireTabs(){view.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>go(b.dataset.tab));}
+
+// Example history so the report has something to show while the company uses example data
+function exampleHistory(){
+  const o=state.org;if(!o.example)return [];
+  const talks=["fall","ladder","heat","ppe","lift","slips"];const out=[];const mon=mondayOf(new Date());
+  for(let k=1;k<=11;k++){
+    o.teams.forEach((t,ti)=>{
+      if(ti===1&&k===4)return;                       // Crew 2 skipped a week, so it shows as missed
+      const when=new Date(mon);when.setDate(when.getDate()-7*k+1+ti);when.setHours(7,ti?15:0,0,0);
+      const talk=TALKS.find(x=>x.id===talks[(k+ti)%talks.length]);
+      const members=o.people.filter(p=>p.teamId===t.id);
+      const att=members.map((p,i)=>{let status="signed";
+        if(i===members.length-1&&k%3===0)status="absent";
+        if(ti===1&&i===1&&(k===2||k===5))status="unsigned";
+        return {name:p.name,role:t.leadId===p.id?"Team lead":p.role,team:t.name,status,sig:null,at:status==="signed"?when:null};});
+      const pr=o.people.find(p=>p.role==="Superintendent")||o.people[0];
+      out.push({id:9e12+k*10+ti,example:true,talkId:talk.id,talk:talk.title,lang:"en",industry:state.industry,when,site:o.jobsite,
+        company:{...o.company},team:{name:t.name,lead:(person(t.leadId)||{}).name||""},presenter:{name:pr?pr.name:"",role:pr?pr.role:""},attendees:att});
+    });
+  }
+  return out;
+}
+function allRecords(){const ex=exampleHistory();return state.records.concat(ex).sort((a,b)=>new Date(b.when)-new Date(a.when));}
+
+const RANGES=[{id:"4",label:"Last 4 weeks",weeks:4},{id:"12",label:"Last 12 weeks",weeks:12},{id:"ytd",label:"This year"},{id:"all",label:"All time"}];
+function rangeStart(id){
+  const mon=mondayOf(new Date());
+  if(id==="ytd"){return mondayOf(new Date(new Date().getFullYear(),0,1));}
+  if(id==="all"){const rs=allRecords();const first=rs.length?mondayOf(new Date(rs[rs.length-1].when)):mon;return first;}
+  const r=RANGES.find(x=>x.id===id);const d=new Date(mon);d.setDate(d.getDate()-7*(r.weeks-1));return d;
+}
+function reportData(){
+  const f=state.rep;const start=rangeStart(f.range);
+  const teams=state.org.teams.map(t=>t.name);
+  const teamNames=f.team==="all"?teams:[f.team];
+  const recs=allRecords().filter(r=>new Date(r.when)>=start&&(f.team==="all"||(r.team&&(r.team.name===f.team||r.team.name==="All teams"))));
+  // weeks in range, newest first
+  const weeks=[];const mon=mondayOf(new Date());for(let d=new Date(mon);d>=start;d.setDate(d.getDate()-7))weeks.push(new Date(d));
+  const inWeek=(r,w)=>{const m=mondayOf(new Date(r.when));return isoDay(m)===isoDay(w);};
+  const coverage=weeks.map(w=>({w,cells:teamNames.map(tn=>{const r=recs.find(r=>inWeek(r,w)&&r.team&&(r.team.name===tn||r.team.name==="All teams"));return {team:tn,rec:r||null};})}));
+  // the current week isn't over yet: count it only if held
+  const done=coverage.flatMap((row,i)=>row.cells.filter(c=>c.rec||i>0));
+  const held=done.filter(c=>c.rec).length;
+  // employees
+  const emp={};
+  recs.forEach(r=>r.attendees.forEach(a=>{
+    if(f.team!=="all"&&a.team&&a.team!==f.team)return;
+    const e=emp[a.name]||(emp[a.name]={name:a.name,team:a.team||"",role:a.role||"",signed:0,unsigned:0,absent:0,last:null,lastFlag:null});
+    e[a.status||"signed"]++;
+    if((a.status||"signed")==="signed"&&(!e.last||new Date(r.when)>e.last))e.last=new Date(r.when);
+    if(a.status&&a.status!=="signed"&&(!e.lastFlag||new Date(r.when)>e.lastFlag))e.lastFlag=new Date(r.when);
+  }));
+  const employees=Object.values(emp).sort((a,b)=>(b.unsigned+b.absent)-(a.unsigned+a.absent)||a.name.localeCompare(b.name));
+  const tot={signed:0,unsigned:0,absent:0};recs.forEach(r=>{const c=counts(r);tot.signed+=c.signed;tot.unsigned+=c.unsigned;tot.absent+=c.absent;});
+  const expected=tot.signed+tot.unsigned+tot.absent;
+  const flags=[];recs.forEach(r=>r.attendees.forEach(a=>{if(a.status&&a.status!=="signed"&&(f.team==="all"||a.team===f.team||!a.team))flags.push({r,a});}));
+  return {start,recs,coverage,held,possible:done.length,employees,tot,expected,flags,teamNames};
+}
+function pct(a,b){return b?Math.round(100*a/b)+"%":"–";}
+
+function reports(){
+  setSteps(0);
+  state.rep=state.rep||{range:"12",team:"all",onlyFlagged:false};const f=state.rep;
+  const D=reportData();const flaggedPeople=D.employees.filter(e=>e.unsigned+e.absent>0);
+  const shownEmp=f.onlyFlagged?flaggedPeople:D.employees;
+  const missed=D.possible-D.held;
+  const dShort=d=>d.toLocaleDateString([], {month:"short",day:"numeric"});
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Admin</div>
+    <h2>Safety reports</h2>
+    ${adminTabs("reports")}
+    ${state.org.example?`<div class="banner"><span>Includes example history so you can see how reports look. It goes away when you start fresh in Setup.</span></div>`:""}
+    <div class="filters">
+      <div class="chips" role="group" aria-label="Date range">${RANGES.map(r=>`<button class="chipbtn${r.id===f.range?" on":""}" data-range="${r.id}" aria-pressed="${r.id===f.range}">${r.label}</button>`).join("")}</div>
+      <select id="repTeam" aria-label="Team">${opt("all","All teams",f.team==="all")}${state.org.teams.map(t=>opt(t.name,t.name,f.team===t.name)).join("")}</select>
+    </div>
+    <p class="hint num">${dShort(D.start)} to today</p>
+
+    <div class="kpis num">
+      <div class="kpi"><span>Talks held</span><b>${D.recs.length}</b><small>${D.held} of ${D.possible} team-weeks covered</small></div>
+      <div class="kpi ${missed?"bad":""}"><span>Weeks missed</span><b>${missed}</b><small>Teams with no talk that week</small></div>
+      <div class="kpi"><span>Sign-in rate</span><b>${pct(D.tot.signed,D.expected)}</b><small>${D.tot.signed} of ${D.expected} on the rosters</small></div>
+      <div class="kpi ${D.flags.length?"bad":""}"><span>Flags</span><b>${D.flags.length}</b><small>${D.tot.unsigned} not signed · ${D.tot.absent} absent</small></div>
+    </div>
+
+    <div class="group">Weekly coverage</div>
+    <p class="hint">One talk per team per week. This week stays open until it's held.</p>
+    <div class="scrollx"><table class="cov num"><thead><tr><th>Week of</th>${D.teamNames.map(t=>`<th>${esc(t)}</th>`).join("")}</tr></thead><tbody>
+      ${D.coverage.map((row,i)=>`<tr><td>${dShort(row.w)}${i===0?' <small>this week</small>':""}</td>${row.cells.map(c=>c.rec?`<td><button class="cell ok" data-rec="${c.rec.id}">${esc(c.rec.talk)}${counts(c.rec).unsigned+counts(c.rec).absent?` <span class="tag flag">${counts(c.rec).unsigned+counts(c.rec).absent}</span>`:""}</button></td>`:i===0?`<td><span class="cell open">Not yet</span></td>`:`<td><span class="cell miss">Missed</span></td>`).join("")}</tr>`).join("")}
+    </tbody></table></div>
+
+    <div class="group">Employees</div>
+    <label class="toggle"><input type="checkbox" id="onlyFlag" ${f.onlyFlagged?"checked":""}> Only show people with flags (${flaggedPeople.length})</label>
+    <div class="scrollx"><table class="emp num"><thead><tr><th>Name</th><th>Signed</th><th>Not signed</th><th>Absent</th><th>Last signed</th></tr></thead><tbody>
+      ${shownEmp.length?shownEmp.map(e=>`<tr class="${e.unsigned+e.absent?"flagrow":""}"><td><b>${esc(e.name)}</b><small>${esc([e.role,e.team].filter(Boolean).join(" · "))}</small></td><td>${e.signed}</td><td>${e.unsigned||""}</td><td>${e.absent||""}</td><td>${e.last?dShort(e.last):"–"}</td></tr>`).join(""):`<tr><td colspan="5" class="hint">No one to show for this range.</td></tr>`}
+    </tbody></table></div>
+
+    <div class="group">Recent flags</div>
+    <div class="hist">${D.flags.slice(0,15).map(({r,a})=>`<button data-rec="${r.id}"><span><b>${esc(a.name)}</b><small class="num">${new Date(r.when).toLocaleDateString([], {weekday:"short",month:"short",day:"numeric"})} · ${esc(r.talk)}${r.team&&r.team.name?" · "+esc(r.team.name):""}</small></span><span class="tag flag">${STATUS[a.status]}</span></button>`).join("")||`<p class="hint">No flags in this range.</p>`}</div>
+
+    <button class="btn" id="csv">Export CSV</button>
+    <p class="sigline" id="csvSt" aria-live="polite"></p>
+    <p class="note">The CSV has one row per person per talk, so it opens in Excel and can be filtered by team, week or status.</p>
+  </div>`;
+  wireTabs();
+  view.querySelectorAll("[data-range]").forEach(b=>b.onclick=()=>{f.range=b.dataset.range;reports();});
+  $("#repTeam").onchange=e=>{f.team=e.target.value;reports();};
+  $("#onlyFlag").onchange=e=>{f.onlyFlagged=e.target.checked;reports();};
+  view.querySelectorAll("[data-rec]").forEach(b=>b.onclick=()=>{state.viewing=allRecords().find(r=>String(r.id)===b.dataset.rec);state.back="reports";go("record");});
+  $("#csv").onclick=()=>exportCsv(D);
+}
+async function exportCsv(D){
+  const st=$("#csvSt");const q=v=>{v=v==null?"":String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const rows=[["Date","Week of","Talk","Team","Team lead","Presented by","Presenter role","Jobsite","Employee","Role","Status","Signed at","Example"]];
+  D.recs.slice().reverse().forEach(r=>r.attendees.forEach(a=>rows.push([isoDay(new Date(r.when)),isoDay(mondayOf(new Date(r.when))),r.talk,r.team?r.team.name:"",r.team?r.team.lead:"",r.presenter?r.presenter.name:"",r.presenter?r.presenter.role:"",r.site||"",a.name,a.role||"",STATUS[a.status||"signed"],a.at?new Date(a.at).toLocaleString():"",r.example?"yes":""])));
+  const csv=rows.map(r=>r.map(q).join(",")).join("\r\n");
+  const dl=await window.claude?.use?.("downloads");
+  if(!dl){st.textContent="Saving files isn't available in this view. Open the app in a browser to export.";return;}
+  try{await dl.save({filename:"Toolbox talk report "+isoDay(new Date())+".csv",data:"﻿"+csv});st.textContent="CSV saved.";}
+  catch(e){st.textContent=e&&e.code==="declined"?"Export canceled.":"Couldn't export. Try again.";}
+}
+
+function admin(){
+  setSteps(0);const o=state.org;
+  const roleOpts=r=>[...o.roles,CREW_ROLE].concat(o.roles.includes(r)||r===CREW_ROLE?[]:[r]).map(x=>opt(x,x,x===r)).join("");
+  const teamOpts=t=>opt("","No team",!t)+o.teams.map(x=>opt(x.id,x.name,x.id===t)).join("");
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Admin</div>
+    <h2>Company setup</h2>
+    ${adminTabs("setup")}
+    ${o.example?`<div class="banner"><span>You're looking at example data so you can try the app.</span><button class="btn ghost" id="clearEx">Start fresh</button></div>`:""}
+    <form id="coForm" class="form">
+      <div class="group">Company info</div>
+      <p class="hint">This prints at the top of every PDF record.</p>
+      <label for="co-name">Company name</label><input id="co-name" autocomplete="organization">
+      <label for="co-lic">License numbers <small>One per line</small></label><textarea id="co-lic" rows="3"></textarea>
+      <label for="co-addr">Address</label><input id="co-addr" autocomplete="street-address">
+      <div class="two"><div><label for="co-phone">Phone</label><input id="co-phone" inputmode="tel" autocomplete="tel"></div><div><label for="co-email">Email or website</label><input id="co-email"></div></div>
+      <label for="co-site">Default jobsite</label><input id="co-site">
+      <label for="co-start">Week 1 of the 52-week plan starts</label><input type="date" id="co-start">
+      <button class="btn" type="submit">Save company info</button>
+      <p class="sigline" id="coSt" aria-live="polite"></p>
+    </form>
+
+    <div class="group">Who can give talks</div>
+    <p class="hint">Anyone with one of these roles appears in the "Presented by" dropdown.</p>
+    <div class="chips">${o.roles.map((r,i)=>`<span class="chip">${esc(r)}<button aria-label="Remove ${esc(r)}" data-rmrole="${i}">×</button></span>`).join("")}</div>
+    <div class="addrow"><input id="newRole" placeholder="Add a role, like Project Manager"><button class="btn ghost" id="addRole">Add</button></div>
+    <p class="sigline" id="roleSt" aria-live="polite"></p>
+
+    <div class="group">Teams</div>
+    <div class="rows">${o.teams.length?o.teams.map(t=>{const n=o.people.filter(p=>p.teamId===t.id).length;return `<div class="arow">
+      <input id="tn-${t.id}" data-tname="${t.id}" value="${esc(t.name)}" aria-label="Team name">
+      <div class="arow2"><label for="tl-${t.id}">Team lead</label><select id="tl-${t.id}" data-tlead="${t.id}">${opt("","No lead set",!t.leadId)}${o.people.filter(p=>p.teamId===t.id).map(p=>opt(p.id,p.name,p.id===t.leadId)).join("")}</select>
+      <span class="count num">${n} ${n===1?"person":"people"}</span><button class="btn ghost sm" data-rmteam="${t.id}">Remove</button></div></div>`}).join(""):`<p class="hint">No teams yet. Add one below, then add people to it.</p>`}</div>
+    <div class="addrow"><input id="newTeam" placeholder="Team name, like Roofing Crew 3"><button class="btn ghost" id="addTeam">Add team</button></div>
+
+    <div class="group">People</div>
+    <p class="hint">Crew members sign in. Everyone else can also give talks.</p>
+    <div class="rows">${o.people.length?o.people.map(p=>`<div class="arow">
+      <input id="pn-${p.id}" data-pname="${p.id}" value="${esc(p.name)}" aria-label="Name">
+      <div class="arow2"><select id="pr-${p.id}" data-prole="${p.id}" aria-label="Role for ${esc(p.name)}">${roleOpts(p.role)}</select>
+      <select id="pt-${p.id}" data-pteam="${p.id}" aria-label="Team for ${esc(p.name)}">${teamOpts(p.teamId)}</select>
+      <button class="btn ghost sm" data-rmperson="${p.id}">Remove</button></div></div>`).join(""):`<p class="hint">No people yet.</p>`}</div>
+    <form id="addPerson" class="arow add">
+      <input id="np-name" placeholder="Full name" aria-label="New person's name">
+      <div class="arow2"><select id="np-role" aria-label="New person's role">${roleOpts(CREW_ROLE)}</select><select id="np-team" aria-label="New person's team">${teamOpts(o.teams[0]&&o.teams[0].id)}</select><button class="btn ghost sm" type="submit">Add person</button></div>
+    </form>
+    <p class="note">In this prototype, setup is saved on this device only. The full version keeps it in the company account so every foreman's phone has the same teams.</p>
+  </div>`;
+  wireTabs();const c=o.company;
+  $("#co-name").value=c.name;$("#co-lic").value=c.licenses;$("#co-addr").value=c.address;$("#co-phone").value=c.phone;$("#co-email").value=c.email||"";$("#co-site").value=o.jobsite||"";$("#co-start").value=o.programStart;
+  $("#coForm").onsubmit=e=>{e.preventDefault();
+    Object.assign(c,{name:$("#co-name").value.trim(),licenses:$("#co-lic").value.trim(),address:$("#co-addr").value.trim(),phone:$("#co-phone").value.trim(),email:$("#co-email").value.trim()});
+    o.jobsite=$("#co-site").value.trim();
+    const ds=$("#co-start").value;if(/^\d{4}-\d{2}-\d{2}$/.test(ds)){const m=mondayOf(new Date(ds+"T00:00:00"));o.programStart=isoDay(m);$("#co-start").value=o.programStart;}
+    saveOrg();$("#coSt").textContent="Saved. Week 1 starts the week of "+new Date(o.programStart+"T00:00:00").toLocaleDateString([], {month:"short",day:"numeric",year:"numeric"})+".";};
+  if($("#clearEx"))confirmBtn($("#clearEx"),"Tap again to clear examples",()=>{state.org=blankOrg();saveOrg();admin();});
+  view.querySelectorAll("[data-rmrole]").forEach(b=>b.onclick=()=>{const r=o.roles[+b.dataset.rmrole];const used=o.people.filter(p=>p.role===r).length;
+    if(used){$("#roleSt").textContent=`${used} ${used===1?"person has":"people have"} the ${r} role. Change their role first.`;return;}o.roles.splice(+b.dataset.rmrole,1);saveOrg();admin();});
+  const addRole=()=>{const v=$("#newRole").value.trim();if(!v||o.roles.includes(v)||v===CREW_ROLE)return;o.roles.push(v);saveOrg();admin();};
+  $("#addRole").onclick=addRole;$("#newRole").onkeydown=e=>{if(e.key==="Enter")addRole();};
+  view.querySelectorAll("[data-tname]").forEach(i=>i.onchange=()=>{teamOf(i.dataset.tname).name=i.value.trim()||"Unnamed team";saveOrg();});
+  view.querySelectorAll("[data-tlead]").forEach(s=>s.onchange=()=>{teamOf(s.dataset.tlead).leadId=s.value||null;saveOrg();});
+  view.querySelectorAll("[data-rmteam]").forEach(b=>confirmBtn(b,"Confirm",()=>{const id=b.dataset.rmteam;o.teams=o.teams.filter(t=>t.id!==id);o.people.forEach(p=>{if(p.teamId===id)p.teamId=null;});saveOrg();admin();}));
+  const addTeam=()=>{const v=$("#newTeam").value.trim();if(!v)return;o.teams.push({id:uid(),name:v,leadId:null});saveOrg();admin();};
+  $("#addTeam").onclick=addTeam;$("#newTeam").onkeydown=e=>{if(e.key==="Enter")addTeam();};
+  view.querySelectorAll("[data-pname]").forEach(i=>i.onchange=()=>{const v=i.value.trim();if(v){person(i.dataset.pname).name=v;saveOrg();}});
+  view.querySelectorAll("[data-prole]").forEach(s=>s.onchange=()=>{person(s.dataset.prole).role=s.value;saveOrg();});
+  view.querySelectorAll("[data-pteam]").forEach(s=>s.onchange=()=>{const p=person(s.dataset.pteam);o.teams.forEach(t=>{if(t.leadId===p.id&&t.id!==s.value)t.leadId=null;});p.teamId=s.value||null;saveOrg();admin();});
+  view.querySelectorAll("[data-rmperson]").forEach(b=>confirmBtn(b,"Confirm",()=>{const id=b.dataset.rmperson;o.people=o.people.filter(p=>p.id!==id);o.teams.forEach(t=>{if(t.leadId===id)t.leadId=null;});saveOrg();admin();}));
+  $("#addPerson").onsubmit=e=>{e.preventDefault();const n=$("#np-name").value.trim();if(!n)return;
+    const p={id:uid(),name:n,role:$("#np-role").value,teamId:$("#np-team").value||null};o.people.push(p);
+    if(p.role==="Team Lead"&&p.teamId){const t=teamOf(p.teamId);if(t&&!t.leadId)t.leadId=p.id;}
+    saveOrg();admin();setTimeout(()=>{const i=$("#np-name");if(i)i.focus();},0);};
+}
+
+// ---- Step 3: presenter, team, roster ----
+function rosterFor(teamId){
+  const o=state.org;const ppl=teamId==="all"?o.people.filter(p=>p.teamId):o.people.filter(p=>p.teamId===teamId);
+  const isLead=p=>o.teams.some(t=>t.leadId===p.id);
+  return [...ppl].sort((a,b)=>isLead(b)-isLead(a));
+}
+function crew(){
+  setSteps(3);const o=state.org;
+  if(!state.session)state.session={presenterId:(presenters()[0]||{}).id||"",teamId:o.teams[0]?o.teams[0].id:"all",site:o.jobsite||"",present:{},extras:[]};
+  const S=state.session;const roster=rosterFor(S.teamId);
+  roster.forEach(p=>{if(!(p.id in S.present))S.present[p.id]=true;});
+  const isLead=p=>o.teams.some(t=>t.leadId===p.id);
+  const pres=presenters();
+  const here=roster.filter(p=>p.id!==S.presenterId&&S.present[p.id]).length+S.extras.length;
+  const absent=roster.filter(p=>p.id!==S.presenterId&&!S.present[p.id]).length;
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Step 3 of 4</div>
+    <h2>Who's here?</h2>
+    <div class="form">
+      <label for="presenter">Presented by</label>
+      ${pres.length?`<select id="presenter">${pres.map(p=>opt(p.id,p.name+" · "+p.role,p.id===S.presenterId)).join("")}</select>`:`<p class="hint">No one is set up to give talks yet. Add supervisors or team leads in Admin.</p>`}
+      <label for="team">Team</label>
+      <select id="team">${o.teams.map(t=>opt(t.id,t.name,t.id===S.teamId)).join("")}${opt("all","All teams",S.teamId==="all")}</select>
+      <label for="site">Jobsite</label><input id="site">
+    </div>
+    <div class="group">Roster <span class="tally num">${here} here · ${absent} absent</span></div>
+    <p class="hint">Uncheck anyone who isn't here. They'll be flagged as absent on the record.</p>
+    <div class="crew">${roster.length?roster.map(p=>{const t=teamOf(p.teamId);const presenting=p.id===S.presenterId;return `<label class="${presenting?"presenting":S.present[p.id]?"":"off"}"><input type="checkbox" id="r-${p.id}" data-pid="${p.id}" ${presenting?"disabled checked":S.present[p.id]?"checked":""}><span class="who"><span>${esc(p.name)}</span><small>${isLead(p)?"Team lead":esc(p.role)}${S.teamId==="all"&&t?" · "+esc(t.name):""}</small></span>${presenting?'<span class="tag">Presenting</span>':S.present[p.id]?"":'<span class="tag flag">Absent</span>'}</label>`}).join(""):`<p class="hint">This team has no people yet. Add them in Admin, or add names below.</p>`}
+    ${S.extras.map((x,i)=>`<label><input type="checkbox" checked disabled><span class="who"><span>${esc(x.name)}</span><small>Not on roster</small></span><button class="btn ghost sm" data-rmx="${i}">Remove</button></label>`).join("")}</div>
+    <div class="addrow"><input id="newName" placeholder="Add someone not on the roster" autocomplete="off"><button class="btn ghost" id="add">Add</button></div>
+    <button class="btn" id="next">Collect signatures</button>
+    <p class="sigline" id="crewSt" aria-live="polite"></p>
+  </div>`;
+  $("#site").value=S.site;$("#site").oninput=e=>{S.site=e.target.value;};
+  if($("#presenter"))$("#presenter").onchange=e=>{S.presenterId=e.target.value;crew();};
+  $("#team").onchange=e=>{S.teamId=e.target.value;crew();};
+  view.querySelectorAll("[data-pid]").forEach(c=>c.onchange=()=>{S.present[c.dataset.pid]=c.checked;crew();});
+  view.querySelectorAll("[data-rmx]").forEach(b=>b.onclick=e=>{e.preventDefault();S.extras.splice(+b.dataset.rmx,1);crew();});
+  const add=()=>{const v=$("#newName").value.trim();if(v){S.extras.push({name:v});crew();setTimeout(()=>$("#newName")&&$("#newName").focus(),0);}};
+  $("#add").onclick=add;$("#newName").onkeydown=e=>{if(e.key==="Enter")add();};
+  $("#next").onclick=()=>{if(!S.presenterId){$("#crewSt").textContent="Pick who is giving the talk first.";return;}
+    if(!here){$("#crewSt").textContent="Check at least one person who is here.";return;}go("sign");};
+}
+
+// ---- Step 4: signatures ----
+function sigPad(cv,key,onDone,onClear){
+  const ctx=cv.getContext("2d");const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr;cv.height=r.height*dpr;ctx.scale(dpr,dpr);
+  ctx.lineWidth=2.5;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#111";
+  if(state.sigs[key]){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height);im.src=state.sigs[key].img;}
+  let drawing=false;const pt=e=>{const b=cv.getBoundingClientRect();return[e.clientX-b.left,e.clientY-b.top];};
+  cv.onpointerdown=e=>{drawing=true;cv.setPointerCapture(e.pointerId);ctx.beginPath();ctx.moveTo(...pt(e));};
+  cv.onpointermove=e=>{if(!drawing)return;ctx.lineTo(...pt(e));ctx.stroke();};
+  cv.onpointerup=()=>{if(!drawing)return;drawing=false;state.sigs[key]={img:cv.toDataURL("image/png"),at:new Date()};onDone();};
+  return ()=>{ctx.clearRect(0,0,cv.width,cv.height);delete state.sigs[key];onClear();};
+}
+function signers(){
+  const S=state.session;const roster=rosterFor(S.teamId).filter(p=>p.id!==S.presenterId);
+  return {roster,present:roster.filter(p=>S.present[p.id]).map(p=>({key:p.id,name:p.name,p})).concat(S.extras.map((x,i)=>({key:"x"+i,name:x.name})))};
+}
+function sign(){
+  setSteps(4);const S=state.session;const pr=person(S.presenterId);const {present}=signers();
+  const u=UI[state.lang];
+  const card=(key,title,sub)=>`<div class="sigcard" id="card-${key}"><div class="sighead"><span class="who"><b>${esc(title)}</b>${sub?`<small>${esc(sub)}</small>`:""}</span><button class="btn ghost sm" data-clear="${key}">Clear</button></div><canvas data-pad="${key}" aria-label="Signature pad for ${esc(title)}"></canvas><div class="sigline" id="st-${key}">${state.sigs[key]?"Signed "+new Date(state.sigs[key].at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):u.signHere}</div></div>`;
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Step 4 of 4 · Pass the phone</div>
+    <h2>Sign in</h2>
+    <p>${UI.en.signNote}</p>${state.lang!=="en"?`<p class="meta">${u.signNote}</p>`:""}
+    <div class="group">Presenter</div>
+    ${card("presenter",pr?pr.name:"Presenter",pr?pr.role:"")}
+    <div class="group">Crew <span class="tally num" id="tally"></span></div>
+    ${present.map(x=>card(x.key,x.name,x.p?(state.org.teams.some(t=>t.leadId===x.p.id)?"Team lead":x.p.role):"Not on roster")).join("")}
+    <div id="warn"></div>
+    <button class="btn" id="save">Save record</button>
+  </div>`;
+  const tally=()=>{const n=present.filter(x=>state.sigs[x.key]).length;$("#tally").textContent=n+" of "+present.length+" signed";$("#warn").innerHTML="";};
+  view.querySelectorAll("[data-pad]").forEach(cv=>{const key=cv.dataset.pad;const st=$("#st-"+key);
+    const clear=sigPad(cv,key,()=>{st.textContent="Signed "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});st.className="sigline done";tally();},()=>{st.textContent=u.signHere;st.className="sigline";tally();});
+    if(state.sigs[key])st.className="sigline done";
+    view.querySelector(`[data-clear="${key}"]`).onclick=clear;});
+  tally();
+  $("#save").onclick=()=>{
+    const missing=present.filter(x=>!state.sigs[x.key]);const noPres=!state.sigs.presenter;
+    if((missing.length||noPres)&&!state.confirmFlag){
+      state.confirmFlag=true;
+      $("#warn").innerHTML=`<div class="banner warn"><span>${noPres?"The presenter hasn't signed. ":""}${missing.length?`${missing.length} ${missing.length===1?"person hasn't":"people haven't"} signed: ${missing.map(x=>esc(x.name)).join(", ")}. They'll be flagged as <b>Not signed</b>.`:""}</span></div>`;
+      $("#save").textContent="Save and flag";return;}
+    saveSession();
+  };
+  state.confirmFlag=false;
+}
+function saveSession(){
+  const S=state.session,o=state.org,pr=person(S.presenterId);const {roster}=signers();
+  const wk=thisWeek();const team=teamOf(S.teamId);
+  const tname=p=>{const t=teamOf(p.teamId);return t?t.name:"";};
+  const isLead=p=>o.teams.some(t=>t.leadId===p.id);
+  const att=roster.map(p=>{const sg=state.sigs[p.id];const status=!S.present[p.id]?"absent":sg?"signed":"unsigned";
+      return {name:p.name,role:isLead(p)?"Team lead":p.role,team:tname(p),status,sig:sg&&S.present[p.id]?sg.img:null,at:sg&&S.present[p.id]?sg.at:null};})
+    .concat(S.extras.map((x,i)=>{const sg=state.sigs["x"+i];return {name:x.name,role:"Not on roster",team:"",status:sg?"signed":"unsigned",sig:sg?sg.img:null,at:sg?sg.at:null};}));
+  const ps=state.sigs.presenter;
+  const rec={id:Date.now(),talkId:state.talk.id,talk:state.talk.title,lang:state.lang,industry:state.industry,when:new Date(),site:S.site,
+    company:{...o.company},
+    week:wk?{n:wk.n,label:weekLabel(wk.date)+", "+wk.date.getFullYear(),scheduled:wk.id===state.talk.id,scheduledTalk:(TALKS.find(t=>t.id===wk.id)||{}).title||""}:null,
+    team:S.teamId==="all"?{name:"All teams",lead:""}:{name:team?team.name:"",lead:team&&person(team.leadId)?person(team.leadId).name:""},
+    presenter:{name:pr?pr.name:"",role:pr?pr.role:"",sig:ps?ps.img:null,at:ps?ps.at:null},
+    attendees:att};
+  state.records.unshift(rec);saveRecords();state.viewing=rec;state.session=null;state.sigs={};go("record");
+}
+const counts=r=>{const c={signed:0,unsigned:0,absent:0};r.attendees.forEach(a=>c[a.status||"signed"]++);return c;};
+const STATUS={signed:"Signed",unsigned:"Not signed",absent:"Absent"};
+
+// ---- Records: keep on this device + PDF export ----
+function saveRecords(){try{localStorage.setItem("tt-records",JSON.stringify(state.records.filter(r=>!r.example).slice(0,40)))}catch(e){}}
+function loadRecords(){try{const a=JSON.parse(localStorage.getItem("tt-records")||"[]");
+  a.forEach(r=>{r.when=new Date(r.when);r.attendees.forEach(x=>{if(x.at)x.at=new Date(x.at);if(!x.status)x.status=x.sig?"signed":"unsigned";});});
+  if(a.length)state.records=a;}catch(e){}}
+
+function buildPdf(r){
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:"pt",format:"letter"});
+  const W=612,H=792,M=48,CW=W-2*M;let y=M;let page=1;
+  const talk=TALKS.find(t=>t.id===r.talkId);const L=LANGS.find(l=>l.id===(r.lang||"en"));const ind=INDUSTRIES.find(i=>i.id===r.industry);
+  const co=r.company||{};const cnt=counts(r);
+  const footer=()=>{doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(110);
+    doc.text((co.name?co.name+" · ":"")+"Record "+r.id+" · Page "+page,M,H-28);
+    doc.text("Documents a safety meeting. Does not by itself certify OSHA compliance.",W-M,H-28,{align:"right"});page++;doc.setTextColor(0);};
+  const newPageIf=h=>{if(y+h>H-M-24){footer();doc.addPage();y=M;return true;}return false;};
+  const kv=(k,v,x,w)=>{doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(110);doc.text(k.toUpperCase(),x,y);doc.setTextColor(0);doc.setFont("helvetica","normal");doc.setFontSize(10);const ls=doc.splitTextToSize(v||"-",w);doc.text(ls,x,y+12);return 12+ls.length*12;};
+  // company header
+  doc.setFillColor(245,196,0);doc.rect(0,0,W,8,"F");
+  doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(co.name||"Company name not set",M,y+4);
+  doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(110);doc.text("TOOLBOX TALK RECORD",W-M,y+4,{align:"right"});doc.setTextColor(60);
+  y+=18;doc.setFont("helvetica","normal");doc.setFontSize(9);
+  const coLines=[co.address,[co.phone,co.email].filter(Boolean).join("  ·  "),(co.licenses||"").split(/\n+/).filter(Boolean).join("  ·  ")].filter(Boolean);
+  coLines.forEach(l=>{doc.splitTextToSize(l,CW).forEach(x=>{doc.text(x,M,y);y+=11;});});
+  doc.setTextColor(0);y+=6;doc.setDrawColor(30);doc.setLineWidth(1.2);doc.line(M,y,W-M,y);doc.setLineWidth(.6);y+=26;
+  // talk + week
+  if(r.week){doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(110);
+    doc.text(`WEEK ${r.week.n} OF 52  ·  WEEK OF ${r.week.label.toUpperCase()}  ·  ${r.week.scheduled?"SCHEDULED TALK":"SUBSTITUTE TALK"}`,M,y);doc.setTextColor(0);y+=20;}
+  doc.setFont("helvetica","bold");doc.setFontSize(20);doc.splitTextToSize(r.talk,CW).forEach(l=>{doc.text(l,M,y);y+=24;});
+  if(r.week&&!r.week.scheduled&&r.week.scheduledTalk){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);doc.text("Scheduled for this week: "+r.week.scheduledTalk,M,y);doc.setTextColor(0);y+=14;}
+  if(r.example){doc.setFontSize(10);doc.setTextColor(180,35,27);doc.text("EXAMPLE RECORD - NOT A REAL MEETING",M,y);doc.setTextColor(0);y+=16;}
+  y+=10;
+  // details, two columns
+  const colW=(CW-24)/2,x2=M+colW+24;
+  const pairs=[["Date and time",fmt(r.when)],["Jobsite",r.site],["Team",r.team?r.team.name:""],["Team lead",r.team?r.team.lead:""],
+    ["Presented by",r.presenter&&r.presenter.name?r.presenter.name+(r.presenter.role?", "+r.presenter.role:""):""],["Language presented",(L?L.label:"English")+(ind?"  ·  "+ind.name:"")]];
+  for(let i=0;i<pairs.length;i+=2){const h1=kv(pairs[i][0],pairs[i][1],M,colW);const h2=pairs[i+1]?kv(pairs[i+1][0],pairs[i+1][1],x2,colW):0;y+=Math.max(h1,h2)+8;}
+  // attendance summary
+  y+=2;const flagged=cnt.unsigned+cnt.absent;
+  doc.setFillColor(flagged?251:236,flagged?230:244,flagged?228:238);doc.roundedRect(M,y,CW,26,3,3,"F");
+  doc.setFont("helvetica","bold");doc.setFontSize(10);
+  doc.text(`Attendance: ${cnt.signed} signed  ·  ${cnt.unsigned} not signed  ·  ${cnt.absent} absent`,M+10,y+17);
+  if(flagged){doc.setTextColor(180,35,27);doc.text(`${flagged} FLAGGED`,W-M-10,y+17,{align:"right"});doc.setTextColor(0);}
+  y+=44;
+  // talk content
+  if(talk){
+    doc.setFont("helvetica","bold");doc.setFontSize(12);doc.text("Topics covered",M,y);y+=16;doc.setFontSize(10);
+    const para=(txt,bold,indent)=>{doc.setFont("helvetica",bold?"bold":"normal");const ls=doc.splitTextToSize(txt,CW-(indent||0));newPageIf(ls.length*13);ls.forEach(l=>{doc.text(l,M+(indent||0),y);y+=13;});};
+    para(talk.hook,true);y+=4;
+    talk.sections.forEach(sec=>{newPageIf(30);para(sec.h,true);sec.items.forEach(it=>{newPageIf(14);doc.text("•",M+6,y);para(it,false,18);});y+=4;});
+    para("Crew discussion: "+talk.ask,false);y+=10;
+  }
+  // sign-in sheet
+  const sheetHead=cont=>{doc.setFont("helvetica","bold");doc.setFontSize(12);
+    doc.text("Sign-in sheet"+(cont?" (continued)":""),M,y);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(80);
+    y+=13;doc.text(doc.splitTextToSize((r.week?"Week "+r.week.n+" of 52  ·  ":"")+r.talk+"  ·  "+new Date(r.when).toLocaleDateString([], {month:"short",day:"numeric",year:"numeric"})+(r.team&&r.team.name?"  ·  "+r.team.name:""),CW),M,y);doc.setTextColor(0);y+=18;
+    doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(110);
+    doc.text("#",M,y);doc.text("NAME / ROLE",M+20,y);doc.text("STATUS",M+190,y);doc.text("SIGNATURE",M+265,y);doc.text("TIME",W-M,y,{align:"right"});doc.setTextColor(0);y+=6;};
+  newPageIf(120);doc.setDrawColor(200);doc.line(M,y,W-M,y);y+=22;sheetHead(false);
+  const rowH=50;
+  r.attendees.forEach((a,i)=>{
+    if(newPageIf(rowH))sheetHead(true);
+    const st=a.status||"signed";const flag=st!=="signed";
+    if(flag){doc.setFillColor(251,230,228);doc.rect(M-6,y,CW+12,rowH-4,"F");}
+    doc.setFont("helvetica","normal");doc.setFontSize(10);doc.text(String(i+1),M,y+20);
+    doc.setFont("helvetica","bold");doc.text(doc.splitTextToSize(a.name,160)[0],M+20,y+18);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(100);doc.text(doc.splitTextToSize([a.role,a.team].filter(Boolean).join(" · "),160)[0]||"",M+20,y+30);doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(9);if(flag)doc.setTextColor(180,35,27);else doc.setTextColor(31,122,69);
+    doc.text(STATUS[st].toUpperCase(),M+190,y+22);doc.setTextColor(0);
+    if(a.sig){try{doc.addImage(a.sig,"PNG",M+262,y+2,150,38)}catch(e){}}
+    else if(r.example&&st==="signed"){doc.setFont("helvetica","italic");doc.setFontSize(8);doc.setTextColor(150);doc.text("example, no signature",M+265,y+24);doc.setTextColor(0);}
+    doc.setDrawColor(120);doc.line(M+262,y+40,M+420,y+40);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);
+    doc.text(a.at?new Date(a.at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"-",W-M,y+22,{align:"right"});
+    y+=rowH;
+  });
+  // presenter block
+  y+=12;newPageIf(90);
+  doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(110);doc.text("TALK DELIVERED BY",M,y);doc.setTextColor(0);y+=14;
+  const P=r.presenter||{};
+  doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text(P.name||"________________________",M,y+16);
+  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);doc.text(P.role||"",M,y+29);doc.setTextColor(0);
+  if(P.sig){try{doc.addImage(P.sig,"PNG",M+262,y-4,150,38)}catch(e){}}
+  else{doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(180,35,27);doc.text(r.example?"":"NOT SIGNED",M+262,y+22);doc.setTextColor(0);}
+  doc.setDrawColor(120);doc.line(M+262,y+36,M+420,y+36);
+  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.text(P.at?new Date(P.at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"",W-M,y+22,{align:"right"});
+  footer();
+  return doc;
+}
+function pdfName(r){const d=new Date(r.when);return (r.week?"Week "+String(r.week.n).padStart(2,"0")+" - ":"")+"Toolbox Talk - "+r.talk.replace(/[^\w\s-]/g,"").trim()+" - "+isoDay(d)+".pdf";}
+async function exportPdf(r){
+  const st=$("#pdfst");
+  if(!window.jspdf){st.textContent="The PDF tool didn't load. Check your connection and reload the page.";return;}
+  const dl=await window.claude?.use?.("downloads");
+  if(!dl){st.textContent="Saving files isn't available in this view. Open the app in a browser to save the PDF.";return;}
+  st.textContent="Building PDF…";
+  try{const blob=buildPdf(r).output("blob");await dl.save({filename:pdfName(r),data:blob});st.textContent="PDF saved.";}
+  catch(e){st.textContent=e&&e.code==="declined"?"Save canceled.":e&&e.code==="rate_limited"?"A save is already waiting for your answer.":"Couldn't save the PDF. Try again.";}
+}
+
+function record(){
+  setSteps(4);const r=state.viewing;const c=counts(r);const flagged=c.unsigned+c.absent;
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">${r.week?`Week ${r.week.n} of 52 · `:""}Attendance record</div>
+    <h2>${esc(r.talk)}</h2>
+    <div class="record">
+      <p><span class="stamp">Recorded</span>${r.example?'<span class="example">Example</span>':""}</p>
+      <p class="meta num"><span class="pill">${fmt(r.when)}</span><span class="pill">${esc(r.site||"")}</span>${r.team&&r.team.name?`<span class="pill">${esc(r.team.name)}</span>`:""}${r.presenter&&r.presenter.name?`<span class="pill">By ${esc(r.presenter.name)}</span>`:""}</p>
+      <p class="summary num"><b>${c.signed}</b> signed · <b>${c.unsigned}</b> not signed · <b>${c.absent}</b> absent${flagged?` <span class="tag flag">${flagged} flagged</span>`:""}</p>
+      <table>${r.attendees.map(a=>{const st=a.status||"signed";return `<tr class="${st!=="signed"?"flagrow":""}"><td><b>${esc(a.name)}</b><small>${esc([a.role,a.team].filter(Boolean).join(" · "))}</small></td><td>${a.sig?`<img src="${a.sig}" alt="Signature of ${esc(a.name)}">`:`<span class="tag ${st==="signed"?"":"flag"}">${STATUS[st]}</span>`}</td></tr>`;}).join("")}</table>
+    </div>
+    <button class="btn" id="pdf">Save as PDF</button>
+    <p class="sigline" id="pdfst" aria-live="polite"></p>
+    <button class="btn ghost" id="new" style="width:100%;margin-top:10px">${state.back==="reports"?"Back to reports":"Start another talk"}</button>
+  </div>`;
+  $("#pdf").onclick=()=>exportPdf(r);
+  $("#new").onclick=()=>{const b=state.back==="reports"?"reports":"pick";state.back=null;go(b);};
+}
+
+function records(){
+  setSteps(0);
+  view.innerHTML=`<div class="screen">
+    <div class="eyebrow">Owner view</div>
+    <h2>Past talks</h2>
+    <div class="hist">${state.records.map(r=>{const c=counts(r);const f=c.unsigned+c.absent;return `<button data-id="${r.id}"><span><b>${esc(r.talk)}</b>${r.example?'<span class="example">Example</span>':""}<small class="num">${r.week?"Week "+r.week.n+" · ":""}${fmt(r.when)}${r.team&&r.team.name?" · "+esc(r.team.name):""}</small></span><span class="num right">${c.signed} signed${f?`<span class="tag flag">${f} flagged</span>`:""}</span></button>`;}).join("")}</div>
+    <p class="note">Tool for documenting safety meetings. It does not by itself guarantee OSHA compliance.</p>
+  </div>`;
+  view.querySelectorAll(".hist button").forEach(b=>b.onclick=()=>{state.viewing=state.records.find(r=>r.id==b.dataset.id);go("record");});
+}
+
+$("#navAdmin").onclick=()=>go(state.screen==="admin"||state.screen==="reports"?"pick":"admin");
+$("#navPlan").onclick=()=>go(state.screen==="plan"?"pick":"plan");
+$("#navRecords").onclick=()=>go(state.screen==="records"||state.screen==="record"?"pick":"records");
+try{state.industry=localStorage.getItem("tt-industry")}catch(e){}
+loadOrg();
+loadRecords();
+state.overrides={};if(state.industry)loadOverrides();
+try{const z=localStorage.getItem("tt-zip");if(z!==null)state.zip=z}catch(e){}
+state.climate=climateFor(state.zip);
+try{const l=localStorage.getItem("tt-lang");if(l&&UI[l])state.lang=l}catch(e){}
+try{const vp=JSON.parse(localStorage.getItem("tt-voice")||"null");if(vp){state.voice=vp.voice||{};state.rate=vp.rate||0.95;}}catch(e){}
+try{if(window.speechSynthesis){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=fillVoiceMenu;}}catch(e){}
+render();
+</script>
