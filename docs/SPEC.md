@@ -11,6 +11,17 @@ give, easy for any crew to understand, and leaves a signed record the owner can 
 The value customers pay for is the **signed, searchable record**. The talk content is a commodity that gets them to
 "complete on day one".
 
+## Platforms
+- **Website, iPhone app and Android app from one codebase.** The web app is built as a static site and wrapped with
+  Capacitor for the two app stores. Built and tested together from the start.
+- **Installable from the browser** ("Add to Home Screen") before the store apps exist.
+- **Works without signal.** Talks, audio and signatures save on the phone and upload when the connection returns.
+- **Phones first.** Big tap targets, readable outdoors, works one-handed on a tailgate.
+- **Everything runs locally for free while we build.** Local Supabase on a Mac; no Supabase or Vercel account until
+  launch. Note for launch: Vercel's free plan is for non-commercial use; since the app is a static site, any static
+  host works.
+- **Store accounts when publishing:** Apple developer account ($99/year), Google Play developer account (one-time fee).
+
 ## Who uses it
 - **Company admin** (owner, safety manager): sets up the company, people and teams, reads reports, pulls records.
 - **Presenter** (superintendent, supervisor, foreman, team lead): picks the talk, reads or plays it, collects signatures.

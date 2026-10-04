@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Design tokens carried over from the prototype. Every color is a token; dark mode redefines the tokens only. */
+:root {
+  --bg: #f3f2ee;
+  --surface: #ffffff;
+  --fg: #1b1d1f;
+  --muted: #5d6166;
+  --line: #d9d7d0;
+  --hivis: #f5c400;
+  --hivis-ink: #1b1d1f;
+  --ok: #1f7a45;
+  --warn: #b4231b;
+  --warn-bg: #fbe6e4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141517;
+    --surface: #1d1f22;
+    --fg: #ecebe6;
+    --muted: #9a9ea4;
+    --line: #33363a;
+    --hivis-ink: #141517;
+    --ok: #4cc27e;
+    --warn: #ff6a5f;
+    --warn-bg: #3a1f1d;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-hivis: var(--hivis);
+  --color-hivis-ink: var(--hivis-ink);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+}
+
+/* Keep content clear of the phone's notch and home bar inside the iPhone/Android apps. */
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -11,53 +11,50 @@ canonical**. If you cite a line that has moved, fix it here in the same change.
 2. Reuse it and cite it: `Blueprint: reused <name> (file:line)`.
 3. If nothing fits, **say so (that's a finding)**, build it, then **add a row here in the same change**.
 
-## Status of this map
-The real app has not been built yet. Every row below points at the **prototype** (`prototype/index.html`), which is
-the reference behavior. When a component is ported, change its row to the real file and mark the prototype line as
-the origin. Do not build a second version of anything listed here.
+Rows marked **PROTOTYPE** are not ported yet: `prototype/index.html` is the reference behavior. When you port one,
+point the row at the real file and keep the prototype line as its origin.
 
 ---
 
-## Content: talks, industries, languages
+## Core logic (`src/core/`: pure TypeScript, no React, no Supabase)
+
+| Component | File | Role |
+|---|---|---|
+| `Talk` · `TalkText` · `TranslationStatus` | `src/core/talks.ts:7` | The one talk shape: id, industries (or `all`), code, minutes, content per language, translation status |
+| `talksFor` · `talkFitsClimate` | `src/core/talks.ts:35` · `:29` | Talks for an industry + location. Storm talk only where hurricanes happen; cold talk hidden with no winter |
+| `talkText` | `src/core/talks.ts:42` | Talk text in a language, falling back to English |
+| `INDUSTRIES` | `src/core/industries.ts:4` | Construction, manufacturing, agriculture & fertilizer, warehouse & logistics |
+| `LANGUAGES` | `src/core/languages.ts:4` | Supported languages (ready vs coming soon) with voice codes |
+| `climateFor` · `stateForZip` | `src/core/climate.ts:40` · `:34` | ZIP → state → climate (`cold` none/light/full, `hotLong`, `hurricane`). South/Southwest Florida = no cold |
+| `buildPlan` | `src/core/plan.ts:46` | **The** plan builder: 52 weeks, seasonal heat/cold/storm by climate, round-robin for the rest, admin overrides |
+| `cycleStart` · `thisWeek` | `src/core/plan.ts:26` · `:85` | Week 1 = company program start; rolls into a new cycle every 52 weeks; this week's number and talk |
+| `mondayOf` · `isoDay` · `parseDay` · `weekLabel` · `weeksBetween` | `src/core/weeks.ts` | **The** week convention: weeks start Monday, keyed by that Monday's local date. Do not invent a second one |
+| `AttendanceStatus` · `countStatuses` · `resolveStatus` | `src/core/attendance.ts:4` · `:16` · `:29` | **The** attendance model: `signed` · `not_signed` · `absent`. Every report counts with this |
+
+## Content
+
+| Component | File | Role |
+|---|---|---|
+| `TALKS` | `src/content/talks.ts` | The talk library: 15 talks, English + Spanish (draft). Ported from prototype `TALKS` + `ES` |
+
+## Data and access (Supabase)
+
+| Component | File | Role |
+|---|---|---|
+| companies · company_members · roles · teams · people | `supabase/migrations/20261004000001_companies_people_teams.sql` | Company info, who can sign in (owner/admin/presenter), presenting roles, teams with a lead, people. Composite keys keep a person's team and role inside their own company |
+| `private.is_member` · `private.is_admin` | same file `:32` · `:37` | The access checks every RLS policy uses. Reuse them for every new company table |
+| `public.create_company` | same file `:47` | The only way to create a company; makes the caller its owner |
+| `supabase()` | `src/lib/supabase.ts:7` | The one browser Supabase client. Public URL + anon key only |
+| company isolation test | `scripts/db-isolation-test.mjs` | Applies all migrations to a throwaway DB and proves one company can't read or write another's rows; self-checks by switching RLS off. **Extend it for every new company table** |
+
+## Not ported yet (PROTOTYPE)
 
 | Component | Prototype | Role |
 |---|---|---|
-| `TALKS` | `prototype/index.html:184` | The talk library. Each talk: `id`, `ind` (industries or `all`), `code` (OSHA standard or topic tag), `title`, `hook`, `sections[]`, `ask`. One shape for every talk |
-| `ES` | `prototype/index.html:297` | Spanish versions keyed by talk id, same structure as English. Every translated talk must match the English section/item counts |
-| `INDUSTRIES` | `prototype/index.html:395` | Industry list (construction, manufacturing, agriculture & fertilizer, warehouse & logistics) |
-| `talksFor` · `talkFits` | `prototype/index.html:417` · `:381` | Which talks apply to an industry + location. Hurricane talk only where hurricanes happen; cold talk hidden where there's no winter |
-| `LANGS` · `UI` | `prototype/index.html:382` · `:390` | Supported languages (ready vs coming soon) and the crew-facing UI strings per language |
-
-## Location and the 52-week plan
-
-| Component | Prototype | Role |
-|---|---|---|
-| `ZIP3` · `climateFor` | `prototype/index.html:368` · `:372` | ZIP prefix → state → climate profile (`cold`: none/light/full, `hotLong`, `hurricane`). South and Southwest Florida split out as no-cold |
-| `buildPlan` | `prototype/index.html:418` | **The** plan builder: 52 weeks, seasonal heat/cold/storm placement by climate, round-robin for the rest, per-week overrides |
-| `cycleStart` · `thisWeek` | `prototype/index.html:438` · `:442` | Week 1 anchored to the company's program start date; returns this week's number (1–52) and scheduled talk |
-| `mondayOf` · `isoDay` · `weekLabel` | `prototype/index.html:415`–`:445` | The week convention: weeks start Monday, keyed by ISO date. Do not invent a second one |
-
-## Presenting
-
-| Component | Prototype | Role |
-|---|---|---|
-| `readAloud` · `pickVoice` · `voiceScore` | `prototype/index.html:576` · `:566` · `:553` | Device text-to-speech fallback with line highlighting and pauses. Replaced by pre-generated audio files in the real app (see SPEC: Voice), kept as the offline fallback |
-
-## Company admin, teams, attendance
-
-| Component | Prototype | Role |
-|---|---|---|
-| company / roles / people / teams model | `prototype/index.html:629` (`exampleOrg`) | Company info (name, licenses, address, phone), roles that can present, people (name, role, team), teams (name, lead) |
-| `presenters` | `prototype/index.html:645` | Anyone whose role isn't "Crew member" can give a talk |
-| `rosterFor` | `prototype/index.html:851` | A team's roster, team lead first |
-| `saveSession` | `prototype/index.html:941` | Builds the saved record: talk, week, team, presenter, every roster person with a status |
-| `counts` · `STATUS` | `prototype/index.html:958` | **The** attendance status model: `signed` · `unsigned` (shown "Not signed") · `absent`. Every report counts with this |
+| `readAloud` · `pickVoice` · `voiceScore` | `prototype/index.html:576` · `:566` · `:553` | Device text-to-speech fallback with line highlighting. Real app plays pre-generated audio files; this stays as the offline fallback |
+| `rosterFor` · `presenters` | `prototype/index.html:851` · `:645` | Team roster (lead first); everyone who isn't a crew member can present |
 | `sigPad` | `prototype/index.html:895` | Finger signature capture with timestamp |
-
-## Records, PDF, reports
-
-| Component | Prototype | Role |
-|---|---|---|
-| `buildPdf` · `pdfName` | `prototype/index.html:967` · `:1049` | **The** PDF record: company header, week line (scheduled vs substitute), details, attendance summary, talk content, sign-in sheet with flagged rows, presenter block, no-compliance-claim footer |
-| `reportData` | `prototype/index.html:684` | **The** report query: talks held, weekly coverage per team (held / missed / this week open), employee totals, flags, sign-in rate |
-| `reports` · `exportCsv` | `prototype/index.html:713` · `:764` | Admin reports screen and CSV export (one row per person per talk) |
+| `saveSession` | `prototype/index.html:941` | Builds the saved record: talk, week, team, presenter, every roster person's status |
+| `buildPdf` · `pdfName` | `prototype/index.html:967` · `:1049` | **The** PDF record: company header, week line, details, attendance summary, talk content, sign-in sheet with flagged rows, presenter block, no-compliance-claim footer |
+| `reportData` · `reports` · `exportCsv` | `prototype/index.html:684` · `:713` · `:764` | **The** report query (talks held, weekly coverage, employee totals, flags) and CSV export |
+| admin setup screen | `prototype/index.html:775` | Company info, roles, teams, people |

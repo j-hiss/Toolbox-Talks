@@ -1,10 +1,7 @@
 name: CI
 
 # Red/green signal on every push and pull request. A check that can't fail is decoration
-# (docs/lessons-learned.md), so a missing test script is a FAILURE, not a skip.
-#
-# Until the app exists there is no package.json, and the job says so and passes. The moment package.json lands,
-# the job requires `typecheck` and `test` scripts and runs both.
+# (docs/lessons-learned.md), so required scripts that are missing FAIL the job instead of being skipped.
 
 on:
   push:
@@ -16,34 +13,57 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  app:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
-
-      - name: App present?
-        id: app
-        run: |
-          if [ -f package.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; echo "No package.json yet: prototype + docs only. Nothing to test."; fi
-
       - uses: actions/setup-node@v4
-        if: steps.app.outputs.present == 'true'
         with: { node-version: 22, cache: npm }
 
-      - name: Require typecheck and test scripts
-        if: steps.app.outputs.present == 'true'
+      - name: Require typecheck, lint, test and test:db scripts
         run: |
-          node -e 'const s=require("./package.json").scripts||{};const miss=["typecheck","test"].filter(k=>!s[k]);if(miss.length){console.error("package.json is missing required scripts: "+miss.join(", ")+". CI will not go green without them.");process.exit(1)}'
+          node -e 'const s=require("./package.json").scripts||{};const miss=["typecheck","lint","test","test:db","build"].filter(k=>!s[k]);if(miss.length){console.error("package.json is missing required scripts: "+miss.join(", "));process.exit(1)}'
 
       - name: Install
-        if: steps.app.outputs.present == 'true'
         run: npm ci
 
       - name: Typecheck
-        if: steps.app.outputs.present == 'true'
         run: npm run typecheck
 
-      - name: Test
-        if: steps.app.outputs.present == 'true'
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
         run: npm test
+
+      # The static build is what ships as the website and inside the iPhone/Android apps.
+      - name: Build
+        run: npm run build
+
+  # Company isolation: applies every migration to a throwaway database and proves one company can't read or
+  # write another's data, including a self-check that the test fails when row-level security is switched off.
+  db-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - name: Install
+        run: npm ci
+      - name: Company isolation test
+        run: npm run test:db

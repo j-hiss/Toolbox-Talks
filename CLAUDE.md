@@ -7,7 +7,22 @@ collect signatures, and keep a PDF record an owner can hand to OSHA or an insure
 It is built separately from RomanOS. Roman Roofing is a **customer** of this app (company #1), never
 a dependency. Nothing in this repo is Roman Roofing–specific.
 
-Stack: Next.js (App Router) · Prisma · Supabase (Postgres, Auth, Storage) · Vercel.
+## Platforms and stack
+One codebase ships three ways: the **website**, the **iPhone app**, and the **Android app**.
+- **Next.js (App Router) built as a static export** (`output: "export"` → `out/`). No server code: no API routes,
+  server actions, middleware, or runtime image optimization. Anything that seems to need a server is a database
+  function or an offline script instead. Raise it as a finding before adding a server.
+- **Capacitor** wraps `out/` as the iPhone and Android apps (`capacitor.config.ts`). Native projects live in `ios/`
+  and `android/`, generated on a Mac.
+- **Supabase** (Postgres, Auth, Storage) is the only backend. The browser talks to it directly; row-level security is
+  what keeps companies apart. Schema changes are SQL files in `supabase/migrations/`. No Prisma (it needs a server).
+- **Local first.** Everything runs on a Mac with local Supabase (`npm run db:start`). No cloud account is needed to
+  build or test.
+- **Offline-first.** Jobsites lose signal. Talks, audio and signatures must save on the device and upload when the
+  connection returns. Design every flow for that.
+- **Phones first.** The foreman's phone is the main screen; the office computer is second.
+- **Core logic stays separate from screens.** `src/core/` is pure TypeScript (no React, no Supabase, no
+  `"use client"`): plan, climate, attendance, talks. Screens call it; they never re-implement it.
 
 ## Before you build (every task)
 1. Read **`docs/SPEC.md`** (what the product does and why) and **`BLUEPRINT-reuse-map.md`** (what already exists).
@@ -30,6 +45,8 @@ canonical. Fix a stale line reference when you touch it.
   and Supabase RLS enforces it independently of app code. A test that can't fail on a cross-company read is not a test.
 - **New migration?** Additive by default. One monotonic counter; never edit or renumber a migration that has been
   applied. Destructive changes (drop, rename, type change) are proposed in the report and wait for Joe's go.
+- **Before you push:** `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, and `npm run test:db` when
+  the schema changed. Each as its own command.
 - **Content is data, not code.** Talks, translations, and audio files live in the content store with a version.
   Changing a talk's wording creates a new version; existing records keep pointing at the version that was read.
 
