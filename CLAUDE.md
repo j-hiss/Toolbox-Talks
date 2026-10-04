@@ -4,7 +4,7 @@ Toolbox Talks (working name in the prototype: Tailgate Talks) is a company-neutr
 weekly safety toolbox talks: pick the week's talk, read it to the crew (in their language, or have the phone read it),
 collect signatures, and keep a PDF record an owner can hand to OSHA or an insurer.
 
-It is built separately from RomanOS and from Contrax. Roman Roofing is a **customer** of this app (company #1), never
+It is built separately from RomanOS. Roman Roofing is a **customer** of this app (company #1), never
 a dependency. Nothing in this repo is Roman Roofing–specific.
 
 Stack: Next.js (App Router) · Prisma · Supabase (Postgres, Auth, Storage) · Vercel.

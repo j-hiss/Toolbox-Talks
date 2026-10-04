@@ -2,7 +2,7 @@
 
 How work gets handed to the build agent. Claude (architect/reviewer) writes a GO as a `.md`; Joe pastes it to the
 build agent (repo + database + push); the agent reports back; the reviewer re-verifies before anything is called done.
-Adapted from the Contrax Railyard GO checklist, where each item is the cost of a real incident.
+Each item below exists because skipping it lets defects land silently.
 
 Keep every GO to **one outcome**. Name what is out of scope ("NOT THIS GO") so the agent doesn't wander.
 

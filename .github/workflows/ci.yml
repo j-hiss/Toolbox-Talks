@@ -1,8 +1,7 @@
 name: CI
 
-# Red/green signal on every push and pull request. Carried over from the Contrax Railyard lessons:
-#  - A check that can't fail is decoration, so a missing test script is a FAILURE, not a skip.
-#  - A false red (config, not code) trains people to ignore the badge, so placeholders are provided for env checks.
+# Red/green signal on every push and pull request. A check that can't fail is decoration
+# (docs/lessons-learned.md), so a missing test script is a FAILURE, not a skip.
 #
 # Until the app exists there is no package.json, and the job says so and passes. The moment package.json lands,
 # the job requires `typecheck` and `test` scripts and runs both.
