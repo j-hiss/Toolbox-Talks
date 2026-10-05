@@ -27,7 +27,20 @@ const rec = (over: Partial<TalkRecord> = {}): TalkRecord => ({
 
 const text = (r: TalkRecord) => buildRecordPdf(r, co).output().replace(/\\([()\\])/g, "$1"); // un-escape PDF strings
 
+const JPEG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAADAAQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCOiiivmj7A/9k=";
+
 describe("PDF record", () => {
+  it("names a walk-in's company and includes the crew photo with when it was taken", () => {
+    const r = rec({
+      photo: JPEG, photo_taken_at: "2026-10-06T11:21:00Z",
+      attendees: [{ person_id: null, name: "Visiting electrician", role: "Not on roster", team_name: "", company_name: "Example Electric", status: "signed", signature: PNG, signed_at: "2026-10-06T11:16:00Z" }],
+    });
+    const pdf = text(r);
+    expect(pdf).toContain("(Not on roster · Example Electric) Tj");
+    expect(pdf).toContain("CREW PHOTO · TAKEN OCT 6, 2026 11:21 AM UTC");
+    expect(pdf).toMatch(/\/Subtype \/Image[\s\S]*\/Filter \/DCTDecode/); // the JPEG is embedded
+    expect(text(rec())).not.toContain("CREW PHOTO");
+  });
   it("header band is the company's brand color (default Signal blue when none is set)", () => {
     // jsPDF writes the fill as "r g b rg" (2 decimals) right before the full-width band "0. <top> <width> -8. re".
     const band = (c: Company) => buildRecordPdf(rec(), c).output().match(/([\d.]+ [\d.]+ [\d.]+) rg\n0\. [\d.]+ [\d.]+ -8\. re/)?.[1];

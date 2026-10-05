@@ -1,4 +1,5 @@
 // Demo version of src/lib/data/records.ts for the preview. Same functions; records stay append-only here too.
+// The preview has no file storage: signatures and the crew photo stay inside the demo record on this device.
 import type * as Real from "@/../src/lib/data/records";
 import type { AttendeeRow, IssuePayload, RecordPayload } from "@/core/record";
 import type { TalkRecord, TalkRecordSummary } from "@/lib/data/types";
@@ -33,7 +34,7 @@ export async function saveTalkRecord(record: RecordPayload, attendees: AttendeeR
 const summary = (r: Stored): TalkRecordSummary => ({
   id: r.id, client_id: r.client_id, talk_id: r.talk_id, language: r.language, title: (r.content as { en?: { title?: string } }).en?.title ?? r.content.title,
   week_number: r.week_number, week_start: r.week_start, makeup_for_week: r.makeup_for_week ?? null, makeup_reason: r.makeup_reason ?? null, held_at: r.held_at, jobsite_name: r.jobsite_name, team_name: r.team_name,
-  presenter_name: r.presenter_name, statuses: r.attendees.map((a) => a.status), presenter_signed: !!r.presenter_signature,
+  presenter_name: r.presenter_name, statuses: r.attendees.map((a) => a.status), presenter_signed: !!r.presenter_signed_at,
 });
 
 export async function listRecords(companyId: string, limit = 100): Promise<TalkRecordSummary[]> {
@@ -51,6 +52,7 @@ export async function getRecord(companyId: string, id: string): Promise<TalkReco
     scheduled_talk_id: r.scheduled_talk_id, team_lead_name: r.team_lead_name,
     presenter_role: r.presenter_role, presenter_signature: r.presenter_signature, presenter_signed_at: r.presenter_signed_at,
     latitude: r.latitude, longitude: r.longitude, site_notes: r.site_notes ?? "", heat: r.heat ?? null, attendees: r.attendees,
+    photo: r.photo ?? null, photo_taken_at: r.photo_taken_at ?? null,
   };
 }
 

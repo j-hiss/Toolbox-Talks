@@ -59,7 +59,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await p.click("text=Review all").catch(() => {}); await p.waitForTimeout(300); await shot("review");
   log("review:", await p.locator("h1").textContent(), "|", (await p.locator("main ul li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
   await p.click("button:has-text('Save')"); await p.waitForTimeout(1200);
-  log("saved:", await p.locator("h1").textContent());
+  log("saved:", await p.locator("h1").textContent(), "|", await p.locator("[role=alert]").allInnerTexts()); await shot("after-save");
   await p.click("nav[aria-label=Main] >> text=Home"); await p.waitForTimeout(900); await shot("home-after");
   log("week card:", (await p.locator("section:has-text('Signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " "));
   log("last setup:", await p.locator("text=Set up like last time").textContent().catch(() => "none"));
@@ -129,19 +129,27 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("3 read heat:", (await r.locator("main p.border-warn").first().innerText().catch(() => "none")).replace(/\s+/g, " "), "| reminder lines:", await r.locator("main p.border-l-4.border-warn").count());
   await r.click("text=Done reading"); await r.waitForTimeout(300);
   await r.selectOption("#presenter", { index: 1 }); await r.selectOption("#team", { label: "North Crew" }); await r.waitForTimeout(200);
+  await r.fill('input[aria-label="Add someone not on the roster"]', "Vic Visitor"); await r.fill('input[aria-label="Their company"]', "Example Electric");
+  await r.click("form button:has-text('Add')"); await r.waitForTimeout(250);
+  log("3 walk-in on roster:", (await r.locator("main ul li label").last().innerText()).replace(/\s+/g, " "));
   await r.click("text=Collect signatures"); await r.waitForTimeout(300);
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     const c = r.locator("canvas"); if (!(await c.count())) break;
     const bb = await c.boundingBox(); await r.mouse.move(bb.x + 30, bb.y + 80); await r.mouse.down(); await r.mouse.move(bb.x + 150, bb.y + 40, { steps: 5 }); await r.mouse.move(bb.x + 250, bb.y + 90, { steps: 5 }); await r.mouse.up();
     await r.locator("button:has-text('Next'), button:has-text('Done signing')").first().click(); await r.waitForTimeout(250);
   }
   await r.fill('input[aria-label="Add something the crew raised"]', "East ladder rail cracked"); await r.click("form button:has-text('Add')"); await r.waitForTimeout(200);
   log("3 issue owner:", await r.locator('select[aria-label="Owner"] option:checked').innerText(), "| due:", await r.locator('input[aria-label="Fix by"]').inputValue());
+  const JPEG = Buffer.from("/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAADAAQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCOiiivmj7A/9k=", "base64");
+  await r.setInputFiles('input[aria-label="Take a crew photo"]', { name: "crew.jpg", mimeType: "image/jpeg", buffer: JPEG }); await r.waitForTimeout(600);
+  log("3 crew photo on review:", await r.locator('img[alt="Crew photo for this talk"]').count(), "| retake/remove:", await r.locator("button:has-text('Retake'), button:has-text('Remove')").count());
   await r.screenshot({ path: `${OUT}/e-review-issue.png`, fullPage: true });
   await r.click("button:has-text('Save')"); await r.waitForTimeout(1200);
   log("3 saved:", (await r.locator("main").innerText()).split("\n").filter((t) => /issue/.test(t)).join(" | "));
   await r.click("text=See records"); await r.waitForTimeout(700);
   await r.locator("main ul li a").first().click(); await r.waitForTimeout(900);
+  log("3 record walk-in + photo:", (await r.locator("main").innerText()).split("\n").filter((t) => /Example Electric/.test(t)).join(" | "), "| photo:", await r.locator('img[alt="Crew photo taken at this talk"]').count());
+  await r.screenshot({ path: `${OUT}/e-record-photo.png`, fullPage: true });
   log("3 record on site:", (await r.locator("main").innerText()).split("\n").filter((t) => /site|Heat index|ladder/i.test(t)).join(" | "));
   await r.click("nav[aria-label=Main] >> text=Records"); await r.waitForTimeout(600);
   await r.click("[role=tab]:has-text('Issues')"); await r.waitForTimeout(700);

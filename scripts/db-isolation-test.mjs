@@ -38,6 +38,15 @@ create or replace function auth.uid() returns uuid language sql stable as
 grant usage on schema auth to anon, authenticated;
 grant execute on function auth.uid() to anon, authenticated;
 grant usage on schema public to anon, authenticated;
+-- Supabase Storage: buckets, objects (row-level security on, like the real one).
+create schema if not exists storage;
+create table if not exists storage.buckets (id text primary key, name text not null, public boolean default false,
+  file_size_limit bigint, allowed_mime_types text[]);
+create table if not exists storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets (id),
+  name text not null, owner uuid default auth.uid(), created_at timestamptz default now(), unique (bucket_id, name));
+alter table storage.objects enable row level security;
+grant usage on schema storage to anon, authenticated;
+grant select, insert, update, delete on storage.objects to anon, authenticated;
 `;
 
 async function main() {
@@ -104,11 +113,14 @@ async function main() {
         presenter_name: "Presenter", held_at: new Date().toISOString() }),
       JSON.stringify(attendees),
     ];
-    const sig = "data:image/png;base64,AAAA";
+    // Signatures and photos are files in the private "talk-files" bucket at <company>/<talk client id>/<file>.
+    const upload = (user, path) => as(user, "insert into storage.objects (bucket_id, name) values ('talk-files', $1)", [path]);
     const clientA = randomUUID();
+    const sigPath = `${coA}/${clientA}/sig-0.png`;
+    await upload(userA, sigPath);
     const save = (user, company, clientId, att) => as(user, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", rec(company, clientId, att));
-    const recA = (await save(userA, coA, clientA, [{ name: "W1", status: "signed", signature: sig }, { name: "W2", status: "absent" }])).rows[0].id;
-    const again = (await save(userA, coA, clientA, [{ name: "W1", status: "signed", signature: sig }])).rows[0].id;
+    const recA = (await save(userA, coA, clientA, [{ name: "W1", status: "signed", signature_path: sigPath }, { name: "W2", status: "absent" }])).rows[0].id;
+    const again = (await save(userA, coA, clientA, [{ name: "W1", status: "signed", signature_path: sigPath }])).rows[0].id;
     const countA = (await as(userA, "select count(*)::int n from public.talk_records")).rows[0].n;
     check("Saving the same talk twice keeps one record", again === recA && countA === 1, `${countA} record(s)`);
     check("Attendees saved with the record", (await as(userA, "select status from public.talk_attendees order by position")).rows.map((r) => r.status).join(",") === "signed,absent");
@@ -120,6 +132,34 @@ async function main() {
     check("B cannot save a record into A's company", await fails(() => save(userB, coA, randomUUID(), [])));
     check("'Signed' without a signature is rejected", await fails(() => save(userA, coA, randomUUID(), [{ name: "W3", status: "signed" }])));
     check("A presenter can record a talk", !!(await save(presenterA, coA, randomUUID(), [{ name: "W1", status: "not_signed" }])).rows[0].id);
+
+    // Private files: company-only, can't be replaced or removed, and a record can only point at its own uploaded files.
+    check("A can't upload into B's folder", await fails(() => upload(userA, `${coB}/${randomUUID()}/sig-0.png`)));
+    check("A can't upload outside any company folder", await fails(() => upload(userA, `not-a-company/${randomUUID()}/x.png`)));
+    check("B can't see A's signature files", (await as(userB, "select name from storage.objects where bucket_id = 'talk-files'")).rows.length === 0);
+    check("A can see A's signature files", (await as(userA, "select name from storage.objects where name = $1", [sigPath])).rows.length === 1);
+    check("Saved files can't be replaced", (await as(userA, "update storage.objects set name = name || 'x' where name = $1", [sigPath])).rowCount === 0);
+    check("Saved files can't be deleted", (await as(userA, "delete from storage.objects where name = $1", [sigPath])).rowCount === 0);
+    check("Signed needs an uploaded file, not an inline image",
+      await fails(() => save(userA, coA, randomUUID(), [{ name: "W3", status: "signed", signature: "data:image/png;base64,AAAA" }])));
+    check("A record can't point at a file that was never uploaded",
+      await fails(() => { const c = randomUUID(); return save(userA, coA, c, [{ name: "W3", status: "signed", signature_path: `${coA}/${c}/sig-0.png` }]); }));
+    check("A record can't point at another talk's file",
+      await fails(() => save(userA, coA, randomUUID(), [{ name: "W3", status: "signed", signature_path: sigPath }])));
+    {
+      const c = randomUUID(), base = `${coA}/${c}/`;
+      for (const f of ["presenter.png", "sig-0.png", "photo.jpg"]) await upload(userA, base + f);
+      const [r] = rec(coA, c, []);
+      const withFiles = JSON.stringify({ ...JSON.parse(r), presenter_signature_path: base + "presenter.png", presenter_signed_at: new Date().toISOString(),
+        photo_path: base + "photo.jpg", photo_taken_at: new Date().toISOString() });
+      const att = JSON.stringify([{ name: "Visiting electrician", status: "signed", signature_path: base + "sig-0.png", company_name: " Example Electric " }]);
+      const id = (await as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", [withFiles, att])).rows[0].id;
+      const row = (await as(userA, "select r.photo_path, r.photo_taken_at, r.presenter_signature_path, a.company_name from public.talk_records r join public.talk_attendees a on a.record_id = r.id where r.id = $1", [id])).rows[0];
+      check("Crew photo, presenter signature and a walk-in's company save with the record",
+        row?.photo_path === base + "photo.jpg" && !!row.photo_taken_at && row.presenter_signature_path === base + "presenter.png" && row.company_name === "Example Electric");
+      check("B can't save a record pointing at A's files",
+        await fails(() => as(userB, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", [JSON.stringify({ ...JSON.parse(withFiles), company_id: coB, client_id: randomUUID() }), "[]"])));
+    }
 
     // Weekly lock and makeups.
     const monday = (offsetWeeks) => {

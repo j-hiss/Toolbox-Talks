@@ -199,7 +199,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
     doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.text(String(i + 1), COL.n, y + 20);
     doc.setFont("helvetica", "bold"); doc.text(doc.splitTextToSize(a.name, 155)[0] ?? "", COL.name, y + 18);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100);
-    doc.text(doc.splitTextToSize([a.role, a.team_name].filter(Boolean).join(" · "), 155)[0] ?? "", COL.name, y + 30); doc.setTextColor(0);
+    doc.text(doc.splitTextToSize([a.role, a.team_name, a.company_name].filter(Boolean).join(" · "), 155)[0] ?? "", COL.name, y + 30); doc.setTextColor(0);
     doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...(flag ? RED : GREEN));
     doc.text(STATUS_LABEL[a.status].toUpperCase(), COL.status, y + 22); doc.setTextColor(0);
     image(a.signature, COL.sig, y + 2);
@@ -219,6 +219,21 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   }
   doc.setDrawColor(120); doc.line(COL.sig, y + 36, COL.sig + 150, y + 36);
   stampCell(r.presenter_signed_at, y - 4);
+
+  // Crew photo (optional) -------------------------------------------------------------------------------------------
+  if (r.photo) {
+    try {
+      const p = doc.getImageProperties(r.photo);
+      const scale = Math.min(CW / p.width, 300 / p.height);
+      const w = p.width * scale, h = p.height * scale;
+      y += 52; newPageIf(h + 30);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY);
+      const when = r.photo_taken_at ? stampParts(r.photo_taken_at) : null;
+      doc.text(`CREW PHOTO${when ? ` · TAKEN ${when.date.toUpperCase()} ${when.time}` : ""}`, M, y); doc.setTextColor(0); y += 8;
+      doc.addImage(r.photo, "JPEG", M, y, w, h);
+      y += h;
+    } catch { /* an unreadable photo never blocks the record */ }
+  }
   footer();
   return doc;
 }

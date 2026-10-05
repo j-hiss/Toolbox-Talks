@@ -54,6 +54,7 @@ export type AttendanceRow = {
   name: string;
   role: string;
   team_name: string;
+  company_name?: string; // walk-ins: the company they work for
   status: "signed" | "not_signed" | "absent";
   signature: string | null;
   signed_at: string | null;
@@ -94,6 +95,9 @@ export type TalkRecord = TalkRecordSummary & {
   site_notes?: string;
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
   attendees: AttendanceRow[];
+  /** Optional crew photo (image loaded from private storage) and when it was taken. */
+  photo?: string | null;
+  photo_taken_at?: string | null;
 };
 
 /** Something the crew raised at a talk. */

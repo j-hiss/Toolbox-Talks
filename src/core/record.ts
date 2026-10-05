@@ -12,6 +12,8 @@ export type RosterEntry = {
   name: string;
   role: string;
   teamName: string;
+  /** For walk-ins: the company they work for (a sub, a supplier). Optional. */
+  company?: string;
 };
 
 export type AttendeeRow = {
@@ -19,6 +21,7 @@ export type AttendeeRow = {
   name: string;
   role: string;
   team_name: string;
+  company_name: string;
   status: AttendanceStatus;
   signature: string | null;
   signed_at: string | null;
@@ -38,6 +41,7 @@ export function buildAttendees(roster: RosterEntry[], present: Record<string, bo
       name: r.name,
       role: r.role,
       team_name: r.teamName,
+      company_name: (r.company ?? "").trim(),
       status,
       signature: status === "signed" ? sig!.image : null,
       signed_at: status === "signed" ? sig!.signedAt : null,
@@ -59,6 +63,8 @@ export type RecordInput = {
   gps: { latitude: number; longitude: number; accuracyMeters: number } | null;
   /** A makeup for an earlier week. Date, week and GPS above stay real; this says which week it covers and why. */
   makeup?: { weekStart: string; reason: string } | null;
+  /** An optional photo of the crew at the talk (JPEG data URL, already shrunk) and when it was taken. */
+  photo?: { image: string; takenAt: string } | null;
   /** A line or two the presenter added for this site today. Read to the crew; saved with the record. */
   siteNotes?: string;
   /** The heat forecast checked for this talk (src/core/heat.ts), and whether the heat reminder was read. */
@@ -105,6 +111,8 @@ export function recordPayload(r: RecordInput) {
     makeup_reason: r.makeup?.reason.trim() || null,
     site_notes: (r.siteNotes ?? "").trim(),
     heat: r.heat ?? null,
+    photo: r.photo?.image ?? null,
+    photo_taken_at: r.photo?.takenAt ?? null,
   };
 }
 export type RecordPayload = ReturnType<typeof recordPayload>;
@@ -112,4 +120,43 @@ export type RecordPayload = ReturnType<typeof recordPayload>;
 /** Names of people who are here but haven't signed, so the presenter can be told before saving. */
 export function unsignedPresent(roster: RosterEntry[], present: Record<string, boolean>, signatures: Record<string, Signature>): string[] {
   return roster.filter((r) => present[r.key] && !signatures[r.key]).map((r) => r.name);
+}
+
+// Files ------------------------------------------------------------------------------------------------------------
+// Signatures and the crew photo are stored as private files, not inside the record. On the phone (draft, outbox) they
+// stay as images so a talk saves with no signal; at upload time they become files at
+// <company_id>/<client_id>/<name>, and the record points at them. The database checks each path (migration 0009).
+
+export const TALK_FILES_BUCKET = "talk-files";
+
+export type TalkFile = { path: string; image: string; contentType: "image/png" | "image/jpeg" };
+
+const contentTypeOf = (image: string): TalkFile["contentType"] => (/^data:image\/jpe?g/i.test(image) ? "image/jpeg" : "image/png");
+
+/** The folder a talk's files live in. */
+export const talkFolder = (companyId: string, clientId: string) => `${companyId}/${clientId}/`;
+
+/**
+ * Split a record into the files to upload and the record that points at them. Pure and deterministic: the same talk
+ * always gets the same paths, so retrying a half-finished upload never makes a second copy.
+ */
+export function toUpload(record: RecordPayload, attendees: AttendeeRow[]) {
+  const folder = talkFolder(record.company_id, record.client_id);
+  const files: TalkFile[] = [];
+  const put = (name: string, image: string | null): string | null => {
+    if (!image) return null;
+    const contentType = contentTypeOf(image);
+    const path = folder + name + (contentType === "image/jpeg" ? ".jpg" : ".png");
+    files.push({ path, image, contentType });
+    return path;
+  };
+  const { presenter_signature, photo, ...rest } = record;
+  const stored = {
+    ...rest,
+    presenter_signature_path: put("presenter", presenter_signature),
+    photo_path: put("photo", photo),
+    photo_taken_at: photo ? record.photo_taken_at : null,
+  };
+  const storedAttendees = attendees.map(({ signature, ...a }, i) => ({ ...a, signature_path: put(`sig-${i}`, signature) }));
+  return { files, record: stored, attendees: storedAttendees };
 }

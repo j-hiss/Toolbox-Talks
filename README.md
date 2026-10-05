@@ -77,6 +77,18 @@ projects, add the permission text:
 - **Android:** in `android/app/src/main/AndroidManifest.xml` add
   `<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />` and `ACCESS_COARSE_LOCATION`.
 
+### Camera (crew photo)
+The optional crew photo uses the phone's camera through a normal file picker. In the native projects add:
+- **iPhone:** `Info.plist` → **Privacy - Camera Usage Description** ("Takes an optional photo of the crew at a
+  safety talk.") and **Privacy - Photo Library Usage Description** (same text).
+- **Android:** `<uses-permission android:name="android.permission.CAMERA" />` in `AndroidManifest.xml`.
+
+### Signatures and photos are private files
+Signatures and crew photos are stored in a private Supabase Storage bucket (`talk-files`, created by migration
+0009), in a folder per company and per talk. Only that company's members can add or read them, nobody can replace or
+delete them, and the app reads them through one-minute signed links. After pulling this change run
+`npx supabase migration up`. Records saved before it keep their signatures inside the record and still show.
+
 ### Phone preview
 `npm run preview:build` packs the current screens into one page with demo data (`preview/dist/preview.html`). It's
 published in Claude so you can check progress from your phone. It opens already signed in (code `123456` if you sign

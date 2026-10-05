@@ -107,7 +107,7 @@ function RecordView({ m }: { m: Membership }) {
           <li key={i} className={`flex items-center gap-3 rounded-lg border p-3 ${a.status === "signed" ? "border-line bg-surface" : "border-warn bg-warn-bg"}`}>
             <span className="min-w-0 flex-1">
               <b className="block">{a.name}</b>
-              <small className="text-muted">{[a.role, a.team_name].filter(Boolean).join(" · ")}{a.signed_at ? ` · ${time(a.signed_at)}` : ""}</small>
+              <small className="text-muted">{[a.role, a.team_name, a.company_name].filter(Boolean).join(" · ")}{a.signed_at ? ` · ${time(a.signed_at)}` : ""}</small>
             </span>
             {a.signature ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -129,6 +129,14 @@ function RecordView({ m }: { m: Membership }) {
           <span className={`rounded px-2 py-0.5 font-display text-xs font-semibold ${STATUS_CHIP.not_signed}`}>Not signed</span>
         )}
       </div>
+
+      {rec.photo && (
+        <>
+          <GroupHeading aside={rec.photo_taken_at ? time(rec.photo_taken_at) : undefined}>Crew photo</GroupHeading>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={rec.photo} alt="Crew photo taken at this talk" className="mt-3 max-h-96 w-full rounded-xl object-cover" />
+        </>
+      )}
 
       {(rec.site_notes || rec.heat || issues.length > 0) && (
         <>

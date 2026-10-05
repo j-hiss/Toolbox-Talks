@@ -191,6 +191,8 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - Sign-in sheet headed with week, talk, date and team: name and role, status, signature image, date and time signed.
   Flagged rows shaded.
 - "Talk delivered by" block with the presenter's signature.
+- Walk-ins show "Not on roster · <their company>" when the company was given.
+- The crew photo, when one was taken, with the date and time it was taken.
 - Footer on every page: record ID, page number, "Documents a safety meeting. Does not by itself certify OSHA
   compliance."
 - File name: `Week 06 - Toolbox Talk - <talk> - <date>.pdf`.
@@ -200,6 +202,19 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - The PDF is regenerated from the saved record each time, so it matches what was signed. Company header details come
   from the company's current info (not yet snapshotted per record).
 - Later: save a copy to the company's account automatically so the presenter doesn't have to send it.
+
+## Signatures, crew photo and walk-ins (built)
+- **Signatures live in private storage, not in the record.** Each talk has its own folder
+  (`<company>/<talk>/presenter.png`, `sig-N.png`, `photo.jpg`) in the private `talk-files` bucket. Only members of
+  that company can add or read files there; nothing can be replaced or deleted. The record points at its files, and
+  the database refuses a record that points outside its own folder or at a file that was never uploaded. Screens and
+  the PDF read them through one-minute signed links. Records saved before this keep their inline signatures.
+- **Offline still works:** signatures and the photo stay on the phone with the talk until there's signal; then the
+  files upload first and the record second. Retrying is safe (fixed file names, one record per talk).
+- **Crew photo (optional):** on the review screen, "Take a crew photo". Shrunk on the phone (longest side 1280 px,
+  JPEG, hidden photo metadata dropped), with retake and remove. Shows on the record and the PDF with its time.
+- **Walk-ins:** name plus an optional company (a sub, a supplier). Companies used before are suggested. Shown on the
+  roster, record and PDF. Walk-ins don't count toward compliance (they aren't on staff).
 
 ## Admin reports (built)
 **Home → Reports** (owners and admins).
@@ -237,9 +252,6 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - Reports carry the same no-compliance-claim note as the PDF.
 
 ## Not yet decided
-- **Where signatures live.** Today they're PNG images inside the record rows, protected by the same row-level
-  security as everything else (no public access, company-only). `CLAUDE.md` asks for private Storage with
-  short-lived signed URLs; moving them there is pending Joe's decision.
 - Pricing (per company per month vs per crew).
 - Whether RomanOS reads records from this app through an API (later, only if useful; no shared code).
 - Moving the repo from Joe's personal GitHub account to a company organization.

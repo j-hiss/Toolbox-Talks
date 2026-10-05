@@ -22,11 +22,12 @@ import { checkHeat } from "@/lib/weather";
 import { alertWorthy, HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/content/heat";
 import { addDays, isoDay } from "@/core/weeks";
-import { writeLastSetup } from "@/lib/lastSetup";
+import { readWalkinCompanies, rememberWalkinCompany, writeLastSetup } from "@/lib/lastSetup";
 import { buzz, toast } from "@/components/toast";
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { clearDraft, newDraft, readDraft, useDraft, writeDraft, type DraftIssue, type TalkDraft } from "@/lib/draft";
 import { enqueue, flush, pending } from "@/lib/outbox";
+import { CrewPhoto } from "@/components/CrewPhoto";
 import { getLocation } from "@/lib/location";
 import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
 import { RequireCompany } from "@/components/Guard";
@@ -418,11 +419,13 @@ function rosterFor(org: Org, draft: TalkDraft): RosterEntry[] {
     .filter((p) => p.id !== draft.presenterId)
     .sort((a, b) => Number(isLead(b)) - Number(isLead(a)) || a.full_name.localeCompare(b.full_name))
     .map((p): RosterEntry => ({ key: p.id, personId: p.id, name: p.full_name, role: roleName(p), teamName: teamName(p) }))
-    .concat(draft.walkins.map((name, i): RosterEntry => ({ key: `walkin:${i}`, personId: null, name, role: "Not on roster", teamName: "" })));
+    .concat(draft.walkins.map((w, i): RosterEntry => ({ key: `walkin:${i}`, personId: null, name: w.name, role: "Not on roster", teamName: "", company: w.company })));
 }
 
 function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; signedIds: string[] | null }) {
   const [walkin, setWalkin] = useState("");
+  const [walkinCo, setWalkinCo] = useState("");
+  const [knownCos] = useState(() => readWalkinCompanies(draft.companyId));
   const [msg, setMsg] = useState<string | null>(null);
   const presenters = org.people.filter((p) => p.role_id);
   const roster = rosterFor(org, draft);
@@ -491,7 +494,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
               <li key={r.key}>
                 <label className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 ${isHere ? "border-line bg-surface" : "border-warn bg-warn-bg"}`}>
                   <input type="checkbox" className="h-6 w-6 accent-[var(--brand)]" checked={isHere} onChange={(e) => update({ present: { ...draft.present, [r.key]: e.target.checked } })} />
-                  <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{[r.role, r.teamName].filter(Boolean).join(" · ")}</small></span>
+                  <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.personId ? [r.role, r.teamName].filter(Boolean).join(" · ") : ["Walk-in", r.company].filter(Boolean).join(" · ")}</small></span>
                   {!isHere && <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Absent</span>}
                 </label>
               </li>
@@ -500,18 +503,34 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
         </ul>
       )}
       <form
-        className="mt-3 flex gap-2"
+        className="mt-3 rounded-xl bg-surface p-3"
         onSubmit={(e) => {
           e.preventDefault();
           const n = walkin.trim();
           if (!n) return;
           const key = `walkin:${draft.walkins.length}`;
-          update({ walkins: [...draft.walkins, n], present: { ...draft.present, [key]: true } });
+          const company = walkinCo.trim();
+          update({ walkins: [...draft.walkins, { name: n, company }], present: { ...draft.present, [key]: true } });
+          rememberWalkinCompany(draft.companyId, company);
           setWalkin("");
         }}
       >
-        <input aria-label="Add someone not on the roster" placeholder="Add someone not on the roster" className={inputClass} value={walkin} onChange={(e) => setWalkin(e.target.value)} />
-        <Button size="sm" type="submit">Add</Button>
+        <p className="text-sm font-semibold">Someone not on the roster?</p>
+        <div className="mt-2 flex flex-col gap-2">
+          <input aria-label="Add someone not on the roster" placeholder="Their name" className={inputClass} value={walkin} onChange={(e) => setWalkin(e.target.value)} />
+          <div className="flex gap-2">
+            <input
+              aria-label="Their company"
+              placeholder="Their company (optional), e.g. a sub"
+              list="walkin-companies"
+              className={inputClass}
+              value={walkinCo}
+              onChange={(e) => setWalkinCo(e.target.value)}
+            />
+            <Button size="sm" type="submit" disabled={!walkin.trim()}>Add</Button>
+          </div>
+          <datalist id="walkin-companies">{knownCos.map((c) => <option key={c} value={c} />)}</datalist>
+        </div>
       </form>
       <p className="mt-2 text-xs text-muted">Unchecked people are recorded as absent.{draft.gps ? " Location captured." : ""}</p>
 
@@ -555,7 +574,7 @@ function Sign({
   type Turn = { key: string; name: string; sub: string; presenter: boolean };
   const turns: Turn[] = [
     { key: "__presenter", name: presenter?.full_name ?? "Presenter", sub: presenterRole ? `${presenterRole} · presenting` : "Presenting", presenter: true },
-    ...presentRoster.map((r) => ({ key: r.key, name: r.name, sub: [r.role, r.teamName].filter(Boolean).join(" · "), presenter: false })),
+    ...presentRoster.map((r) => ({ key: r.key, name: r.name, sub: r.personId ? [r.role, r.teamName].filter(Boolean).join(" · ") : ["Walk-in", r.company].filter(Boolean).join(" · "), presenter: false })),
   ];
   const sigOf = (t: Turn) => (t.presenter ? draft.presenterSignature : draft.signatures[t.key] ?? null);
   const firstOpen = turns.findIndex((t) => !sigOf(t));
@@ -594,6 +613,7 @@ function Sign({
         gps: draft.gps,
         makeup: draft.makeup ? { weekStart: draft.makeup.weekStart, reason: makeupReasonText(draft.makeupPick, draft.makeupNote) } : null,
         siteNotes: draft.siteNotes,
+        photo: draft.photo,
         heat: draft.heat ? {
           max_heat_index_f: draft.heat.max_heat_index_f, level: draft.heat.level, reminder_read: draft.heat.reminder_read,
           checked_at: draft.heat.checked_at, source: draft.heat.source,
@@ -658,6 +678,7 @@ function Sign({
           ))}
         </ul>
         <IssuesEditor org={org} draft={draft} update={update} />
+        <CrewPhoto draft={draft} update={update} />
 
         {(missing.length > 0 || !draft.presenterSignature) && (
           <div className="mt-4">

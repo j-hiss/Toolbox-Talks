@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAttendees, recordPayload, unsignedPresent, type RosterEntry } from "./record";
+import { buildAttendees, recordPayload, toUpload, unsignedPresent, type RosterEntry } from "./record";
 import { countStatuses } from "./attendance";
 
 const roster: RosterEntry[] = [
@@ -7,7 +7,7 @@ const roster: RosterEntry[] = [
   { key: "p2", personId: "p2", name: "Signed worker", role: "Crew member", teamName: "Crew 1" },
   { key: "p3", personId: "p3", name: "Didn't sign", role: "Crew member", teamName: "Crew 1" },
   { key: "p4", personId: "p4", name: "Not here", role: "Crew member", teamName: "Crew 1" },
-  { key: "walkin:0", personId: null, name: "Visiting sub", role: "Not on roster", teamName: "" },
+  { key: "walkin:0", personId: null, name: "Visiting sub", role: "Not on roster", teamName: "", company: " Example Electric " },
 ];
 const present = { p1: true, p2: true, p3: true, p4: false, "walkin:0": true };
 const sig = (t: string) => ({ image: "data:image/png;base64,AA", signedAt: t });
@@ -33,7 +33,8 @@ describe("building a saved talk", () => {
   });
 
   it("keeps walk-ins with no person id", () => {
-    expect(rows[4]).toMatchObject({ person_id: null, name: "Visiting sub", status: "signed" });
+    expect(rows[4]).toMatchObject({ person_id: null, name: "Visiting sub", status: "signed", company_name: "Example Electric" });
+    expect(rows[0].company_name).toBe("");
   });
 
   it("lists who is here but hasn't signed", () => {
@@ -52,5 +53,40 @@ describe("building a saved talk", () => {
       gps: null,
     });
     expect(p).toMatchObject({ week_number: 6, scheduled_talk_id: "ppe", jobsite_name: "Smith reroof", presenter_signature: null, latitude: null });
+  });
+});
+
+describe("signatures and the crew photo become private files", () => {
+  const rows = buildAttendees(roster, present, sigs);
+  const base = recordPayload({
+    companyId: "co-1", clientId: "cl-1", talkId: "fall", language: "en", content: { title: "Fall", hook: "", sections: [], ask: "" },
+    week: null, jobsite: null, team: null, heldAt: "2026-10-05T12:10:00Z", gps: null,
+    presenter: { personId: "p1", name: "Lead", role: "Team lead", signature: sig("2026-10-05T12:05:00Z") },
+    photo: { image: "data:image/jpeg;base64,BB", takenAt: "2026-10-05T12:09:00Z" },
+  });
+  const up = toUpload(base, rows);
+
+  it("uploads every signature and the photo into this talk's own folder", () => {
+    expect(up.files.map((f) => f.path)).toEqual([
+      "co-1/cl-1/presenter.png", "co-1/cl-1/photo.jpg", "co-1/cl-1/sig-0.png", "co-1/cl-1/sig-1.png", "co-1/cl-1/sig-4.png",
+    ]);
+    expect(up.files.find((f) => f.path.endsWith("photo.jpg"))?.contentType).toBe("image/jpeg");
+  });
+
+  it("sends no images in the record, only paths", () => {
+    const json = JSON.stringify({ record: up.record, attendees: up.attendees });
+    expect(json).not.toContain("data:image");
+    expect(up.record).toMatchObject({ presenter_signature_path: "co-1/cl-1/presenter.png", photo_path: "co-1/cl-1/photo.jpg", photo_taken_at: "2026-10-05T12:09:00Z" });
+    expect(up.attendees.map((a) => a.signature_path)).toEqual(["co-1/cl-1/sig-0.png", "co-1/cl-1/sig-1.png", null, null, "co-1/cl-1/sig-4.png"]);
+  });
+
+  it("gives the same paths every time, so a retried upload never makes a second copy", () => {
+    expect(toUpload(base, rows).files.map((f) => f.path)).toEqual(up.files.map((f) => f.path));
+  });
+
+  it("no photo and no presenter signature means no files and null paths", () => {
+    const bare = toUpload({ ...base, photo: null, photo_taken_at: null, presenter_signature: null }, []);
+    expect(bare.files).toEqual([]);
+    expect(bare.record).toMatchObject({ photo_path: null, photo_taken_at: null, presenter_signature_path: null });
   });
 });

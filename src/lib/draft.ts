@@ -23,7 +23,8 @@ export type TalkDraft = {
   needIds: string[] | null;
   jobsiteId: string;
   present: Record<string, boolean>;
-  walkins: string[];
+  /** People added on the spot (not on the roster), with the company they work for if given. */
+  walkins: Walkin[];
   signatures: Record<string, Signature>;
   presenterSignature: Signature | null;
   gps: { latitude: number; longitude: number; accuracyMeters: number } | null;
@@ -34,7 +35,11 @@ export type TalkDraft = {
   heat: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; place: string } | null;
   /** Things the crew raised, logged before saving. */
   issues: DraftIssue[];
+  /** Optional crew photo (shrunk JPEG data URL) and when it was taken. */
+  photo: { image: string; takenAt: string } | null;
 };
+
+export type Walkin = { name: string; company: string };
 
 export type DraftIssue = { clientId: string; description: string; ownerId: string; dueDate: string };
 
@@ -55,9 +60,10 @@ export function readDraft(companyId: string): TalkDraft | null {
 
 /** Drafts saved by an earlier version of the app (free talk picking) become a makeup choice or carry on as is. */
 function upgrade(raw: unknown): TalkDraft {
-  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues"> & { step: string };
+  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues" | "photo" | "walkins"> & { step: string; walkins?: (string | Walkin)[] };
   const step = (d.step === "pick" ? (d.talkId ? "read" : "makeup") : d.step) as TalkDraft["step"];
-  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], step };
+  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], photo: d.photo ?? null,
+    walkins: (d.walkins ?? []).map((w) => (typeof w === "string" ? { name: w, company: "" } : w)), step };
 }
 
 export function writeDraft(d: TalkDraft) {
@@ -97,6 +103,7 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
     siteNotes: "",
     heat: null,
     issues: [],
+    photo: null,
   };
   writeDraft(d);
   return d;
