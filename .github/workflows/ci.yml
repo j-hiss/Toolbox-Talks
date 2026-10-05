@@ -43,6 +43,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      # The phone preview is built from the same screens; building it here keeps it from rotting.
+      - name: Build phone preview
+        run: npm run preview:build
+
   # Company isolation: applies every migration to a throwaway database and proves one company can't read or
   # write another's data, including a self-check that the test fails when row-level security is switched off.
   db-isolation:

@@ -76,9 +76,6 @@ export function CompanyForm({ initial, submitLabel, onSubmit }: { initial: Compa
           <input id="co-email" className={inputClass} value={c.email} onChange={(e) => set("email", e.target.value)} />
         </Field>
       </div>
-      <Field label="Default jobsite" id="co-site">
-        <input id="co-site" className={inputClass} value={c.default_jobsite} onChange={(e) => set("default_jobsite", e.target.value)} />
-      </Field>
       <Field label="Week 1 of the 52-week plan starts" id="co-start" hint="Rounded to that week's Monday">
         <input id="co-start" type="date" className={inputClass} value={c.program_start} onChange={(e) => set("program_start", e.target.value)} />
       </Field>

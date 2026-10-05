@@ -24,6 +24,14 @@ One codebase ships three ways: the **website**, the **iPhone app**, and the **An
 - **Core logic stays separate from screens.** `src/core/` is pure TypeScript (no React, no Supabase, no
   `"use client"`): plan, climate, attendance, talks. Screens call it; they never re-implement it.
 
+## Phone preview (keep it current)
+Joe follows progress on his phone through the preview artifact: https://claude.ai/artifact/7ppnr94Q6EKn9E65kdyaVZ
+- It is built **from the real screens and core logic** (`npm run preview:build` → `preview/dist/preview.html`). Only
+  the router, sign-in, data access and GPS are swapped for demo versions, all listed in `preview/vite.config.ts`.
+  Never hand-build a separate mock: a second copy drifts.
+- After any change to screens, rebuild and republish to that same artifact URL.
+- A new data function in `src/lib/data/` needs its demo twin in `preview/demo/` (typecheck fails until it exists).
+
 ## Before you build (every task)
 1. Read **`docs/SPEC.md`** (what the product does and why) and **`BLUEPRINT-reuse-map.md`** (what already exists).
 2. Read the **area `CLAUDE.md`** where you're working, once areas have them.

@@ -1,0 +1,36 @@
+/* The real app's styles and fonts, plus what an embedded preview needs. */
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource/barlow-condensed/800.css";
+@import "@fontsource/atkinson-hyperlegible/400.css";
+@import "@fontsource/atkinson-hyperlegible/700.css";
+@import "../src/app/globals.css";
+@source "../src";
+@source "./";
+
+/* The viewer can force light or dark; mirror the app's dark tokens for that case. */
+:root[data-theme="dark"] {
+  --bg: #141517;
+  --surface: #1d1f22;
+  --fg: #ecebe6;
+  --muted: #9a9ea4;
+  --line: #33363a;
+  --hivis-ink: #141517;
+  --ok: #4cc27e;
+  --warn: #ff6a5f;
+  --warn-bg: #3a1f1d;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="light"] {
+    --bg: #f3f2ee;
+    --surface: #ffffff;
+    --fg: #1b1d1f;
+    --muted: #5d6166;
+    --line: #d9d7d0;
+    --hivis-ink: #1b1d1f;
+    --ok: #1f7a45;
+    --warn: #b4231b;
+    --warn-bg: #fbe6e4;
+    color-scheme: light;
+  }
+}

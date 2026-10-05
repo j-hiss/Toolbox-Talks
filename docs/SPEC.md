@@ -67,7 +67,7 @@ customer #1, not a special case.
 - **Every voice is license-checked first.** See `docs/voice-licenses.md`.
 
 ## Company admin
-- **Company info:** name, license numbers (one per line), address, phone, email/website, default jobsite, Week 1 date.
+- **Company info:** name, license numbers (one per line), address, phone, email/website, Week 1 date.
   All of it prints on every PDF.
 - **Roles that can present:** Owner, Safety Manager, Superintendent, Supervisor, Foreman, Team Lead, editable.
   "Crew member" is fixed and signs only.
@@ -79,6 +79,15 @@ customer #1, not a special case.
   - Unknown teams/roles created after the admin confirms.
   - Employee ID matches existing people, so re-uploading updates instead of duplicating.
   - Accepts `.xlsx` and `.csv`.
+
+## Jobsites
+- Admin → **Jobsites**: name, address, and a GPS point captured by tapping **Use my location** while standing on site
+  (or **Pin to my location** later). Jobsites are deactivated, never deleted, so past records keep them.
+- Home → **Jobsite**: pick from the list, or **Find nearest** uses GPS to pick the closest jobsite. Within about
+  400 m (1,300 ft) it selects it; farther away it names the closest and how far, and asks instead of assuming.
+- Sites without a GPS point are never guessed at.
+- Later: turn a typed address into a map point automatically (needs a geocoding service; not chosen yet), and log
+  the presenter's GPS on each saved talk as extra proof of where it happened.
 
 ## Running a talk
 1. **Pick the talk** (this week's scheduled one is on top).

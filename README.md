@@ -67,6 +67,21 @@ npm run ios       # builds the app and opens it in Xcode → press ▶ to run it
 npm run android   # builds the app and opens it in Android Studio → press ▶ to run it in the emulator
 ```
 
+### Location (GPS)
+"Use my location" and "Find nearest" use the phone's GPS. Browsers only allow it on `https` or on the computer
+running the app (`localhost`), so on a real phone over Wi-Fi (`http://your-mac.local:3000`) the browser will refuse.
+Test GPS in the iPhone simulator (Features → Location) or in the phone apps. When you first create the native
+projects, add the permission text:
+- **iPhone:** in Xcode, `ios/App/App/Info.plist` → add **Privacy - Location When In Use Usage Description**, e.g.
+  "Finds the jobsite you're at so talks are logged to the right place."
+- **Android:** in `android/app/src/main/AndroidManifest.xml` add
+  `<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />` and `ACCESS_COARSE_LOCATION`.
+
+### Phone preview
+`npm run preview:build` packs the current screens into one page with demo data (`preview/dist/preview.html`). It's
+published in Claude so you can check progress from your phone. It opens already signed in (code `123456` if you sign
+out). The preview can't use GPS.
+
 ### Checks (run each on its own before pushing)
 ```sh
 npm run typecheck

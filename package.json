@@ -14,7 +14,8 @@
     "db:reset": "supabase db reset",
     "app:sync": "next build && cap sync",
     "ios": "npm run app:sync && cap open ios",
-    "android": "npm run app:sync && cap open android"
+    "android": "npm run app:sync && cap open android",
+    "preview:build": "vite build --config preview/vite.config.ts && node preview/to-artifact.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
@@ -31,16 +32,20 @@
     "@capacitor/ios": "^8.5.2",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^20",
     "@types/pg": "^8.11.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^9",
     "eslint-config-next": "^16.3.8",
     "pg": "^8.13.0",
     "supabase": "^2.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vite": "^7.3.6",
+    "vite-plugin-singlefile": "^2.3.3",
     "vitest": "^3.0.0"
   }
 }

@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useSession } from "@/lib/session";
 import { canAdmin, type Membership } from "@/lib/data/types";
 import { RequireCompany } from "@/components/Guard";
+import { JobsitePicker } from "@/components/JobsitePicker";
 import { Button, Eyebrow, GroupHeading, NavLink, Notice, Shell, Title } from "@/components/ui";
 
 export default function HomePage() {
@@ -73,6 +74,8 @@ function Home({ m }: { m: Membership }) {
           </Notice>
         </div>
       )}
+
+      <JobsitePicker companyId={co.id} isAdmin={canAdmin(m.access)} />
 
       {upcoming.length > 0 && (
         <section>

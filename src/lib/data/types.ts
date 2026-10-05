@@ -34,3 +34,13 @@ export type Person = {
 };
 
 export const canAdmin = (access: Access | undefined) => access === "owner" || access === "admin";
+
+export type Jobsite = {
+  id: string;
+  company_id: string;
+  name: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+  active: boolean;
+};

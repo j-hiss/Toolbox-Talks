@@ -1,13 +1,15 @@
 "use client";
 
-// Admin setup: company info, people, teams and the roles that can give talks. Owners and admins only.
+// Admin setup: people, teams, jobsites, the roles that can give talks, and company info. Owners and admins only.
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
 import {
-  addPerson, addRole, addTeam, deactivatePerson, deleteRole, deleteTeam, listPeople, listRoles, listTeams,
-  updateCompany, updatePerson, updateTeam,
+  addJobsite, addPerson, addRole, addTeam, deactivateJobsite, deactivatePerson, deleteRole, deleteTeam, listJobsites,
+  listPeople, listRoles, listTeams, updateCompany, updateJobsite, updatePerson, updateTeam,
 } from "@/lib/data/company";
-import type { Membership, Person, Role, Team } from "@/lib/data/types";
+import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
+import { getLocation, LocationError } from "@/lib/location";
+import { mapsLink } from "@/core/geo";
 import { RequireCompany } from "@/components/Guard";
 import { CompanyForm } from "@/components/CompanyForm";
 import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
@@ -15,6 +17,7 @@ import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, NavLink, 
 const TABS = [
   { id: "people", label: "People" },
   { id: "teams", label: "Teams" },
+  { id: "jobsites", label: "Jobsites" },
   { id: "roles", label: "Roles" },
   { id: "company", label: "Company" },
 ] as const;
@@ -42,14 +45,15 @@ function Admin({ m }: { m: Membership }) {
   const [roles, setRoles] = useState<Role[] | null>(null);
   const [teams, setTeams] = useState<Team[] | null>(null);
   const [people, setPeople] = useState<Person[] | null>(null);
+  const [jobsites, setJobsites] = useState<Jobsite[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
     let live = true;
-    Promise.all([listRoles(companyId), listTeams(companyId), listPeople(companyId)])
-      .then(([r, t, p]) => { if (live) { setRoles(r); setTeams(t); setPeople(p); setError(null); } })
+    Promise.all([listRoles(companyId), listTeams(companyId), listPeople(companyId), listJobsites(companyId)])
+      .then(([r, t, p, j]) => { if (live) { setRoles(r); setTeams(t); setPeople(p); setJobsites(j); setError(null); } })
       .catch((e) => { if (live) setError(e instanceof Error ? e.message : String(e)); });
     return () => { live = false; };
   }, [companyId, version]);
@@ -87,12 +91,14 @@ function Admin({ m }: { m: Membership }) {
             submitLabel="Save company info"
             onSubmit={async (c) => { await updateCompany(companyId, c); await s.refresh(); }}
           />
-        ) : !roles || !teams || !people ? (
+        ) : !roles || !teams || !people || !jobsites ? (
           <Loading />
         ) : tab === "people" ? (
           <PeopleTab companyId={companyId} people={people} roles={roles} teams={teams} act={act} />
         ) : tab === "teams" ? (
           <TeamsTab companyId={companyId} people={people} teams={teams} act={act} />
+        ) : tab === "jobsites" ? (
+          <JobsitesTab companyId={companyId} jobsites={jobsites} act={act} />
         ) : (
           <RolesTab companyId={companyId} people={people} roles={roles} act={act} />
         )}
@@ -255,6 +261,117 @@ function RolesTab({ companyId, people, roles, act }: { companyId: string; people
         <input aria-label="New role" placeholder="Add a role, like Project Manager" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
         <Button size="sm" type="submit">Add</Button>
       </form>
+    </>
+  );
+}
+
+function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites: Jobsite[]; act: Act }) {
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [fix, setFix] = useState<{ latitude: number; longitude: number; accuracyMeters: number } | null>(null);
+  const [locating, setLocating] = useState<string | null>(null); // which form is waiting on GPS: "new" or a jobsite id
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const locate = async (target: string): Promise<{ latitude: number; longitude: number; accuracyMeters: number } | null> => {
+    setMsg(null);
+    setLocating(target);
+    try {
+      return await getLocation();
+    } catch (e) {
+      setMsg(e instanceof LocationError ? e.message : String(e));
+      return null;
+    } finally {
+      setLocating(null);
+    }
+  };
+
+  return (
+    <>
+      <p className="text-sm text-muted">
+        Add the places your crews work. Stand on site and tap &quot;Use my location&quot; so the app can find the nearest jobsite later.
+      </p>
+      <form
+        className="mt-4 flex flex-col gap-3 rounded-lg border border-dashed border-line bg-surface p-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const n = name.trim();
+          if (!n) { setMsg("Give the jobsite a name."); return; }
+          act(async () => {
+            await addJobsite(companyId, { name: n, address: address.trim(), latitude: fix?.latitude ?? null, longitude: fix?.longitude ?? null });
+            setName(""); setAddress(""); setFix(null); setMsg(null);
+          })();
+        }}
+      >
+        <Field label="Add a jobsite" id="js-name">
+          <input id="js-name" placeholder="Name, like Smith reroof or Plant 2" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+        </Field>
+        <input aria-label="Address" placeholder="Address (optional)" autoComplete="street-address" className={inputClass} value={address} onChange={(e) => setAddress(e.target.value)} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="ghost" type="button" disabled={locating !== null} onClick={async () => { const f = await locate("new"); if (f) setFix(f); }}>
+            {locating === "new" ? "Finding you…" : fix ? "Update location" : "Use my location"}
+          </Button>
+          {fix && <span className="text-sm text-muted tabular-nums">GPS set · within {Math.round(fix.accuracyMeters * 3.28084)} ft</span>}
+          <Button size="sm" type="submit" className="ml-auto">Add jobsite</Button>
+        </div>
+      </form>
+      {msg && <div className="mt-3"><Notice tone="error">{msg}</Notice></div>}
+
+      <GroupHeading aside={`${jobsites.length}`}>Active jobsites</GroupHeading>
+      {jobsites.length === 0 ? (
+        <p className="mt-3 text-sm text-muted">No jobsites yet.</p>
+      ) : (
+        <ul className="mt-3 flex flex-col gap-2">
+          {jobsites.map((j) => {
+            const hasGps = j.latitude != null && j.longitude != null;
+            return (
+              <li key={j.id} className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-3">
+                <input
+                  aria-label="Jobsite name"
+                  defaultValue={j.name}
+                  className={`${inputClass} font-bold`}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v && v !== j.name) act(() => updateJobsite(companyId, j.id, { name: v }))();
+                    else e.target.value = j.name;
+                  }}
+                />
+                <input
+                  aria-label={`Address for ${j.name}`}
+                  defaultValue={j.address}
+                  placeholder="Address"
+                  className={inputClass}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v !== j.address) act(() => updateJobsite(companyId, j.id, { address: v }))();
+                  }}
+                />
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  {hasGps ? (
+                    <a className="font-bold underline" href={mapsLink({ latitude: j.latitude!, longitude: j.longitude! })} target="_blank" rel="noreferrer">
+                      GPS set · open in Maps
+                    </a>
+                  ) : (
+                    <span className="text-warn font-bold">No GPS point yet</span>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={locating !== null}
+                    onClick={async () => {
+                      const f = await locate(j.id);
+                      if (f) act(() => updateJobsite(companyId, j.id, { latitude: f.latitude, longitude: f.longitude }))();
+                    }}
+                  >
+                    {locating === j.id ? "Finding you…" : hasGps ? "Re-pin to my location" : "Pin to my location"}
+                  </Button>
+                  <span className="ml-auto"><ConfirmButton label="Remove" confirmLabel="Confirm" onConfirm={act(() => deactivateJobsite(companyId, j.id))} /></span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <p className="mt-4 text-xs text-muted">Removing a jobsite hides it from new talks. Past records keep it.</p>
     </>
   );
 }

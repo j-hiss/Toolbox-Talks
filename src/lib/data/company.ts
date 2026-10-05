@@ -1,7 +1,7 @@
 // Company, roles, teams and people. Every call goes through RLS: a user only ever reaches their own companies.
 // Each function scopes by company_id explicitly as well, so a query never depends on RLS alone to be correct.
 import { supabase } from "@/lib/supabase";
-import type { Company, Membership, Person, Role, Team } from "./types";
+import type { Company, Jobsite, Membership, Person, Role, Team } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
   if (res.error) throw new Error(res.error.message);
@@ -90,4 +90,23 @@ export async function updatePerson(companyId: string, personId: string, patch: P
 export async function deactivatePerson(companyId: string, personId: string): Promise<void> {
   check(await supabase().from("teams").update({ lead_person_id: null }).eq("company_id", companyId).eq("lead_person_id", personId));
   await updatePerson(companyId, personId, { active: false, team_id: null });
+}
+
+// Jobsites -------------------------------------------------------------------------------------------------------
+const JOBSITE_COLUMNS = "id, company_id, name, address, latitude, longitude, active";
+
+export async function listJobsites(companyId: string): Promise<Jobsite[]> {
+  return check(
+    await supabase().from("jobsites").select(JOBSITE_COLUMNS).eq("company_id", companyId).eq("active", true).order("name"),
+  );
+}
+export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "address" | "latitude" | "longitude">): Promise<void> {
+  check(await supabase().from("jobsites").insert({ company_id: companyId, ...j }));
+}
+export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude">>): Promise<void> {
+  check(await supabase().from("jobsites").update(patch).eq("company_id", companyId).eq("id", id));
+}
+/** Jobsites are deactivated, never deleted: saved talk records will point at them. */
+export async function deactivateJobsite(companyId: string, id: string): Promise<void> {
+  check(await supabase().from("jobsites").update({ active: false }).eq("company_id", companyId).eq("id", id));
 }
