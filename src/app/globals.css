@@ -12,6 +12,13 @@
   --ok: #1f7a45;
   --warn: #b4231b;
   --warn-bg: #fbe6e4;
+  /* Charts (validated for color-vision deficiency, light and dark): two series, gridlines, score bands. */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --grid: #e1e0d9;
+  --band-good: color-mix(in srgb, #0ca30c 22%, var(--surface));
+  --band-warn: color-mix(in srgb, #fab219 40%, var(--surface));
+  --band-bad: color-mix(in srgb, #d03b3b 30%, var(--surface));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,6 +32,9 @@
     --ok: #4cc27e;
     --warn: #ff6a5f;
     --warn-bg: #3a1f1d;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --grid: #2c2c2a;
     color-scheme: dark;
   }
 }

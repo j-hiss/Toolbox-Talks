@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCompliance, makeupDeadline, onStaff, onTimeRate, pct, score, weekKeys, type ReportPerson, type ReportRecord } from "./compliance";
+import { buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onStaff, onTimeRate, pct, periodChange, score, teamGrid, trend, weekKeys, type ReportPerson, type ReportRecord } from "./compliance";
 import { isoDay } from "./weeks";
 
 const TODAY = new Date(2026, 9, 7); // Wed Oct 7 2026; this week = Oct 5
@@ -90,5 +90,40 @@ describe("weekly compliance", () => {
       weeks: ["2026-09-28"], makeupWeeks: 4, today: TODAY,
     });
     expect(Object.fromEntries(c.weeks[0].people.map((p) => [p.personId, p.state]))).toEqual({ lead: "on_time", lead2: "open" });
+  });
+});
+
+describe("report views", () => {
+  const people = [person("a", { teamId: "t1" }), person("b", { teamId: "t2" })];
+  const records = [
+    rec("2026-08-31", ["a", "b"]), rec("2026-09-07", ["a"]),         // b missed 9/7 (past limit)
+    rec("2026-09-14", ["a", "b"]), rec("2026-09-21", ["a"]),
+    rec("2026-09-28", ["a"], { makeupForWeek: "2026-09-21", makeupReason: "Out sick: flu", heldAt: "2026-09-30T12:00:00Z" }), // makes up nothing new for a
+    rec("2026-09-28", ["b"], { makeupForWeek: "2026-09-21", makeupReason: "Out sick: flu", heldAt: "2026-09-30T12:00:00Z" }),
+    rec("2026-09-28", ["a"]),                                          // b open for 9/28
+  ];
+  const c = buildCompliance({ people, records, weeks: weekKeys("2026-08-31", TODAY), makeupWeeks: 2, today: TODAY });
+
+  it("trend runs oldest to newest over finished weeks only", () => {
+    expect(trend(c, TODAY).map((w) => [w.key, pct(w.score), pct(w.onTime)])).toEqual([
+      ["2026-08-31", "100%", "100%"], ["2026-09-07", "50%", "50%"], ["2026-09-14", "100%", "100%"],
+      ["2026-09-21", "100%", "50%"], ["2026-09-28", "50%", "50%"],
+    ]);
+  });
+  it("period change compares the last n finished weeks with the n before", () => {
+    expect(periodChange(c, 2, TODAY)).toEqual({ now: 0.75, before: 0.75, points: 0 });
+    expect(periodChange(c, 3, TODAY)).toBeNull();
+  });
+  it("team grid splits each week by team", () => {
+    const g = Object.fromEntries(teamGrid(c).map((t) => [t.teamId, t.weeks.find((w) => w.key === "2026-09-21")!.tally]));
+    expect(g.t1).toMatchObject({ expected: 1, on_time: 1 });
+    expect(g.t2).toMatchObject({ expected: 1, made_up: 1 });
+  });
+  it("needs-makeup list is soonest deadline first and stops at the limit", () => {
+    expect(needsMakeup(c, 2, TODAY).map((p) => [p.personId, p.week, p.daysLeft])).toEqual([["b", "2026-09-28", 12]]);
+  });
+  it("makeup reasons group by quick pick, with average lateness", () => {
+    const s = makeupSummary(c, ["Off that week", "Out sick", "Other"]);
+    expect(s).toEqual({ total: 1, reasons: [{ reason: "Out sick", n: 1 }], avgDaysLate: 3 }); // 2.5 days after the week ended
   });
 });

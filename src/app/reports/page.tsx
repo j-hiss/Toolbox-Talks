@@ -4,8 +4,12 @@
 // closes a missed week but stays marked as made up. Math: src/core/compliance.ts. Data: src/lib/data/reports.ts.
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { buildCompliance, makeupDeadline, onTimeRate, pct, score, weekKeys, WEEK_STATE_LABEL, type Compliance, type ReportPerson, type ReportRecord, type Tally, type WeekState } from "@/core/compliance";
-import { planWeekAt } from "@/core/makeup";
+import {
+  buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onTimeRate, pct, periodChange, score, teamGrid, trend, weekKeys,
+  WEEK_STATE_LABEL, type Compliance, type ReportPerson, type ReportRecord, type Tally, type WeekState,
+} from "@/core/compliance";
+import { MAKEUP_REASONS, planWeekAt } from "@/core/makeup";
+import { HBars, TeamGrid, TrendChart } from "@/components/charts";
 import { cycleStart } from "@/core/plan";
 import { STATUS_LABEL } from "@/core/attendance";
 import { addDays, isoDay, mondayOf, parseDay, weekLabel } from "@/core/weeks";
@@ -94,6 +98,15 @@ function Reports({ m }: { m: Membership }) {
     .filter((p) => !onlyGaps || p.tally.open + p.tally.missed > 0)
     .sort((a, b) => (score(a.tally) ?? 2) - (score(b.tally) ?? 2) || a.person.name.localeCompare(b.person.name));
   const gapsCount = report.people.filter((p) => p.tally.open + p.tally.missed > 0).length;
+  const points = trend(report, today).map((w) => ({ key: w.key, label: short(parseDay(w.key)), score: w.score, onTime: w.onTime }));
+  const span = Math.min(4, Math.floor(points.length / 2));
+  const change = span >= 2 ? periodChange(report, span, today) : null;
+  const owed = needsMakeup(report, co.makeup_weeks ?? 4, today);
+  const made = makeupSummary(report, MAKEUP_REASONS);
+  const grid = teamGrid(report)
+    .map((g) => ({ name: g.teamId ? teamName(g.teamId) || "Former team" : "No team", cells: g.weeks }))
+    .sort((a, b) => (a.name === "No team" ? 1 : b.name === "No team" ? -1 : a.name.localeCompare(b.name)));
+  const gridWeeks = [...report.weeks].reverse().map((w) => ({ key: w.key, label: short(parseDay(w.key)) }));
   const flags = data.records.flatMap((r) => r.attendees.filter((a) => a.status !== "signed").map((a) => ({ r, a }))).reverse();
 
   const exportCsv = async () => {
@@ -148,6 +161,15 @@ function Reports({ m }: { m: Membership }) {
             <span className="text-muted">{t.on_time + t.made_up} of {t.expected} people-weeks signed</span>
           </p>
         </div>
+        {change && (
+          <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5 text-sm tabular-nums">
+            <span aria-hidden className={change.points > 0 ? "text-ok" : change.points < 0 ? "text-warn" : "text-muted"}>
+              {change.points > 0 ? "▲" : change.points < 0 ? "▼" : "■"}
+            </span>
+            <b>{change.points > 0 ? `Up ${change.points}` : change.points < 0 ? `Down ${-change.points}` : "No change,"}{change.points ? " points" : ""}</b>
+            <span className="text-muted">last {span} weeks ({pct(change.now)}) vs the {span} before ({pct(change.before)})</span>
+          </p>
+        )}
         <StatusBar tally={t} big />
         <Legend tally={t} />
         <p className="mt-3 text-xs text-muted">
@@ -169,6 +191,64 @@ function Reports({ m }: { m: Membership }) {
           {t.open > 0 && <Link href="/" className="text-sm font-bold underline">Make up from Home</Link>}
         </div>
       </div>
+
+      {/* Trend ------------------------------------------------------------------------------------------------------- */}
+      {points.length >= 2 && (
+        <>
+          <GroupHeading>Trend</GroupHeading>
+          <p className="mt-1 text-sm text-muted">Each finished week. The gap between the lines is makeups: people who signed late.</p>
+          <div className="mt-3 rounded-lg border border-line bg-surface p-3"><TrendChart points={points} /></div>
+        </>
+      )}
+
+      {/* Who owes a makeup ------------------------------------------------------------------------------------------- */}
+      <GroupHeading aside={owed.length ? `${owed.length}` : undefined}>Needs a makeup</GroupHeading>
+      {owed.length === 0 ? (
+        <p className="mt-3 text-sm text-muted">No one owes a past week right now.</p>
+      ) : (
+        <>
+          <ul className="mt-3 flex flex-col gap-1.5">
+            {owed.slice(0, 12).map((o) => {
+              const person = names.get(o.personId);
+              const urgent = o.daysLeft <= 7;
+              return (
+                <li key={`${o.personId}-${o.week}`} className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${urgent ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}>
+                  <span className="min-w-0"><b>{person?.name}</b> <small className="text-muted">{teamName(person?.teamId ?? null)}</small>
+                    <small className="block text-muted">{plan(o.week) ? `Week ${plan(o.week)!.n} · ` : ""}{talkTitle(o.week)}</small></span>
+                  <span className="text-right tabular-nums">
+                    <b className="block">{o.daysLeft === 0 ? "Last day" : `${o.daysLeft} day${o.daysLeft === 1 ? "" : "s"} left`}</b>
+                    <small className="text-muted">by {short(o.deadline)}</small>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {owed.length > 12 && <p className="mt-1 text-xs text-muted">And {owed.length - 12} more in the CSV and the week list below.</p>}
+          <p className="mt-2 text-sm"><Link href="/" className="font-bold underline">Give a makeup from Home</Link> · &quot;Everyone who still needs Week N&quot; loads them.</p>
+        </>
+      )}
+
+      {/* Teams ------------------------------------------------------------------------------------------------------- */}
+      {team === "all" && grid.length > 0 && (
+        <>
+          <GroupHeading>By team</GroupHeading>
+          <p className="mt-1 text-sm text-muted">Score per team per week (team as of today). Tap a square for the count.</p>
+          <div className="mt-3"><TeamGrid rows={grid} weeks={gridWeeks} currentKey={isoDay(mondayOf(today))} /></div>
+        </>
+      )}
+
+      {/* Makeups ----------------------------------------------------------------------------------------------------- */}
+      {made.total > 0 && (
+        <>
+          <GroupHeading aside={`${made.total}`}>Why weeks were made up</GroupHeading>
+          <p className="mt-1 text-sm text-muted">
+            People-weeks closed by a makeup, by reason.{made.avgDaysLate !== null ? ` On average ${made.avgDaysLate} day${made.avgDaysLate === 1 ? "" : "s"} after the week ended.` : ""}
+          </p>
+          <div className="mt-3 rounded-lg border border-line bg-surface p-3">
+            <HBars items={made.reasons.map((r) => ({ label: r.reason, n: r.n }))} unit={(n) => String(n)} />
+          </div>
+        </>
+      )}
 
       {/* Weeks ------------------------------------------------------------------------------------------------------- */}
       <GroupHeading>By week</GroupHeading>

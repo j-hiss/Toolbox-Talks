@@ -163,6 +163,14 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   (`people.deactivated_at`, stamped by the database). Deactivated people still count for the weeks they worked.
 - Zero talks in a week means everyone on staff is open or missed, never "fine".
 - Filters: 4 / 12 / 26 weeks / this plan year; all teams, one team, or no team (team as of today).
+- **Change:** last 4 finished weeks vs the 4 before, in points (fewer when the range is short).
+- **Trend chart:** compliance and on-time rate per finished week; the shaded gap between the lines is makeups.
+  Hover, tap or arrow keys show both values for a week.
+- **Needs a makeup:** everyone who still owes a past week, soonest deadline first, with days left (7 or fewer
+  highlighted).
+- **By team grid:** team × week squares with each score, shaded 95%+ / 80–94% / under 80% (display bands, not a
+  standard). This week shows signed-so-far with a dashed outline. Tap a square for the counts.
+- **Why weeks were made up:** people-weeks closed by makeup, grouped by reason, with average days late.
 - **By week:** score bar per week; tap for who's open (make up by date), missed, made up (date + reason), on time,
   and the talks given that week (makeups tagged).
 - **By person:** on time, made up, open, missed and score; "only people with open or missed weeks" switch.

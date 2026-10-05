@@ -18,6 +18,9 @@
   --ok: #4cc27e;
   --warn: #ff6a5f;
   --warn-bg: #3a1f1d;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --grid: #2c2c2a;
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {

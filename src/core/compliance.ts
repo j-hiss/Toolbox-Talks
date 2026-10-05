@@ -137,3 +137,65 @@ export function buildCompliance(input: {
 export function makeupDeadline(weekKey: string, makeupWeeks: number): Date {
   return addDays(parseDay(weekKey), 7 * (makeupWeeks + 1) - 1);
 }
+
+// Views for the charts -------------------------------------------------------------------------------------------
+
+export type Week = Compliance["weeks"][number];
+const finished = (c: Compliance, today: Date) => c.weeks.filter((w) => w.key < isoDay(mondayOf(today)));
+
+/** Finished weeks, oldest first, with their compliance and on-time rates (null when no one was expected). */
+export function trend(c: Compliance, today: Date = new Date()) {
+  return finished(c, today).reverse().map((w) => ({ key: w.key, score: score(w.tally), onTime: onTimeRate(w.tally), tally: w.tally }));
+}
+
+/** Score of the last `n` finished weeks against the `n` before them. Null when there aren't 2×n finished weeks. */
+export function periodChange(c: Compliance, n: number, today: Date = new Date()) {
+  const f = finished(c, today); // newest first
+  if (f.length < 2 * n) return null;
+  const sum = (ws: Week[]) => ws.reduce((t, w) => { (Object.keys(t) as (keyof Tally)[]).forEach((k) => (t[k] += w.tally[k])); return t; }, zero());
+  const now = score(sum(f.slice(0, n)));
+  const before = score(sum(f.slice(n, 2 * n)));
+  return now === null || before === null ? null : { now, before, points: Math.round(now * 100) - Math.round(before * 100) };
+}
+
+/** Team × week tallies (team as of today; null = no team). Weeks newest first, as in `c.weeks`. */
+export function teamGrid(c: Compliance) {
+  const teamOf = new Map(c.people.map((p) => [p.person.id, p.person.teamId]));
+  const teams = [...new Set(c.people.map((p) => p.person.teamId))];
+  return teams.map((teamId) => ({
+    teamId,
+    weeks: c.weeks.map((w) => {
+      const t = zero();
+      for (const p of w.people) if (teamOf.get(p.personId) === teamId) { t.expected++; t[p.state]++; }
+      return { key: w.key, tally: t };
+    }),
+  }));
+}
+
+/** Everyone who still owes a week, soonest deadline first. */
+export function needsMakeup(c: Compliance, makeupWeeks: number, today: Date = new Date()) {
+  const day = 86_400_000;
+  return c.weeks
+    .flatMap((w) => w.people.filter((p) => p.state === "open"))
+    .map((p) => {
+      const deadline = makeupDeadline(p.week, makeupWeeks);
+      return { ...p, deadline, daysLeft: Math.max(0, Math.ceil((addDays(deadline, 1).getTime() - today.getTime()) / day)) }; // through the deadline day
+    })
+    .sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
+}
+
+/** Why weeks were made up (the reason's quick pick), and how late on average, in days after the week ended. */
+export function makeupSummary(c: Compliance, reasons: readonly string[]) {
+  const made = c.weeks.flatMap((w) => w.people.filter((p) => p.state === "made_up"));
+  const counts = new Map<string, number>();
+  for (const p of made) {
+    const pick = reasons.find((r) => p.reason === r || p.reason?.startsWith(`${r}: `)) ?? "Other";
+    counts.set(pick, (counts.get(pick) ?? 0) + 1);
+  }
+  const late = made.filter((p) => p.signedOn).map((p) => (new Date(p.signedOn!).getTime() - addDays(parseDay(p.week), 7).getTime()) / 86_400_000);
+  return {
+    total: made.length,
+    reasons: [...counts.entries()].map(([reason, n]) => ({ reason, n })).sort((a, b) => b.n - a.n),
+    avgDaysLate: late.length ? Math.max(0, Math.round(late.reduce((a, b) => a + b, 0) / late.length)) : null,
+  };
+}
