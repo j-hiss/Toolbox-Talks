@@ -98,6 +98,13 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("2 pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
   await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1200);
   log("2 reports score:", await q.locator("p.text-6xl").textContent());
+  log("2 needs-makeup cards:", (await q.locator("li:has(button:has-text('Give this makeup now'))").allInnerTexts()).map((t) => t.replace(/\s+/g, " ").slice(0, 120)).join(" || "));
+  await q.screenshot({ path: `${OUT}/e-reports-top.png`, fullPage: true });
+  await q.locator("button:has-text('Give this makeup now')").first().click(); await q.waitForTimeout(700);
+  log("2 one-tap makeup:", (await q.locator("[role=radio][aria-checked=true]").innerText()).replace(/\s+/g, " "));
+  await q.click("button:has-text('Out sick')"); await q.click("text=Continue to the talk"); await q.waitForTimeout(400);
+  await q.click("text=Done reading"); await q.waitForTimeout(400);
+  log("2 roster ready:", await q.locator("#team").inputValue(), "|", (await q.locator("main ul li b").allTextContents()).join(", "));
   // Scenario 3: spreadsheet import -> talk with site notes, heat reminder and a raised issue -> issue fixed.
   const r = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   r.on("pageerror", (e) => errs.push(e.message));

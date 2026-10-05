@@ -83,7 +83,8 @@ point the row at the real file and keep the prototype line as its origin.
 | `heatReminder` | `src/content/heat.ts` | The heat reminder text (EN reviewed, ES draft), versioned |
 | `MakeupTag` | `src/components/ui.tsx` | "Makeup for the week of … · reason" wherever a record is listed |
 | offline outbox · `useOutbox` | `src/lib/outbox.ts` · `src/lib/useOutbox.ts` | **The** offline-first save path: phone first, upload when online, idempotent by `client_id` |
-| talk draft | `src/lib/draft.ts` | The talk in progress, saved on the phone after every change |
+| talk draft · `newMakeupDraft` | `src/lib/draft.ts` | The talk in progress, saved on the phone after every change. `newMakeupDraft` starts a makeup already pointed at a week and the people who owe it |
+| `useOpenMakeups` | `src/lib/useOpenMakeups.ts` | Who still owes each makeup-able week (report layer + `buildCompliance`), for the makeup picker |
 | `speakLines` · `bestVoice` | `src/lib/speech.ts` | Device read-aloud with line highlighting (offline fallback for recorded audio) |
 | `SignaturePad` | `src/components/SignaturePad.tsx` | Finger signature, exported small (≤480 px) to fit the offline outbox. `tall` for the one-person-at-a-time sign screen |
 | crew UI text | `src/content/ui.ts` | Crew-facing lines per language (draft until reviewed) |

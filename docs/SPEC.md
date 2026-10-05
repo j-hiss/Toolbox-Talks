@@ -138,7 +138,8 @@ customer #1, not a special case.
 
 ## Running a talk (built)
 - **Home → Start this talk** opens this week's talk (locked for the week). **Make up a missed week** picks a past week
-  inside the admin's limit and a reason, then runs that week's talk. A talk in progress is saved on the phone after every tap; Home shows **Resume**.
+  inside the admin's limit and a reason, then runs that week's talk. The picker shows who still owes each week and
+  pre-selects the week when only one is owed; the roster is set to those people. A talk in progress is saved on the phone after every tap; Home shows **Resume**.
 - **Read:** language buttons (English, Spanish; others "soon"), **Read it out loud** with each line highlighted,
   a note when the translation isn't reviewed yet.
 - **Who's here:** presenter (anyone with a role other than crew member), team (or all teams, or everyone who still
@@ -200,8 +201,11 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   (`people.deactivated_at`, stamped by the database). Deactivated people still count for the weeks they worked.
 - Zero talks in a week means everyone on staff is open or missed, never "fine".
 - Filters: 4 / 12 / 26 weeks / this plan year; all teams, one team, or no team (team as of today).
+- **Needs a makeup:** one card per week that people still owe, soonest deadline first, with their names and days left,
+  and **Give this makeup now**: it opens the makeup already pointed at that week and those people, so the presenter
+  only picks a reason, reads, and collects signatures. The week drill-down has the same button.
 - **Change:** last 4 finished weeks vs the 4 before, in points (fewer when the range is short).
-- **Trend chart:** compliance and on-time rate per finished week; the shaded gap between the lines is makeups.
+- **Trend chart** (shown from the first finished week): compliance and on-time rate per finished week; the shaded gap between the lines is makeups.
   Hover, tap or arrow keys show both values for a week.
 - **Needs a makeup:** everyone who still owes a past week, soonest deadline first, with days left (7 or fewer
   highlighted).

@@ -20,6 +20,9 @@ import { isOverdue } from "@/components/Issues";
 import { listTeams } from "@/lib/data/company";
 import type { Issue, Membership, Team } from "@/lib/data/types";
 import { usePlan } from "@/lib/usePlan";
+import { newMakeupDraft } from "@/lib/draft";
+import { readChosenJobsite } from "@/components/JobsitePicker";
+import { useRouter } from "next/navigation";
 import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
 import { Button, Eyebrow, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
@@ -57,6 +60,11 @@ function Reports({ m }: { m: Membership }) {
   const [data, setData] = useState<{ people: ReportPerson[]; records: ReportRecord[]; teams: Team[]; from: string; issues: Issue[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [csvMsg, setCsvMsg] = useState<string | null>(null);
+  const router = useRouter();
+  const startMakeup = (weekStart: string, weekNumber: number, talkId: string, personIds: string[]) => {
+    newMakeupDraft(co.id, { weekStart, weekNumber, talkId, personIds }, readChosenJobsite(co.id) ?? "");
+    router.push("/talk/");
+  };
 
   const today = useMemo(() => new Date(), []);
   const programStart = isoDay(mondayOf(parseDay(co.program_start)));
@@ -103,6 +111,11 @@ function Reports({ m }: { m: Membership }) {
   const span = Math.min(4, Math.floor(points.length / 2));
   const change = span >= 2 ? periodChange(report, span, today) : null;
   const owed = needsMakeup(report, co.makeup_weeks ?? 4, today);
+  // Group by week (soonest deadline first): one makeup talk covers everyone who owes that week.
+  const owedWeeks = [...new Set(owed.map((o) => o.week))].map((week) => {
+    const rows = owed.filter((o) => o.week === week);
+    return { week, people: rows.map((o) => o.personId), deadline: rows[0].deadline, daysLeft: rows[0].daysLeft };
+  });
   const made = makeupSummary(report, MAKEUP_REASONS);
   const grid = teamGrid(report)
     .map((g) => ({ name: g.teamId ? teamName(g.teamId) || "Former team" : "No team", cells: g.weeks }))
@@ -193,39 +206,51 @@ function Reports({ m }: { m: Membership }) {
         </div>
       </div>
 
-      {/* Trend ------------------------------------------------------------------------------------------------------- */}
-      {points.length >= 2 && (
-        <>
-          <GroupHeading>Trend</GroupHeading>
-          <p className="mt-1 text-sm text-muted">Each finished week. The gap between the lines is makeups: people who signed late.</p>
-          <div className="mt-3 rounded-lg border border-line bg-surface p-3"><TrendChart points={points} /></div>
-        </>
-      )}
-
-      {/* Who owes a makeup ------------------------------------------------------------------------------------------- */}
+      {/* Who owes a makeup: one card per week, one tap to start it ------------------------------------------------- */}
       <GroupHeading aside={owed.length ? `${owed.length}` : undefined}>Needs a makeup</GroupHeading>
-      {owed.length === 0 ? (
+      {owedWeeks.length === 0 ? (
         <p className="mt-3 text-sm text-muted">No one owes a past week right now.</p>
       ) : (
-        <>
-          <ul className="mt-3 flex flex-col gap-1.5">
-            {owed.slice(0, 12).map((o) => {
-              const person = names.get(o.personId);
-              const urgent = o.daysLeft <= 7;
-              return (
-                <li key={`${o.personId}-${o.week}`} className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${urgent ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}>
-                  <span className="min-w-0"><b>{person?.name}</b> <small className="text-muted">{teamName(person?.teamId ?? null)}</small>
-                    <small className="block text-muted">{plan(o.week) ? `Week ${plan(o.week)!.n} · ` : ""}{talkTitle(o.week)}</small></span>
-                  <span className="text-right tabular-nums">
-                    <b className="block">{o.daysLeft === 0 ? "Last day" : `${o.daysLeft} day${o.daysLeft === 1 ? "" : "s"} left`}</b>
-                    <small className="text-muted">by {short(o.deadline)}</small>
+        <ul className="mt-3 flex flex-col gap-2">
+          {owedWeeks.map((g) => {
+            const pw = plan(g.week);
+            const urgent = g.daysLeft <= 7;
+            return (
+              <li key={g.week} className={`rounded-lg border p-3 ${urgent ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <span className="min-w-0">
+                    <b className="block">{pw ? `Week ${pw.n} · ` : ""}{talkTitle(g.week)}</b>
+                    <small className="text-muted">{weekLabel(parseDay(g.week))}</small>
                   </span>
-                </li>
-              );
-            })}
-          </ul>
-          {owed.length > 12 && <p className="mt-1 text-xs text-muted">And {owed.length - 12} more in the CSV and the week list below.</p>}
-          <p className="mt-2 text-sm"><Link href="/" className="font-bold underline">Give a makeup from Home</Link> · &quot;Everyone who still needs Week N&quot; loads them.</p>
+                  <span className="shrink-0 text-right text-sm tabular-nums">
+                    <b className="block">{g.daysLeft === 0 ? "Last day" : `${g.daysLeft} day${g.daysLeft === 1 ? "" : "s"} left`}</b>
+                    <small className="text-muted">by {short(g.deadline)}</small>
+                  </span>
+                </div>
+                <p className="mt-2 text-sm"><b>{g.people.length} still need it:</b> {g.people.map((p) => names.get(p)?.name).join(", ")}</p>
+                {pw && (
+                  <Button className="mt-2 !py-3" onClick={() => startMakeup(g.week, pw.n, pw.talkId, g.people)}>
+                    Give this makeup now
+                  </Button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {/* Trend ------------------------------------------------------------------------------------------------------- */}
+      <GroupHeading>Trend</GroupHeading>
+      {points.length === 0 ? (
+        <p className="mt-3 text-sm text-muted">The trend starts once your first week is finished.</p>
+      ) : (
+        <>
+          <p className="mt-1 text-sm text-muted">
+            {points.length === 1
+              ? "One finished week so far. The lines fill in as more weeks finish."
+              : "Each finished week. The shaded gap between the lines is makeups: people who signed late."}
+          </p>
+          <div className="mt-3 rounded-lg border border-line bg-surface p-3"><TrendChart points={points} /></div>
         </>
       )}
 
@@ -300,6 +325,11 @@ function Reports({ m }: { m: Membership }) {
                 <div className="border-t border-line p-3 text-sm">
                   {w.tally.expected === 0 && <p className="text-muted">No one was on staff this week.</p>}
                   <PeopleList title="Open: can still be made up" tone="open" rows={by("open")} names={names} note={`Make up by ${short(makeupDeadline(w.key, co.makeup_weeks ?? 4))}`} />
+                  {by("open").length > 0 && pw && (
+                    <Button size="sm" className="mt-2" onClick={() => startMakeup(w.key, pw.n, pw.talkId, by("open").map((p) => p.personId))}>
+                      Give the makeup for these {by("open").length}
+                    </Button>
+                  )}
                   <PeopleList title="Missed" tone="missed" rows={by("missed")} names={names} note="Past the makeup limit" />
                   <PeopleList title="Not signed yet" tone="due" rows={by("due")} names={names} />
                   <PeopleList title="Made up" tone="made_up" rows={by("made_up")} names={names} detail={(p) => `${short(p.signedOn!)}${p.reason ? ` · ${p.reason}` : ""}`} />

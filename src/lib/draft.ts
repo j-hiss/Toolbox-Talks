@@ -102,6 +102,17 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
   return d;
 }
 
+/**
+ * Start a makeup already pointed at a week and the people who owe it (from Reports or Home), so the presenter only
+ * picks a reason, reads, and collects signatures.
+ */
+export function newMakeupDraft(companyId: string, m: { weekStart: string; weekNumber: number; talkId: string; personIds: string[] }, jobsiteId = ""): TalkDraft {
+  const d = newDraft(companyId, m.talkId, jobsiteId);
+  const out: TalkDraft = { ...d, step: "makeup", makeup: { weekStart: m.weekStart, weekNumber: m.weekNumber }, teamId: m.personIds.length ? "needs" : d.teamId, needIds: m.personIds.length ? m.personIds : null };
+  writeDraft(out);
+  return out;
+}
+
 const subscribe = (cb: () => void) => { listeners.add(cb); return () => { listeners.delete(cb); }; };
 
 export function useDraft(companyId: string): TalkDraft | null {

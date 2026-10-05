@@ -17,6 +17,7 @@ import { countStatuses } from "@/core/attendance";
 import { listJobsites, listPeople, listRoles, listTeams } from "@/lib/data/company";
 import { saveTalkRecord, signedForWeek } from "@/lib/data/records";
 import { usePlan } from "@/lib/usePlan";
+import { useOpenMakeups, type OpenMakeups } from "@/lib/useOpenMakeups";
 import { checkHeat } from "@/lib/weather";
 import { alertWorthy, HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/content/heat";
@@ -57,6 +58,7 @@ function Talk({ m }: { m: Membership }) {
   }, [co.id]);
 
   const { week, input } = usePlan(co);
+  const openMakeups = useOpenMakeups(co);
 
   // Who has already signed for the week this talk counts toward, for the "everyone who still needs it" roster.
   const creditKey = draft?.makeup?.weekStart ?? week?.key ?? null;
@@ -98,7 +100,7 @@ function Talk({ m }: { m: Membership }) {
 
   return (
     <Shell nav={nav} tabs={false}>
-      {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} />}
+      {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} open={openMakeups} />}
       {draft.step === "read" && draft.talkId && <Read draft={draft} update={update} org={org} />}
       {draft.step === "crew" && <Crew org={org} draft={draft} update={update} signedIds={signedIds} />}
       {draft.step === "sign" && (
@@ -128,17 +130,37 @@ function Steps({ n, label }: { n: 1 | 2 | 3; label: string }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-function MakeupPick({ weeks, draft, update }: { weeks: ReturnType<typeof makeupWeeks>; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void }) {
+function MakeupPick({ weeks, draft, update, open }: {
+  weeks: ReturnType<typeof makeupWeeks>; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; open: OpenMakeups | null;
+}) {
   const [msg, setMsg] = useState<string | null>(null);
   const reason = makeupReasonText(draft.makeupPick, draft.makeupNote);
+  const owed = (key: string) => open?.get(key) ?? [];
+  const choose = (w: (typeof weeks)[number]) => {
+    const people = owed(w.key);
+    update({
+      makeup: { weekStart: w.key, weekNumber: w.n }, talkId: w.talkId,
+      // the roster is the people who still owe that week; the presenter can still change it on the next screen
+      teamId: people.length ? "needs" : draft.teamId === "needs" ? "" : draft.teamId,
+      needIds: people.length ? people.map((p) => p.id) : null,
+      present: {},
+    });
+  };
+  // One week with people owing it and nothing chosen yet: pick it for them.
+  const withOwed = weeks.filter((w) => owed(w.key).length > 0);
+  useEffect(() => {
+    if (!draft.makeup && withOwed.length === 1) choose(withOwed[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+  const chosenPeople = draft.makeup && draft.needIds
+    ? draft.needIds.map((id) => owed(draft.makeup!.weekStart).find((p) => p.id === id)?.name).filter(Boolean)
+    : [];
+
   return (
     <>
       <Eyebrow>Makeup talk</Eyebrow>
       <Title>Make up a missed week</Title>
-      <p className="mt-2 text-sm text-muted">
-        For people who missed a week&apos;s talk. It&apos;s saved with today&apos;s real date and location, marked as a makeup for the week
-        you pick, with the reason.
-      </p>
+      <p className="mt-2 text-sm text-muted">Saved with today&apos;s real date, marked as a makeup for the week you pick.</p>
       <GroupHeading>Which week?</GroupHeading>
       {weeks.length === 0 ? (
         <p className="mt-3 text-sm text-muted">No earlier weeks to make up yet.</p>
@@ -147,50 +169,67 @@ function MakeupPick({ weeks, draft, update }: { weeks: ReturnType<typeof makeupW
           {weeks.map((w) => {
             const t = TALKS.find((x) => x.id === w.talkId)!;
             const on = draft.makeup?.weekStart === w.key;
+            const people = owed(w.key);
             return (
               <button
                 key={w.key}
                 role="radio"
                 aria-checked={on}
-                onClick={() => update({ makeup: { weekStart: w.key, weekNumber: w.n }, talkId: w.talkId, teamId: draft.teamId === "needs" ? "" : draft.teamId, needIds: null })}
-                className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left ${on ? "border-hivis bg-surface shadow-[0_0_0_2px_var(--hivis)]" : "border-line bg-surface"}`}
+                onClick={() => choose(w)}
+                className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left ${on ? "border-hivis bg-surface shadow-[0_0_0_2px_var(--hivis)]" : "border-line bg-surface"} ${open && !people.length && !on ? "opacity-60" : ""}`}
               >
-                <span className="whitespace-nowrap rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold text-hivis-ink">{t.code}</span>
-                <span className="min-w-0 flex-1"><b className="block">{t.content.en.title}</b><small className="text-muted">Week {w.n} · {weekLabel(w.monday)}</small></span>
+                <span className="mt-0.5 whitespace-nowrap rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold text-hivis-ink">{t.code}</span>
+                <span className="min-w-0 flex-1">
+                  <b className="block">{t.content.en.title}</b>
+                  <small className="text-muted">Week {w.n} · {weekLabel(w.monday)}</small>
+                  {open && (
+                    <small className={`block ${people.length ? "font-bold" : "text-muted"}`}>
+                      {people.length ? `${people.length} still need it: ${people.map((p) => p.name).join(", ")}` : "Everyone has this week"}
+                    </small>
+                  )}
+                </span>
               </button>
             );
           })}
         </div>
       )}
-      <GroupHeading>Why is it being made up?</GroupHeading>
+      {draft.makeup && chosenPeople.length > 0 && chosenPeople.length < owed(draft.makeup.weekStart).length && (
+        <p className="mt-2 text-sm">Making up for: <b>{chosenPeople.join(", ")}</b></p>
+      )}
+      <GroupHeading>Why?</GroupHeading>
       <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Reason">
         {MAKEUP_REASONS.map((r) => (
           <button
             key={r}
             aria-pressed={draft.makeupPick === r}
-            onClick={() => update({ makeupPick: r })}
-            className={`rounded-full border px-3 py-1.5 text-sm font-bold ${draft.makeupPick === r ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}
+            onClick={() => { setMsg(null); update({ makeupPick: r }); }}
+            className={`min-h-11 rounded-full border px-3.5 text-sm font-bold ${draft.makeupPick === r ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}
           >
             {r}
           </button>
         ))}
       </div>
-      <input
-        aria-label="Note"
-        placeholder={draft.makeupPick === "Other" ? "Say why (required)" : "Note (optional)"}
-        className={`${inputClass} mt-3`}
-        value={draft.makeupNote}
-        onChange={(e) => update({ makeupNote: e.target.value })}
-      />
+      {(draft.makeupPick === "Other" || draft.makeupNote) && (
+        <input
+          aria-label="Note"
+          placeholder={draft.makeupPick === "Other" ? "Say why (required)" : "Note (optional)"}
+          className={`${inputClass} mt-3`}
+          value={draft.makeupNote}
+          onChange={(e) => update({ makeupNote: e.target.value })}
+        />
+      )}
+      {draft.makeupPick && draft.makeupPick !== "Other" && !draft.makeupNote && (
+        <button className="mt-2 min-h-11 text-sm font-bold underline" onClick={() => update({ makeupNote: " " })}>+ Add a note</button>
+      )}
       {msg && <div className="mt-4"><Notice tone="error">{msg}</Notice></div>}
-      <div className="mt-5">
+      <div className="sticky bottom-0 -mx-4 mt-5 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
         <Button
           disabled={weeks.length === 0}
           onClick={() => {
             if (!draft.makeup || !draft.talkId) return setMsg("Pick the week being made up.");
             if (!reason) return setMsg(draft.makeupPick === "Other" ? "Add a note saying why." : "Pick a reason.");
             setMsg(null);
-            update({ step: "read" });
+            update({ step: "read", makeupNote: draft.makeupNote.trim() });
           }}
         >
           Continue to the talk
