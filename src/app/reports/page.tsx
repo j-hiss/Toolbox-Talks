@@ -20,7 +20,7 @@ import type { Membership, Team } from "@/lib/data/types";
 import { usePlan } from "@/lib/usePlan";
 import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
-import { Button, Eyebrow, GroupHeading, Loading, MakeupTag, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, Eyebrow, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
 
 export default function ReportsPage() {
   return <RequireCompany admin>{(m) => <Reports m={m} />}</RequireCompany>;
@@ -77,12 +77,11 @@ function Reports({ m }: { m: Membership }) {
     return buildCompliance({ people, records: data.records, weeks: weekKeys(data.from, today), makeupWeeks: co.makeup_weeks ?? 4, today });
   }, [data, team, today, co.makeup_weeks]);
 
-  const nav = <><NavLink href="/records/">Records</NavLink><NavLink href="/">Home</NavLink></>;
-  if (error) return <Shell nav={nav}><Notice tone="error">Couldn&apos;t load reports: {error}</Notice></Shell>;
+  if (error) return <Shell><Notice tone="error">Couldn&apos;t load reports: {error}</Notice></Shell>;
   if (parseDay(co.program_start) > today) {
-    return <Shell nav={nav}><Title>Reports</Title><div className="mt-4"><Notice>Your plan starts the week of {short(parseDay(co.program_start))}. Reports fill in from then.</Notice></div></Shell>;
+    return <Shell><Title>Reports</Title><div className="mt-4"><Notice>Your plan starts the week of {short(parseDay(co.program_start))}. Reports fill in from then.</Notice></div></Shell>;
   }
-  if (!data || !report) return <Shell nav={nav}><Loading /></Shell>;
+  if (!data || !report) return <Shell><Loading /></Shell>;
 
   const names = new Map(data.people.map((p) => [p.id, p]));
   const teamName = (id: string | null) => data.teams.find((t) => t.id === id)?.name ?? "";
@@ -128,7 +127,7 @@ function Reports({ m }: { m: Membership }) {
   };
 
   return (
-    <Shell nav={nav}>
+    <Shell>
       <Eyebrow>Reports · {co.name}</Eyebrow>
       <Title>Weekly compliance</Title>
 

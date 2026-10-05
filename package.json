@@ -15,7 +15,8 @@
     "app:sync": "next build && cap sync",
     "ios": "npm run app:sync && cap open ios",
     "android": "npm run app:sync && cap open android",
-    "preview:build": "vite build --config preview/vite.config.ts && node preview/to-artifact.mjs"
+    "preview:build": "vite build --config preview/vite.config.ts && node preview/to-artifact.mjs",
+    "test:preview": "npm run preview:build && node scripts/preview-e2e.cjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
@@ -42,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.3.8",
     "pg": "^8.13.0",
+    "playwright-core": "^1.63.0",
     "supabase": "^2.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",

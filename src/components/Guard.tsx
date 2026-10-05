@@ -19,15 +19,15 @@ export function RequireCompany({ admin = false, children }: { admin?: boolean; c
   if (s.status === "not-configured") return <NotConfigured message={s.error} />;
   if (s.status === "signed-in" && s.error) {
     return (
-      <Shell>
+      <Shell tabs={false}>
         <Notice tone="error">Couldn&apos;t load your company: {s.error}. Check your connection and reload.</Notice>
       </Shell>
     );
   }
-  if (s.status !== "signed-in" || !s.current) return <Shell><Loading /></Shell>;
+  if (s.status !== "signed-in" || !s.current) return <Shell tabs={false}><Loading /></Shell>;
   if (admin && !canAdmin(s.current.access)) {
     return (
-      <Shell>
+      <Shell tabs={false}>
         <Notice tone="error">Only owners and admins can change company setup. Ask your safety manager.</Notice>
       </Shell>
     );
@@ -37,7 +37,7 @@ export function RequireCompany({ admin = false, children }: { admin?: boolean; c
 
 export function NotConfigured({ message }: { message: string | null }) {
   return (
-    <Shell>
+    <Shell tabs={false}>
       <Notice tone="error">
         <p className="font-bold">The app isn&apos;t connected to a database yet.</p>
         <p className="mt-1">{message}</p>

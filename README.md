@@ -89,6 +89,7 @@ npm run lint
 npm test          # core logic tests
 npm run build     # the static site that ships to web, iPhone and Android
 npm run test:db   # company isolation test (needs local Supabase running)
+npm run test:preview   # clicks through the phone preview in a real browser (first time: npx playwright install chromium)
 ```
 
 ## What's here

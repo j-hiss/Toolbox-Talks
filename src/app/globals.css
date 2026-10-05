@@ -66,3 +66,16 @@ body {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* Motion: short and quiet; off for people who ask for reduced motion. */
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes pulse-bg { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes slide-up { from { transform: translateY(100%); } to { transform: none; } }
+.page-in { animation: page-in 180ms ease-out; }
+.toast-in { animation: toast-in 180ms ease-out; }
+.sheet-in { animation: slide-up 200ms ease-out; }
+.skeleton { background: var(--line); animation: pulse-bg 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .page-in, .toast-in, .sheet-in, .skeleton { animation: none; }
+}

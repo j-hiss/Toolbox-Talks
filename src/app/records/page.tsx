@@ -1,14 +1,15 @@
 "use client";
 
 // Saved talks for the current company, newest first, plus any still waiting on this phone to upload.
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { isoDay, mondayOf, weekLabel } from "@/core/weeks";
 import Link from "next/link";
 import { listRecords } from "@/lib/data/records";
 import type { Membership, TalkRecordSummary } from "@/lib/data/types";
 import { countStatuses } from "@/core/attendance";
 import { useOutbox } from "@/lib/useOutbox";
 import { RequireCompany } from "@/components/Guard";
-import { Button, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, Shell, Title } from "@/components/ui";
+import { Button, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
 
 export default function RecordsPage() {
   return <RequireCompany>{(m) => <Records m={m} />}</RequireCompany>;
@@ -20,6 +21,21 @@ function Records({ m }: { m: Membership }) {
   const [rows, setRows] = useState<TalkRecordSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const outbox = useOutbox(m.company.id);
+  const [team, setTeam] = useState("all");
+  const [onlyFlagged, setOnlyFlagged] = useState(false);
+  const teams = useMemo(() => [...new Set((rows ?? []).map((r) => r.team_name).filter(Boolean))].sort(), [rows]);
+  // Newest week first; each week's talks newest first. Grouped by the week the talk was given.
+  const weeks = useMemo(() => {
+    const out = new Map<string, TalkRecordSummary[]>();
+    for (const r of rows ?? []) {
+      if (team !== "all" && r.team_name !== team) continue;
+      const c = countStatuses(r.statuses.map((status) => ({ status })));
+      if (onlyFlagged && c.flagged + (r.presenter_signed ? 0 : 1) === 0) continue;
+      const k = isoDay(mondayOf(new Date(r.held_at)));
+      out.set(k, [...(out.get(k) ?? []), r]);
+    }
+    return [...out.entries()];
+  }, [rows, team, onlyFlagged]);
   const waitingCount = outbox.items.length;
 
   useEffect(() => {
@@ -31,7 +47,7 @@ function Records({ m }: { m: Membership }) {
   }, [m.company.id, waitingCount]); // reload after waiting talks upload
 
   return (
-    <Shell nav={<NavLink href="/">Home</NavLink>}>
+    <Shell>
       <Eyebrow>{m.company.name}</Eyebrow>
       <Title>Records</Title>
 
@@ -64,28 +80,54 @@ function Records({ m }: { m: Membership }) {
       ) : rows.length === 0 ? (
         <p className="mt-3 text-sm text-muted">No talks recorded yet. Start this week&apos;s talk from Home.</p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {rows.map((r) => {
-            const c = countStatuses(r.statuses.map((status) => ({ status })));
+        <>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {teams.length > 1 && (
+              <select aria-label="Crew" className={`${inputClass} w-auto py-2`} value={team} onChange={(e) => setTeam(e.target.value)}>
+                <option value="all">All crews</option>
+                {teams.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            )}
+            <label className="flex min-h-11 items-center gap-2 text-sm">
+              <input type="checkbox" className="h-5 w-5 accent-[var(--hivis)]" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} />
+              Only flagged
+            </label>
+          </div>
+          {weeks.length === 0 && <p className="mt-3 text-sm text-muted">Nothing matches.</p>}
+          {weeks.map(([k, list]) => {
+            const monday = new Date(`${k}T12:00:00`);
+            const wk = list.find((r) => r.week_number && !r.makeup_for_week)?.week_number ?? list[0].week_number;
             return (
-              <li key={r.id}>
-                <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-lg border border-line bg-surface p-3 hover:border-hivis">
-                  <span className="min-w-0">
-                    <b className="block">{r.title}</b>
-                    {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}
-                    <small className="text-muted tabular-nums">
-                      {r.week_number ? `${r.makeup_for_week ? "Given in week" : "Week"} ${r.week_number} · ` : ""}{when(r.held_at)}{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}
-                    </small>
-                  </span>
-                  <span className="flex flex-col items-end gap-1 text-sm tabular-nums">
-                    <span>{c.signed}/{c.total} signed</span>
-                    <FlagChip n={c.flagged + (r.presenter_signed ? 0 : 1)} />
-                  </span>
-                </Link>
-              </li>
+              <section key={k} className="mt-5">
+                <h3 className="sticky top-[3.6rem] z-10 -mx-4 bg-bg/95 px-4 py-1.5 font-display text-sm font-bold uppercase tracking-widest text-muted backdrop-blur">
+                  {wk ? `Week ${wk} · ` : ""}{weekLabel(monday)} <span className="font-sans font-normal normal-case tracking-normal">· {list.length} talk{list.length === 1 ? "" : "s"}</span>
+                </h3>
+                <ul className="mt-1 flex flex-col gap-2">
+                  {list.map((r) => {
+                    const c = countStatuses(r.statuses.map((status) => ({ status })));
+                    return (
+                      <li key={r.id}>
+                        <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-lg border border-line bg-surface p-3 hover:border-hivis">
+                          <span className="min-w-0">
+                            <b className="block">{r.title}</b>
+                            {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}
+                            <small className="text-muted tabular-nums">
+                              {when(r.held_at)}{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}
+                            </small>
+                          </span>
+                          <span className="flex shrink-0 flex-col items-end gap-1 text-sm tabular-nums">
+                            <span>{c.signed}/{c.total} signed</span>
+                            <FlagChip n={c.flagged + (r.presenter_signed ? 0 : 1)} />
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
             );
           })}
-        </ul>
+        </>
       )}
     </Shell>
   );

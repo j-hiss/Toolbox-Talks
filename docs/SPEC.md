@@ -103,6 +103,18 @@ customer #1, not a special case.
 - Later: turn a typed address into a map point automatically (needs a geocoding service; not chosen yet), and log
   the presenter's GPS on each saved talk as extra proof of where it happened.
 
+## App frame (built)
+- **Bottom tab bar:** Home · Talk · Records, plus Reports · Admin for owners and admins. Hidden while giving a talk.
+- **Header pill** when offline or when talks are waiting to upload.
+- **Home** shows this week by crew ("Crew A ✓ 4/4 · Crew B 3/5"), how many person-weeks need a makeup, and for a new
+  company a getting-started checklist (people → crews → place → first talk).
+- **Feedback:** a short message after every change, with **Undo** for removing a person or place; skeleton
+  placeholders while loading; a small vibration on signing where the phone supports it.
+- **Admin → People:** search, grouped by crew, tap a person to edit in a slide-up panel. Admin sections are wrapping
+  chips so none run off the screen.
+- **Records** grouped by week, with a crew filter and "only flagged".
+- **Reading:** play and "Done reading" stay pinned at the bottom; A− / A+ text size, remembered on the phone.
+
 ## Running a talk (built)
 - **Home → Start this talk** opens this week's talk (locked for the week). **Make up a missed week** picks a past week
   inside the admin's limit and a reason, then runs that week's talk. A talk in progress is saved on the phone after every tap; Home shows **Resume**.
@@ -111,7 +123,11 @@ customer #1, not a special case.
 - **Who's here:** presenter (anyone with a role other than crew member), team (or all teams, or everyone who still
   needs this week's talk), where (jobsite or office), roster
   (team lead first, everyone checked; uncheck who's absent), walk-ins. A GPS point is taken quietly if allowed.
-- **Sign:** presenter first, then each person present. Saving with anyone unsigned names them and flags them.
+- **Sign, one person at a time:** presenter first, then each person here gets a full screen with their name and a
+  big pad. **Next** (enabled once signed) goes to the next person who hasn't signed; **Isn't here** marks them
+  absent (with Undo); **Skip** leaves them for later. A **review** screen lists everyone, tap anyone to sign; saving
+  with anyone unsigned names them and flags them.
+- **Remembered setup:** the last presenter, crew and place used on this phone are filled in for the next talk.
 - **Saved:** goes into the phone's outbox first, then uploads. With no signal it says "saved on this phone" and
   uploads automatically when the phone is back online (Home and Records also have **Upload now**).
 - **Records:** list (waiting + saved) with signed counts and flags; tap for the full record: details, sign-in

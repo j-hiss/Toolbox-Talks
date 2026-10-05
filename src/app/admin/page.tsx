@@ -22,7 +22,8 @@ import { clearOverride, setOverride } from "@/lib/data/plan";
 import { listRecordedWeeks } from "@/lib/data/records";
 import { RequireCompany } from "@/components/Guard";
 import { CompanyForm } from "@/components/CompanyForm";
-import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, Sheet, Shell, Title, inputClass } from "@/components/ui";
+import { toast } from "@/components/toast";
 
 const TABS = [
   { id: "people", label: "People" },
@@ -69,24 +70,33 @@ function Admin({ m }: { m: Membership }) {
     return () => { live = false; };
   }, [companyId, version]);
 
-  /** Run a change, then reload. Errors show at the top instead of failing silently. */
-  const act = (fn: () => Promise<void>) => async () => {
-    try { await fn(); setVersion((v) => v + 1); } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+  /** Run a change, then reload. Says "Saved" (or the given message; null for none). Errors show as a red message. */
+  const act: Act = (fn, msg = "Saved") => async () => {
+    try {
+      await fn();
+      setVersion((v) => v + 1);
+      setError(null);
+      if (msg) toast(msg);
+    } catch (e) {
+      const text = e instanceof Error ? e.message : String(e);
+      setError(text);
+      toast(text, { tone: "error" });
+    }
   };
 
   return (
-    <Shell nav={<NavLink href="/">Done</NavLink>}>
+    <Shell>
       <Eyebrow>Admin · {m.company.name}</Eyebrow>
       <Title>Company setup</Title>
 
-      <div role="tablist" className="mt-4 flex gap-1 overflow-x-auto border-b border-line">
+      <div role="tablist" className="mt-4 flex flex-wrap gap-1.5">
         {TABS.map((t) => (
           <button
             key={t.id}
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`-mb-px border-b-[3px] px-3.5 py-2 font-display text-lg font-bold uppercase tracking-wide ${tab === t.id ? "border-hivis text-fg" : "border-transparent text-muted"}`}
+            className={`min-h-10 rounded-full border px-3.5 font-display text-base font-bold uppercase tracking-wide ${tab === t.id ? "border-fg bg-fg text-bg" : "border-line bg-surface text-muted"}`}
           >
             {t.label}
           </button>
@@ -120,65 +130,119 @@ function Admin({ m }: { m: Membership }) {
   );
 }
 
-type Act = (fn: () => Promise<void>) => () => Promise<void>;
+type Act = (fn: () => Promise<void>, msg?: string | null) => () => Promise<void>;
 const CREW = "";
 
 function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string; people: Person[]; roles: Role[]; teams: Team[]; act: Act }) {
   const [name, setName] = useState("");
   const [roleId, setRoleId] = useState(CREW);
   const [teamId, setTeamId] = useState(teams[0]?.id ?? "");
+  const [adding, setAdding] = useState(people.length === 0);
+  const [q, setQ] = useState("");
+  const [editing, setEditing] = useState<Person | null>(null);
   const roleOptions = <><option value={CREW}>Crew member</option>{roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</>;
   const teamOptions = <><option value="">No team</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</>;
+  const roleName = (p: Person) => roles.find((r) => r.id === p.role_id)?.name ?? "Crew member";
+  const isLead = (p: Person) => teams.some((t) => t.lead_person_id === p.id);
+  const shown = people.filter((p) => !q.trim() || p.full_name.toLowerCase().includes(q.trim().toLowerCase()));
+  const groups = [...teams.map((t) => ({ id: t.id, name: t.name })), { id: "", name: "No team" }]
+    .map((g) => ({ ...g, people: shown.filter((p) => (p.team_id ?? "") === g.id).sort((a, b) => Number(isLead(b)) - Number(isLead(a)) || a.full_name.localeCompare(b.full_name)) }))
+    .filter((g) => g.people.length > 0);
+
+  const remove = (p: Person) => act(async () => {
+    // Capture what removing clears (team, team-lead spots) before it happens, so Undo can put it back.
+    const leadOf = teams.filter((t) => t.lead_person_id === p.id).map((t) => t.id);
+    const teamId = p.team_id;
+    await deactivatePerson(companyId, p.id);
+    setEditing(null);
+    toast(`${p.full_name} removed`, {
+      action: {
+        label: "Undo",
+        run: act(async () => {
+          await updatePerson(companyId, p.id, { active: true, team_id: teamId });
+          for (const t of leadOf) await updateTeam(companyId, t, { lead_person_id: p.id });
+        }, `${p.full_name} is back`),
+      },
+    });
+  }, null)();
 
   return (
     <>
-      <p className="text-sm text-muted">Crew members sign in at talks. Everyone with another role can also give talks. Spreadsheet import is coming.</p>
-      <form
-        className="mt-4 flex flex-col gap-3 rounded-lg border border-dashed border-line bg-surface p-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const n = name.trim();
-          if (!n) return;
-          act(async () => { await addPerson(companyId, { full_name: n, role_id: roleId || null, team_id: teamId || null }); setName(""); })();
-        }}
-      >
-        <Field label="Add a person" id="np-name">
-          <input id="np-name" placeholder="Full name" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
-        </Field>
-        <div className="flex flex-wrap gap-2">
-          <select aria-label="Role" className={`${inputClass} flex-1 basis-36`} value={roleId} onChange={(e) => setRoleId(e.target.value)}>{roleOptions}</select>
-          <select aria-label="Team" className={`${inputClass} flex-1 basis-36`} value={teamId} onChange={(e) => setTeamId(e.target.value)}>{teamOptions}</select>
-          <Button size="sm" type="submit">Add person</Button>
-        </div>
-      </form>
-
-      <GroupHeading aside={`${people.length} ${people.length === 1 ? "person" : "people"}`}>Everyone</GroupHeading>
-      {people.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">No one yet. Add your crew above.</p>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {people.map((p) => (
-            <li key={p.id} className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-3">
-              <input
-                aria-label="Name"
-                defaultValue={p.full_name}
-                className={`${inputClass} font-bold`}
-                onBlur={(e) => {
-                  const v = e.target.value.trim();
-                  if (v && v !== p.full_name) act(() => updatePerson(companyId, p.id, { full_name: v }))();
-                  else e.target.value = p.full_name;
-                }}
-              />
-              <div className="flex flex-wrap items-center gap-2">
-                <select aria-label={`Role for ${p.full_name}`} className={`${inputClass} flex-1 basis-36`} value={p.role_id ?? CREW} onChange={(e) => act(() => updatePerson(companyId, p.id, { role_id: e.target.value || null }))()}>{roleOptions}</select>
-                <select aria-label={`Team for ${p.full_name}`} className={`${inputClass} flex-1 basis-36`} value={p.team_id ?? ""} onChange={(e) => act(() => updatePerson(companyId, p.id, { team_id: e.target.value || null }))()}>{teamOptions}</select>
-                <ConfirmButton label="Remove" confirmLabel="Confirm" onConfirm={act(() => deactivatePerson(companyId, p.id))} />
-              </div>
-            </li>
-          ))}
-        </ul>
+      <div className="flex gap-2">
+        <input type="search" aria-label="Search people" placeholder={`Search ${people.length} people`} className={inputClass} value={q} onChange={(e) => setQ(e.target.value)} />
+        {!adding && <Button size="sm" className="shrink-0" onClick={() => setAdding(true)}>+ Add</Button>}
+      </div>
+      {adding && (
+        <form
+          className="mt-3 flex flex-col gap-3 rounded-lg border border-dashed border-line bg-surface p-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const n = name.trim();
+            if (!n) return;
+            act(async () => { await addPerson(companyId, { full_name: n, role_id: roleId || null, team_id: teamId || null }); setName(""); }, `${n} added`)();
+          }}
+        >
+          <Field label="Add a person" id="np-name">
+            <input id="np-name" placeholder="Full name" autoComplete="off" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            <select aria-label="Role" className={`${inputClass} flex-1 basis-36`} value={roleId} onChange={(e) => setRoleId(e.target.value)}>{roleOptions}</select>
+            <select aria-label="Team" className={`${inputClass} flex-1 basis-36`} value={teamId} onChange={(e) => setTeamId(e.target.value)}>{teamOptions}</select>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" type="submit">Add person</Button>
+            {people.length > 0 && <Button size="sm" variant="ghost" type="button" onClick={() => setAdding(false)}>Done adding</Button>}
+          </div>
+          <p className="text-xs text-muted">Crew members sign at talks. Anyone with another role can also give talks. Spreadsheet import is coming.</p>
+        </form>
       )}
+
+      {people.length === 0 ? (
+        <p className="mt-4 text-sm text-muted">No one yet. Add your crew above.</p>
+      ) : shown.length === 0 ? (
+        <p className="mt-4 text-sm text-muted">No one matches &quot;{q}&quot;.</p>
+      ) : groups.map((g) => (
+        <section key={g.id || "none"}>
+          <GroupHeading aside={`${g.people.length}`}>{g.name}</GroupHeading>
+          <ul className="mt-2 divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface">
+            {g.people.map((p) => (
+              <li key={p.id}>
+                <button className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg" onClick={() => setEditing(p)}>
+                  <span className="min-w-0 flex-1">
+                    <b className="block truncate">{p.full_name}</b>
+                    <small className="text-muted">{isLead(p) ? "Team lead · " : ""}{roleName(p)}</small>
+                  </span>
+                  <span aria-hidden className="text-xl text-muted">›</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
       <p className="mt-4 text-xs text-muted">Removing someone takes them off rosters. Their past signed records stay.</p>
+
+      <Sheet title="Edit person" open={!!editing} onClose={() => setEditing(null)}>
+        {editing && (
+          <form
+            key={editing.id}
+            className="flex flex-col gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              const full_name = String(f.get("name") ?? "").trim();
+              if (!full_name) return;
+              const patch = { full_name, role_id: String(f.get("role") ?? "") || null, team_id: String(f.get("team") ?? "") || null };
+              act(async () => { await updatePerson(companyId, editing.id, patch); setEditing(null); })();
+            }}
+          >
+            <Field label="Name" id="ep-name"><input id="ep-name" name="name" defaultValue={editing.full_name} className={`${inputClass} font-bold`} /></Field>
+            <Field label="Role" id="ep-role"><select id="ep-role" name="role" defaultValue={editing.role_id ?? CREW} className={inputClass}>{roleOptions}</select></Field>
+            <Field label="Team" id="ep-team"><select id="ep-team" name="team" defaultValue={editing.team_id ?? ""} className={inputClass}>{teamOptions}</select></Field>
+            <Button type="submit">Save</Button>
+            <Button type="button" size="sm" variant="danger" onClick={() => remove(editing)}>Remove {editing.full_name}</Button>
+          </form>
+        )}
+      </Sheet>
     </>
   );
 }
@@ -381,7 +445,10 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
                   >
                     {locating === j.id ? "Finding you…" : hasGps ? "Re-pin to my location" : "Pin to my location"}
                   </Button>
-                  <span className="ml-auto"><ConfirmButton label="Remove" confirmLabel="Confirm" onConfirm={act(() => deactivateJobsite(companyId, j.id))} /></span>
+                  <span className="ml-auto"><Button size="sm" variant="ghost" onClick={act(async () => {
+                    await deactivateJobsite(companyId, j.id);
+                    toast(`${j.name} removed`, { action: { label: "Undo", run: act(() => updateJobsite(companyId, j.id, { active: true }), `${j.name} is back`) } });
+                  }, null)}>Remove</Button></span>
                 </div>
               </li>
             );

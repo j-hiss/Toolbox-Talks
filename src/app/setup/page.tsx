@@ -18,10 +18,10 @@ export default function Setup() {
   }, [s.status, router]);
 
   if (s.status === "not-configured") return <NotConfigured message={s.error} />;
-  if (s.status !== "signed-in") return <Shell><Loading /></Shell>;
+  if (s.status !== "signed-in") return <Shell tabs={false}><Loading /></Shell>;
 
   return (
-    <Shell nav={s.memberships.length ? <NavLink href="/">Cancel</NavLink> : undefined}>
+    <Shell tabs={false} nav={s.memberships.length ? <NavLink href="/">Cancel</NavLink> : undefined}>
       <Eyebrow>Set up</Eyebrow>
       <Title>Your company</Title>
       <p className="mt-2 mb-5 text-muted">

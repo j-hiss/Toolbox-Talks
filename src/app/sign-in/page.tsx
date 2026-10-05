@@ -49,7 +49,7 @@ export default function SignIn() {
   };
 
   return (
-    <Shell>
+    <Shell tabs={false}>
       <Eyebrow>Sign in</Eyebrow>
       <Title>{step === "email" ? "Get a sign-in code" : "Enter your code"}</Title>
 

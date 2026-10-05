@@ -103,7 +103,7 @@ export async function listJobsites(companyId: string): Promise<Jobsite[]> {
 export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">): Promise<void> {
   check(await supabase().from("jobsites").insert({ company_id: companyId, ...j }));
 }
-export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">>): Promise<void> {
+export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind" | "active">>): Promise<void> {
   check(await supabase().from("jobsites").update(patch).eq("company_id", companyId).eq("id", id));
 }
 /** Jobsites are deactivated, never deleted: saved talk records will point at them. */

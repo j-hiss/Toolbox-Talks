@@ -87,7 +87,9 @@ export async function addPerson(companyId: string, p: Pick<Person, "full_name" |
 }
 export async function updatePerson(companyId: string, personId: string, patch: Partial<Omit<Person, "id" | "company_id">>): Promise<void> {
   await tick(); mustBeAdmin(companyId);
-  Object.assign(rows<Person>("people").find((p) => p.company_id === companyId && p.id === personId)!, patch); save();
+  // Same as the database trigger: reactivating clears the deactivation date.
+  const extra = patch.active === true ? { deactivated_at: null } : {};
+  Object.assign(rows<Person>("people").find((p) => p.company_id === companyId && p.id === personId)!, patch, extra); save();
 }
 export async function deactivatePerson(companyId: string, personId: string): Promise<void> {
   await tick(); mustBeAdmin(companyId);
@@ -103,7 +105,7 @@ export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "a
   await tick(); mustBeAdmin(companyId);
   rows<Jobsite>("jobsites").push({ id: uid(), company_id: companyId, active: true, ...j }); save();
 }
-export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">>): Promise<void> {
+export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind" | "active">>): Promise<void> {
   await tick(); mustBeAdmin(companyId);
   Object.assign(rows<Jobsite>("jobsites").find((j) => j.company_id === companyId && j.id === id)!, patch); save();
 }

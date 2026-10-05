@@ -6,7 +6,9 @@ import type { Signature } from "@/core/record";
 
 const EXPORT_WIDTH = 480;
 
-export function SignaturePad({ label, value, onChange }: { label: string; value: Signature | null; onChange: (s: Signature | null) => void }) {
+export function SignaturePad({ label, value, onChange, tall = false, hint = "Sign above" }: {
+  label: string; value: Signature | null; onChange: (s: Signature | null) => void; tall?: boolean; hint?: string;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const dirty = useRef(false);
@@ -62,7 +64,7 @@ export function SignaturePad({ label, value, onChange }: { label: string; value:
       <canvas
         ref={canvas}
         aria-label={`Signature pad for ${label}`}
-        className="block h-36 w-full touch-none rounded-md border-2 border-dashed border-line bg-white"
+        className={`block w-full touch-none rounded-md border-2 border-dashed bg-white ${tall ? "h-[min(42vh,320px)] border-muted" : "h-36 border-line"}`}
         onPointerDown={(e) => {
           drawing.current = true;
           dirty.current = true;
@@ -82,9 +84,9 @@ export function SignaturePad({ label, value, onChange }: { label: string; value:
       />
       <div className="mt-1 flex items-center justify-between text-sm">
         <span className={value ? "font-bold text-ok" : "text-muted"}>
-          {value ? `Signed ${new Date(value.signedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "Sign above"}
+          {value ? `Signed ${new Date(value.signedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : hint}
         </span>
-        {value && <button type="button" onClick={clear} className="font-bold underline">Clear</button>}
+        {value && <button type="button" onClick={clear} className="min-h-11 px-2 font-bold underline">Clear</button>}
       </div>
     </div>
   );

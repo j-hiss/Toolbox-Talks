@@ -74,14 +74,17 @@ point the row at the real file and keep the prototype line as its origin.
 | offline outbox · `useOutbox` | `src/lib/outbox.ts` · `src/lib/useOutbox.ts` | **The** offline-first save path: phone first, upload when online, idempotent by `client_id` |
 | talk draft | `src/lib/draft.ts` | The talk in progress, saved on the phone after every change |
 | `speakLines` · `bestVoice` | `src/lib/speech.ts` | Device read-aloud with line highlighting (offline fallback for recorded audio) |
-| `SignaturePad` | `src/components/SignaturePad.tsx` | Finger signature, exported small (≤480 px) to fit the offline outbox |
+| `SignaturePad` | `src/components/SignaturePad.tsx` | Finger signature, exported small (≤480 px) to fit the offline outbox. `tall` for the one-person-at-a-time sign screen |
 | crew UI text | `src/content/ui.ts` | Crew-facing lines per language (draft until reviewed) |
-| talk flow | `src/app/talk/page.tsx` | (makeup: pick missed week + reason) → read → who's here → sign → saved. This week's talk is locked |
+| talk flow | `src/app/talk/page.tsx` | (makeup: pick missed week + reason) → read (pinned play/done bar, text size) → who's here → sign one person at a time (Next / Isn't here / Skip) → review → saved. This week's talk is locked |
 | records | `src/app/records/page.tsx` · `src/app/record/page.tsx` | Records list (waiting + saved) and one record (`/record/#id`) |
 | company data functions | `src/lib/data/company.ts` | **The** data access for companies, roles, teams, people. Every call is scoped by `company_id` as well as RLS. People are deactivated (`deactivatePerson`), never deleted |
 | row types · `canAdmin` | `src/lib/data/types.ts` | Supabase row shapes; who can change setup (owner/admin) |
 | `RequireCompany` · `NotConfigured` | `src/components/Guard.tsx` | Gate for every signed-in screen: loading, not configured, signed out → sign-in, no company → setup, admin-only |
-| UI kit (`Button`, `ConfirmButton`, `Field`, `Shell`, `Notice`, …) | `src/components/ui.tsx` | Shared, phone-first pieces on the prototype's tokens. `ConfirmButton` = two-tap destructive action |
+| UI kit (`Button`, `ConfirmButton`, `Field`, `Shell`, `Notice`, `Sheet`, `Loading`, …) | `src/components/ui.tsx` | Shared, phone-first pieces on the prototype's tokens. `Shell` = header + offline/upload pill + bottom tab bar (`tabs={false}` for focused flows). `Sheet` = slide-up edit panel. `Loading` = skeleton rows. `ConfirmButton` = two-tap destructive action (prefer an Undo toast where the action can be reversed) |
+| `toast` · `Toaster` · `buzz` | `src/components/toast.tsx` | **The** feedback message (optionally with Undo), shown under the header and cleared on navigation; `buzz` = short vibration where supported |
+| `useHomeStatus` · `WeekStatusCard` · `GettingStarted` | `src/components/HomeCards.tsx` | Home's this-week-by-crew card (+ who owes a makeup) and the new-company checklist. Built on the report query layer + `buildCompliance` |
+| `readLastSetup` · `writeLastSetup` | `src/lib/lastSetup.ts` | Last presenter, crew and place on this phone; `newDraft` starts from it |
 | `CompanyForm` | `src/components/CompanyForm.tsx` | Company info form used by setup and Admin; rounds Week 1 to Monday, validates ZIP |
 | sign-in | `src/app/sign-in/page.tsx` | Email 6-digit code (no passwords, no links), same in browser and phone apps |
 | company setup | `src/app/setup/page.tsx` | First company for a new user |

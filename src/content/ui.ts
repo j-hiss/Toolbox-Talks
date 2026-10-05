@@ -9,6 +9,8 @@ type Strings = {
   reading: string;
   noVoice: string;
   signNote: string;
+  signHere: string;     // under the pad
+  signedBy: string;     // "By signing, I confirm I attended this talk."
 };
 
 const en: Strings = {
@@ -18,6 +20,8 @@ const en: Strings = {
   reading: "Reading out loud…",
   noVoice: "Read-out-loud isn't available on this device.",
   signNote: "Each person signs with a finger. By signing, they confirm they attended this talk.",
+  signHere: "Sign here with your finger",
+  signedBy: "By signing, I confirm I attended this talk.",
 };
 
 const es: Strings = {
@@ -27,6 +31,8 @@ const es: Strings = {
   reading: "Leyendo en voz alta…",
   noVoice: "La lectura en voz alta no está disponible en este dispositivo.",
   signNote: "Cada persona firma con el dedo. Al firmar, confirma que asistió a esta charla.",
+  signHere: "Firme aquí con el dedo",
+  signedBy: "Al firmar, confirmo que asistí a esta charla.",
 };
 
 export function crewText(lang: LanguageId): Strings {

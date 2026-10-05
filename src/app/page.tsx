@@ -15,8 +15,10 @@ import { JobsitePicker, readChosenJobsite } from "@/components/JobsitePicker";
 import { newDraft, useDraft } from "@/lib/draft";
 import { useOutbox } from "@/lib/useOutbox";
 import { usePlan } from "@/lib/usePlan";
+import { readLastSetup } from "@/lib/lastSetup";
+import { GettingStarted, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
 import { useRouter } from "next/navigation";
-import { Button, Eyebrow, GroupHeading, NavLink, Notice, Shell, Title } from "@/components/ui";
+import { Button, Eyebrow, GroupHeading, Notice, Shell, Title } from "@/components/ui";
 
 export default function HomePage() {
   return <RequireCompany>{(m) => <Home m={m} />}</RequireCompany>;
@@ -36,13 +38,17 @@ function Home({ m }: { m: Membership }) {
   const draft = useDraft(co.id);
   const outbox = useOutbox(co.id);
   const draftTitle = draft?.talkId ? TALKS.find((t) => t.id === draft.talkId)?.content.en.title : null;
+  const st = useHomeStatus(co, outbox.items.length);
+  const isAdmin = canAdmin(m.access);
+  const last = readLastSetup(co.id);
+  const lastCrew = last?.teamId === "all" ? "All teams" : st?.teams.find((t) => t.id === last?.teamId)?.name;
   const start = (talkId: string | null) => {
     newDraft(co.id, talkId, readChosenJobsite(co.id) ?? "");
     router.push("/talk/");
   };
 
   return (
-    <Shell nav={<><NavLink href="/records/">Records</NavLink>{canAdmin(m.access) && <><NavLink href="/reports/">Reports</NavLink><NavLink href="/admin/">Admin</NavLink></>}</>}>
+    <Shell>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         {s.memberships.length > 1 ? (
           <select
@@ -88,6 +94,8 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
+      {isAdmin && st && <GettingStarted st={st} />}
+
       {week && talk && text ? (
         <section className="mt-6">
           <Eyebrow>Week {week.n} of 52 · {weekLabel(week.monday)}</Eyebrow>
@@ -96,8 +104,10 @@ function Home({ m }: { m: Membership }) {
           <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every crew this week</p>
           <div className="mt-5 flex flex-col gap-2">
             <Button onClick={() => start(week.talkId)}>Start this talk</Button>
+            {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
             <Button size="sm" variant="ghost" onClick={() => start(null)}>Make up a missed week</Button>
           </div>
+          {st && <WeekStatusCard st={st} isAdmin={isAdmin} onMakeup={() => start(null)} />}
         </section>
       ) : (
         <div className="mt-6">
@@ -107,7 +117,7 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
-      <JobsitePicker companyId={co.id} isAdmin={canAdmin(m.access)} />
+      <JobsitePicker companyId={co.id} isAdmin={isAdmin} />
 
       {upcoming.length > 0 && (
         <section>

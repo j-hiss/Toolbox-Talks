@@ -5,6 +5,7 @@
 import { useSyncExternalStore } from "react";
 import type { Signature } from "@/core/record";
 import type { LanguageId } from "@/core/languages";
+import { readLastSetup } from "./lastSetup";
 
 export type TalkDraft = {
   clientId: string;
@@ -65,6 +66,7 @@ export function clearDraft(companyId: string) {
 
 /** Start this week's talk (talkId), or a makeup (talkId null: the presenter picks the missed week first). */
 export function newDraft(companyId: string, talkId: string | null, jobsiteId = ""): TalkDraft {
+  const last = readLastSetup(companyId); // same presenter and crew as last time on this phone
   const d: TalkDraft = {
     clientId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     companyId,
@@ -74,10 +76,10 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
     makeup: null,
     makeupPick: "",
     makeupNote: "",
-    presenterId: "",
-    teamId: "",
+    presenterId: last?.presenterId ?? "",
+    teamId: last?.teamId ?? "",
     needIds: null,
-    jobsiteId,
+    jobsiteId: jobsiteId || last?.jobsiteId || "",
     present: {},
     walkins: [],
     signatures: {},
