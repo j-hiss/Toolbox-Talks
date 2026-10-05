@@ -77,6 +77,26 @@ projects, add the permission text:
 - **Android:** in `android/app/src/main/AndroidManifest.xml` add
   `<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />` and `ACCESS_COARSE_LOCATION`.
 
+### Test data on your Mac
+Fill your local database with a made-up company to click around in:
+
+```bash
+npm run db:start                     # if it isn't running
+npx supabase migration up            # if you pulled new changes
+npm run seed -- --email you@yourcompany.com
+```
+
+It makes **"Example Test Co (test data)"** with three crews, about 18 people (a new hire and someone who left),
+three places, and about 12 weeks of talks: signatures, crew photos, walk-ins from other companies, makeups with
+reasons, a few misses, heat days and issues (some fixed, some overdue). Your account is added as an owner, so pick it
+from the company menu on Home. Sign in to the app once with that email first (the code shows up in the local mail
+viewer at http://127.0.0.1:54324).
+
+- Run it again any time for a fresh copy; it removes the old test company first. Your other companies aren't touched.
+- It only runs against a database on your own computer and refuses anything else.
+- `npm run seed -- --dry-run` shows what it would make without saving anything.
+- Everything is labelled "Example"; the signatures are scribbles and the photos are drawings.
+
 ### Camera (crew photo)
 The optional crew photo uses the phone's camera through a normal file picker. In the native projects add:
 - **iPhone:** `Info.plist` → **Privacy - Camera Usage Description** ("Takes an optional photo of the crew at a

@@ -117,6 +117,14 @@ point the row at the real file and keep the prototype line as its origin.
 |---|---|---|
 | _(nothing left: reports and the PDF are ported)_ | | |
 
+## Local test data
+
+| Component | File | Role |
+|---|---|---|
+| `buildSeed` · `staffDates` · `rng` | `scripts/seed/build.ts` | Plans the local test company and ~12 weeks of history with the app's own rules (`planWeekAt`, `MAKEUP_REASONS`, `heatLevel`). Pure and repeatable; tested against `buildCompliance` |
+| `exampleSignature` · `examplePhoto` · `encodePng` | `scripts/seed/png.ts` | Made-up signature scribbles and drawn "crew photos" as PNGs, no extra packages |
+| `npm run seed` | `scripts/seed-local.ts` | Saves that plan into the LOCAL database the way the app does (`recordPayload` → `buildAttendees` → `toUpload` → Storage → `save_talk`) as a test owner; local-only guard; replaces the previous test company |
+
 ## Phone preview
 
 | Component | File | Role |

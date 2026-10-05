@@ -230,7 +230,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
       doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY);
       const when = r.photo_taken_at ? stampParts(r.photo_taken_at) : null;
       doc.text(`CREW PHOTO${when ? ` · TAKEN ${when.date.toUpperCase()} ${when.time}` : ""}`, M, y); doc.setTextColor(0); y += 8;
-      doc.addImage(r.photo, "JPEG", M, y, w, h);
+      doc.addImage(r.photo, /^data:image\/png/i.test(r.photo) ? "PNG" : "JPEG", M, y, w, h);
       y += h;
     } catch { /* an unreadable photo never blocks the record */ }
   }

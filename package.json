@@ -16,7 +16,8 @@
     "ios": "npm run app:sync && cap open ios",
     "android": "npm run app:sync && cap open android",
     "preview:build": "vite build --config preview/vite.config.ts && node preview/to-artifact.mjs",
-    "test:preview": "npm run preview:build && node scripts/preview-e2e.mjs"
+    "test:preview": "npm run preview:build && node scripts/preview-e2e.mjs",
+    "seed": "tsx scripts/seed-local.ts"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
@@ -47,6 +48,7 @@
     "playwright-core": "^1.63.0",
     "supabase": "^2.0.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vite": "^7.3.6",
     "vite-plugin-singlefile": "^2.3.3",
