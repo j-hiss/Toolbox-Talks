@@ -32,6 +32,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `distanceMeters` · `nearestJobsite` · `AT_SITE_METERS` · `formatDistance` · `mapsLink` | `src/core/geo.ts` | **The** location math: distance, nearest jobsite with GPS (never guesses a site without one), feet/miles, maps link |
 | `buildAttendees` · `recordPayload` · `unsignedPresent` | `src/core/record.ts` | **The** saved-talk builder: every roster person gets one honest status; signatures from absent people are dropped |
 | `creditWeek` · `makeupWeeks` · `planWeekAt` · `canMakeUp` · `stillNeeds` · `signedFor` · `canChangeWeek` · `MAKEUP_REASONS` · `makeupReasonText` | `src/core/makeup.ts` | **The** weekly-lock and makeup rules: which week a talk counts toward (makeups keep their real date), past weeks inside the limit with their scheduled talk, who still needs a week, when an admin can still swap a week |
+| `buildCompliance` · `score` · `onTimeRate` · `onStaff` · `weekKeys` · `makeupDeadline` · `WEEK_STATE_LABEL` | `src/core/compliance.ts` | **The** compliance math: every person on staff, every week → on time / made up / open / missed / due. Makeups close a week and stay marked; this week isn't scored; presenters who signed count. Origin: prototype `reportData` (`prototype/index.html:684`) |
 | `AttendanceStatus` · `countStatuses` · `resolveStatus` | `src/core/attendance.ts:4` · `:16` · `:29` | **The** attendance model: `signed` · `not_signed` · `absent`. Every report counts with this |
 
 ## Content
@@ -47,6 +48,7 @@ point the row at the real file and keep the prototype line as its origin.
 | companies · company_members · roles · teams · people | `supabase/migrations/20261004000001_companies_people_teams.sql` | Company info, who can sign in (owner/admin/presenter), presenting roles, teams with a lead, people. Composite keys keep a person's team and role inside their own company |
 | talk_records · talk_attendees · `save_talk_record` | `supabase/migrations/20261005000004_talk_records.sql` | Append-only records with snapshots; select+insert grants only; one-transaction, idempotent save |
 | jobsites | `supabase/migrations/20261005000003_jobsites.sql` | Name, address, optional GPS point; no delete grant (deactivate only). `kind` site/office added in …05 |
+| `people.deactivated_at` · `private.stamp_deactivated` | `supabase/migrations/20261005000006_people_deactivated_at.sql` | When someone left, stamped by the database; the app can't move it |
 | plan_overrides · lock trigger · makeup columns | `supabase/migrations/20261005000005_weekly_lock_makeups.sql` | Admin week swaps (members read, admins write); trigger refuses a swap once the week is given or over; `talk_records.makeup_for_week` + required `makeup_reason`; `companies.makeup_weeks` |
 | `private.is_member` · `private.is_admin` | same file `:32` · `:37` | The access checks every RLS policy uses. Reuse them for every new company table |
 | `public.create_company` | `supabase/migrations/20261004000002_default_roles.sql` | The only way to create a company; makes the caller its owner and adds the default presenting roles |
@@ -65,6 +67,8 @@ point the row at the real file and keep the prototype line as its origin.
 | `usePlan` | `src/lib/usePlan.ts` | The plan with the admin's swaps, cached on the phone for offline. Every screen that shows a week's talk uses it |
 | `buildRecordPdf` · `pdfFileName` · `stampParts` · `PDF_FOOTER` | `src/lib/pdf.ts` | **The** PDF record, built only from the saved record: company header, week line (or makeup week + real week + reason), details with GPS, attendance summary, talk text that was read, sign-in sheet with full date and time on every signature line and flagged rows shaded, presenter block, no-compliance footer. Origin: prototype `buildPdf` (`prototype/index.html:967`) |
 | `saveFile` | `src/lib/download.ts` | **The** file hand-off: share sheet on phones, download on computers. Preview twin: `preview/demo/download.ts` |
+| `reportPeople` · `reportRecords` | `src/lib/data/reports.ts` | **The** report query layer: all people incl. deactivated (with dates), records held in or making up weeks in range. No signatures loaded |
+| reports screen | `src/app/reports/page.tsx` | Score card, by week (tap for who), by person, flags, CSV export. Admins only |
 | `MakeupTag` | `src/components/ui.tsx` | "Makeup for the week of … · reason" wherever a record is listed |
 | offline outbox · `useOutbox` | `src/lib/outbox.ts` · `src/lib/useOutbox.ts` | **The** offline-first save path: phone first, upload when online, idempotent by `client_id` |
 | talk draft | `src/lib/draft.ts` | The talk in progress, saved on the phone after every change |
@@ -87,13 +91,14 @@ point the row at the real file and keep the prototype line as its origin.
 
 | Component | Prototype | Role |
 |---|---|---|
-| `reportData` · `reports` · `exportCsv` | `prototype/index.html:684` · `:713` · `:764` | **The** report query (talks held, weekly coverage, employee totals, flags) and CSV export |
+| _(nothing left: reports and the PDF are ported)_ | | |
 
 ## Phone preview
 
 | Component | File | Role |
 |---|---|---|
 | preview build | `preview/vite.config.ts` | Packs the real screens into one page; the swap list (router, sign-in, data, GPS) lives here |
-| demo data | `preview/demo/company.ts` · `records.ts` · `plan.ts` · `store.ts` | Demo twin of `src/lib/data/company.ts`, stored in the browser. Must keep the same exports (enforced by typecheck) |
+| demo data | `preview/demo/company.ts` · `records.ts` · `plan.ts` · `reports.ts` · `store.ts` | Demo twin of `src/lib/data/company.ts`, stored in the browser. Must keep the same exports (enforced by typecheck) |
 | demo sign-in | `preview/demo/supabase.ts` | Code `123456` |
+| example history | `preview/demo/example.ts` | Preview-only "Add example history": people named "Example …", eight past weeks, misses and makeups |
 | router shims | `preview/shims/` | Stand-ins for `next/link` and `next/navigation` |

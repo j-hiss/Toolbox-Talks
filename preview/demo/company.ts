@@ -83,7 +83,7 @@ export async function listPeople(companyId: string): Promise<Person[]> {
 }
 export async function addPerson(companyId: string, p: Pick<Person, "full_name" | "role_id" | "team_id">): Promise<void> {
   await tick(); mustBeAdmin(companyId);
-  rows<Person>("people").push({ id: uid(), company_id: companyId, employee_id: null, phone: null, preferred_language: "en", active: true, ...p }); save();
+  rows<Person>("people").push({ id: uid(), company_id: companyId, employee_id: null, phone: null, preferred_language: "en", active: true, ...p, created_at: new Date().toISOString() } as Person); save();
 }
 export async function updatePerson(companyId: string, personId: string, patch: Partial<Omit<Person, "id" | "company_id">>): Promise<void> {
   await tick(); mustBeAdmin(companyId);
@@ -92,7 +92,7 @@ export async function updatePerson(companyId: string, personId: string, patch: P
 export async function deactivatePerson(companyId: string, personId: string): Promise<void> {
   await tick(); mustBeAdmin(companyId);
   rows<Team>("teams").forEach((t) => { if (t.company_id === companyId && t.lead_person_id === personId) t.lead_person_id = null; });
-  Object.assign(rows<Person>("people").find((p) => p.company_id === companyId && p.id === personId)!, { active: false, team_id: null });
+  Object.assign(rows<Person>("people").find((p) => p.company_id === companyId && p.id === personId)!, { active: false, team_id: null, deactivated_at: new Date().toISOString() });
   save();
 }
 

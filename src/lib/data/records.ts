@@ -54,10 +54,10 @@ export async function signedForWeek(companyId: string, weekKey: string): Promise
   const rows = check(
     await supabase()
       .from("talk_records")
-      .select("week_start, makeup_for_week, talk_attendees(person_id, status)")
+      .select("week_start, makeup_for_week, presenter_person_id, presenter_signed_at, talk_attendees(person_id, status)")
       .eq("company_id", companyId)
       .or(`week_start.eq.${weekKey},makeup_for_week.eq.${weekKey}`),
-  ) as unknown as { week_start: string | null; makeup_for_week: string | null; talk_attendees: { person_id: string | null; status: string }[] }[];
+  ) as unknown as { week_start: string | null; makeup_for_week: string | null; presenter_person_id: string | null; presenter_signed_at: string | null; talk_attendees: { person_id: string | null; status: string }[] }[];
   return signedFor(weekKey, rows.map((r) => ({ ...r, attendees: r.talk_attendees })));
 }
 

@@ -164,6 +164,14 @@ async function main() {
     check("Locations default to jobsite; office is allowed",
       (await as(userA, "insert into public.jobsites (company_id, name, kind) values ($1, 'Office', 'office') returning kind", [coA])).rows[0].kind === "office" &&
       (await as(userA, "select kind from public.jobsites where name = 'A yard'")).rows[0].kind === "site");
+    // (in company B, so A's people counts used by the leak check stay the same)
+    const pid = (await as(userB, "insert into public.people (company_id, full_name) values ($1, 'Leaving soon') returning id", [coB])).rows[0].id;
+    await as(userB, "update public.people set active = false, deactivated_at = '2000-01-01' where id = $1", [pid]);
+    const gone = (await as(userB, "select deactivated_at from public.people where id = $1", [pid])).rows[0];
+    check("Deactivating stamps the date, and the app can't backdate it", gone.deactivated_at && new Date(gone.deactivated_at).getFullYear() > 2000);
+    await as(userB, "update public.people set active = true where id = $1", [pid]);
+    check("Reactivating clears it", (await as(userB, "select deactivated_at from public.people where id = $1", [pid])).rows[0].deactivated_at === null);
+    await as(userB, "update public.people set active = false where id = $1", [pid]);
     check("Makeup limit defaults to 4 weeks, admin can change it",
       (await as(userA, "update public.companies set makeup_weeks = 8 where id = $1 returning makeup_weeks", [coA])).rows[0]?.makeup_weeks === 8);
 
@@ -195,7 +203,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 42;
+  const EXPECTED = 44;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

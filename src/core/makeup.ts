@@ -57,15 +57,19 @@ export function stillNeeds<P extends { id: string; active: boolean }>(people: P[
   return people.filter((p) => p.active && !signed.has(p.id));
 }
 
-/** Person ids who signed for `weekKey`, from saved records with their attendees. */
+/** Person ids who signed for `weekKey` (as attendee, or as the presenter), from saved records. */
 export function signedFor(
   weekKey: string,
-  records: { week_start: string | null; makeup_for_week: string | null; attendees: { person_id: string | null; status: string }[] }[],
+  records: {
+    week_start: string | null; makeup_for_week: string | null; attendees: { person_id: string | null; status: string }[];
+    presenter_person_id?: string | null; presenter_signed_at?: string | null;
+  }[],
 ): string[] {
   const ids = new Set<string>();
   for (const r of records) {
     if (creditWeek(r) !== weekKey) continue;
     for (const a of r.attendees) if (a.person_id && a.status === "signed") ids.add(a.person_id);
+    if (r.presenter_person_id && r.presenter_signed_at) ids.add(r.presenter_person_id); // presenting counts
   }
   return [...ids];
 }

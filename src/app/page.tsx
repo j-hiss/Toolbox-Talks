@@ -42,7 +42,7 @@ function Home({ m }: { m: Membership }) {
   };
 
   return (
-    <Shell nav={<><NavLink href="/records/">Records</NavLink>{canAdmin(m.access) && <NavLink href="/admin/">Admin</NavLink>}</>}>
+    <Shell nav={<><NavLink href="/records/">Records</NavLink>{canAdmin(m.access) && <><NavLink href="/reports/">Reports</NavLink><NavLink href="/admin/">Admin</NavLink></>}</>}>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         {s.memberships.length > 1 ? (
           <select

@@ -147,16 +147,29 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   from the company's current info (not yet snapshotted per record).
 - Later: save a copy to the company's account automatically so the presenter doesn't have to send it.
 
-## Admin reports
-- Filters: last 4 weeks · last 12 weeks · this year · all time; one team or all.
-- Headline numbers: talks held, weeks missed (team-weeks with no talk), sign-in rate, open flags.
-- **Weekly coverage grid:** week × team, each cell the talk given, "Missed", or "Not yet" for the current week. Tap a
-  talk to open its record. Makeups count toward the week they make up and are marked late, never hidden or merged
-  into on-time.
-- **Per person per week:** on time, made up (with the reason and how late), or still missing.
-- **Employee table:** signed / not signed / absent counts and last signed date; "only people with flags" switch.
-- **Recent flags** list.
-- **CSV export**, one row per person per talk.
+## Admin reports (built)
+**Home → Reports** (owners and admins).
+- **Compliance score:** everyone on staff signs each week's talk. Score = people-weeks signed (on time or made up) ÷
+  people-weeks expected, over weeks that are over. Shown next to it: the on-time rate, so makeups never hide lateness.
+- **Every person, every week, ends in one state:**
+  - **On time:** signed that week's talk.
+  - **Made up:** signed later in a makeup. It **closes** the week (counts toward the score) and **stays marked**
+    with the date given and the reason.
+  - **Open:** not signed yet, still inside the makeup limit. Shows the make-up-by date.
+  - **Missed:** past the makeup limit. Stays against the score for good.
+  - **Due this week:** this week isn't over, so it's shown but not scored yet.
+- Absent and not-signed both mean "hasn't had it". A presenter who signed as presenter has had it.
+- **Who is expected:** people on staff that week, from when they were added to when they were deactivated
+  (`people.deactivated_at`, stamped by the database). Deactivated people still count for the weeks they worked.
+- Zero talks in a week means everyone on staff is open or missed, never "fine".
+- Filters: 4 / 12 / 26 weeks / this plan year; all teams, one team, or no team (team as of today).
+- **By week:** score bar per week; tap for who's open (make up by date), missed, made up (date + reason), on time,
+  and the talks given that week (makeups tagged).
+- **By person:** on time, made up, open, missed and score; "only people with open or missed weeks" switch.
+- **Flags on sign-in sheets:** recent not-signed / absent rows, each linking to its record.
+- **CSV export:** one row per person per week: week, week #, talk, person, team, status, signed on, makeup reason,
+  record ID.
+- Reports carry the same no-compliance-claim note as the PDF.
 
 ## Not yet decided
 - **Where signatures live.** Today they're PNG images inside the record rows, protected by the same row-level
