@@ -92,6 +92,22 @@ customer #1, not a special case.
   - Employee ID matches existing people, so re-uploading updates instead of duplicating.
   - Accepts `.xlsx` and `.csv`.
 
+## Look and company colors (built)
+- **Default look, "Signal":** the safety colors on signs and tags (ANSI Z535 in the US, ISO 3864 worldwide), so it
+  reads as safety in any trade. Safety blue for the brand (header, week card, links, selected tab), safety orange for
+  main buttons, green only for done/signed, yellow only for caution (open makeups, heat), red only for missed/not
+  signed. Schibsted Grotesk (bundled, works offline), sentence case, soft rounded cards and buttons.
+- **Admin → Brand:** an admin can change any of the eight colors (brand, buttons, done, caution, missed, background,
+  cards, text) with a color picker or an exact hex code, or start from a preset (Signal, Harbor, Cobalt, Graphite).
+  The whole app changes live while trying colors; nothing is saved until "Save colors"; leaving the tab puts the
+  saved colors back. "Back to default" returns to Signal.
+- **Checks, not blocks:** plain-language warnings when a choice makes text hard to read (WCAG contrast) or makes
+  two meanings look alike (done vs missed, buttons vs missed). They warn; the admin can still save.
+- Saved per company (`companies.theme`, only the changed colors), seen by everyone in that company, remembered on
+  the phone so the app opens in the right colors offline. The PDF header band uses the brand color; the PDF's
+  status colors and content don't change with it.
+- Dark mode keeps the company's colors and uses its own background, cards and text.
+
 ## Jobsites and the office
 - Talks can happen on a jobsite **or at the office or shop**. Each place is marked Jobsite or Office or shop. Where a
   talk happened is recorded, never flagged: no place is "wrong".

@@ -71,7 +71,7 @@ export default function SignIn() {
               inputMode="numeric"
               autoComplete="one-time-code"
               maxLength={6}
-              className={`${inputClass} font-display text-3xl tracking-[0.3em]`}
+              className={`${inputClass} font-display text-3xl tracking-[0.3em] tracking-tight`}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
             />

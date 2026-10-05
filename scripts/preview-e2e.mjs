@@ -61,7 +61,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await p.click("button:has-text('Save')"); await p.waitForTimeout(1200);
   log("saved:", await p.locator("h1").textContent());
   await p.click("nav[aria-label=Main] >> text=Home"); await p.waitForTimeout(900); await shot("home-after");
-  log("week card:", (await p.locator("section:has-text('This week so far')").last().innerText().catch(() => "none")).replace(/\s+/g, " "));
+  log("week card:", (await p.locator("section:has-text('Signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " "));
   log("last setup:", await p.locator("text=Set up like last time").textContent().catch(() => "none"));
   await p.click("nav[aria-label=Main] >> text=Records"); await p.waitForTimeout(800); await shot("records");
   log("records:", (await p.locator("main h3").allInnerTexts()).join(" | "));
@@ -76,7 +76,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("text=Preview"); await q.click("text=Add example history"); await q.waitForTimeout(1500);
   await q.selectOption("main select", { label: "Example Jobsite" }).catch(() => {}); await q.waitForTimeout(500);
   log("2 home heat:", (await q.locator("main [role=alert]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).find((t) => /Heat index/.test(t)) ?? "none");
-  log("2 home week card:", (await q.locator("section:has-text('This week so far')").last().innerText()).replace(/\s+/g, " "));
+  log("2 home week card:", (await q.locator("section:has-text('Signed this week')").last().innerText()).replace(/\s+/g, " "));
   await q.click("text=Give a makeup"); await q.waitForTimeout(600);
   await q.locator("[role=radio]").nth(0).click(); await q.click("button:has-text('Off that week')"); await q.click("text=Continue to the talk"); await q.waitForTimeout(400);
   log("2 read heat:", (await q.locator("main p.border-warn").first().innerText().catch(() => "none")).replace(/\s+/g, " "), "| reminder lines:", await q.locator("main p.border-l-4.border-warn").count());
@@ -150,6 +150,30 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.fill("#is-note", "Ladder replaced"); await r.click("text=Mark fixed"); await r.waitForTimeout(700);
   await r.click("button:has-text('Fixed (')"); await r.waitForTimeout(300);
   log("3 fixed:", (await r.locator("main ul li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
+  // Scenario 4: Admin -> Brand. Colors change live, save, survive a reload, and go back to default.
+  const brandVar = (pg) => pg.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brand").trim());
+  const markBg = (pg) => pg.evaluate(() => getComputedStyle(document.querySelector("header a span")).backgroundColor);
+  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500);
+  await r.click("[role=tab]:has-text('Brand')"); await r.waitForTimeout(400);
+  log("4 brand start:", await brandVar(r), "| checks:", await r.locator("main [role=status]").last().innerText());
+  await r.screenshot({ path: `${OUT}/e-brand.png`, fullPage: true });
+  await r.click("button:has-text('Harbor')"); await r.waitForTimeout(300);
+  log("4 live after Harbor:", await brandVar(r), "| header mark:", await markBg(r));
+  await r.fill('input[aria-label="Buttons hex code"]', "#a01539"); await r.press('input[aria-label="Buttons hex code"]', "Enter"); await r.waitForTimeout(300);
+  log("4 warning for red buttons:", (await r.locator("main [role=status]").last().innerText()).replace(/\s+/g, " "));
+  await r.fill('input[aria-label="Buttons hex code"]', "#D2492F"); await r.press('input[aria-label="Buttons hex code"]', "Enter");
+  await r.click("button:has-text('Save colors')"); await r.waitForTimeout(700);
+  await r.screenshot({ path: `${OUT}/e-brand-harbor.png`, fullPage: true });
+  await r.reload(); await r.waitForTimeout(1200);
+  log("4 after reload:", await brandVar(r));
+  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(700);
+  await r.screenshot({ path: `${OUT}/e-home-harbor.png` });
+  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Brand')"); await r.waitForTimeout(300);
+  await r.fill('input[aria-label="Brand hex code"]', "#000000"); await r.press('input[aria-label="Brand hex code"]', "Enter"); await r.waitForTimeout(200);
+  await r.click("[role=tab]:has-text('People')"); await r.waitForTimeout(300);
+  log("4 unsaved change dropped on leaving:", await brandVar(r));
+  await r.click("[role=tab]:has-text('Brand')"); await r.click("button:has-text('Back to default')"); await r.click("button:has-text('Save colors')"); await r.waitForTimeout(700);
+  log("4 back to default:", await brandVar(r));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

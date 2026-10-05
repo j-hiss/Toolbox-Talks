@@ -39,7 +39,7 @@ export function NotConfigured({ message }: { message: string | null }) {
   return (
     <Shell tabs={false}>
       <Notice tone="error">
-        <p className="font-bold">The app isn&apos;t connected to a database yet.</p>
+        <p className="font-semibold">The app isn&apos;t connected to a database yet.</p>
         <p className="mt-1">{message}</p>
         <p className="mt-2">On your Mac: run <code>npm run db:start</code>, then <code>npx supabase status</code>, copy the API URL and anon key into <code>.env.local</code>, and restart <code>npm run dev</code>.</p>
       </Notice>

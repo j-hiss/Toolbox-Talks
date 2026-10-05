@@ -28,6 +28,12 @@ const rec = (over: Partial<TalkRecord> = {}): TalkRecord => ({
 const text = (r: TalkRecord) => buildRecordPdf(r, co).output().replace(/\\([()\\])/g, "$1"); // un-escape PDF strings
 
 describe("PDF record", () => {
+  it("header band is the company's brand color (default Signal blue when none is set)", () => {
+    // jsPDF writes the fill as "r g b rg" (2 decimals) right before the full-width band "0. <top> <width> -8. re".
+    const band = (c: Company) => buildRecordPdf(rec(), c).output().match(/([\d.]+ [\d.]+ [\d.]+) rg\n0\. [\d.]+ [\d.]+ -8\. re/)?.[1];
+    expect(band(co)).toBe("0.04 0.31 0.64"); // #0B4EA2
+    expect(band({ ...co, theme: { brand: "#123456" } })).toBe("0.07 0.2 0.34");
+  });
   it("every signature line has the full date and time", () => {
     expect(stampParts("2026-10-06T11:15:00Z")).toEqual({ date: "Oct 6, 2026", time: "11:15 AM UTC" });
     const pdf = text(rec());

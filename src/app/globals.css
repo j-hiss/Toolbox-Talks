@@ -1,40 +1,56 @@
 @import "tailwindcss";
 
-/* Design tokens carried over from the prototype. Every color is a token; dark mode redefines the tokens only. */
+/*
+ * Design tokens. The look is "Signal": the safety colors on signs and tags (ANSI Z535 / ISO 3864).
+ * A company can change any of the eight inputs (--t-*) from Admin → Brand; src/core/theme.ts sets them and
+ * checks readability. Everything else is mixed from them here, so dark mode only swaps background, cards and text.
+ */
 :root {
-  --bg: #f3f2ee;
-  --surface: #ffffff;
-  --fg: #1b1d1f;
-  --muted: #5d6166;
-  --line: #d9d7d0;
-  --hivis: #f5c400;
-  --hivis-ink: #1b1d1f;
-  --ok: #1f7a45;
-  --warn: #b4231b;
-  --warn-bg: #fbe6e4;
-  /* Charts (validated for color-vision deficiency, light and dark): two series, gridlines, score bands. */
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --grid: #e1e0d9;
-  --band-good: color-mix(in srgb, #0ca30c 22%, var(--surface));
-  --band-warn: color-mix(in srgb, #fab219 40%, var(--surface));
-  --band-bad: color-mix(in srgb, #d03b3b 30%, var(--surface));
+  --brand: var(--t-brand, #0b4ea2);
+  --brand-ink: var(--t-brand-ink, #ffffff);
+  --action: var(--t-action, #c8410c);
+  --action-ink: var(--t-action-ink, #ffffff);
+  --ok: var(--t-done, #00843d);
+  --ok-ink: var(--t-done-ink, #ffffff);
+  --caution: var(--t-caution, #f5b700);
+  --warn: var(--t-danger, #c8102e);
+  --warn-ink: var(--t-danger-ink, #ffffff);
+  --bg: var(--t-bg, #eef1f5);
+  --surface: var(--t-surface, #ffffff);
+  --fg: var(--t-text, #14202e);
+
+  --muted: color-mix(in srgb, var(--fg) 68%, var(--surface));
+  --line: color-mix(in srgb, var(--fg) 13%, var(--surface));
+  --brand-soft: color-mix(in srgb, var(--brand) 11%, var(--surface));
+  --brand-text: var(--brand);
+  --ok-bg: color-mix(in srgb, var(--ok) 13%, var(--surface));
+  --ok-text: color-mix(in srgb, var(--ok) 75%, var(--fg));
+  --caution-bg: color-mix(in srgb, var(--caution) 20%, var(--surface));
+  --caution-text: color-mix(in srgb, var(--caution) 35%, var(--fg));
+  --warn-bg: color-mix(in srgb, var(--warn) 11%, var(--surface));
+  --warn-text: var(--warn);
+
+  /* Charts (two series, gridlines, score bands) follow the brand: compliance in brand, on time in button color. */
+  --series-1: var(--brand-text);
+  --series-2: var(--action);
+  --grid: var(--line);
+  --band-good: color-mix(in srgb, var(--ok) 24%, var(--surface));
+  --band-warn: color-mix(in srgb, var(--caution) 38%, var(--surface));
+  --band-bad: color-mix(in srgb, var(--warn) 24%, var(--surface));
 }
 
+/* Dark: own background, cards and text; the company's colors stay, lightened where they're used as text. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141517;
-    --surface: #1d1f22;
-    --fg: #ecebe6;
-    --muted: #9a9ea4;
-    --line: #33363a;
-    --hivis-ink: #141517;
-    --ok: #4cc27e;
-    --warn: #ff6a5f;
-    --warn-bg: #3a1f1d;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --grid: #2c2c2a;
+    --bg: #0e131a;
+    --surface: #18202a;
+    --fg: #e8edf3;
+    --brand-text: color-mix(in srgb, var(--brand) 55%, #ffffff);
+    --warn-text: color-mix(in srgb, var(--warn) 60%, #ffffff);
+    --brand-soft: color-mix(in srgb, var(--brand) 26%, var(--surface));
+    --ok-bg: color-mix(in srgb, var(--ok) 22%, var(--surface));
+    --caution-bg: color-mix(in srgb, var(--caution) 18%, var(--surface));
+    --warn-bg: color-mix(in srgb, var(--warn) 22%, var(--surface));
     color-scheme: dark;
   }
 }
@@ -45,13 +61,31 @@
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-line: var(--line);
-  --color-hivis: var(--hivis);
-  --color-hivis-ink: var(--hivis-ink);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-text: var(--brand-text);
+  --color-action: var(--action);
+  --color-action-ink: var(--action-ink);
   --color-ok: var(--ok);
+  --color-ok-ink: var(--ok-ink);
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-text: var(--ok-text);
+  --color-caution: var(--caution);
+  --color-caution-bg: var(--caution-bg);
+  --color-caution-text: var(--caution-text);
   --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
   --color-warn-bg: var(--warn-bg);
-  --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
-  --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --color-warn-text: var(--warn-text);
+  --font-display: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
+  --font-sans: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
+  /* Softer corners across the app: chips 8px, inputs 12px, buttons and cards 16px, big cards 24px. */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
 }
 
 html,

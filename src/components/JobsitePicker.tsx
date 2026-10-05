@@ -64,7 +64,7 @@ export function JobsitePicker({ companyId, isAdmin, onChange }: { companyId: str
       {sites && sites.length === 0 ? (
         <p className="mt-3 text-sm text-muted">
           No jobsites yet.{" "}
-          {isAdmin ? <Link className="font-bold underline" href="/admin/#jobsites">Add one in Admin</Link> : "Ask your admin to add them."}
+          {isAdmin ? <Link className="font-semibold text-brand-text underline underline-offset-2" href="/admin/#jobsites">Add one in Admin</Link> : "Ask your admin to add them."}
         </p>
       ) : (
         <div className="mt-3 flex flex-wrap gap-2">

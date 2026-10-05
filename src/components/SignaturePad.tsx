@@ -83,10 +83,10 @@ export function SignaturePad({ label, value, onChange, tall = false, hint = "Sig
         onPointerCancel={finish}
       />
       <div className="mt-1 flex items-center justify-between text-sm">
-        <span className={value ? "font-bold text-ok" : "text-muted"}>
+        <span className={value ? "font-semibold text-ok-text" : "text-muted"}>
           {value ? `Signed ${new Date(value.signedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : hint}
         </span>
-        {value && <button type="button" onClick={clear} className="min-h-11 px-2 font-bold underline">Clear</button>}
+        {value && <button type="button" onClick={clear} className="min-h-11 px-2 font-semibold text-brand-text underline underline-offset-2">Clear</button>}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 // Row shapes as stored in Supabase (snake_case, matching supabase/migrations/).
+import type { Theme } from "@/core/theme";
 import type { IndustryId } from "@/core/industries";
 import type { LanguageId } from "@/core/languages";
 
@@ -16,6 +17,7 @@ export type Company = {
   program_start: string; // YYYY-MM-DD, the Monday of Week 1
   default_jobsite: string;
   makeup_weeks: number; // how many weeks back a missed talk can be made up
+  theme?: Partial<Theme> | null; // only the colors this company changed (Admin → Brand); see src/core/theme.ts
 };
 
 export type Membership = { company: Company; access: Access };

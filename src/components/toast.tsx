@@ -44,11 +44,11 @@ export function Toaster() {
         <div
           key={t.id}
           role={t.tone === "error" ? "alert" : "status"}
-          className={`toast-in pointer-events-auto flex max-w-md items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold shadow-lg ${t.tone === "error" ? "bg-[#b4231b] text-white" : "bg-[#1b1d1f] text-white ring-1 ring-white/15"}`}
+          className={`toast-in pointer-events-auto flex max-w-md items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold shadow-lg ${t.tone === "error" ? "bg-warn text-warn-ink" : "bg-fg text-bg"}`}
         >
           <span>{t.text}</span>
           {t.action && (
-            <button className="ml-auto rounded px-2 py-1 font-display uppercase tracking-wide text-hivis underline-offset-2 hover:underline" onClick={() => { t.action!.run(); dismissToast(); }}>
+            <button className="ml-auto rounded px-2 py-1 font-semibold underline underline-offset-2" onClick={() => { t.action!.run(); dismissToast(); }}>
               {t.action.label}
             </button>
           )}

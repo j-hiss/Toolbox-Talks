@@ -9,6 +9,7 @@ import { LANGUAGES } from "@/core/languages";
 import { parseDay, weekLabel } from "@/core/weeks";
 import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
+import { normalizeTheme, rgb } from "@/core/theme";
 
 export const PDF_FOOTER = "Documents a safety meeting. Does not by itself certify OSHA compliance.";
 
@@ -64,7 +65,8 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   };
 
   // Company header ------------------------------------------------------------------------------------------------
-  doc.setFillColor(245, 196, 0); doc.rect(0, 0, W, 8, "F");
+  // A band in the company's brand color (Admin → Brand). Decoration only: the record's content never depends on it.
+  doc.setFillColor(...rgb(normalizeTheme(co.theme).brand)); doc.rect(0, 0, W, 8, "F");
   doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text(co.name || "Company name not set", M, y + 4);
   doc.setFontSize(9); doc.setTextColor(GREY); doc.text("TOOLBOX TALK RECORD", W - M, y + 4, { align: "right" });
   y += 18; doc.setTextColor(60); doc.setFont("helvetica", "normal"); doc.setFontSize(9);

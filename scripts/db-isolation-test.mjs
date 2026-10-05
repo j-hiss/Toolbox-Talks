@@ -174,6 +174,14 @@ async function main() {
     await as(userB, "update public.people set active = false where id = $1", [pid]);
     check("Makeup limit defaults to 4 weeks, admin can change it",
       (await as(userA, "update public.companies set makeup_weeks = 8 where id = $1 returning makeup_weeks", [coA])).rows[0]?.makeup_weeks === 8);
+    // Brand colors: admins set their own company's; nobody else can; only real colors are stored.
+    check("A new company starts with the default colors", (await as(userA, "select theme from public.companies where id = $1", [coA])).rows[0]?.theme && Object.keys((await as(userA, "select theme from public.companies where id = $1", [coA])).rows[0].theme).length === 0);
+    check("An admin can change their company's colors",
+      (await as(userA, "update public.companies set theme = $2 where id = $1 returning theme", [coA, { brand: "#123456", action: "#AA3300" }])).rows[0]?.theme?.brand === "#123456");
+    check("A can't change B's colors", (await as(userA, "update public.companies set theme = $2 where id = $1", [coB, { brand: "#000000" }])).rowCount === 0);
+    check("A presenter can't change the colors", (await as(presenterA, "update public.companies set theme = $2 where id = $1", [coA, { brand: "#000000" }])).rowCount === 0);
+    check("Only hex colors for known parts are stored", await fails(() => as(userA, "update public.companies set theme = $2 where id = $1", [coA, { brand: "red" }]))
+      && await fails(() => as(userA, "update public.companies set theme = $2 where id = $1", [coA, { logo: "#000000" }])));
 
     // Site notes, heat, and issues raised at a talk.
     const personA = (await as(userA, "select id from public.people where company_id = $1 limit 1", [coA])).rows[0].id;

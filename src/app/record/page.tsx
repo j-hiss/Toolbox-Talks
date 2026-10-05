@@ -84,10 +84,10 @@ function RecordView({ m }: { m: Membership }) {
 
       <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
         {details.map(([k, v]) => (
-          <div key={k} className="contents"><dt className="text-muted">{k}</dt><dd className="font-bold">{v}</dd></div>
+          <div key={k} className="contents"><dt className="text-muted">{k}</dt><dd className="font-semibold">{v}</dd></div>
         ))}
         {rec.latitude != null && rec.longitude != null && (
-          <div className="contents"><dt className="text-muted">Location</dt><dd><a className="font-bold underline" target="_blank" rel="noreferrer" href={mapsLink({ latitude: rec.latitude, longitude: rec.longitude })}>Open in Maps</a></dd></div>
+          <div className="contents"><dt className="text-muted">Location</dt><dd><a className="font-semibold text-brand-text underline underline-offset-2" target="_blank" rel="noreferrer" href={mapsLink({ latitude: rec.latitude, longitude: rec.longitude })}>Open in Maps</a></dd></div>
         )}
       </dl>
 
@@ -113,7 +113,7 @@ function RecordView({ m }: { m: Membership }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={a.signature} alt={`Signature of ${a.name}`} className="h-12 w-32 rounded bg-white object-contain" />
             ) : (
-              <span className={`rounded px-2 py-0.5 font-display text-xs font-bold uppercase ${STATUS_CHIP[a.status]}`}>{STATUS_LABEL[a.status]}</span>
+              <span className={`rounded px-2 py-0.5 font-display text-xs font-semibold ${STATUS_CHIP[a.status]}`}>{STATUS_LABEL[a.status]}</span>
             )}
           </li>
         ))}
@@ -126,7 +126,7 @@ function RecordView({ m }: { m: Membership }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={rec.presenter_signature} alt={`Signature of ${rec.presenter_name}`} className="h-12 w-32 rounded bg-white object-contain" />
         ) : (
-          <span className={`rounded px-2 py-0.5 font-display text-xs font-bold uppercase ${STATUS_CHIP.not_signed}`}>Not signed</span>
+          <span className={`rounded px-2 py-0.5 font-display text-xs font-semibold ${STATUS_CHIP.not_signed}`}>Not signed</span>
         )}
       </div>
 
@@ -136,18 +136,18 @@ function RecordView({ m }: { m: Membership }) {
           <div className="mt-3 flex flex-col gap-2 text-sm">
             {rec.site_notes && <p className="rounded-r border-l-4 border-fg bg-surface px-3 py-2"><b>Today on this site:</b> {rec.site_notes}</p>}
             {rec.heat && (
-              <p className="rounded-lg border border-line bg-surface px-3 py-2">
+              <p className="rounded-xl bg-surface px-3 py-2">
                 <b>Heat index up to {rec.heat.max_heat_index_f}°F</b> ({HEAT_LABEL[rec.heat.level as HeatLevel] ?? rec.heat.level}){rec.heat.reminder_read ? " · heat reminder read with this talk" : ""}
               </p>
             )}
             {issues.length > 0 && (
-              <div className="rounded-lg border border-line bg-surface px-3 py-2">
+              <div className="rounded-xl bg-surface px-3 py-2">
                 <b>Raised by the crew ({issues.length})</b>
                 <ul className="mt-1 flex flex-col gap-1">
                   {issues.map((i) => (
                     <li key={i.id}>
                       <Link href="/records/#issues" className="underline-offset-2 hover:underline">{i.description}</Link>
-                      <small className={`block ${isOverdue(i) ? "font-bold text-warn" : "text-muted"}`}>
+                      <small className={`block ${isOverdue(i) ? "font-semibold text-warn-text" : "text-muted"}`}>
                         {i.owner_name || "No owner"}{i.status === "fixed" ? " · fixed" : i.due_date ? ` · fix by ${i.due_date}${isOverdue(i) ? " (overdue)" : ""}` : ""}
                       </small>
                     </li>
@@ -160,11 +160,11 @@ function RecordView({ m }: { m: Membership }) {
       )}
 
       <GroupHeading>What was covered</GroupHeading>
-      <div className="mt-3 rounded-lg border border-line bg-surface p-4 text-sm">
-        <p className="font-bold">{rec.content.hook}</p>
+      <div className="mt-3 rounded-xl bg-surface p-4 text-sm">
+        <p className="font-semibold">{rec.content.hook}</p>
         {rec.content.sections.map((s) => (
           <div key={s.heading} className="mt-3">
-            <h3 className="font-display font-bold uppercase tracking-wide">{s.heading}</h3>
+            <h3 className="font-display font-semibold">{s.heading}</h3>
             <ul className="mt-1 list-disc pl-5">{s.items.map((it) => <li key={it}>{it}</li>)}</ul>
           </div>
         ))}

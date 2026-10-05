@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 // Fonts are bundled with the app (no Google Fonts request) so it works on a jobsite with no signal.
-import "@fontsource/barlow-condensed/700.css";
-import "@fontsource/barlow-condensed/800.css";
-import "@fontsource/atkinson-hyperlegible/400.css";
-import "@fontsource/atkinson-hyperlegible/700.css";
+import "@fontsource/schibsted-grotesk/400.css";
+import "@fontsource/schibsted-grotesk/500.css";
+import "@fontsource/schibsted-grotesk/600.css";
+import "@fontsource/schibsted-grotesk/700.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 

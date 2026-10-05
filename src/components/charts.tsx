@@ -186,7 +186,7 @@ export function TeamGrid({ rows, weeks, currentKey }: {
           <tbody>
             {rows.map((r, ri) => (
               <tr key={r.name}>
-                <th scope="row" className="sticky left-0 z-10 max-w-28 truncate bg-bg pr-2 text-left font-bold">{r.name}</th>
+                <th scope="row" className="sticky left-0 z-10 max-w-28 truncate bg-bg pr-2 text-left font-semibold">{r.name}</th>
                 {weeks.map((w) => {
                   const c = r.cells.find((x) => x.key === w.key);
                   const t = c?.tally;
@@ -198,7 +198,7 @@ export function TeamGrid({ rows, weeks, currentKey }: {
                   return (
                     <td key={w.key} className="p-0">
                       <button
-                        className={`h-9 w-full min-w-11 rounded text-center font-bold ${now ? "border border-dashed border-muted" : ""} ${on ? "outline-2 outline-fg" : ""} ${!t || t.expected === 0 ? "text-muted" : ""}`}
+                        className={`h-9 w-full min-w-11 rounded text-center font-semibold ${now ? "border border-dashed border-muted" : ""} ${on ? "outline-2 outline-fg" : ""} ${!t || t.expected === 0 ? "text-muted" : ""}`}
                         style={{ background: bg }}
                         aria-label={`${r.name}, week of ${w.label}: ${t && t.expected ? detail(t) : "no one expected"}`}
                         disabled={!t || t.expected === 0}

@@ -55,11 +55,11 @@ export function IssuesList({ companyId }: { companyId: string }) {
       <div className="mt-3 flex items-center gap-1.5" role="group" aria-label="Show">
         {(["open", "fixed"] as const).map((k) => (
           <button key={k} aria-pressed={show === k} onClick={() => setShow(k)}
-            className={`min-h-10 rounded-full border px-3.5 text-sm font-bold ${show === k ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}>
+            className={`min-h-10 rounded-full border px-3.5 text-sm font-semibold ${show === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>
             {k === "open" ? `Open (${open.length})` : `Fixed (${fixed.length})`}
           </button>
         ))}
-        {overdue > 0 && <span className="ml-auto rounded bg-warn px-2 py-0.5 font-display text-xs font-bold uppercase text-white">{overdue} overdue</span>}
+        {overdue > 0 && <span className="ml-auto rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">{overdue} overdue</span>}
       </div>
       {list.length === 0 ? (
         <p className="mt-4 text-sm text-muted">{show === "open" ? "Nothing open. Issues the crew raises at a talk show up here." : "Nothing fixed yet."}</p>
@@ -76,7 +76,7 @@ export function IssuesList({ companyId }: { companyId: string }) {
                     {i.status === "open" ? (i.due_date ? ` · fix by ${short(i.due_date)}` : "") : ` · fixed ${short(i.fixed_at!)}${i.fixed_note ? `: ${i.fixed_note}` : ""}`}
                     {i.jobsite_name ? ` · ${i.jobsite_name}` : ""} · raised {short(i.raised_at)}
                   </small>
-                  {late && <span className="mt-1 block font-display text-xs font-bold uppercase text-warn">Overdue</span>}
+                  {late && <span className="mt-1 block font-display text-xs font-semibold text-warn-text">Overdue</span>}
                 </button>
               </li>
             );
@@ -97,7 +97,7 @@ export function IssuesList({ companyId }: { companyId: string }) {
               void save(editing.id, patch, "Saved");
             }}
           >
-            <p className="break-words text-lg font-bold">{editing.description}</p>
+            <p className="break-words text-lg font-semibold">{editing.description}</p>
             <p className="text-sm text-muted">
               Raised {short(editing.raised_at)}{editing.raised_by_name ? ` by ${editing.raised_by_name}'s crew` : ""}{editing.jobsite_name ? ` at ${editing.jobsite_name}` : ""}
               {editing.record_id && <> · <Link className="underline" href={`/record/#${editing.record_id}`}>see the talk</Link></>}

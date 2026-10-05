@@ -91,7 +91,7 @@ function Talk({ m }: { m: Membership }) {
   const update = (patch: Partial<TalkDraft>) => writeDraft({ ...draft, ...patch });
   const cancel = (
     <button
-      className="text-sm font-bold text-muted underline"
+      className="text-sm font-semibold text-muted underline"
       onClick={() => { stopSpeaking(); clearDraft(co.id); router.replace("/"); }}
     >
       Discard this talk
@@ -122,9 +122,9 @@ function Steps({ n, label }: { n: 1 | 2 | 3; label: string }) {
   return (
     <div className="mb-3">
       <div className="flex gap-1.5" aria-hidden>
-        {[1, 2, 3].map((i) => <span key={i} className={`h-1.5 flex-1 rounded ${i <= n ? "bg-hivis" : "bg-line"}`} />)}
+        {[1, 2, 3].map((i) => <span key={i} className={`h-1.5 flex-1 rounded ${i <= n ? "bg-brand" : "bg-line"}`} />)}
       </div>
-      <p className="mt-3 font-display text-sm font-bold uppercase tracking-widest text-muted">Step {n} of 3 · {label}</p>
+      <p className="mt-3 font-display text-sm font-semibold text-muted">Step {n} of 3 · {label}</p>
     </div>
   );
 }
@@ -176,14 +176,14 @@ function MakeupPick({ weeks, draft, update, open }: {
                 role="radio"
                 aria-checked={on}
                 onClick={() => choose(w)}
-                className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left ${on ? "border-hivis bg-surface shadow-[0_0_0_2px_var(--hivis)]" : "border-line bg-surface"} ${open && !people.length && !on ? "opacity-60" : ""}`}
+                className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left ${on ? "border-brand bg-surface shadow-[0_0_0_2px_var(--brand)]" : "border-line bg-surface"} ${open && !people.length && !on ? "opacity-60" : ""}`}
               >
-                <span className="mt-0.5 whitespace-nowrap rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold text-hivis-ink">{t.code}</span>
+                <span className="mt-0.5 whitespace-nowrap rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{t.code}</span>
                 <span className="min-w-0 flex-1">
                   <b className="block">{t.content.en.title}</b>
                   <small className="text-muted">Week {w.n} · {weekLabel(w.monday)}</small>
                   {open && (
-                    <small className={`block ${people.length ? "font-bold" : "text-muted"}`}>
+                    <small className={`block ${people.length ? "font-semibold" : "text-muted"}`}>
                       {people.length ? `${people.length} still need it: ${people.map((p) => p.name).join(", ")}` : "Everyone has this week"}
                     </small>
                   )}
@@ -203,7 +203,7 @@ function MakeupPick({ weeks, draft, update, open }: {
             key={r}
             aria-pressed={draft.makeupPick === r}
             onClick={() => { setMsg(null); update({ makeupPick: r }); }}
-            className={`min-h-11 rounded-full border px-3.5 text-sm font-bold ${draft.makeupPick === r ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-full border px-3.5 text-sm font-semibold ${draft.makeupPick === r ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
           >
             {r}
           </button>
@@ -219,7 +219,7 @@ function MakeupPick({ weeks, draft, update, open }: {
         />
       )}
       {draft.makeupPick && draft.makeupPick !== "Other" && !draft.makeupNote && (
-        <button className="mt-2 min-h-11 text-sm font-bold underline" onClick={() => update({ makeupNote: " " })}>+ Add a note</button>
+        <button className="mt-2 min-h-11 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => update({ makeupNote: " " })}>+ Add a note</button>
       )}
       {msg && <div className="mt-4"><Notice tone="error">{msg}</Notice></div>}
       <div className="sticky bottom-0 -mx-4 mt-5 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
@@ -307,7 +307,7 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
       onError: () => { setLine(null); setStatus(ui.noVoice); },
     });
   };
-  const hl = (i: number) => (line === i ? "rounded bg-hivis text-hivis-ink shadow-[0_0_0_4px_var(--hivis)]" : "");
+  const hl = (i: number) => (line === i ? "rounded bg-caution-bg shadow-[0_0_0_4px_var(--caution-bg)]" : "");
 
   return (
     <>
@@ -320,16 +320,16 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
             disabled={!l.ready || !talk.content[l.id]}
             aria-pressed={draft.lang === l.id}
             onClick={() => { stopRef.current?.(); setLine(null); update({ lang: l.id as LanguageId }); }}
-            className={`rounded-full border px-3 py-1.5 text-sm font-bold disabled:opacity-40 ${draft.lang === l.id ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}
+            className={`rounded-full border px-3 py-1.5 text-sm font-semibold disabled:opacity-40 ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
           >
-            {l.label}{!l.ready && <small className="ml-1 font-normal uppercase">soon</small>}
+            {l.label}{!l.ready && <small className="ml-1 font-normal">soon</small>}
           </button>
         ))}
       </div>
       <div className="mt-2 flex items-center gap-1.5" role="group" aria-label="Text size">
         <span className="mr-1 text-sm text-muted">Text size</span>
-        <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-sm font-bold disabled:opacity-40" disabled={size === 0} onClick={() => setSize(size - 1)} aria-label="Smaller text">A−</button>
-        <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-lg font-bold disabled:opacity-40" disabled={size === 3} onClick={() => setSize(size + 1)} aria-label="Bigger text">A+</button>
+        <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-sm font-semibold disabled:opacity-40" disabled={size === 0} onClick={() => setSize(size - 1)} aria-label="Smaller text">A−</button>
+        <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-lg font-semibold disabled:opacity-40" disabled={size === 3} onClick={() => setSize(size + 1)} aria-label="Bigger text">A+</button>
       </div>
       {draft.lang !== "en" && (talk.translationStatus[draft.lang] !== "reviewed" || (hot && !heatReminderReviewed[draft.lang])) && (
         <p className="mt-2 text-xs text-muted">This translation hasn&apos;t been reviewed by a native speaker yet.</p>
@@ -346,7 +346,7 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
       <div className="mt-3">
         {editingNotes || notes ? (
           <div className="rounded-lg border border-dashed border-line bg-surface p-3">
-            <label htmlFor="site-notes" className="text-sm font-bold">Today on this site <small className="font-normal text-muted">read to the crew, saved with the record</small></label>
+            <label htmlFor="site-notes" className="text-sm font-semibold">Today on this site <small className="font-normal text-muted">read to the crew, saved with the record</small></label>
             <textarea
               id="site-notes"
               rows={2}
@@ -358,22 +358,22 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
             />
           </div>
         ) : (
-          <button className="min-h-11 text-sm font-bold underline" onClick={() => setEditingNotes(true)}>+ Add today&apos;s site notes</button>
+          <button className="min-h-11 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => setEditingNotes(true)}>+ Add today&apos;s site notes</button>
         )}
       </div>
 
-      <h1 id="line-0" className={`mt-4 font-display text-4xl font-extrabold uppercase leading-none text-balance ${hl(0)}`}>{text.title}</h1>
+      <h1 id="line-0" className={`mt-4 font-display text-4xl font-semibold leading-none text-balance tracking-tight ${hl(0)}`}>{text.title}</h1>
       {status && <p className="mt-2 text-sm text-muted" aria-live="polite">{status}</p>}
 
-      <div className={`mt-4 rounded-lg border border-line bg-surface p-4 ${textSize}`}>
+      <div className={`mt-4 rounded-xl bg-surface p-4 ${textSize}`}>
         {lines.slice(1).map((l, j) => {
           const i = j + 1;
-          if (l.kind === "hook") return <p key={i} id={`line-${i}`} className={`font-bold ${hl(i)}`}>{l.text}</p>;
-          if (l.kind === "noteh" || l.kind === "heath") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-bold uppercase tracking-wide ${l.kind === "heath" ? "text-warn" : ""} ${hl(i)}`}>{l.text}</h3>;
-          if (l.kind === "note") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-fg bg-bg px-3 py-2 font-bold ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "hook") return <p key={i} id={`line-${i}`} className={`font-semibold ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "noteh" || l.kind === "heath") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-semibold ${l.kind === "heath" ? "text-warn-text" : ""} ${hl(i)}`}>{l.text}</h3>;
+          if (l.kind === "note") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-fg bg-bg px-3 py-2 font-semibold ${hl(i)}`}>{l.text}</p>;
           if (l.kind === "heat") return <p key={i} id={`line-${i}`} className={`mt-1.5 border-l-4 border-warn pl-4 before:-ml-2 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
-          if (l.kind === "h" || l.kind === "askh") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-bold uppercase tracking-wide ${hl(i)}`}>{l.text}</h3>;
-          if (l.kind === "ask") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-hivis bg-bg px-3 py-2 ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "h" || l.kind === "askh") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-semibold ${hl(i)}`}>{l.text}</h3>;
+          if (l.kind === "ask") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-brand bg-bg px-3 py-2 ${hl(i)}`}>{l.text}</p>;
           return <p key={i} id={`line-${i}`} className={`mt-1.5 pl-4 before:-ml-4 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
         })}
       </div>
@@ -396,7 +396,7 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
 function MakeupBanner({ draft }: { draft: TalkDraft }) {
   if (!draft.makeup) return null;
   return (
-    <p className="mb-3 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+    <p className="mb-3 rounded-xl bg-surface px-3 py-2 text-sm">
       <b>Makeup for Week {draft.makeup.weekNumber}</b> ({weekLabel(parseDay(draft.makeup.weekStart))}) · {makeupReasonText(draft.makeupPick, draft.makeupNote)}
     </p>
   );
@@ -490,9 +490,9 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
             return (
               <li key={r.key}>
                 <label className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 ${isHere ? "border-line bg-surface" : "border-warn bg-warn-bg"}`}>
-                  <input type="checkbox" className="h-6 w-6 accent-[var(--hivis)]" checked={isHere} onChange={(e) => update({ present: { ...draft.present, [r.key]: e.target.checked } })} />
+                  <input type="checkbox" className="h-6 w-6 accent-[var(--brand)]" checked={isHere} onChange={(e) => update({ present: { ...draft.present, [r.key]: e.target.checked } })} />
                   <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{[r.role, r.teamName].filter(Boolean).join(" · ")}</small></span>
-                  {!isHere && <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-bold uppercase text-white">Absent</span>}
+                  {!isHere && <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Absent</span>}
                 </label>
               </li>
             );
@@ -643,7 +643,7 @@ function Sign({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={sig.image} alt={`Signature of ${t.name}`} className="h-10 w-24 rounded bg-white object-contain" />
                   ) : (
-                    <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-bold uppercase text-white">Sign now</span>
+                    <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Sign now</span>
                   )}
                 </button>
               </li>
@@ -652,8 +652,8 @@ function Sign({
           {absent.map((r) => (
             <li key={r.key} className="flex items-center gap-3 rounded-lg border border-warn bg-warn-bg p-3">
               <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.role}</small></span>
-              <button className="min-h-11 px-2 text-sm font-bold underline" onClick={() => update({ present: { ...draft.present, [r.key]: true } })}>Is here</button>
-              <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-bold uppercase text-white">Absent</span>
+              <button className="min-h-11 px-2 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => update({ present: { ...draft.present, [r.key]: true } })}>Is here</button>
+              <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Absent</span>
             </li>
           ))}
         </ul>
@@ -693,17 +693,17 @@ function Sign({
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <p className="font-display text-sm font-bold uppercase tracking-widest text-muted tabular-nums">Signing {idx + 1} of {turns.length}</p>
-        <button className="min-h-11 text-sm font-bold underline" onClick={() => go(turns.length)}>Review all</button>
+        <p className="font-display text-sm font-semibold text-muted tabular-nums">Signing {idx + 1} of {turns.length}</p>
+        <button className="min-h-11 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => go(turns.length)}>Review all</button>
       </div>
       <div className="mt-2 flex gap-1" aria-hidden>
         {turns.map((x, i) => (
-          <span key={x.key} className={`h-1.5 flex-1 rounded ${sigOf(x) ? "bg-ok" : i === idx ? "bg-hivis" : "bg-line"}`} />
+          <span key={x.key} className={`h-1.5 flex-1 rounded ${sigOf(x) ? "bg-ok" : i === idx ? "bg-brand" : "bg-line"}`} />
         ))}
       </div>
       <MakeupBanner draft={draft} />
       <p className="mt-5 text-sm text-muted">{t.presenter ? "Presenter signs first" : "Pass the phone to"}</p>
-      <h1 className="font-display text-5xl font-extrabold uppercase leading-none text-balance">{t.name}</h1>
+      <h1 className="font-display text-5xl font-semibold leading-none text-balance tracking-tight">{t.name}</h1>
       <p className="mt-1 text-muted">{t.sub}</p>
       <div className="mt-4">
         <SignaturePad key={t.key} tall label={t.name} value={sig} onChange={setSig} hint={ui.signHere} />
@@ -748,10 +748,10 @@ function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; upda
       <p className="mt-2 text-sm text-muted">Hazards or problems to fix, like a damaged ladder or missing guardrail. Each one gets an owner and a fix-by date.</p>
       <ul className="mt-3 flex flex-col gap-2">
         {draft.issues.map((x, i) => (
-          <li key={x.clientId} className="rounded-lg border border-line bg-surface p-3">
+          <li key={x.clientId} className="rounded-xl bg-surface p-3">
             <div className="flex items-start justify-between gap-2">
               <b className="min-w-0 break-words">{x.description}</b>
-              <button className="min-h-11 px-2 text-sm font-bold underline" onClick={() => set(draft.issues.filter((_, j) => j !== i))} aria-label={`Remove: ${x.description}`}>Remove</button>
+              <button className="min-h-11 px-2 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => set(draft.issues.filter((_, j) => j !== i))} aria-label={`Remove: ${x.description}`}>Remove</button>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <select aria-label="Owner" className={inputClass} value={x.ownerId} onChange={(e) => set(draft.issues.map((y, j) => (j === i ? { ...y, ownerId: e.target.value } : y)))}>
@@ -794,18 +794,18 @@ function Saved({ done }: { done: Done }) {
           <Notice>Saved on this phone. It will upload automatically when you have signal.</Notice>
         )}
       </div>
-      {done.issues > 0 && <p className="mt-3 text-sm"><b>{done.issues}</b> {done.issues === 1 ? "issue" : "issues"} logged for follow-up. <Link href="/records/#issues" className="font-bold underline">Track issues</Link></p>}
+      {done.issues > 0 && <p className="mt-3 text-sm"><b>{done.issues}</b> {done.issues === 1 ? "issue" : "issues"} logged for follow-up. <Link href="/records/#issues" className="font-semibold text-brand-text underline underline-offset-2">Track issues</Link></p>}
       <p className="mt-4 tabular-nums">
         <b>{c.signed}</b> signed · <b>{c.not_signed}</b> not signed · <b>{c.absent}</b> absent
         {(c.flagged > 0 || !done.presenterSigned) && (
-          <span className="ml-2 rounded bg-warn px-2 py-0.5 font-display text-xs font-bold uppercase text-white">
+          <span className="ml-2 rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">
             {c.flagged + (done.presenterSigned ? 0 : 1)} flagged
           </span>
         )}
       </p>
       <div className="mt-6 flex flex-col gap-2">
-        <Link href="/records/" className="rounded-lg bg-hivis px-4 py-4 text-center font-display text-xl font-extrabold uppercase tracking-wide text-hivis-ink">See records</Link>
-        <Link href="/" className="rounded-lg border border-line px-4 py-3 text-center font-bold">Home</Link>
+        <Link href="/records/" className="rounded-lg bg-action px-4 py-4 text-center font-display text-xl font-semibold text-action-ink">See records</Link>
+        <Link href="/" className="rounded-lg border border-line px-4 py-3 text-center font-semibold">Home</Link>
       </div>
     </>
   );

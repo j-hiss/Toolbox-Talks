@@ -1,39 +1,36 @@
 /* The real app's styles and fonts, plus what an embedded preview needs. */
-@import "@fontsource/barlow-condensed/700.css";
-@import "@fontsource/barlow-condensed/800.css";
-@import "@fontsource/atkinson-hyperlegible/400.css";
-@import "@fontsource/atkinson-hyperlegible/700.css";
+@import "@fontsource/schibsted-grotesk/400.css";
+@import "@fontsource/schibsted-grotesk/500.css";
+@import "@fontsource/schibsted-grotesk/600.css";
+@import "@fontsource/schibsted-grotesk/700.css";
 @import "../src/app/globals.css";
 @source "../src";
 @source "./";
 
-/* The viewer can force light or dark; mirror the app's dark tokens for that case. */
+/* The viewer can force light or dark; mirror the app's dark tokens (globals.css) for that case. */
 :root[data-theme="dark"] {
-  --bg: #141517;
-  --surface: #1d1f22;
-  --fg: #ecebe6;
-  --muted: #9a9ea4;
-  --line: #33363a;
-  --hivis-ink: #141517;
-  --ok: #4cc27e;
-  --warn: #ff6a5f;
-  --warn-bg: #3a1f1d;
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --grid: #2c2c2a;
+  --bg: #0e131a;
+  --surface: #18202a;
+  --fg: #e8edf3;
+  --brand-text: color-mix(in srgb, var(--brand) 55%, #ffffff);
+  --warn-text: color-mix(in srgb, var(--warn) 60%, #ffffff);
+  --brand-soft: color-mix(in srgb, var(--brand) 26%, var(--surface));
+  --ok-bg: color-mix(in srgb, var(--ok) 22%, var(--surface));
+  --caution-bg: color-mix(in srgb, var(--caution) 18%, var(--surface));
+  --warn-bg: color-mix(in srgb, var(--warn) 22%, var(--surface));
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
   :root[data-theme="light"] {
-    --bg: #f3f2ee;
-    --surface: #ffffff;
-    --fg: #1b1d1f;
-    --muted: #5d6166;
-    --line: #d9d7d0;
-    --hivis-ink: #1b1d1f;
-    --ok: #1f7a45;
-    --warn: #b4231b;
-    --warn-bg: #fbe6e4;
+    --bg: var(--t-bg, #eef1f5);
+    --surface: var(--t-surface, #ffffff);
+    --fg: var(--t-text, #14202e);
+    --brand-text: var(--brand);
+    --warn-text: var(--warn);
+    --brand-soft: color-mix(in srgb, var(--brand) 11%, var(--surface));
+    --ok-bg: color-mix(in srgb, var(--ok) 13%, var(--surface));
+    --caution-bg: color-mix(in srgb, var(--caution) 20%, var(--surface));
+    --warn-bg: color-mix(in srgb, var(--warn) 11%, var(--surface));
     color-scheme: light;
   }
 }

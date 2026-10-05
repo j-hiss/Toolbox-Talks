@@ -59,7 +59,7 @@ function Records({ m }: { m: Membership }) {
       <div className="mt-4 flex gap-1.5" role="tablist">
         {(["talks", "issues"] as const).map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => { window.location.hash = v === "issues" ? "issues" : ""; }}
-            className={`min-h-10 flex-1 rounded-full border px-3.5 font-display text-base font-bold uppercase tracking-wide ${view === v ? "border-fg bg-fg text-bg" : "border-line bg-surface text-muted"}`}>
+            className={`min-h-10 flex-1 rounded-full border px-3.5 font-display text-base font-semibold ${view === v ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
             {v === "talks" ? "Talks" : "Issues"}
           </button>
         ))}
@@ -104,7 +104,7 @@ function Records({ m }: { m: Membership }) {
               </select>
             )}
             <label className="flex min-h-11 items-center gap-2 text-sm">
-              <input type="checkbox" className="h-5 w-5 accent-[var(--hivis)]" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} />
+              <input type="checkbox" className="h-5 w-5 accent-[var(--brand)]" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} />
               Only flagged
             </label>
           </div>
@@ -114,7 +114,7 @@ function Records({ m }: { m: Membership }) {
             const wk = list.find((r) => r.week_number && !r.makeup_for_week)?.week_number ?? list[0].week_number;
             return (
               <section key={k} className="mt-5">
-                <h3 className="sticky top-[3.6rem] z-10 -mx-4 bg-bg/95 px-4 py-1.5 font-display text-sm font-bold uppercase tracking-widest text-muted backdrop-blur">
+                <h3 className="sticky top-[3.6rem] z-10 -mx-4 bg-bg/95 px-4 py-1.5 font-display text-sm font-semibold text-muted backdrop-blur">
                   {wk ? `Week ${wk} · ` : ""}{weekLabel(monday)} <span className="font-sans font-normal normal-case tracking-normal">· {list.length} talk{list.length === 1 ? "" : "s"}</span>
                 </h3>
                 <ul className="mt-1 flex flex-col gap-2">
@@ -122,7 +122,7 @@ function Records({ m }: { m: Membership }) {
                     const c = countStatuses(r.statuses.map((status) => ({ status })));
                     return (
                       <li key={r.id}>
-                        <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-lg border border-line bg-surface p-3 hover:border-hivis">
+                        <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-xl bg-surface p-3 hover:ring-2 hover:ring-brand">
                           <span className="min-w-0">
                             <b className="block">{r.title}</b>
                             {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}

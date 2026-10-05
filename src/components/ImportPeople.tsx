@@ -79,7 +79,7 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
         <div className="flex flex-col gap-3">
           <p className="text-sm">Upload your crew list from Excel or a CSV. The first row names the columns: <b>Name</b> (required), Role, Team, Employee ID, Phone, Preferred language.</p>
           <p className="text-sm text-muted">Re-uploading the same list updates people with a matching Employee ID instead of adding them twice. New crews and roles are created for you.</p>
-          <label className={`flex min-h-14 cursor-pointer items-center justify-center rounded-lg bg-hivis px-4 font-display text-xl font-extrabold uppercase tracking-wide text-hivis-ink ${busy ? "opacity-50" : ""}`}>
+          <label className={`flex min-h-14 cursor-pointer items-center justify-center rounded-lg bg-action px-4 font-display text-xl font-semibold text-action-ink ${busy ? "opacity-50" : ""}`}>
             {busy ?? "Choose a file"}
             <input type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="sr-only" disabled={!!busy}
               onChange={(e) => { void pick(e.target.files?.[0]); e.target.value = ""; }} />
@@ -92,24 +92,24 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted">{fileName}</p>
-          <p className="tabular-nums"><b>{plan.counts.add}</b> to add · <b>{plan.counts.update}</b> to update · <b className={plan.counts.skip ? "text-warn" : ""}>{plan.counts.skip}</b> skipped</p>
+          <p className="tabular-nums"><b>{plan.counts.add}</b> to add · <b>{plan.counts.update}</b> to update · <b className={plan.counts.skip ? "text-warn-text" : ""}>{plan.counts.skip}</b> skipped</p>
           {(plan.newTeams.length > 0 || plan.newRoles.length > 0) && (
             <Notice>
               {plan.newTeams.length > 0 && <>New crews: <b>{plan.newTeams.join(", ")}</b>. </>}
               {plan.newRoles.length > 0 && <>New roles that can give talks: <b>{plan.newRoles.join(", ")}</b>.</>}
             </Notice>
           )}
-          <ul className="flex max-h-[45vh] flex-col divide-y divide-line overflow-y-auto rounded-lg border border-line bg-surface text-sm">
+          <ul className="flex max-h-[45vh] flex-col divide-y divide-line overflow-y-auto rounded-xl bg-surface text-sm">
             {plan.rows.map((r) => (
               <li key={r.line} className={`px-3 py-2 ${r.action === "skip" ? "bg-warn-bg" : ""}`}>
                 <div className="flex items-baseline justify-between gap-2">
                   <b className="truncate">{r.name || "(no name)"}</b>
-                  <span className={`shrink-0 font-display text-xs font-bold uppercase ${r.action === "skip" ? "text-warn" : r.action === "update" ? "text-muted" : "text-ok"}`}>
+                  <span className={`shrink-0 font-display text-xs font-semibold ${r.action === "skip" ? "text-warn-text" : r.action === "update" ? "text-muted" : "text-ok-text"}`}>
                     {r.action === "add" ? "Add" : r.action === "update" ? "Update" : "Skip"} · row {r.line}
                   </span>
                 </div>
                 <small className="text-muted">{[r.role || "Crew member", r.team || "No team", r.employeeId && `ID ${r.employeeId}`].filter(Boolean).join(" · ")}</small>
-                {[...r.problems, ...r.notes].map((n) => <small key={n} className={`block ${r.problems.includes(n) ? "font-bold text-warn" : "text-muted"}`}>{n}</small>)}
+                {[...r.problems, ...r.notes].map((n) => <small key={n} className={`block ${r.problems.includes(n) ? "font-semibold text-warn-text" : "text-muted"}`}>{n}</small>)}
               </li>
             ))}
           </ul>

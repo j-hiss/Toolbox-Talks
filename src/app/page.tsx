@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { planReminders } from "@/core/reminders";
 import { applyReminders, remindersOn, remindersSupported, setReminders } from "@/lib/reminders";
 import { useRouter } from "next/navigation";
-import { Button, Eyebrow, GroupHeading, Notice, Shell, Title } from "@/components/ui";
+import { Button, GroupHeading, Notice, Shell } from "@/components/ui";
 
 export default function HomePage() {
   return <RequireCompany>{(m) => <Home m={m} />}</RequireCompany>;
@@ -74,15 +74,13 @@ function Home({ m }: { m: Membership }) {
         {s.memberships.length > 1 ? (
           <select
             aria-label="Company"
-            className="rounded-full border border-line bg-surface px-3 py-1 font-bold"
+            className="rounded-full border border-line bg-surface px-3 py-1 font-semibold"
             value={co.id}
             onChange={(e) => s.setCurrent(e.target.value)}
           >
             {s.memberships.map((x) => <option key={x.company.id} value={x.company.id}>{x.company.name}</option>)}
           </select>
-        ) : (
-          <span className="rounded-full border border-line px-3 py-1 font-bold">{co.name}</span>
-        )}
+        ) : null}
         <span className="rounded-full border border-line px-3 py-1 text-muted">{industry}</span>
         <span className="rounded-full border border-line px-3 py-1 text-muted">{climate.state ? climate.label : "No ZIP set"}</span>
       </div>
@@ -111,22 +109,33 @@ function Home({ m }: { m: Membership }) {
 
       {!co.zip && canAdmin(m.access) && (
         <div className="mt-4">
-          <Notice>Add your ZIP code in <Link className="font-bold underline" href="/admin/#company">Admin</Link> so heat, cold and storm talks land in the right weeks.</Notice>
+          <Notice>Add your ZIP code in <Link className="font-semibold text-brand-text underline underline-offset-2" href="/admin/#company">Admin</Link> so heat, cold and storm talks land in the right weeks.</Notice>
         </div>
       )}
 
       {isAdmin && st && <GettingStarted st={st} />}
 
       {week && talk && text ? (
-        <section className="mt-6">
-          <Eyebrow>Week {week.n} of 52 · {weekLabel(week.monday)}</Eyebrow>
-          <Title>{text.title}</Title>
-          <p className="mt-3 font-bold">{text.hook}</p>
-          <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every crew this week</p>
-          <div className="mt-5 flex flex-col gap-2">
-            <Button onClick={() => start(week.talkId)}>Start this talk</Button>
-            {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
-            <Button size="sm" variant="ghost" onClick={() => start(null)}>Make up a missed week</Button>
+        <section className="mt-5">
+          <div className="overflow-hidden rounded-2xl bg-surface">
+            <div className="bg-brand px-5 pt-5 pb-4 text-brand-ink">
+              <p className="text-sm opacity-80">Week {week.n} of 52 · {weekLabel(week.monday)}</p>
+              <h1 className="mt-1.5 font-display text-[30px] font-semibold leading-[1.08] tracking-tight text-balance">{text.title}</h1>
+              <div className="mt-4 flex gap-0.5" aria-hidden>
+                <span className="h-1.5 rounded-full bg-current opacity-60" style={{ flex: week.n - 1 }} />
+                <span className="h-1.5 rounded-full bg-action" style={{ flex: 1 }} />
+                <span className="h-1.5 rounded-full bg-current opacity-20" style={{ flex: 52 - week.n }} />
+              </div>
+            </div>
+            <div className="px-5 pt-4 pb-5">
+              <p className="leading-relaxed">{text.hook}</p>
+              <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every crew this week</p>
+              <div className="mt-4 flex flex-col gap-2">
+                <Button onClick={() => start(week.talkId)}>Start this talk</Button>
+                {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
+                <Button variant="soft" onClick={() => start(null)}>Make up a missed week</Button>
+              </div>
+            </div>
           </div>
           {st && <WeekStatusCard st={st} isAdmin={isAdmin} onMakeup={() => start(null)} />}
         </section>
@@ -146,12 +155,12 @@ function Home({ m }: { m: Membership }) {
           <GroupHeading>Coming up</GroupHeading>
           <ul className="mt-3 flex flex-col gap-2">
             {upcoming.map(({ w, t }) => (
-              <li key={w.key} className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3">
+              <li key={w.key} className="flex items-center justify-between gap-3 rounded-xl bg-surface px-4 py-3">
                 <span className="min-w-0">
                   <b className="block">{t.content.en.title}</b>
                   <small className="text-muted">Week {w.n} · {weekLabel(w.monday)}</small>
                 </span>
-                <span className="whitespace-nowrap rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold text-hivis-ink">{t.code}</span>
+                <span className="whitespace-nowrap rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{t.code}</span>
               </li>
             ))}
           </ul>
@@ -162,7 +171,7 @@ function Home({ m }: { m: Membership }) {
         {remindersSupported() ? (
           <label className="flex min-h-11 items-center justify-between gap-3">
             <span><b>Reminders on this phone</b><small className="block text-muted">Monday: this week&apos;s talk · Thursday: if your crew hasn&apos;t had it · makeups running out</small></span>
-            <input type="checkbox" className="h-6 w-6 accent-[var(--hivis)]" checked={remind} onChange={async (e) => setRemind(await setReminders(e.target.checked))} />
+            <input type="checkbox" className="h-6 w-6 accent-[var(--brand)]" checked={remind} onChange={async (e) => setRemind(await setReminders(e.target.checked))} />
           </label>
         ) : (
           <p className="text-muted">Phone reminders (Monday&apos;s talk, Thursday nudge, makeups running out) come with the iPhone and Android app.</p>
@@ -172,7 +181,7 @@ function Home({ m }: { m: Membership }) {
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-sm text-muted">
         <span>Signed in as {s.user?.email}</span>
         <div className="flex gap-2">
-          <Link href="/setup/" className="rounded-md border border-line px-2.5 py-1.5 font-bold text-fg">New company</Link>
+          <Link href="/setup/" className="rounded-md border border-line px-2.5 py-1.5 font-semibold text-fg">New company</Link>
           <Button size="sm" variant="ghost" onClick={() => s.signOut()}>Sign out</Button>
         </div>
       </div>

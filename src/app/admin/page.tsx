@@ -25,6 +25,7 @@ import { CompanyForm } from "@/components/CompanyForm";
 import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, Sheet, Shell, Title, inputClass } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
+import { BrandEditor } from "@/components/BrandEditor";
 
 const TABS = [
   { id: "people", label: "People" },
@@ -33,6 +34,7 @@ const TABS = [
   { id: "plan", label: "Plan" },
   { id: "roles", label: "Roles" },
   { id: "company", label: "Company" },
+  { id: "brand", label: "Brand" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
@@ -97,7 +99,7 @@ function Admin({ m }: { m: Membership }) {
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`min-h-10 rounded-full border px-3.5 font-display text-base font-bold uppercase tracking-wide ${tab === t.id ? "border-fg bg-fg text-bg" : "border-line bg-surface text-muted"}`}
+            className={`min-h-10 rounded-full border px-3.5 font-display text-base font-semibold ${tab === t.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}
           >
             {t.label}
           </button>
@@ -109,6 +111,19 @@ function Admin({ m }: { m: Membership }) {
       <div className="mt-5">
         {tab === "plan" ? (
           <PlanTab m={m} />
+        ) : tab === "brand" ? (
+          <BrandEditor
+            saved={m.company.theme}
+            onSave={async (theme) => {
+              try {
+                await updateCompany(companyId, { theme });
+                await s.refresh();
+                toast("Colors saved");
+              } catch (e) {
+                toast(e instanceof Error ? e.message : String(e), { tone: "error" });
+              }
+            }}
+          />
         ) : tab === "company" ? (
           <CompanyForm
             initial={{ ...m.company, makeup_weeks: m.company.makeup_weeks ?? 4 }}
@@ -174,7 +189,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
         <input type="search" aria-label="Search people" placeholder={`Search ${people.length} people`} className={inputClass} value={q} onChange={(e) => setQ(e.target.value)} />
         {!adding && <Button size="sm" className="shrink-0" onClick={() => setAdding(true)}>+ Add</Button>}
       </div>
-      <button className="mt-2 min-h-11 text-sm font-bold underline" onClick={() => setImporting(true)}>Import from a spreadsheet (Excel or CSV)</button>
+      <button className="mt-2 min-h-11 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => setImporting(true)}>Import from a spreadsheet (Excel or CSV)</button>
       <ImportPeople companyId={companyId} open={importing} onClose={() => setImporting(false)} onDone={act(async () => {}, null)} />
       {adding && (
         <form
@@ -208,7 +223,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
       ) : groups.map((g) => (
         <section key={g.id || "none"}>
           <GroupHeading aside={`${g.people.length}`}>{g.name}</GroupHeading>
-          <ul className="mt-2 divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface">
+          <ul className="mt-2 divide-y divide-line overflow-hidden rounded-xl bg-surface">
             {g.people.map((p) => (
               <li key={p.id}>
                 <button className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg" onClick={() => setEditing(p)}>
@@ -239,7 +254,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
               act(async () => { await updatePerson(companyId, editing.id, patch); setEditing(null); })();
             }}
           >
-            <Field label="Name" id="ep-name"><input id="ep-name" name="name" defaultValue={editing.full_name} className={`${inputClass} font-bold`} /></Field>
+            <Field label="Name" id="ep-name"><input id="ep-name" name="name" defaultValue={editing.full_name} className={`${inputClass} font-semibold`} /></Field>
             <Field label="Role" id="ep-role"><select id="ep-role" name="role" defaultValue={editing.role_id ?? CREW} className={inputClass}>{roleOptions}</select></Field>
             <Field label="Team" id="ep-team"><select id="ep-team" name="team" defaultValue={editing.team_id ?? ""} className={inputClass}>{teamOptions}</select></Field>
             <Button type="submit">Save</Button>
@@ -269,11 +284,11 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
           {teams.map((t) => {
             const members = people.filter((p) => p.team_id === t.id);
             return (
-              <li key={t.id} className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-3">
+              <li key={t.id} className="flex flex-col gap-2 rounded-xl bg-surface p-3">
                 <input
                   aria-label="Team name"
                   defaultValue={t.name}
-                  className={`${inputClass} font-bold`}
+                  className={`${inputClass} font-semibold`}
                   onBlur={(e) => {
                     const v = e.target.value.trim();
                     if (v && v !== t.name) act(() => updateTeam(companyId, t.id, { name: v }))();
@@ -309,12 +324,12 @@ function RolesTab({ companyId, people, roles, act }: { companyId: string; people
         {roles.map((r) => {
           const used = people.filter((p) => p.role_id === r.id).length;
           return (
-            <li key={r.id} className="inline-flex items-center gap-1 rounded-full border border-line bg-surface py-1 pl-3 pr-1 text-sm font-bold">
+            <li key={r.id} className="inline-flex items-center gap-1 rounded-full border border-line bg-surface py-1 pl-3 pr-1 text-sm font-semibold">
               {r.name}
               {used > 0 && <span className="font-normal text-muted tabular-nums">· {used}</span>}
               <button
                 aria-label={`Remove ${r.name}`}
-                className="h-8 w-8 rounded-full text-lg text-muted hover:text-warn"
+                className="h-8 w-8 rounded-full text-lg text-muted hover:text-warn-text"
                 onClick={() => {
                   if (used) { setMsg(`${used} ${used === 1 ? "person has" : "people have"} the ${r.name} role. Change their role first.`); return; }
                   setMsg(null);
@@ -408,11 +423,11 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
           {jobsites.map((j) => {
             const hasGps = j.latitude != null && j.longitude != null;
             return (
-              <li key={j.id} className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-3">
+              <li key={j.id} className="flex flex-col gap-2 rounded-xl bg-surface p-3">
                 <input
                   aria-label="Jobsite name"
                   defaultValue={j.name}
-                  className={`${inputClass} font-bold`}
+                  className={`${inputClass} font-semibold`}
                   onBlur={(e) => {
                     const v = e.target.value.trim();
                     if (v && v !== j.name) act(() => updateJobsite(companyId, j.id, { name: v }))();
@@ -432,7 +447,7 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
                 />
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   {hasGps ? (
-                    <a className="font-bold underline" href={mapsLink({ latitude: j.latitude!, longitude: j.longitude! })} target="_blank" rel="noreferrer">
+                    <a className="font-semibold text-brand-text underline underline-offset-2" href={mapsLink({ latitude: j.latitude!, longitude: j.longitude! })} target="_blank" rel="noreferrer">
                       GPS set · open in Maps
                     </a>
                   ) : (
@@ -470,7 +485,7 @@ function KindToggle({ value, onChange }: { value: Jobsite["kind"]; onChange: (k:
       type="button"
       aria-pressed={value === k}
       onClick={() => value !== k && onChange(k)}
-      className={`rounded-full border px-3 py-1 text-sm font-bold ${value === k ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}
+      className={`rounded-full border px-3 py-1 text-sm font-semibold ${value === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
     >
       {label}
     </button>
@@ -532,17 +547,17 @@ function PlanTab({ m }: { m: Membership }) {
           const base = planned.get(w.key) ?? w.talkId;
           const isNow = week?.key === w.key;
           return (
-            <li key={w.key} className={`rounded-lg border p-3 ${isNow ? "border-hivis bg-surface" : "border-line bg-surface"}`}>
+            <li key={w.key} className={`rounded-lg border p-3 ${isNow ? "border-brand bg-surface" : "border-line bg-surface"}`}>
               <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                 <b>Week {w.n} · {weekLabel(w.monday)}</b>
                 <span className="flex gap-1.5">
-                  {isNow && <span className="rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold uppercase text-hivis-ink">This week</span>}
-                  {locked && <span className="rounded bg-fg px-2 py-0.5 font-display text-xs font-bold uppercase text-bg">Given · locked</span>}
-                  {!locked && w.changed && <span className="rounded border border-line px-2 py-0.5 font-display text-xs font-bold uppercase">Swapped</span>}
+                  {isNow && <span className="rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">This week</span>}
+                  {locked && <span className="rounded bg-fg px-2 py-0.5 font-display text-xs font-semibold text-bg">Given · locked</span>}
+                  {!locked && w.changed && <span className="rounded border border-line px-2 py-0.5 font-display text-xs font-semibold">Swapped</span>}
                 </span>
               </div>
               {locked ? (
-                <p className="mt-1 font-bold">{title(w.talkId)}</p>
+                <p className="mt-1 font-semibold">{title(w.talkId)}</p>
               ) : (
                 <select
                   aria-label={`Talk for week ${w.n}`}

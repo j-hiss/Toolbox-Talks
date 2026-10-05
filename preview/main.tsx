@@ -39,7 +39,7 @@ function Banner() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed right-0 top-[45%] z-50 rounded-l border border-r-0 border-hivis bg-surface/90 px-0.5 py-2 font-display text-[10px] font-bold uppercase tracking-widest opacity-80 shadow [writing-mode:vertical-rl]"
+        className="fixed right-0 top-[45%] z-50 rounded-l border border-r-0 border-action bg-surface/90 px-0.5 py-2 font-display text-[10px] font-semibold opacity-80 shadow [writing-mode:vertical-rl]"
         aria-expanded="false"
         aria-label="Show preview options"
       >
@@ -48,19 +48,19 @@ function Banner() {
     );
   }
   return (
-    <div className="fixed inset-x-0 top-0 z-50 border-b border-hivis bg-surface px-4 pt-[calc(0.5rem+env(safe-area-inset-top,0px))] pb-2 text-xs shadow-lg">
+    <div className="fixed inset-x-0 top-0 z-50 border-b border-action bg-surface px-4 pt-[calc(0.5rem+env(safe-area-inset-top,0px))] pb-2 text-xs shadow-lg">
       <div className="mx-auto flex max-w-xl flex-wrap items-center gap-x-3 gap-y-1">
-        <b className="font-display text-sm uppercase tracking-wide">Preview</b>
+        <b className="font-display text-sm">Preview</b>
         <span className="text-muted">Demo data on this phone · signed in automatically (code <b className="text-fg tabular-nums">{DEMO_CODE}</b> if you sign out) · built {__BUILT_AT__}</span>
         <div className="ml-auto flex gap-2">
           <button
-            className="rounded border border-line px-2 py-1 font-bold"
+            className="rounded border border-line px-2 py-1 font-semibold"
             onClick={() => { const msg = seedExample(); if (msg === "Example history added.") window.location.reload(); else setSeedMsg(msg); }}
           >
             {seedMsg ?? "Add example history"}
           </button>
           <button
-            className={`rounded border px-2 py-1 font-bold ${confirm ? "border-warn text-warn" : "border-line"}`}
+            className={`rounded border px-2 py-1 font-semibold ${confirm ? "border-warn text-warn-text" : "border-line"}`}
             onClick={() => {
               if (!confirm) { setConfirm(true); setTimeout(() => setConfirm(false), 4000); return; }
               resetDemo();
@@ -69,7 +69,7 @@ function Banner() {
           >
             {confirm ? "Tap again to erase" : "Reset demo"}
           </button>
-          <button className="rounded border border-line px-2 py-1 font-bold" onClick={() => setOpen(false)} aria-label="Hide preview bar">Hide ▴</button>
+          <button className="rounded border border-line px-2 py-1 font-semibold" onClick={() => setOpen(false)} aria-label="Hide preview bar">Hide ▴</button>
         </div>
       </div>
     </div>
