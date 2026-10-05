@@ -11,9 +11,10 @@ export type DemoDb = {
   jobsites: Record<string, unknown>[];
   records: Record<string, unknown>[];
   overrides: { company_id: string; week_start: string; talk_id: string }[];
+  issues: (import("@/lib/data/types").Issue & { company_id: string })[];
 };
 
-const empty = (): DemoDb => ({ session: null, companies: [], members: [], roles: [], teams: [], people: [], jobsites: [], records: [], overrides: [] });
+const empty = (): DemoDb => ({ session: null, companies: [], members: [], roles: [], teams: [], people: [], jobsites: [], records: [], overrides: [], issues: [] });
 
 let memory: DemoDb | null = null;
 

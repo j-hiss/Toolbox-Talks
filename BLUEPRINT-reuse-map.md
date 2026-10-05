@@ -33,6 +33,9 @@ point the row at the real file and keep the prototype line as its origin.
 | `buildAttendees` · `recordPayload` · `unsignedPresent` | `src/core/record.ts` | **The** saved-talk builder: every roster person gets one honest status; signatures from absent people are dropped |
 | `creditWeek` · `makeupWeeks` · `planWeekAt` · `canMakeUp` · `stillNeeds` · `signedFor` · `canChangeWeek` · `MAKEUP_REASONS` · `makeupReasonText` | `src/core/makeup.ts` | **The** weekly-lock and makeup rules: which week a talk counts toward (makeups keep their real date), past weeks inside the limit with their scheduled talk, who still needs a week, when an admin can still swap a week |
 | `buildCompliance` · `score` · `onTimeRate` · `onStaff` · `weekKeys` · `makeupDeadline` · `WEEK_STATE_LABEL` · `trend` · `periodChange` · `teamGrid` · `needsMakeup` · `makeupSummary` | `src/core/compliance.ts` | **The** compliance math: every person on staff, every week → on time / made up / open / missed / due. Makeups close a week and stay marked; this week isn't scored; presenters who signed count. Origin: prototype `reportData` (`prototype/index.html:684`) |
+| `heatIndexF` · `heatLevel` · `heatForDay` · `alertWorthy` · `HEAT_LABEL` | `src/core/heat.ts` | **The** heat judgment: NWS heat index formula and chart levels; hottest work hour from an NWS hourly forecast |
+| `planImport` · `parseCsv` · `templateCsv` · `IMPORT_COLUMNS` | `src/core/importPeople.ts` | **The** people-import plan: header aliases, add/update/skip with reasons, new crews/roles, matching by Employee ID |
+| `planReminders` | `src/core/reminders.ts` | Which phone reminders should be scheduled now (Monday talk, Thursday nudge, makeups running out) |
 | `AttendanceStatus` · `countStatuses` · `resolveStatus` | `src/core/attendance.ts:4` · `:16` · `:29` | **The** attendance model: `signed` · `not_signed` · `absent`. Every report counts with this |
 
 ## Content
@@ -49,6 +52,7 @@ point the row at the real file and keep the prototype line as its origin.
 | talk_records · talk_attendees · `save_talk_record` | `supabase/migrations/20261005000004_talk_records.sql` | Append-only records with snapshots; select+insert grants only; one-transaction, idempotent save |
 | jobsites | `supabase/migrations/20261005000003_jobsites.sql` | Name, address, optional GPS point; no delete grant (deactivate only). `kind` site/office added in …05 |
 | `people.deactivated_at` · `private.stamp_deactivated` | `supabase/migrations/20261005000006_people_deactivated_at.sql` | When someone left, stamped by the database; the app can't move it |
+| talk_issues · `save_talk` · site_notes · heat | `supabase/migrations/20261005000007_site_notes_heat_issues.sql` | Issues (members read/raise/work, no delete; trigger keeps what was raised); `save_talk(record, attendees, issues)` = record + issues in one idempotent transaction; record columns for site notes and heat |
 | plan_overrides · lock trigger · makeup columns | `supabase/migrations/20261005000005_weekly_lock_makeups.sql` | Admin week swaps (members read, admins write); trigger refuses a swap once the week is given or over; `talk_records.makeup_for_week` + required `makeup_reason`; `companies.makeup_weeks` |
 | `private.is_member` · `private.is_admin` | same file `:32` · `:37` | The access checks every RLS policy uses. Reuse them for every new company table |
 | `public.create_company` | `supabase/migrations/20261004000002_default_roles.sql` | The only way to create a company; makes the caller its owner and adds the default presenting roles |
@@ -62,7 +66,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `SessionProvider` · `useSession` | `src/lib/session.tsx` | **The** session: signed-in user, their companies, the current company, sign out |
 | `getLocation` · `LocationError` | `src/lib/location.ts` | **The** GPS read, with plain-language errors (permission off, no https, timeout) |
 | `JobsitePicker` | `src/components/JobsitePicker.tsx` | Today's jobsite: pick from list or "Find nearest"; remembered per company on the device |
-| `saveTalkRecord` · `listRecords` · `getRecord` · `signedForWeek` · `listRecordedWeeks` | `src/lib/data/records.ts` | **The** record access. No update/delete on purpose (append-only). Who signed for a week; which weeks are given (locked) |
+| `saveTalkRecord` (record + attendees + issues) · `listRecords` · `getRecord` · `signedForWeek` · `listRecordedWeeks` | `src/lib/data/records.ts` | **The** record access. No update/delete on purpose (append-only). Who signed for a week; which weeks are given (locked) |
 | `listOverrides` · `setOverride` · `clearOverride` | `src/lib/data/plan.ts` | Admin week swaps; DB enforces the lock |
 | `usePlan` | `src/lib/usePlan.ts` | The plan with the admin's swaps, cached on the phone for offline. Every screen that shows a week's talk uses it |
 | `buildRecordPdf` · `pdfFileName` · `stampParts` · `PDF_FOOTER` | `src/lib/pdf.ts` | **The** PDF record, built only from the saved record: company header, week line (or makeup week + real week + reason), details with GPS, attendance summary, talk text that was read, sign-in sheet with full date and time on every signature line and flagged rows shaded, presenter block, no-compliance footer. Origin: prototype `buildPdf` (`prototype/index.html:967`) |
@@ -70,6 +74,13 @@ point the row at the real file and keep the prototype line as its origin.
 | `reportPeople` · `reportRecords` | `src/lib/data/reports.ts` | **The** report query layer: all people incl. deactivated (with dates), records held in or making up weeks in range. No signatures loaded |
 | `TrendChart` · `TeamGrid` · `HBars` · `BANDS` · `bandOf` | `src/components/charts.tsx` | **The** report charts, hand-built on app tokens (`--series-1/2`, `--grid`, `--band-*` in `globals.css`, validated for color blindness in light and dark). Reuse these for any new chart |
 | reports screen | `src/app/reports/page.tsx` | Score card, by week (tap for who), by person, flags, CSV export. Admins only |
+| `checkHeat` · `cachedHeat` | `src/lib/weather.ts` | Today's heat from api.weather.gov, cached on the phone for the day. Preview twin returns an example forecast |
+| `listIssues` · `listIssuesForRecord` · `updateIssue` | `src/lib/data/issues.ts` | Crew-raised issues (new ones save with their talk via `saveTalkRecord` → `save_talk`) |
+| `IssuesList` · `isOverdue` | `src/components/Issues.tsx` | Records → Issues: open/fixed, overdue first, edit panel, mark fixed with Undo |
+| `ImportPeople` | `src/components/ImportPeople.tsx` | Admin → People → Import sheet: pick file, preview plan, import |
+| `HeatCard` | `src/components/HomeCards.tsx` | Home's heat line/warning for the chosen jobsite or this phone |
+| `applyReminders` · `setReminders` · `remindersSupported` | `src/lib/reminders.ts` | Phone-scheduled notifications (Capacitor Local Notifications); no-op on the website |
+| `heatReminder` | `src/content/heat.ts` | The heat reminder text (EN reviewed, ES draft), versioned |
 | `MakeupTag` | `src/components/ui.tsx` | "Makeup for the week of … · reason" wherever a record is listed |
 | offline outbox · `useOutbox` | `src/lib/outbox.ts` · `src/lib/useOutbox.ts` | **The** offline-first save path: phone first, upload when online, idempotent by `client_id` |
 | talk draft | `src/lib/draft.ts` | The talk in progress, saved on the phone after every change |

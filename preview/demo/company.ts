@@ -6,7 +6,7 @@ import { db, save, tick, uid } from "./store";
 
 const DEFAULT_ROLES = ["Owner", "Safety Manager", "Superintendent", "Supervisor", "Foreman", "Team Lead"];
 const byName = <T,>(k: keyof T) => (a: T, b: T) => String(a[k]).localeCompare(String(b[k]));
-const rows = <T,>(table: keyof Omit<ReturnType<typeof db>, "session" | "members" | "records" | "overrides">) => db()[table] as unknown as T[];
+const rows = <T,>(table: keyof Omit<ReturnType<typeof db>, "session" | "members" | "records" | "overrides" | "issues">) => db()[table] as unknown as T[];
 
 function mustBeAdmin(companyId: string) {
   const user = db().session?.user.id;
@@ -81,7 +81,10 @@ export async function deleteTeam(companyId: string, teamId: string): Promise<voi
 export async function listPeople(companyId: string): Promise<Person[]> {
   await tick(); return rows<Person>("people").filter((p) => p.company_id === companyId && p.active).sort(byName<Person>("full_name"));
 }
-export async function addPerson(companyId: string, p: Pick<Person, "full_name" | "role_id" | "team_id">): Promise<void> {
+export async function listAllPeople(companyId: string): Promise<Person[]> {
+  await tick(); return rows<Person>("people").filter((p) => p.company_id === companyId).sort(byName<Person>("full_name"));
+}
+export async function addPerson(companyId: string, p: Pick<Person, "full_name" | "role_id" | "team_id"> & Partial<Pick<Person, "employee_id" | "phone" | "preferred_language">>): Promise<void> {
   await tick(); mustBeAdmin(companyId);
   rows<Person>("people").push({ id: uid(), company_id: companyId, employee_id: null, phone: null, preferred_language: "en", active: true, ...p, created_at: new Date().toISOString() } as Person); save();
 }
@@ -117,6 +120,6 @@ export async function deactivateJobsite(companyId: string, id: string): Promise<
 // Compile-time check that this demo module offers every function the real one does, with the same signatures.
 const _sameShape = {
   myMemberships, createCompany, updateCompany, listRoles, addRole, deleteRole, listTeams, addTeam, updateTeam, deleteTeam,
-  listPeople, addPerson, updatePerson, deactivatePerson, listJobsites, addJobsite, updateJobsite, deactivateJobsite,
+  listPeople, listAllPeople, addPerson, updatePerson, deactivatePerson, listJobsites, addJobsite, updateJobsite, deactivateJobsite,
 } satisfies Omit<typeof Real, never>;
 void _sameShape;

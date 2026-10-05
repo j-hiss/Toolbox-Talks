@@ -17,10 +17,14 @@ import { countStatuses } from "@/core/attendance";
 import { listJobsites, listPeople, listRoles, listTeams } from "@/lib/data/company";
 import { saveTalkRecord, signedForWeek } from "@/lib/data/records";
 import { usePlan } from "@/lib/usePlan";
+import { checkHeat } from "@/lib/weather";
+import { alertWorthy, HEAT_LABEL, type HeatLevel } from "@/core/heat";
+import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/content/heat";
+import { addDays, isoDay } from "@/core/weeks";
 import { writeLastSetup } from "@/lib/lastSetup";
 import { buzz, toast } from "@/components/toast";
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
-import { clearDraft, newDraft, useDraft, writeDraft, type TalkDraft } from "@/lib/draft";
+import { clearDraft, newDraft, readDraft, useDraft, writeDraft, type DraftIssue, type TalkDraft } from "@/lib/draft";
 import { enqueue, flush, pending } from "@/lib/outbox";
 import { getLocation } from "@/lib/location";
 import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
@@ -34,7 +38,7 @@ export default function TalkPage() {
 }
 
 type Org = { people: Person[]; teams: Team[]; roles: Role[]; jobsites: Jobsite[] };
-type Done = { title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean; makeupLabel: string | null };
+type Done = { title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean; makeupLabel: string | null; issues: number };
 
 function Talk({ m }: { m: Membership }) {
   const co = m.company;
@@ -95,7 +99,7 @@ function Talk({ m }: { m: Membership }) {
   return (
     <Shell nav={nav} tabs={false}>
       {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} />}
-      {draft.step === "read" && draft.talkId && <Read draft={draft} update={update} />}
+      {draft.step === "read" && draft.talkId && <Read draft={draft} update={update} org={org} />}
       {draft.step === "crew" && <Crew org={org} draft={draft} update={update} signedIds={signedIds} />}
       {draft.step === "sign" && (
         <Sign
@@ -197,7 +201,7 @@ function MakeupPick({ weeks, draft, update }: { weeks: ReturnType<typeof makeupW
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-function Read({ draft, update }: { draft: TalkDraft; update: (p: Partial<TalkDraft>) => void }) {
+function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; org: Org }) {
   const talk = TALKS.find((t) => t.id === draft.talkId)!;
   const { text } = talkText(talk, draft.lang);
   const ui = crewText(draft.lang);
@@ -209,19 +213,48 @@ function Read({ draft, update }: { draft: TalkDraft; update: (p: Partial<TalkDra
   const textSize = ["text-base", "text-lg", "text-xl", "text-2xl"][size];
   const stopRef = useRef<(() => void) | null>(null);
   useEffect(() => () => stopRef.current?.(), []);
+  const [editingNotes, setEditingNotes] = useState(false);
 
+  // Heat: check today's forecast for the chosen place (or this phone's GPS). Hot days add the heat reminder to the
+  // talk. Quiet when offline or when the weather service can't be reached.
+  const site = org.jobsites.find((j) => j.id === draft.jobsiteId);
+  const point = site?.latitude != null && site.longitude != null ? { latitude: site.latitude, longitude: site.longitude } : draft.gps;
+  const [heatMsg, setHeatMsg] = useState<string | null>(null);
+  useEffect(() => {
+    if (!point || draft.heat) return;
+    let live = true;
+    checkHeat(point)
+      .then((h) => {
+        const cur = readDraft(draft.companyId); // latest draft, so notes typed meanwhile aren't lost
+        if (!live || !h || !cur) return;
+        writeDraft({ ...cur, heat: { max_heat_index_f: h.maxHeatIndexF, level: h.level, reminder_read: false, checked_at: h.checkedAt, source: h.source, place: h.place } });
+      })
+      .catch((e) => live && setHeatMsg(e instanceof Error ? e.message : String(e)));
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [point?.latitude, point?.longitude]);
+  const hot = !!draft.heat && alertWorthy(draft.heat.level as HeatLevel) && talk.id !== "heat";
+  const reminder = heatReminder(draft.lang);
+  const notes = draft.siteNotes.trim();
+
+  type Line = { text: string; heading?: boolean; kind: "title" | "hook" | "h" | "item" | "askh" | "ask" | "noteh" | "note" | "heath" | "heat" };
   const lines = useMemo(() => {
-    const out: { text: string; heading?: boolean; kind: "title" | "hook" | "h" | "item" | "askh" | "ask" }[] = [
+    const out: Line[] = [
       { text: text.title, heading: true, kind: "title" },
       { text: text.hook, kind: "hook" },
     ];
+    if (notes) out.push({ text: draft.lang === "es" ? "Hoy en este sitio" : "Today on this site", heading: true, kind: "noteh" }, { text: notes, kind: "note" });
+    if (hot) {
+      out.push({ text: `${reminder.title} · ${draft.heat!.max_heat_index_f}°F`, heading: true, kind: "heath" });
+      reminder.items.forEach((i) => out.push({ text: i, kind: "heat" }));
+    }
     text.sections.forEach((s) => {
       out.push({ text: s.heading, heading: true, kind: "h" });
       s.items.forEach((i) => out.push({ text: i, kind: "item" }));
     });
     out.push({ text: ui.ask, heading: true, kind: "askh" }, { text: text.ask, kind: "ask" });
     return out;
-  }, [text, ui.ask]);
+  }, [text, ui.ask, notes, hot, reminder, draft.lang, draft.heat]);
 
   const voice = LANGUAGES.find((l) => l.id === draft.lang)!.voice;
   const playing = line !== null;
@@ -259,9 +292,36 @@ function Read({ draft, update }: { draft: TalkDraft; update: (p: Partial<TalkDra
         <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-sm font-bold disabled:opacity-40" disabled={size === 0} onClick={() => setSize(size - 1)} aria-label="Smaller text">A−</button>
         <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-lg font-bold disabled:opacity-40" disabled={size === 3} onClick={() => setSize(size + 1)} aria-label="Bigger text">A+</button>
       </div>
-      {draft.lang !== "en" && talk.translationStatus[draft.lang] !== "reviewed" && (
+      {draft.lang !== "en" && (talk.translationStatus[draft.lang] !== "reviewed" || (hot && !heatReminderReviewed[draft.lang])) && (
         <p className="mt-2 text-xs text-muted">This translation hasn&apos;t been reviewed by a native speaker yet.</p>
       )}
+
+      {draft.heat && alertWorthy(draft.heat.level as HeatLevel) && (
+        <p className="mt-3 rounded-lg border-2 border-warn bg-warn-bg px-3 py-2 text-sm">
+          <b>{HEAT_LABEL[draft.heat.level as HeatLevel]}: heat index up to {draft.heat.max_heat_index_f}°F today</b>
+          {draft.heat.place ? ` · ${draft.heat.place}` : ""}. {talk.id === "heat" ? "Good week for this talk." : "The heat reminder is added to this talk."}
+        </p>
+      )}
+      {heatMsg && !draft.heat && <p className="mt-2 text-xs text-muted">Heat check unavailable: {heatMsg}</p>}
+
+      <div className="mt-3">
+        {editingNotes || notes ? (
+          <div className="rounded-lg border border-dashed border-line bg-surface p-3">
+            <label htmlFor="site-notes" className="text-sm font-bold">Today on this site <small className="font-normal text-muted">read to the crew, saved with the record</small></label>
+            <textarea
+              id="site-notes"
+              rows={2}
+              maxLength={1000}
+              placeholder="Like: working over the pool enclosure, tie off at the ridge anchor"
+              className={`${inputClass} mt-1`}
+              value={draft.siteNotes}
+              onChange={(e) => update({ siteNotes: e.target.value })}
+            />
+          </div>
+        ) : (
+          <button className="min-h-11 text-sm font-bold underline" onClick={() => setEditingNotes(true)}>+ Add today&apos;s site notes</button>
+        )}
+      </div>
 
       <h1 id="line-0" className={`mt-4 font-display text-4xl font-extrabold uppercase leading-none text-balance ${hl(0)}`}>{text.title}</h1>
       {status && <p className="mt-2 text-sm text-muted" aria-live="polite">{status}</p>}
@@ -270,6 +330,9 @@ function Read({ draft, update }: { draft: TalkDraft; update: (p: Partial<TalkDra
         {lines.slice(1).map((l, j) => {
           const i = j + 1;
           if (l.kind === "hook") return <p key={i} id={`line-${i}`} className={`font-bold ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "noteh" || l.kind === "heath") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-bold uppercase tracking-wide ${l.kind === "heath" ? "text-warn" : ""} ${hl(i)}`}>{l.text}</h3>;
+          if (l.kind === "note") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-fg bg-bg px-3 py-2 font-bold ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "heat") return <p key={i} id={`line-${i}`} className={`mt-1.5 border-l-4 border-warn pl-4 before:-ml-2 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
           if (l.kind === "h" || l.kind === "askh") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-bold uppercase tracking-wide ${hl(i)}`}>{l.text}</h3>;
           if (l.kind === "ask") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-hivis bg-bg px-3 py-2 ${hl(i)}`}>{l.text}</p>;
           return <p key={i} id={`line-${i}`} className={`mt-1.5 pl-4 before:-ml-4 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
@@ -281,7 +344,10 @@ function Read({ draft, update }: { draft: TalkDraft; update: (p: Partial<TalkDra
       {/* Always in reach while reading: play/stop and done. */}
       <div className="sticky bottom-0 -mx-4 mt-5 flex gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
         <Button size="sm" onClick={toggle} className="shrink-0 bg-fg text-bg" aria-label={playing ? ui.stop : ui.play}>{playing ? `■ ${ui.stop}` : `▶ ${ui.play}`}</Button>
-        <Button className="!py-3" onClick={() => { stopRef.current?.(); update({ step: "crew" }); }}>Done reading</Button>
+        <Button className="!py-3" onClick={() => {
+          stopRef.current?.();
+          update({ step: "crew", siteNotes: draft.siteNotes.trim(), heat: draft.heat ? { ...draft.heat, reminder_read: hot } : null });
+        }}>Done reading</Button>
       </div>
     </>
   );
@@ -488,9 +554,21 @@ function Sign({
         heldAt: new Date().toISOString(),
         gps: draft.gps,
         makeup: draft.makeup ? { weekStart: draft.makeup.weekStart, reason: makeupReasonText(draft.makeupPick, draft.makeupNote) } : null,
+        siteNotes: draft.siteNotes,
+        heat: draft.heat ? {
+          max_heat_index_f: draft.heat.max_heat_index_f, level: draft.heat.level, reminder_read: draft.heat.reminder_read,
+          checked_at: draft.heat.checked_at, source: draft.heat.source,
+          // the exact reminder text that was read, so the record and PDF show what the crew heard
+          ...(draft.heat.reminder_read ? { reminder: { ...heatReminder(lang), version: HEAT_REMINDER_VERSION } } : {}),
+        } : null,
       });
       if (record.team_id === "") record.team_id = null;
-      enqueue(record, attendees);
+      const raisedAt = new Date().toISOString();
+      const issues = draft.issues.filter((x) => x.description.trim()).map((x) => {
+        const owner = org.people.find((p) => p.id === x.ownerId);
+        return { client_id: x.clientId, description: x.description.trim(), owner_person_id: owner?.id ?? null, owner_name: owner?.full_name ?? "", due_date: x.dueDate || null, raised_by_name: presenter?.full_name ?? "", raised_at: raisedAt };
+      });
+      enqueue(record, attendees, issues);
       writeLastSetup(m.company.id, { presenterId: draft.presenterId, teamId: draft.teamId, jobsiteId: draft.jobsiteId });
       await flush(saveTalkRecord);
       const uploaded = !pending(m.company.id).some((i) => i.record.client_id === draft.clientId);
@@ -498,6 +576,7 @@ function Sign({
       onSaved({
         title: text.title, uploaded, counts: countStatuses(attendees), presenterSigned: !!draft.presenterSignature,
         makeupLabel: draft.makeup ? `Makeup for Week ${draft.makeup.weekNumber}` : null,
+        issues: issues.length,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -539,6 +618,8 @@ function Sign({
             </li>
           ))}
         </ul>
+        <IssuesEditor org={org} draft={draft} update={update} />
+
         {(missing.length > 0 || !draft.presenterSignature) && (
           <div className="mt-4">
             <Notice tone="error">
@@ -616,6 +697,51 @@ function Sign({
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+/** "Anything the crew raised?" Each item gets an owner (the presenter by default) and a fix-by date (a week out). */
+function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void }) {
+  const [text, setText] = useState("");
+  const set = (list: DraftIssue[]) => update({ issues: list });
+  const uid = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const people = [...org.people].sort((a, b) => a.full_name.localeCompare(b.full_name));
+  return (
+    <section className="mt-6">
+      <GroupHeading aside={draft.issues.length ? `${draft.issues.length}` : undefined}>Anything the crew raised?</GroupHeading>
+      <p className="mt-2 text-sm text-muted">Hazards or problems to fix, like a damaged ladder or missing guardrail. Each one gets an owner and a fix-by date.</p>
+      <ul className="mt-3 flex flex-col gap-2">
+        {draft.issues.map((x, i) => (
+          <li key={x.clientId} className="rounded-lg border border-line bg-surface p-3">
+            <div className="flex items-start justify-between gap-2">
+              <b className="min-w-0 break-words">{x.description}</b>
+              <button className="min-h-11 px-2 text-sm font-bold underline" onClick={() => set(draft.issues.filter((_, j) => j !== i))} aria-label={`Remove: ${x.description}`}>Remove</button>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <select aria-label="Owner" className={inputClass} value={x.ownerId} onChange={(e) => set(draft.issues.map((y, j) => (j === i ? { ...y, ownerId: e.target.value } : y)))}>
+                <option value="">No owner yet</option>
+                {people.map((p) => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+              </select>
+              <input aria-label="Fix by" type="date" className={inputClass} value={x.dueDate} onChange={(e) => set(draft.issues.map((y, j) => (j === i ? { ...y, dueDate: e.target.value } : y)))} />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <form
+        className="mt-2 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const d = text.trim();
+          if (!d) return;
+          set([...draft.issues, { clientId: uid(), description: d, ownerId: draft.presenterId, dueDate: isoDay(addDays(new Date(), 7)) }]);
+          setText("");
+        }}
+      >
+        <input aria-label="Add something the crew raised" placeholder="Add something the crew raised" maxLength={1000} className={inputClass} value={text} onChange={(e) => setText(e.target.value)} />
+        <Button size="sm" type="submit">Add</Button>
+      </form>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------
 function Saved({ done }: { done: Done }) {
   const c = done.counts;
   return (
@@ -629,6 +755,7 @@ function Saved({ done }: { done: Done }) {
           <Notice>Saved on this phone. It will upload automatically when you have signal.</Notice>
         )}
       </div>
+      {done.issues > 0 && <p className="mt-3 text-sm"><b>{done.issues}</b> {done.issues === 1 ? "issue" : "issues"} logged for follow-up. <Link href="/records/#issues" className="font-bold underline">Track issues</Link></p>}
       <p className="mt-4 tabular-nums">
         <b>{c.signed}</b> signed · <b>{c.not_signed}</b> not signed · <b>{c.absent}</b> absent
         {(c.flagged > 0 || !done.presenterSigned) && (

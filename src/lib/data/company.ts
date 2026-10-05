@@ -77,7 +77,11 @@ export async function listPeople(companyId: string): Promise<Person[]> {
     await supabase().from("people").select(PERSON_COLUMNS).eq("company_id", companyId).eq("active", true).order("full_name"),
   );
 }
-export async function addPerson(companyId: string, p: Pick<Person, "full_name" | "role_id" | "team_id">): Promise<void> {
+/** Everyone, including removed people (for matching a spreadsheet re-import). */
+export async function listAllPeople(companyId: string): Promise<Person[]> {
+  return check(await supabase().from("people").select(PERSON_COLUMNS).eq("company_id", companyId).order("full_name"));
+}
+export async function addPerson(companyId: string, p: Pick<Person, "full_name" | "role_id" | "team_id"> & Partial<Pick<Person, "employee_id" | "phone" | "preferred_language">>): Promise<void> {
   check(await supabase().from("people").insert({ company_id: companyId, ...p }));
 }
 export async function updatePerson(companyId: string, personId: string, patch: Partial<Omit<Person, "id" | "company_id">>): Promise<void> {

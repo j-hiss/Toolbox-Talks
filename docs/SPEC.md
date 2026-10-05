@@ -115,6 +115,27 @@ customer #1, not a special case.
 - **Records** grouped by week, with a crew filter and "only flagged".
 - **Reading:** play and "Done reading" stay pinned at the bottom; A− / A+ text size, remembered on the phone.
 
+## Jobsite tools (built)
+- **Spreadsheet import (Admin → People → Import):** .xlsx or .csv; headers matched loosely (Name / Full name,
+  Role / Position, Team / Crew, Employee ID / Emp ID, Phone, Language). A preview shows add / update / skip per row
+  with reasons; new crews and roles are listed and created on import. Re-importing updates people matched by
+  Employee ID (or by name when there's no ID) and brings back removed people. Template download included.
+- **Today's site notes:** optional line or two on the Read screen, read to the crew (and read aloud), saved on the
+  record and the PDF.
+- **Heat:** today's forecast for the chosen jobsite (GPS point) or the phone's location, from the National Weather
+  Service hourly forecast (free, no key, US only). Heat index by the NWS formula; levels per the NWS chart. From 91°F
+  ("extreme caution") Home shows a warning and every talk that day gets a short heat reminder added (not the heat
+  talk itself). The record stores the max heat index, level, whether the reminder was read, and the exact reminder
+  text; the PDF prints it. Checked once per site per few hours and kept on the phone for the day.
+- **Crew-raised issues:** on the review screen before saving, the presenter logs what the crew raised. Each gets an
+  owner (presenter by default) and a fix-by date (a week out). They upload with the talk (same offline outbox,
+  one transaction). Records → Issues lists open (overdue first) and fixed; tap to reassign, change the date, or mark
+  fixed with a note (Undo). What was raised never changes; nothing is deleted. Shown on the record, its PDF ("status
+  when printed"), Home and Reports (raised, open/overdue, average days to fix).
+- **Reminders (phone app only):** a per-phone switch on Home. The phone schedules its own notifications, no server:
+  Monday 6:30 AM this week's talk; Thursday noon if this phone's usual crew hasn't had it; next morning when makeups
+  run out within 7 days. Rescheduled every time Home opens. Texts/email would need a paid service: not built.
+
 ## Running a talk (built)
 - **Home → Start this talk** opens this week's talk (locked for the week). **Make up a missed week** picks a past week
   inside the admin's limit and a reason, then runs that week's talk. A talk in progress is saved on the phone after every tap; Home shows **Resume**.

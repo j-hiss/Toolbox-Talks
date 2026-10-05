@@ -18,7 +18,7 @@ function writeChosenJobsite(companyId: string, id: string) {
   try { localStorage.setItem(key(companyId), id); } catch { /* not remembered; fine */ }
 }
 
-export function JobsitePicker({ companyId, isAdmin }: { companyId: string; isAdmin: boolean }) {
+export function JobsitePicker({ companyId, isAdmin, onChange }: { companyId: string; isAdmin: boolean; onChange?: (site: Jobsite | null) => void }) {
   const [sites, setSites] = useState<Jobsite[] | null>(null);
   const [chosen, setChosen] = useState<string>("");
   const [status, setStatus] = useState<{ tone: "info" | "error" | "ok"; text: string } | null>(null);
@@ -32,12 +32,15 @@ export function JobsitePicker({ companyId, isAdmin }: { companyId: string; isAdm
         setSites(s);
         const saved = readChosenJobsite(companyId);
         setChosen(s.some((x) => x.id === saved) ? saved! : "");
+        onChange?.(s.find((x) => x.id === saved) ?? null);
       })
       .catch((e) => live && setStatus({ tone: "error", text: e instanceof Error ? e.message : String(e) }));
     return () => { live = false; };
+    // onChange is reported once per load; a new callback identity shouldn't reload the list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
 
-  const choose = (id: string) => { setChosen(id); writeChosenJobsite(companyId, id); };
+  const choose = (id: string) => { setChosen(id); writeChosenJobsite(companyId, id); onChange?.(sites?.find((x) => x.id === id) ?? null); };
 
   const findNearest = async () => {
     if (!sites) return;

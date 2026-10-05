@@ -82,6 +82,10 @@ projects, add the permission text:
 published in Claude so you can check progress from your phone. It opens already signed in (code `123456` if you sign
 out). The preview can't use GPS.
 
+### Phone reminders
+Reminders are scheduled by the phone itself (Capacitor Local Notifications), so they only work in the iPhone and
+Android apps. After `git pull` and `npm install`, run `npm run app:sync` so the native projects pick up the plugin.
+
 ### Checks (run each on its own before pushing)
 ```sh
 npm run typecheck

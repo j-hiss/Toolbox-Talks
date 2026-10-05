@@ -175,6 +175,36 @@ async function main() {
     check("Makeup limit defaults to 4 weeks, admin can change it",
       (await as(userA, "update public.companies set makeup_weeks = 8 where id = $1 returning makeup_weeks", [coA])).rows[0]?.makeup_weeks === 8);
 
+    // Site notes, heat, and issues raised at a talk.
+    const personA = (await as(userA, "select id from public.people where company_id = $1 limit 1", [coA])).rows[0].id;
+    const personB = (await as(userB, "select id from public.people where company_id = $1 limit 1", [coB])).rows[0].id;
+    const talk = (company, clientId, issues) => [
+      JSON.stringify({ company_id: company, client_id: clientId, talk_id: "heat", language: "en", content: { title: "Heat" },
+        presenter_name: "Presenter", held_at: new Date().toISOString(), site_notes: " Tie off at the ridge ",
+        heat: { max_heat_index_f: 104, level: "danger", reminder_read: true } }),
+      "[]",
+      JSON.stringify(issues),
+    ];
+    const issueClient = randomUUID();
+    const iss = [{ client_id: issueClient, description: "East ladder cracked", owner_person_id: personA, owner_name: "A worker", due_date: "2030-01-01" }];
+    const tClient = randomUUID();
+    const tId = (await as(userA, "select public.save_talk($1::jsonb, $2::jsonb, $3::jsonb) as id", talk(coA, tClient, iss))).rows[0].id;
+    await as(userA, "select public.save_talk($1::jsonb, $2::jsonb, $3::jsonb) as id", talk(coA, tClient, iss)); // retry
+    const saved = (await as(userA, "select site_notes, heat->>'level' lvl from public.talk_records where id = $1", [tId])).rows[0];
+    check("Site notes and heat save with the record", saved.site_notes === "Tie off at the ridge" && saved.lvl === "danger");
+    const issuesA = await as(userA, "select id, record_id, status from public.talk_issues");
+    check("Issues save with their talk, once even when retried", issuesA.rows.length === 1 && issuesA.rows[0].record_id === tId && issuesA.rows[0].status === "open");
+    const issueId = issuesA.rows[0].id;
+    check("B sees none of A's issues", (await as(userB, "select id from public.talk_issues")).rows.length === 0);
+    check("B can't change A's issues", (await as(userB, "update public.talk_issues set status = 'fixed' where id = $1", [issueId])).rowCount === 0);
+    check("B can't raise an issue in A", await fails(() => as(userB, "insert into public.talk_issues (company_id, client_id, description) values ($1, $2, 'x')", [coA, randomUUID()])));
+    check("An issue's owner must be in the same company", await fails(() => as(userA, "insert into public.talk_issues (company_id, client_id, description, owner_person_id) values ($1, $2, 'x', $3)", [coA, randomUUID(), personB])));
+    await as(presenterA, "update public.talk_issues set description = 'rewritten', status = 'fixed', fixed_note = 'Replaced' where id = $1", [issueId]);
+    const fixed = (await as(userA, "select description, status, fixed_at, fixed_by, fixed_note from public.talk_issues where id = $1", [issueId])).rows[0];
+    check("A presenter can mark an issue fixed; it stamps who and when", fixed.status === "fixed" && fixed.fixed_at && fixed.fixed_by === presenterA && fixed.fixed_note === "Replaced");
+    check("What was raised can't be rewritten", fixed.description === "East ladder cracked");
+    check("Issues can't be deleted", await fails(() => as(userA, "delete from public.talk_issues where id = $1", [issueId])));
+
     const rolesA = await as(userA, "select company_id from public.roles");
     check("New company gets its default roles, and A sees only A's", rolesA.rows.length === 6 && rolesA.rows.every((r) => r.company_id === coA), `${rolesA.rows.length} visible`);
     check("A cannot add a role to B", await fails(() => as(userA, "insert into public.roles (company_id, name) values ($1, 'Intruder')", [coB])));
@@ -203,7 +233,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 44;
+  const EXPECTED = 53;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

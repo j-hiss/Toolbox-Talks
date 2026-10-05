@@ -63,3 +63,23 @@ describe("PDF record", () => {
     expect(pdfFileName(rec({ makeup_for_week: "2026-09-21" }))).toBe("Week 05 - Makeup - Toolbox Talk - Fall Protection - 2026-10-06.pdf");
   });
 });
+
+describe("PDF extras", () => {
+  it("shows site notes, the heat check with the reminder that was read, and what the crew raised", () => {
+    const pdf = text(rec({
+      site_notes: "Working over the pool enclosure",
+      heat: { max_heat_index_f: 104, level: "danger", reminder_read: true, checked_at: "2026-10-06T10:00:00Z", source: "NWS", reminder: { title: "Heat today", items: ["Drink water often"], version: 1 } },
+    }));
+    expect(pdf).toContain("Today on this site");
+    expect(pdf).toContain("Working over the pool enclosure");
+    expect(pdf).toContain("Danger");
+    expect(pdf).toContain("Drink water often");
+    const withIssues = buildRecordPdf(rec(), co, [{
+      id: "i1", client_id: "c", record_id: "r1", jobsite_name: "", description: "East ladder cracked", owner_person_id: null, owner_name: "Lee Lead",
+      due_date: "2026-10-13", status: "open", raised_by_name: "", raised_at: "2026-10-06T11:00:00Z", fixed_at: null, fixed_note: "",
+    }]).output().replace(/\\([()\\])/g, "$1");
+    expect(withIssues).toContain("Raised by the crew (1)");
+    expect(withIssues).toContain("East ladder cracked");
+    expect(withIssues).toContain("fix by 2026-10-13");
+  });
+});

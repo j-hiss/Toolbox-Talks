@@ -7,7 +7,8 @@ import { countStatuses, STATUS_LABEL } from "@/core/attendance";
 import { INDUSTRIES } from "@/core/industries";
 import { LANGUAGES } from "@/core/languages";
 import { parseDay, weekLabel } from "@/core/weeks";
-import type { Company, TalkRecord } from "@/lib/data/types";
+import type { Company, Issue, TalkRecord } from "@/lib/data/types";
+import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 
 export const PDF_FOOTER = "Documents a safety meeting. Does not by itself certify OSHA compliance.";
 
@@ -32,7 +33,7 @@ export function pdfFileName(r: Pick<TalkRecord, "week_number" | "title" | "held_
   return `${week}${makeup}Toolbox Talk - ${r.title.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim()} - ${iso}.pdf`;
 }
 
-export function buildRecordPdf(r: TalkRecord, co: Company): jsPDF {
+export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = []): jsPDF {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const W = 612, H = 792, M = 48, CW = W - 2 * M;
   let y = M;
@@ -140,6 +141,32 @@ export function buildRecordPdf(r: TalkRecord, co: Company): jsPDF {
     y += 4;
   });
   para(`Crew discussion: ${t.ask}`, false); y += 10;
+
+  // Site notes, heat, and what the crew raised ----------------------------------------------------------------------
+  if (r.site_notes) { newPageIf(40); para("Today on this site", true); para(r.site_notes, false); y += 8; }
+  if (r.heat) {
+    newPageIf(40);
+    const h = r.heat;
+    para(`Heat check: heat index up to ${h.max_heat_index_f}°F (${HEAT_LABEL[h.level as HeatLevel] ?? h.level}), forecast from ${h.source === "NWS" ? "the National Weather Service" : h.source}.`, true);
+    if (h.reminder_read && h.reminder) {
+      para(`${h.reminder.title} (read with this talk):`, false);
+      h.reminder.items.forEach((it) => { newPageIf(14); doc.setFont("helvetica", "normal"); doc.text("•", M + 6, y); para(it, false, 18); });
+    }
+    y += 8;
+  }
+  if (issues.length) {
+    newPageIf(40);
+    para(`Raised by the crew (${issues.length})`, true);
+    issues.forEach((i) => {
+      newPageIf(28);
+      doc.setFont("helvetica", "normal"); doc.text("•", M + 6, y);
+      para(i.description, false, 18);
+      doc.setTextColor(90);
+      para(`Owner: ${i.owner_name || "none"}${i.due_date ? `  ·  fix by ${i.due_date}` : ""}  ·  status when printed: ${i.status === "fixed" ? `fixed ${new Date(i.fixed_at!).toLocaleDateString("en-US")}${i.fixed_note ? ` (${i.fixed_note})` : ""}` : "open"}`, false, 18);
+      doc.setTextColor(0);
+    });
+    y += 8;
+  }
 
   // Sign-in sheet -------------------------------------------------------------------------------------------------
   const COL = { n: M, name: M + 18, status: M + 178, sig: M + 245, when: W - M };

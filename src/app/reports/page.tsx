@@ -15,8 +15,10 @@ import { STATUS_LABEL } from "@/core/attendance";
 import { addDays, isoDay, mondayOf, parseDay, weekLabel } from "@/core/weeks";
 import { TALKS } from "@/content/talks";
 import { reportPeople, reportRecords } from "@/lib/data/reports";
+import { listIssues } from "@/lib/data/issues";
+import { isOverdue } from "@/components/Issues";
 import { listTeams } from "@/lib/data/company";
-import type { Membership, Team } from "@/lib/data/types";
+import type { Issue, Membership, Team } from "@/lib/data/types";
 import { usePlan } from "@/lib/usePlan";
 import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
@@ -52,7 +54,7 @@ function Reports({ m }: { m: Membership }) {
   const [team, setTeam] = useState("all");
   const [onlyGaps, setOnlyGaps] = useState(false);
   const [openWeek, setOpenWeek] = useState<string | null>(null);
-  const [data, setData] = useState<{ people: ReportPerson[]; records: ReportRecord[]; teams: Team[]; from: string } | null>(null);
+  const [data, setData] = useState<{ people: ReportPerson[]; records: ReportRecord[]; teams: Team[]; from: string; issues: Issue[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [csvMsg, setCsvMsg] = useState<string | null>(null);
 
@@ -65,8 +67,8 @@ function Reports({ m }: { m: Membership }) {
 
   useEffect(() => {
     let live = true;
-    Promise.all([reportPeople(co.id), reportRecords(co.id, from), listTeams(co.id)])
-      .then(([people, records, teams]) => live && setData({ people, records, teams, from }))
+    Promise.all([reportPeople(co.id), reportRecords(co.id, from), listTeams(co.id), listIssues(co.id)])
+      .then(([people, records, teams, issues]) => live && setData({ people, records, teams, from, issues }))
       .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
     return () => { live = false; };
   }, [co.id, from]);
@@ -248,6 +250,28 @@ function Reports({ m }: { m: Membership }) {
           </div>
         </>
       )}
+
+      {/* Issues ------------------------------------------------------------------------------------------------------ */}
+      {(() => {
+        const raised = data.issues.filter((i) => i.raised_at.slice(0, 10) >= data.from);
+        const open = data.issues.filter((i) => i.status === "open");
+        const late = open.filter(isOverdue).length;
+        const fixed = raised.filter((i) => i.status === "fixed" && i.fixed_at);
+        const days = fixed.map((i) => (new Date(i.fixed_at!).getTime() - new Date(i.raised_at).getTime()) / 86_400_000);
+        const avg = days.length ? Math.round(days.reduce((a, b) => a + b, 0) / days.length) : null;
+        if (!raised.length && !open.length) return null;
+        return (
+          <>
+            <GroupHeading>Issues the crew raised</GroupHeading>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
+              <div className="rounded-lg border border-line bg-surface p-2"><b className="block text-2xl">{raised.length}</b><small className="text-muted">raised in range</small></div>
+              <div className={`rounded-lg border p-2 ${late ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}><b className="block text-2xl">{open.length}</b><small className="text-muted">open{late ? ` · ${late} overdue` : ""}</small></div>
+              <div className="rounded-lg border border-line bg-surface p-2"><b className="block text-2xl">{avg ?? "–"}</b><small className="text-muted">avg days to fix</small></div>
+            </div>
+            <Link href="/records/#issues" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold underline">See all issues</Link>
+          </>
+        );
+      })()}
 
       {/* Weeks ------------------------------------------------------------------------------------------------------- */}
       <GroupHeading>By week</GroupHeading>

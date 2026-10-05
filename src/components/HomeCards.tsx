@@ -8,7 +8,11 @@ import { buildCompliance, needsMakeup, teamGrid, weekKeys } from "@/core/complia
 import { addDays, isoDay, mondayOf, parseDay } from "@/core/weeks";
 import { reportPeople, reportRecords } from "@/lib/data/reports";
 import { listJobsites, listTeams } from "@/lib/data/company";
-import type { Company, Team } from "@/lib/data/types";
+import type { Company, Jobsite, Team } from "@/lib/data/types";
+import { alertWorthy, HEAT_LABEL } from "@/core/heat";
+import { checkHeat, type HeatCheck } from "@/lib/weather";
+import { getLocation, LocationError } from "@/lib/location";
+import { listIssues } from "@/lib/data/issues";
 
 type Status = {
   teams: Team[];
@@ -18,6 +22,9 @@ type Status = {
   week: ReturnType<typeof teamGrid>;
   thisWeek: { signed: number; expected: number };
   owed: number;
+  expiringSoon: number;           // makeups whose deadline is within 7 days
+  openIssues: number;
+  overdueIssues: number;
 };
 
 export function useHomeStatus(co: Company, version = 0): Status | null {
@@ -29,8 +36,8 @@ export function useHomeStatus(co: Company, version = 0): Status | null {
     const limit = co.makeup_weeks ?? 4;
     const start = isoDay(mondayOf(parseDay(co.program_start)));
     const fromKey = [isoDay(addDays(thisMonday, -7 * limit)), start].sort().at(-1)!;
-    Promise.all([reportPeople(co.id), reportRecords(co.id, fromKey), listTeams(co.id), listJobsites(co.id)])
-      .then(([people, records, teams, sites]) => {
+    Promise.all([reportPeople(co.id), reportRecords(co.id, fromKey), listTeams(co.id), listJobsites(co.id), listIssues(co.id).catch(() => [])])
+      .then(([people, records, teams, sites, issues]) => {
         if (!live) return;
         const keys = start > isoDay(thisMonday) ? [] : weekKeys(fromKey, today);
         const c = buildCompliance({ people, records, weeks: keys, makeupWeeks: limit, today });
@@ -43,6 +50,9 @@ export function useHomeStatus(co: Company, version = 0): Status | null {
           week: teamGrid({ ...c, weeks: now ? [now] : [] }),
           thisWeek: { signed: now ? now.tally.on_time : 0, expected: now ? now.tally.expected : 0 },
           owed: needsMakeup(c, limit, today).length,
+          expiringSoon: needsMakeup(c, limit, today).filter((o) => o.daysLeft <= 7).length,
+          openIssues: issues.filter((i) => i.status === "open").length,
+          overdueIssues: issues.filter((i) => i.status === "open" && i.due_date && i.due_date < isoDay(today)).length,
         });
       })
       .catch(() => { /* offline: Home works without the cards */ });
@@ -53,7 +63,7 @@ export function useHomeStatus(co: Company, version = 0): Status | null {
 
 /** "This week: 7 of 9 signed", one chip per crew, and how many people owe a past week. */
 export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin: boolean; onMakeup: () => void }) {
-  if (st.thisWeek.expected === 0 && st.owed === 0) return null;
+  if (st.thisWeek.expected === 0 && st.owed === 0 && st.openIssues === 0) return null;
   const name = (id: string | null) => (id ? st.teams.find((t) => t.id === id)?.name ?? "Former team" : "No team");
   const crews = st.week
     .map((g) => ({ name: name(g.teamId), t: g.weeks[0]?.tally }))
@@ -81,11 +91,17 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
       )}
       {st.owed > 0 && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-sm">
-          <span><b>{st.owed}</b> {st.owed === 1 ? "person-week needs" : "person-weeks need"} a makeup</span>
+          <span><b>{st.owed}</b> {st.owed === 1 ? "person-week needs" : "person-weeks need"} a makeup{st.expiringSoon ? <b className="text-warn"> · {st.expiringSoon} run out within 7 days</b> : null}</span>
           <span className="flex gap-3">
             <button className="min-h-11 font-bold underline" onClick={onMakeup}>Give a makeup</button>
             {isAdmin && <Link href="/reports/" className="flex min-h-11 items-center font-bold underline">See who</Link>}
           </span>
+        </div>
+      )}
+      {st.openIssues > 0 && (
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-sm">
+          <span><b>{st.openIssues}</b> open {st.openIssues === 1 ? "issue" : "issues"} the crew raised{st.overdueIssues ? <b className="text-warn"> · {st.overdueIssues} overdue</b> : null}</span>
+          <Link href="/records/#issues" className="flex min-h-11 items-center font-bold underline">See issues</Link>
         </div>
       )}
     </section>
@@ -119,5 +135,48 @@ export function GettingStarted({ st }: { st: Status }) {
         ))}
       </ol>
     </section>
+  );
+}
+
+/** Today's heat for the chosen place (or this phone's location). Loud only from "extreme caution" up. */
+export function HeatCard({ site }: { site: Jobsite | null }) {
+  const [h, setH] = useState<HeatCheck | null | undefined>(undefined);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const point = site?.latitude != null && site.longitude != null ? { latitude: site.latitude, longitude: site.longitude } : null;
+
+  useEffect(() => {
+    if (!point) return;
+    let live = true;
+    checkHeat(point).then((x) => live && setH(x)).catch((e) => live && setMsg(e instanceof Error ? e.message : String(e)));
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [point?.latitude, point?.longitude]);
+
+  const here = async () => {
+    setBusy(true); setMsg(null);
+    try { setH(await checkHeat(await getLocation(10_000))); }
+    catch (e) { setMsg(e instanceof LocationError || e instanceof Error ? e.message : String(e)); }
+    setBusy(false);
+  };
+
+  if (!point && h === undefined) {
+    return (
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="text-muted">{msg ?? "Heat check needs a jobsite with GPS, or your location."}</span>
+        <button className="min-h-11 font-bold underline" onClick={here} disabled={busy}>{busy ? "Checking…" : "Check today's heat here"}</button>
+      </div>
+    );
+  }
+  if (h === undefined) return msg ? <p className="mt-3 text-sm text-muted">Heat check unavailable: {msg}</p> : null;
+  if (h === null) return null;
+  const loud = alertWorthy(h.level);
+  return (
+    <div className={`mt-3 rounded-lg px-3 py-2 text-sm ${loud ? "border-2 border-warn bg-warn-bg" : "border border-line bg-surface"}`} role={loud ? "alert" : "status"}>
+      <b>{loud ? "⚠ " : ""}Heat index up to {h.maxHeatIndexF}°F today</b> · {HEAT_LABEL[h.level]}
+      <span className="block text-muted">
+        {h.place ? `${h.place} · ` : ""}{h.tempF}°F, {h.humidity}% humidity at the hottest hour{loud ? " · the heat reminder is added to today's talks" : ""}
+      </span>
+    </div>
   );
 }

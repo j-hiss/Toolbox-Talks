@@ -1,6 +1,6 @@
 // Saved talks. Records are append-only: there is no update or delete here, on purpose.
 import { supabase } from "@/lib/supabase";
-import type { AttendeeRow, RecordPayload } from "@/core/record";
+import type { AttendeeRow, IssuePayload, RecordPayload } from "@/core/record";
 import { signedFor } from "@/core/makeup";
 import type { TalkRecord, TalkRecordSummary } from "./types";
 
@@ -9,9 +9,9 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
-/** Saves the record and its attendees in one transaction. Safe to retry: the same client_id saves once. */
-export async function saveTalkRecord(record: RecordPayload, attendees: AttendeeRow[]): Promise<string> {
-  return check(await supabase().rpc("save_talk_record", { record, attendees })) as string;
+/** Saves the record, its attendees and any issues raised in one transaction. Safe to retry (client ids). */
+export async function saveTalkRecord(record: RecordPayload, attendees: AttendeeRow[], issues: IssuePayload[] = []): Promise<string> {
+  return check(await supabase().rpc("save_talk", { record, attendees, issues })) as string;
 }
 
 const SUMMARY = "id, client_id, talk_id, language, content, week_number, week_start, makeup_for_week, makeup_reason, held_at, jobsite_name, team_name, presenter_name, presenter_signature, talk_attendees(status)";

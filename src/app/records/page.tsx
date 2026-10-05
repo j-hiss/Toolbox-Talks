@@ -1,7 +1,8 @@
 "use client";
 
 // Saved talks for the current company, newest first, plus any still waiting on this phone to upload.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { IssuesList } from "@/components/Issues";
 import { isoDay, mondayOf, weekLabel } from "@/core/weeks";
 import Link from "next/link";
 import { listRecords } from "@/lib/data/records";
@@ -15,12 +16,17 @@ export default function RecordsPage() {
   return <RequireCompany>{(m) => <Records m={m} />}</RequireCompany>;
 }
 
+// Talks or Issues, kept in the URL hash (/records/#issues) so Home can link straight to issues.
+const subscribeHash = (cb: () => void) => { window.addEventListener("hashchange", cb); return () => window.removeEventListener("hashchange", cb); };
+const useView = () => useSyncExternalStore(subscribeHash, () => (window.location.hash === "#issues" ? "issues" : "talks"), () => "talks");
+
 const when = (iso: string) => new Date(iso).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 function Records({ m }: { m: Membership }) {
   const [rows, setRows] = useState<TalkRecordSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const outbox = useOutbox(m.company.id);
+  const view = useView();
   const [team, setTeam] = useState("all");
   const [onlyFlagged, setOnlyFlagged] = useState(false);
   const teams = useMemo(() => [...new Set((rows ?? []).map((r) => r.team_name).filter(Boolean))].sort(), [rows]);
@@ -50,6 +56,15 @@ function Records({ m }: { m: Membership }) {
     <Shell>
       <Eyebrow>{m.company.name}</Eyebrow>
       <Title>Records</Title>
+      <div className="mt-4 flex gap-1.5" role="tablist">
+        {(["talks", "issues"] as const).map((v) => (
+          <button key={v} role="tab" aria-selected={view === v} onClick={() => { window.location.hash = v === "issues" ? "issues" : ""; }}
+            className={`min-h-10 flex-1 rounded-full border px-3.5 font-display text-base font-bold uppercase tracking-wide ${view === v ? "border-fg bg-fg text-bg" : "border-line bg-surface text-muted"}`}>
+            {v === "talks" ? "Talks" : "Issues"}
+          </button>
+        ))}
+      </div>
+      {view === "issues" ? <IssuesList companyId={m.company.id} /> : (<>
 
       {outbox.items.length > 0 && (
         <>
@@ -129,6 +144,7 @@ function Records({ m }: { m: Membership }) {
           })}
         </>
       )}
+      </>)}
     </Shell>
   );
 }

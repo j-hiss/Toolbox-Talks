@@ -16,7 +16,11 @@ import { newDraft, useDraft } from "@/lib/draft";
 import { useOutbox } from "@/lib/useOutbox";
 import { usePlan } from "@/lib/usePlan";
 import { readLastSetup } from "@/lib/lastSetup";
-import { GettingStarted, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
+import { GettingStarted, HeatCard, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
+import type { Jobsite } from "@/lib/data/types";
+import { useEffect, useState } from "react";
+import { planReminders } from "@/core/reminders";
+import { applyReminders, remindersOn, remindersSupported, setReminders } from "@/lib/reminders";
 import { useRouter } from "next/navigation";
 import { Button, Eyebrow, GroupHeading, Notice, Shell, Title } from "@/components/ui";
 
@@ -39,9 +43,26 @@ function Home({ m }: { m: Membership }) {
   const outbox = useOutbox(co.id);
   const draftTitle = draft?.talkId ? TALKS.find((t) => t.id === draft.talkId)?.content.en.title : null;
   const st = useHomeStatus(co, outbox.items.length);
+  const [site, setSite] = useState<Jobsite | null>(null);
   const isAdmin = canAdmin(m.access);
   const last = readLastSetup(co.id);
   const lastCrew = last?.teamId === "all" ? "All teams" : st?.teams.find((t) => t.id === last?.teamId)?.name;
+  const [remind, setRemind] = useState(() => remindersOn());
+  const nextWeek = week ? plan.find((w) => w.n === week.n + 1) : plan[0];
+  const crewGrid = st?.week.find((g) => g.teamId === (last?.teamId || null))?.weeks[0]?.tally;
+  // Keep this phone's reminders matching the latest plan and records (phone app only; nothing on the website).
+  useEffect(() => {
+    if (!st || !remind) return;
+    void applyReminders(planReminders({
+      today: new Date(),
+      thisWeekTitle: talk?.content.en.title ?? null,
+      nextWeekTitle: nextWeek ? TALKS.find((t) => t.id === nextWeek.talkId)?.content.en.title ?? null : null,
+      crewName: lastCrew ?? null,
+      crewDone: !!crewGrid && crewGrid.expected > 0 && crewGrid.on_time >= crewGrid.expected,
+      expiringSoon: st.expiringSoon,
+    })).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [st, remind, talk?.id, nextWeek?.key]);
   const start = (talkId: string | null) => {
     newDraft(co.id, talkId, readChosenJobsite(co.id) ?? "");
     router.push("/talk/");
@@ -117,7 +138,8 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
-      <JobsitePicker companyId={co.id} isAdmin={isAdmin} />
+      <JobsitePicker companyId={co.id} isAdmin={isAdmin} onChange={setSite} />
+      <HeatCard key={site?.id ?? "none"} site={site} />
 
       {upcoming.length > 0 && (
         <section>
@@ -136,7 +158,18 @@ function Home({ m }: { m: Membership }) {
         </section>
       )}
 
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-sm text-muted">
+      <div className="mt-10 border-t border-line pt-4 text-sm">
+        {remindersSupported() ? (
+          <label className="flex min-h-11 items-center justify-between gap-3">
+            <span><b>Reminders on this phone</b><small className="block text-muted">Monday: this week&apos;s talk · Thursday: if your crew hasn&apos;t had it · makeups running out</small></span>
+            <input type="checkbox" className="h-6 w-6 accent-[var(--hivis)]" checked={remind} onChange={async (e) => setRemind(await setReminders(e.target.checked))} />
+          </label>
+        ) : (
+          <p className="text-muted">Phone reminders (Monday&apos;s talk, Thursday nudge, makeups running out) come with the iPhone and Android app.</p>
+        )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-sm text-muted">
         <span>Signed in as {s.user?.email}</span>
         <div className="flex gap-2">
           <Link href="/setup/" className="rounded-md border border-line px-2.5 py-1.5 font-bold text-fg">New company</Link>

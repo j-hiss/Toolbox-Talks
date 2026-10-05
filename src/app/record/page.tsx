@@ -1,9 +1,14 @@
 "use client";
 
 // One saved talk: what was read, where, by whom, and every person's status and signature. Read-only by design.
+import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getRecord } from "@/lib/data/records";
 import { saveFile } from "@/lib/download";
+import { listIssuesForRecord } from "@/lib/data/issues";
+import type { Issue } from "@/lib/data/types";
+import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
+import { isOverdue } from "@/components/Issues";
 import type { Membership, TalkRecord } from "@/lib/data/types";
 import { countStatuses, STATUS_LABEL } from "@/core/attendance";
 import { TALKS } from "@/content/talks";
@@ -24,6 +29,7 @@ function RecordView({ m }: { m: Membership }) {
   const id = useHashId();
   const [rec, setRec] = useState<TalkRecord | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
   const [pdf, setPdf] = useState<{ busy: boolean; msg: string | null }>({ busy: false, msg: null });
 
   useEffect(() => {
@@ -31,6 +37,9 @@ function RecordView({ m }: { m: Membership }) {
     let live = true;
     getRecord(m.company.id, id)
       .then((r) => live && setRec(r))
+      .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
+    listIssuesForRecord(m.company.id, id)
+      .then((i) => live && setIssues(i))
       .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
     return () => { live = false; };
   }, [m.company.id, id]);
@@ -44,7 +53,7 @@ function RecordView({ m }: { m: Membership }) {
     setPdf({ busy: true, msg: null });
     try {
       const { buildRecordPdf, pdfFileName } = await import("@/lib/pdf"); // loaded only when needed
-      const result = await saveFile(pdfFileName(rec), buildRecordPdf(rec, m.company).output("blob"));
+      const result = await saveFile(pdfFileName(rec), buildRecordPdf(rec, m.company, issues).output("blob"));
       setPdf({ busy: false, msg: result === "canceled" ? "Canceled." : null });
     } catch (e) {
       setPdf({ busy: false, msg: e instanceof Error ? e.message : String(e) });
@@ -120,6 +129,35 @@ function RecordView({ m }: { m: Membership }) {
           <span className={`rounded px-2 py-0.5 font-display text-xs font-bold uppercase ${STATUS_CHIP.not_signed}`}>Not signed</span>
         )}
       </div>
+
+      {(rec.site_notes || rec.heat || issues.length > 0) && (
+        <>
+          <GroupHeading>On site</GroupHeading>
+          <div className="mt-3 flex flex-col gap-2 text-sm">
+            {rec.site_notes && <p className="rounded-r border-l-4 border-fg bg-surface px-3 py-2"><b>Today on this site:</b> {rec.site_notes}</p>}
+            {rec.heat && (
+              <p className="rounded-lg border border-line bg-surface px-3 py-2">
+                <b>Heat index up to {rec.heat.max_heat_index_f}°F</b> ({HEAT_LABEL[rec.heat.level as HeatLevel] ?? rec.heat.level}){rec.heat.reminder_read ? " · heat reminder read with this talk" : ""}
+              </p>
+            )}
+            {issues.length > 0 && (
+              <div className="rounded-lg border border-line bg-surface px-3 py-2">
+                <b>Raised by the crew ({issues.length})</b>
+                <ul className="mt-1 flex flex-col gap-1">
+                  {issues.map((i) => (
+                    <li key={i.id}>
+                      <Link href="/records/#issues" className="underline-offset-2 hover:underline">{i.description}</Link>
+                      <small className={`block ${isOverdue(i) ? "font-bold text-warn" : "text-muted"}`}>
+                        {i.owner_name || "No owner"}{i.status === "fixed" ? " · fixed" : i.due_date ? ` · fix by ${i.due_date}${isOverdue(i) ? " (overdue)" : ""}` : ""}
+                      </small>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       <GroupHeading>What was covered</GroupHeading>
       <div className="mt-3 rounded-lg border border-line bg-surface p-4 text-sm">

@@ -43,7 +43,8 @@ export function seedExample(): string {
   const crewA = ["Example Diaz", "Example Evans", "Example Fox"].map((n) => person(n, t1));
   const crewB = ["Example Gomez", "Example Hall", "Example Ito"].map((n) => person(n, t2));
   const newHire = person("Example New Hire", t2, null, addDays(thisMonday, -10).toISOString());
-  const site = { id: uid(), company_id: coId, name: "Example Jobsite", address: "", latitude: null, longitude: null, kind: "site", active: true };
+  // An example GPS point so the heat check (an example forecast in the preview) has somewhere to look.
+  const site = { id: uid(), company_id: coId, name: "Example Jobsite", address: "", latitude: 26.6, longitude: -81.9, kind: "site", active: true };
   d.jobsites.push(site);
 
   const input = { talks: TALKS, industry: co.industry, climate: climateFor(co.zip), programStart: co.program_start };
@@ -76,6 +77,20 @@ export function seedExample(): string {
   record(wk(3), at(addDays(thisMonday, -14), 3), "Example Crew A", leadA, [{ p: crewA[1], s: "signed" }], { week: wk(3), reason: "Out sick" });
   record(wk(6), at(addDays(thisMonday, -28), 2), "Example Crew B", leadB, [{ p: crewB[0], s: "signed" }, { p: crewB[1], s: "signed" }], { week: wk(6), reason: "No work that week (weather, job gap)" });
   void newHire;
+  // Example issues the crew raised: one overdue, one open, one fixed.
+  const recs = (d.records as { id: string; company_id: string; held_at: string }[]).filter((r) => r.company_id === coId);
+  const issue = (k: number, description: string, owner: { id: string; name: string }, dueIn: number, fixed?: string) => {
+    const raised = at(addDays(thisMonday, -7 * k), 0);
+    (d.issues ??= []).push({
+      id: uid(), client_id: uid(), company_id: coId, record_id: recs[recs.length - 1 - k]?.id ?? null, jobsite_name: site.name,
+      description, owner_person_id: owner.id, owner_name: owner.name, due_date: isoDay(addDays(raised, dueIn)),
+      status: fixed ? "fixed" : "open", raised_by_name: owner.name, raised_at: raised.toISOString(),
+      fixed_at: fixed ? addDays(raised, 3).toISOString() : null, fixed_note: fixed ?? "",
+    });
+  };
+  issue(2, "Example: east ladder has a cracked rail", leadA, 7);
+  issue(1, "Example: no shade at the north side staging area", leadB, 10);
+  issue(4, "Example: guardrail missing at the stair opening", leadB, 5, "Rail installed");
   save();
   return "Example history added.";
 }

@@ -89,5 +89,24 @@ export type TalkRecord = TalkRecordSummary & {
   presenter_signed_at: string | null;
   latitude: number | null;
   longitude: number | null;
+  site_notes?: string;
+  heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
   attendees: AttendanceRow[];
+};
+
+/** Something the crew raised at a talk. */
+export type Issue = {
+  id: string;
+  client_id: string;
+  record_id: string | null;
+  jobsite_name: string;
+  description: string;
+  owner_person_id: string | null;
+  owner_name: string;
+  due_date: string | null;
+  status: "open" | "fixed";
+  raised_by_name: string;
+  raised_at: string;
+  fixed_at: string | null;
+  fixed_note: string;
 };

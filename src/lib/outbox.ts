@@ -1,11 +1,12 @@
 // Offline-first saving. A finished talk goes into this outbox on the phone FIRST, then uploads. If there's no
 // signal, it waits and uploads later; nothing is lost when the jobsite has no reception.
 // Uploads are idempotent (client_id), so retrying after a half-finished upload never saves a talk twice.
-import type { AttendeeRow, RecordPayload } from "@/core/record";
+import type { AttendeeRow, IssuePayload, RecordPayload } from "@/core/record";
 
 export type OutboxItem = {
   record: RecordPayload;
   attendees: AttendeeRow[];
+  issues?: IssuePayload[];         // raised at this talk; uploaded with it
   queuedAt: string;
   lastError: string | null;
 };
@@ -32,22 +33,22 @@ export function pending(companyId?: string): OutboxItem[] {
 }
 
 /** Put a finished talk on the phone. Throws only if the phone can't store it at all. */
-export function enqueue(record: RecordPayload, attendees: AttendeeRow[]) {
+export function enqueue(record: RecordPayload, attendees: AttendeeRow[], issues: IssuePayload[] = []) {
   const items = read().filter((i) => i.record.client_id !== record.client_id);
-  items.push({ record, attendees, queuedAt: new Date().toISOString(), lastError: null });
+  items.push({ record, attendees, issues, queuedAt: new Date().toISOString(), lastError: null });
   write(items);
 }
 
 let flushing: Promise<{ uploaded: number; failed: number }> | null = null;
 
 /** Upload everything waiting, oldest first. One flush at a time. */
-export function flush(upload: (r: RecordPayload, a: AttendeeRow[]) => Promise<unknown>): Promise<{ uploaded: number; failed: number }> {
+export function flush(upload: (r: RecordPayload, a: AttendeeRow[], issues: IssuePayload[]) => Promise<unknown>): Promise<{ uploaded: number; failed: number }> {
   if (flushing) return flushing;
   flushing = (async () => {
     let uploaded = 0, failed = 0;
     for (const item of read()) {
       try {
-        await upload(item.record, item.attendees);
+        await upload(item.record, item.attendees, item.issues ?? []);
         write(read().filter((i) => i.record.client_id !== item.record.client_id));
         uploaded++;
       } catch (e) {

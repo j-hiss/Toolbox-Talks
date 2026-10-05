@@ -59,6 +59,21 @@ export type RecordInput = {
   gps: { latitude: number; longitude: number; accuracyMeters: number } | null;
   /** A makeup for an earlier week. Date, week and GPS above stay real; this says which week it covers and why. */
   makeup?: { weekStart: string; reason: string } | null;
+  /** A line or two the presenter added for this site today. Read to the crew; saved with the record. */
+  siteNotes?: string;
+  /** The heat forecast checked for this talk (src/core/heat.ts), and whether the heat reminder was read. */
+  heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
+};
+
+/** Something the crew raised at a talk: a hazard or problem to fix, with an owner and a fix-by date. */
+export type IssuePayload = {
+  client_id: string;
+  description: string;
+  owner_person_id: string | null;
+  owner_name: string;
+  due_date: string | null;       // YYYY-MM-DD
+  raised_by_name: string;
+  raised_at: string;
 };
 
 /** The JSON sent to save_talk_record(). Field names match supabase/migrations/…_talk_records.sql. */
@@ -88,6 +103,8 @@ export function recordPayload(r: RecordInput) {
     gps_accuracy_m: r.gps?.accuracyMeters ?? null,
     makeup_for_week: r.makeup?.weekStart ?? null,
     makeup_reason: r.makeup?.reason.trim() || null,
+    site_notes: (r.siteNotes ?? "").trim(),
+    heat: r.heat ?? null,
   };
 }
 export type RecordPayload = ReturnType<typeof recordPayload>;

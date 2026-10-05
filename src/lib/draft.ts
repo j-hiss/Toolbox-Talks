@@ -28,7 +28,15 @@ export type TalkDraft = {
   presenterSignature: Signature | null;
   gps: { latitude: number; longitude: number; accuracyMeters: number } | null;
   startedAt: string;
+  /** A line or two for this site today, read to the crew. */
+  siteNotes: string;
+  /** The heat check for this talk; reminder_read once the heat reminder was part of what was read. */
+  heat: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; place: string } | null;
+  /** Things the crew raised, logged before saving. */
+  issues: DraftIssue[];
 };
+
+export type DraftIssue = { clientId: string; description: string; ownerId: string; dueDate: string };
 
 const key = (companyId: string) => `tt-draft-${companyId}`;
 const listeners = new Set<() => void>();
@@ -47,9 +55,9 @@ export function readDraft(companyId: string): TalkDraft | null {
 
 /** Drafts saved by an earlier version of the app (free talk picking) become a makeup choice or carry on as is. */
 function upgrade(raw: unknown): TalkDraft {
-  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds"> & { step: string };
+  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues"> & { step: string };
   const step = (d.step === "pick" ? (d.talkId ? "read" : "makeup") : d.step) as TalkDraft["step"];
-  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, step };
+  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], step };
 }
 
 export function writeDraft(d: TalkDraft) {
@@ -86,6 +94,9 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
     presenterSignature: null,
     gps: null,
     startedAt: new Date().toISOString(),
+    siteNotes: "",
+    heat: null,
+    issues: [],
   };
   writeDraft(d);
   return d;

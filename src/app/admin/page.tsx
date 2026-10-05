@@ -24,6 +24,7 @@ import { RequireCompany } from "@/components/Guard";
 import { CompanyForm } from "@/components/CompanyForm";
 import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, Sheet, Shell, Title, inputClass } from "@/components/ui";
 import { toast } from "@/components/toast";
+import { ImportPeople } from "@/components/ImportPeople";
 
 const TABS = [
   { id: "people", label: "People" },
@@ -140,6 +141,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
   const [adding, setAdding] = useState(people.length === 0);
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Person | null>(null);
+  const [importing, setImporting] = useState(false);
   const roleOptions = <><option value={CREW}>Crew member</option>{roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</>;
   const teamOptions = <><option value="">No team</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</>;
   const roleName = (p: Person) => roles.find((r) => r.id === p.role_id)?.name ?? "Crew member";
@@ -172,6 +174,8 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
         <input type="search" aria-label="Search people" placeholder={`Search ${people.length} people`} className={inputClass} value={q} onChange={(e) => setQ(e.target.value)} />
         {!adding && <Button size="sm" className="shrink-0" onClick={() => setAdding(true)}>+ Add</Button>}
       </div>
+      <button className="mt-2 min-h-11 text-sm font-bold underline" onClick={() => setImporting(true)}>Import from a spreadsheet (Excel or CSV)</button>
+      <ImportPeople companyId={companyId} open={importing} onClose={() => setImporting(false)} onDone={act(async () => {}, null)} />
       {adding && (
         <form
           className="mt-3 flex flex-col gap-3 rounded-lg border border-dashed border-line bg-surface p-3"
@@ -193,7 +197,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
             <Button size="sm" type="submit">Add person</Button>
             {people.length > 0 && <Button size="sm" variant="ghost" type="button" onClick={() => setAdding(false)}>Done adding</Button>}
           </div>
-          <p className="text-xs text-muted">Crew members sign at talks. Anyone with another role can also give talks. Spreadsheet import is coming.</p>
+          <p className="text-xs text-muted">Crew members sign at talks. Anyone with another role can also give talks.</p>
         </form>
       )}
 
