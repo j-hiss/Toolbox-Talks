@@ -63,6 +63,8 @@ point the row at the real file and keep the prototype line as its origin.
 | `saveTalkRecord` · `listRecords` · `getRecord` · `signedForWeek` · `listRecordedWeeks` | `src/lib/data/records.ts` | **The** record access. No update/delete on purpose (append-only). Who signed for a week; which weeks are given (locked) |
 | `listOverrides` · `setOverride` · `clearOverride` | `src/lib/data/plan.ts` | Admin week swaps; DB enforces the lock |
 | `usePlan` | `src/lib/usePlan.ts` | The plan with the admin's swaps, cached on the phone for offline. Every screen that shows a week's talk uses it |
+| `buildRecordPdf` · `pdfFileName` · `stampParts` · `PDF_FOOTER` | `src/lib/pdf.ts` | **The** PDF record, built only from the saved record: company header, week line (or makeup week + real week + reason), details with GPS, attendance summary, talk text that was read, sign-in sheet with full date and time on every signature line and flagged rows shaded, presenter block, no-compliance footer. Origin: prototype `buildPdf` (`prototype/index.html:967`) |
+| `saveFile` | `src/lib/download.ts` | **The** file hand-off: share sheet on phones, download on computers. Preview twin: `preview/demo/download.ts` |
 | `MakeupTag` | `src/components/ui.tsx` | "Makeup for the week of … · reason" wherever a record is listed |
 | offline outbox · `useOutbox` | `src/lib/outbox.ts` · `src/lib/useOutbox.ts` | **The** offline-first save path: phone first, upload when online, idempotent by `client_id` |
 | talk draft | `src/lib/draft.ts` | The talk in progress, saved on the phone after every change |
@@ -85,7 +87,6 @@ point the row at the real file and keep the prototype line as its origin.
 
 | Component | Prototype | Role |
 |---|---|---|
-| `buildPdf` · `pdfName` | `prototype/index.html:967` · `:1049` | **The** PDF record: company header, week line, details, attendance summary, talk content, sign-in sheet with flagged rows, presenter block, no-compliance-claim footer |
 | `reportData` · `reports` · `exportCsv` | `prototype/index.html:684` · `:713` · `:764` | **The** report query (talks held, weekly coverage, employee totals, flags) and CSV export |
 
 ## Phone preview

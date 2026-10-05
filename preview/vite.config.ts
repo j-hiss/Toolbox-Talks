@@ -4,6 +4,7 @@
 //   @/lib/supabase               -> demo sign-in (code 123456)
 //   @/lib/data/company, records, plan -> demo data saved in the browser
 //   @/lib/location               -> explains GPS isn't available in the preview
+//   @/lib/download               -> the preview page's own save-file prompt
 // Run: npm run preview:build   (output: preview/dist/preview.html)
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -25,6 +26,7 @@ export default defineConfig({
       { find: /^@\/lib\/data\/records$/, replacement: here("demo/records.ts") },
       { find: /^@\/lib\/data\/plan$/, replacement: here("demo/plan.ts") },
       { find: /^@\/lib\/location$/, replacement: here("demo/location.ts") },
+      { find: /^@\/lib\/download$/, replacement: here("demo/download.ts") },
       { find: /^@\//, replacement: here("../src") + "/" },
     ],
   },

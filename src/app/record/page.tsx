@@ -3,13 +3,14 @@
 // One saved talk: what was read, where, by whom, and every person's status and signature. Read-only by design.
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getRecord } from "@/lib/data/records";
+import { saveFile } from "@/lib/download";
 import type { Membership, TalkRecord } from "@/lib/data/types";
 import { countStatuses, STATUS_LABEL } from "@/core/attendance";
 import { TALKS } from "@/content/talks";
 import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { RequireCompany } from "@/components/Guard";
-import { Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
+import { Button, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
 
 export default function RecordPage() {
   return <RequireCompany>{(m) => <RecordView m={m} />}</RequireCompany>;
@@ -23,6 +24,7 @@ function RecordView({ m }: { m: Membership }) {
   const id = useHashId();
   const [rec, setRec] = useState<TalkRecord | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [pdf, setPdf] = useState<{ busy: boolean; msg: string | null }>({ busy: false, msg: null });
 
   useEffect(() => {
     if (!id) return;
@@ -37,6 +39,17 @@ function RecordView({ m }: { m: Membership }) {
   if (error) return <Shell nav={nav}><Notice tone="error">Couldn&apos;t load this record: {error}</Notice></Shell>;
   if (!id || rec === null) return <Shell nav={nav}><Notice tone="error">That record wasn&apos;t found in this company.</Notice></Shell>;
   if (rec === undefined) return <Shell nav={nav}><Loading /></Shell>;
+
+  const downloadPdf = async () => {
+    setPdf({ busy: true, msg: null });
+    try {
+      const { buildRecordPdf, pdfFileName } = await import("@/lib/pdf"); // loaded only when needed
+      const result = await saveFile(pdfFileName(rec), buildRecordPdf(rec, m.company).output("blob"));
+      setPdf({ busy: false, msg: result === "canceled" ? "Canceled." : null });
+    } catch (e) {
+      setPdf({ busy: false, msg: e instanceof Error ? e.message : String(e) });
+    }
+  };
 
   const c = countStatuses(rec.attendees);
   const flagged = c.flagged + (rec.presenter_signature ? 0 : 1);
@@ -72,6 +85,11 @@ function RecordView({ m }: { m: Membership }) {
       <div className={`mt-4 flex flex-wrap items-center gap-2 rounded-lg border px-4 py-3 text-sm tabular-nums ${flagged ? "border-warn bg-warn-bg" : "border-ok bg-surface"}`}>
         <span><b>{c.signed}</b> signed · <b>{c.not_signed}</b> not signed · <b>{c.absent}</b> absent</span>
         <span className="ml-auto"><FlagChip n={flagged} /></span>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button size="sm" onClick={downloadPdf} disabled={pdf.busy}>{pdf.busy ? "Building PDF…" : "Download PDF"}</Button>
+        {pdf.msg && <span className="text-sm text-muted" role="status">{pdf.msg}</span>}
       </div>
 
       <GroupHeading>Sign-in sheet</GroupHeading>

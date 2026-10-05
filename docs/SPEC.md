@@ -131,16 +131,21 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - Company header: name, address, phone/email, license numbers.
 - "Week N of 52 · week of <dates> · Scheduled talk", or for a makeup: "Makeup for the week of <dates> · <reason>" with
   the real date it was given.
-- Date and time, jobsite, team, team lead, presented by (name and role), language, industry.
+- Date and time, where (jobsite or office), team, team lead, presented by (name and role), language, industry, GPS.
 - Attendance summary with flagged count.
 - The full talk content that was read.
-- Sign-in sheet headed with week, talk, date and team: name and role, status, signature image, time signed. Flagged
-  rows shaded.
+- Sign-in sheet headed with week, talk, date and team: name and role, status, signature image, date and time signed.
+  Flagged rows shaded.
 - "Talk delivered by" block with the presenter's signature.
 - Footer on every page: record ID, page number, "Documents a safety meeting. Does not by itself certify OSHA
   compliance."
 - File name: `Week 06 - Toolbox Talk - <talk> - <date>.pdf`.
-- In the real app, the PDF is saved to the company's account automatically; the presenter doesn't have to send it.
+- **Built:** Records → a record → **Download PDF** (share sheet on phones, download on computers). Every signature
+  line, including the presenter's, carries the full date and time signed with the time zone. GPS at time of talk
+  is listed when it was captured.
+- The PDF is regenerated from the saved record each time, so it matches what was signed. Company header details come
+  from the company's current info (not yet snapshotted per record).
+- Later: save a copy to the company's account automatically so the presenter doesn't have to send it.
 
 ## Admin reports
 - Filters: last 4 weeks · last 12 weeks · this year · all time; one team or all.
