@@ -57,6 +57,8 @@ export type RecordInput = {
   presenter: { personId: string | null; name: string; role: string; signature: Signature | null };
   heldAt: string;
   gps: { latitude: number; longitude: number; accuracyMeters: number } | null;
+  /** A makeup for an earlier week. Date, week and GPS above stay real; this says which week it covers and why. */
+  makeup?: { weekStart: string; reason: string } | null;
 };
 
 /** The JSON sent to save_talk_record(). Field names match supabase/migrations/…_talk_records.sql. */
@@ -84,6 +86,8 @@ export function recordPayload(r: RecordInput) {
     latitude: r.gps?.latitude ?? null,
     longitude: r.gps?.longitude ?? null,
     gps_accuracy_m: r.gps?.accuracyMeters ?? null,
+    makeup_for_week: r.makeup?.weekStart ?? null,
+    makeup_reason: r.makeup?.reason.trim() || null,
   };
 }
 export type RecordPayload = ReturnType<typeof recordPayload>;

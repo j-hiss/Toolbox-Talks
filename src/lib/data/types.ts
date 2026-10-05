@@ -15,6 +15,7 @@ export type Company = {
   zip: string | null;
   program_start: string; // YYYY-MM-DD, the Monday of Week 1
   default_jobsite: string;
+  makeup_weeks: number; // how many weeks back a missed talk can be made up
 };
 
 export type Membership = { company: Company; access: Access };
@@ -42,6 +43,7 @@ export type Jobsite = {
   address: string;
   latitude: number | null;
   longitude: number | null;
+  kind: "site" | "office"; // office or shop: talks there are normal, not a flag
   active: boolean;
 };
 
@@ -63,6 +65,9 @@ export type TalkRecordSummary = {
   language: string;
   title: string;
   week_number: number | null;
+  week_start: string | null;
+  makeup_for_week: string | null;
+  makeup_reason: string | null;
   held_at: string;
   jobsite_name: string;
   team_name: string;
@@ -71,10 +76,12 @@ export type TalkRecordSummary = {
   presenter_signed: boolean;
 };
 
+/** Admin's swap of one week's talk (week key = that Monday). */
+export type PlanOverride = { week_start: string; talk_id: string };
+
 /** A saved talk with everything needed to show it or build its PDF. */
 export type TalkRecord = TalkRecordSummary & {
   content: { title: string; hook: string; sections: { heading: string; items: string[] }[]; ask: string; en?: unknown };
-  week_start: string | null;
   scheduled_talk_id: string | null;
   team_lead_name: string;
   presenter_role: string;

@@ -121,6 +121,52 @@ async function main() {
     check("'Signed' without a signature is rejected", await fails(() => save(userA, coA, randomUUID(), [{ name: "W3", status: "signed" }])));
     check("A presenter can record a talk", !!(await save(presenterA, coA, randomUUID(), [{ name: "W1", status: "not_signed" }])).rows[0].id);
 
+    // Weekly lock and makeups.
+    const monday = (offsetWeeks) => {
+      const d = new Date();
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7) + offsetWeeks * 7);
+      return d.toISOString().slice(0, 10);
+    };
+    const nextWk = monday(1), laterWk = monday(2), pastWk = monday(-2);
+    const tuesday = new Date(Date.parse(monday(3)) + 86400000).toISOString().slice(0, 10);
+    const setOverride = (user, company, wk, talk = "heat") =>
+      as(user, "insert into public.plan_overrides (company_id, week_start, talk_id) values ($1, $2, $3) on conflict (company_id, week_start) do update set talk_id = excluded.talk_id", [company, wk, talk]);
+    await setOverride(userA, coA, nextWk);
+    await setOverride(userB, coB, nextWk);
+    const ovA = await as(userA, "select company_id from public.plan_overrides");
+    check("A sees only A's plan changes", ovA.rows.length === 1 && ovA.rows[0].company_id === coA, `${ovA.rows.length} visible`);
+    check("A cannot change B's plan", await fails(() => setOverride(userA, coB, laterWk)));
+    check("A presenter cannot change the plan", await fails(() => setOverride(presenterA, coA, laterWk)));
+    check("A presenter can read the plan", (await as(presenterA, "select week_start from public.plan_overrides")).rows.length === 1);
+    check("A week that's over can't be changed", await fails(() => setOverride(userA, coA, pastWk)));
+    check("Plan weeks must start on a Monday", await fails(() => setOverride(userA, coA, tuesday)));
+    const recWk = (company, clientId, wk, extra = {}) => [
+      JSON.stringify({ company_id: company, client_id: clientId, talk_id: "heat", language: "en", content: { title: "Heat" },
+        presenter_name: "Presenter", held_at: new Date().toISOString(), week_number: 2, week_start: wk, ...extra }),
+      "[]",
+    ];
+    const saveWk = (...a) => as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", recWk(...a));
+    // A makeup held next week for an earlier week must NOT lock next week's talk.
+    await saveWk(coA, randomUUID(), nextWk, { makeup_for_week: monday(0), makeup_reason: "Off that week" });
+    check("A makeup doesn't lock the week it was held in", !(await fails(() => setOverride(userA, coA, nextWk, "heat"))));
+    await saveWk(coA, randomUUID(), nextWk);
+    check("Once a week is recorded, its talk is locked", await fails(() => setOverride(userA, coA, nextWk, "fall")));
+    check("…and its plan change can't be removed", await fails(() => as(userA, "delete from public.plan_overrides where company_id = $1 and week_start = $2", [coA, nextWk])));
+    check("An unrecorded future week can still be changed", !(await fails(() => setOverride(userA, coA, laterWk))));
+    const thisWk = monday(0);
+    const mk = (await saveWk(coA, randomUUID(), thisWk, { makeup_for_week: pastWk, makeup_reason: "Out sick" })).rows[0].id;
+    check("A makeup keeps its real week and names the week it makes up",
+      (await as(userA, "select week_start::text ws, makeup_for_week::text mf, makeup_reason from public.talk_records where id = $1", [mk]))
+        .rows.every((r) => r.ws === thisWk && r.mf === pastWk && r.makeup_reason === "Out sick"));
+    check("A makeup without a reason is rejected", await fails(() => saveWk(coA, randomUUID(), thisWk, { makeup_for_week: pastWk, makeup_reason: "  " })));
+    check("A makeup can't be for a later week", await fails(() => saveWk(coA, randomUUID(), pastWk, { makeup_for_week: thisWk, makeup_reason: "x" })));
+    check("Locations default to jobsite; office is allowed",
+      (await as(userA, "insert into public.jobsites (company_id, name, kind) values ($1, 'Office', 'office') returning kind", [coA])).rows[0].kind === "office" &&
+      (await as(userA, "select kind from public.jobsites where name = 'A yard'")).rows[0].kind === "site");
+    check("Makeup limit defaults to 4 weeks, admin can change it",
+      (await as(userA, "update public.companies set makeup_weeks = 8 where id = $1 returning makeup_weeks", [coA])).rows[0]?.makeup_weeks === 8);
+
     const rolesA = await as(userA, "select company_id from public.roles");
     check("New company gets its default roles, and A sees only A's", rolesA.rows.length === 6 && rolesA.rows.every((r) => r.company_id === coA), `${rolesA.rows.length} visible`);
     check("A cannot add a role to B", await fails(() => as(userA, "insert into public.roles (company_id, name) values ($1, 'Intruder')", [coB])));
@@ -149,7 +195,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 27;
+  const EXPECTED = 42;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

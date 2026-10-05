@@ -20,6 +20,7 @@ export const blankCompany = (): CompanyDraft => ({
   zip: "",
   program_start: isoDay(mondayOf(new Date())),
   default_jobsite: "",
+  makeup_weeks: 4,
 });
 
 export function CompanyForm({ initial, submitLabel, onSubmit }: { initial: CompanyDraft; submitLabel: string; onSubmit: (c: CompanyDraft) => Promise<void> }) {
@@ -36,6 +37,7 @@ export function CompanyForm({ initial, submitLabel, onSubmit }: { initial: Compa
     if (!c.name.trim()) return setError("Enter the company name.");
     if (c.zip && !/^\d{5}$/.test(c.zip)) return setError("ZIP code is 5 digits.");
     if (c.zip && !climateFor(c.zip).state) return setError("We don't recognize that ZIP code.");
+    if (!Number.isInteger(c.makeup_weeks) || c.makeup_weeks < 1 || c.makeup_weeks > 52) return setError("Makeup limit is 1 to 52 weeks.");
     const start = isoDay(mondayOf(parseDay(c.program_start)));
     setBusy(true);
     try {
@@ -78,6 +80,11 @@ export function CompanyForm({ initial, submitLabel, onSubmit }: { initial: Compa
       </div>
       <Field label="Week 1 of the 52-week plan starts" id="co-start" hint="Rounded to that week's Monday">
         <input id="co-start" type="date" className={inputClass} value={c.program_start} onChange={(e) => set("program_start", e.target.value)} />
+      </Field>
+      <Field label="Missed talks can be made up for" id="co-makeup" hint="Weeks back. A makeup keeps its real date and needs a reason">
+        <select id="co-makeup" className={inputClass} value={c.makeup_weeks} onChange={(e) => set("makeup_weeks", Number(e.target.value))}>
+          {[1, 2, 3, 4, 6, 8, 12, 26, 52].map((n) => <option key={n} value={n}>{n} week{n > 1 ? "s" : ""}</option>)}
+        </select>
       </Field>
       {error && <Notice tone="error">{error}</Notice>}
       {saved && <Notice tone="ok">{saved}</Notice>}

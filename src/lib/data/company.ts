@@ -8,7 +8,7 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
-const COMPANY_COLUMNS = "id, name, licenses, address, phone, email, industry, zip, program_start, default_jobsite";
+const COMPANY_COLUMNS = "id, name, licenses, address, phone, email, industry, zip, program_start, default_jobsite, makeup_weeks";
 
 export async function myMemberships(userId: string): Promise<Membership[]> {
   const rows = check(
@@ -31,8 +31,8 @@ export async function createCompany(input: NewCompany): Promise<string> {
     }),
   ) as string;
   const details: Partial<Omit<Company, "id">> = {};
-  for (const k of ["licenses", "address", "phone", "email", "program_start", "default_jobsite"] as const) {
-    if (input[k] !== undefined) details[k] = input[k];
+  for (const k of ["licenses", "address", "phone", "email", "program_start", "default_jobsite", "makeup_weeks"] as const) {
+    if (input[k] !== undefined) (details as Record<string, unknown>)[k] = input[k];
   }
   if (Object.keys(details).length) await updateCompany(id, details);
   return id;
@@ -93,17 +93,17 @@ export async function deactivatePerson(companyId: string, personId: string): Pro
 }
 
 // Jobsites -------------------------------------------------------------------------------------------------------
-const JOBSITE_COLUMNS = "id, company_id, name, address, latitude, longitude, active";
+const JOBSITE_COLUMNS = "id, company_id, name, address, latitude, longitude, kind, active";
 
 export async function listJobsites(companyId: string): Promise<Jobsite[]> {
   return check(
     await supabase().from("jobsites").select(JOBSITE_COLUMNS).eq("company_id", companyId).eq("active", true).order("name"),
   );
 }
-export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "address" | "latitude" | "longitude">): Promise<void> {
+export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">): Promise<void> {
   check(await supabase().from("jobsites").insert({ company_id: companyId, ...j }));
 }
-export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude">>): Promise<void> {
+export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">>): Promise<void> {
   check(await supabase().from("jobsites").update(patch).eq("company_id", companyId).eq("id", id));
 }
 /** Jobsites are deactivated, never deleted: saved talk records will point at them. */

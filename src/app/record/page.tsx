@@ -9,7 +9,7 @@ import { TALKS } from "@/content/talks";
 import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { RequireCompany } from "@/components/Guard";
-import { Eyebrow, FlagChip, GroupHeading, Loading, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
+import { Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
 
 export default function RecordPage() {
   return <RequireCompany>{(m) => <RecordView m={m} />}</RequireCompany>;
@@ -45,7 +45,7 @@ function RecordView({ m }: { m: Membership }) {
   const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "");
   const details: [string, string][] = [
     ["When", when],
-    ["Jobsite", rec.jobsite_name || "Not set"],
+    ["Where", rec.jobsite_name || "Not set"],
     ["Team", rec.team_name ? `${rec.team_name}${rec.team_lead_name ? ` (lead: ${rec.team_lead_name})` : ""}` : "Not set"],
     ["Presented by", `${rec.presenter_name}${rec.presenter_role ? `, ${rec.presenter_role}` : ""}`],
     ["Language", LANGUAGES.find((l) => l.id === rec.language)?.label ?? rec.language],
@@ -54,10 +54,11 @@ function RecordView({ m }: { m: Membership }) {
   return (
     <Shell nav={nav}>
       <Eyebrow>
-        {rec.week_number ? `Week ${rec.week_number} of 52 · ` : ""}{rec.scheduled_talk_id ? (scheduled ? "Substitute talk" : "Scheduled talk") : "Talk record"}
+        {rec.week_number ? `${rec.makeup_for_week ? "Given in week" : "Week"} ${rec.week_number} of 52 · ` : ""}{rec.makeup_for_week ? "Makeup talk" : rec.scheduled_talk_id ? (scheduled ? "Different from the plan" : "Scheduled talk") : "Talk record"}
       </Eyebrow>
       <Title>{rec.title}</Title>
-      {scheduled && <p className="mt-1 text-sm text-muted">Scheduled for that week: {scheduled}</p>}
+      {rec.makeup_for_week && <MakeupTag weekStart={rec.makeup_for_week} reason={rec.makeup_reason} />}
+      {scheduled && !rec.makeup_for_week && <p className="mt-1 text-sm text-muted">Scheduled for that week: {scheduled}</p>}
 
       <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
         {details.map(([k, v]) => (

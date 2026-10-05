@@ -10,9 +10,10 @@ export type DemoDb = {
   people: Record<string, unknown>[];
   jobsites: Record<string, unknown>[];
   records: Record<string, unknown>[];
+  overrides: { company_id: string; week_start: string; talk_id: string }[];
 };
 
-const empty = (): DemoDb => ({ session: null, companies: [], members: [], roles: [], teams: [], people: [], jobsites: [], records: [] });
+const empty = (): DemoDb => ({ session: null, companies: [], members: [], roles: [], teams: [], people: [], jobsites: [], records: [], overrides: [] });
 
 let memory: DemoDb | null = null;
 

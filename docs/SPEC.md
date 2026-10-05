@@ -47,8 +47,20 @@ customer #1, not a special case.
 - One talk per week, per company, with a **Week 1 start date** set in Admin. Weeks start Monday.
 - **Timed to local weather by ZIP code.** Long heat season in hot states, no cold-weather talks in South/Southwest
   Florida, Hawaii or Puerto Rico, hurricane prep before and during storm season only in hurricane states.
-- The admin can swap any week's talk. The home screen opens on **this week's scheduled talk**; the presenter can pick a
-  different one, and the record notes it was a **substitute**.
+- **Each week's talk is locked.** Every crew gives the same talk that week, as many times a day or week as needed
+  (several crews, several shifts). There is no "give a different talk" button.
+- Admin → **Plan** can swap a week's talk **until someone gives it** or the week is over; after that the week is
+  locked. The database enforces the lock (`plan_overrides` trigger), not just the app.
+- **Makeups.** Someone who missed a week (off, sick, new hire, no work) gets that week's talk later through
+  **Home → Make up a missed week**. The admin sets how far back (Company → "Missed talks can be made up for", default
+  4 weeks).
+  - A makeup is **never back-dated**: it keeps its real date, time, week and GPS.
+  - It also stores **which week it makes up** and a **required reason** (quick pick + note; "Other" needs a note).
+  - It counts toward the week it makes up, and is always shown as a makeup, so reports can grade on-time vs. late.
+  - A makeup doesn't lock the week it was held in.
+- **Who still needs it.** On the roster step, "Everyone who hasn't had this week's talk" (or "…still needs Week N" for
+  a makeup) lists active people with no signature for that week, on time or by makeup. Absent and not-signed people
+  still need it.
 
 ## Languages and read-aloud
 - Language toggle on every talk. English and Spanish first; Portuguese, Haitian Creole, Vietnamese and Chinese next.
@@ -80,8 +92,10 @@ customer #1, not a special case.
   - Employee ID matches existing people, so re-uploading updates instead of duplicating.
   - Accepts `.xlsx` and `.csv`.
 
-## Jobsites
-- Admin → **Jobsites**: name, address, and a GPS point captured by tapping **Use my location** while standing on site
+## Jobsites and the office
+- Talks can happen on a jobsite **or at the office or shop**. Each place is marked Jobsite or Office or shop. Where a
+  talk happened is recorded, never flagged: no place is "wrong".
+- Admin → **Jobsites**: name, kind, address, and a GPS point captured by tapping **Use my location** while standing on site
   (or **Pin to my location** later). Jobsites are deactivated, never deleted, so past records keep them.
 - Home → **Jobsite**: pick from the list, or **Find nearest** uses GPS to pick the closest jobsite. Within about
   400 m (1,300 ft) it selects it; farther away it names the closest and how far, and asks instead of assuming.
@@ -90,11 +104,12 @@ customer #1, not a special case.
   the presenter's GPS on each saved talk as extra proof of where it happened.
 
 ## Running a talk (built)
-- **Home → Start this talk** opens this week's scheduled talk; **Give a different talk** opens the list (recorded
-  as a substitute). A talk in progress is saved on the phone after every tap; Home shows **Resume**.
+- **Home → Start this talk** opens this week's talk (locked for the week). **Make up a missed week** picks a past week
+  inside the admin's limit and a reason, then runs that week's talk. A talk in progress is saved on the phone after every tap; Home shows **Resume**.
 - **Read:** language buttons (English, Spanish; others "soon"), **Read it out loud** with each line highlighted,
   a note when the translation isn't reviewed yet.
-- **Who's here:** presenter (anyone with a role other than crew member), team (or all teams), jobsite, roster
+- **Who's here:** presenter (anyone with a role other than crew member), team (or all teams, or everyone who still
+  needs this week's talk), where (jobsite or office), roster
   (team lead first, everyone checked; uncheck who's absent), walk-ins. A GPS point is taken quietly if allowed.
 - **Sign:** presenter first, then each person present. Saving with anyone unsigned names them and flags them.
 - **Saved:** goes into the phone's outbox first, then uploads. With no signal it says "saved on this phone" and
@@ -114,7 +129,8 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 
 ## The PDF record
 - Company header: name, address, phone/email, license numbers.
-- "Week N of 52 · week of <dates> · Scheduled talk / Substitute talk" (and the scheduled talk's name if substituted).
+- "Week N of 52 · week of <dates> · Scheduled talk", or for a makeup: "Makeup for the week of <dates> · <reason>" with
+  the real date it was given.
 - Date and time, jobsite, team, team lead, presented by (name and role), language, industry.
 - Attendance summary with flagged count.
 - The full talk content that was read.
@@ -130,7 +146,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - Filters: last 4 weeks · last 12 weeks · this year · all time; one team or all.
 - Headline numbers: talks held, weeks missed (team-weeks with no talk), sign-in rate, open flags.
 - **Weekly coverage grid:** week × team, each cell the talk given, "Missed", or "Not yet" for the current week. Tap a
-  talk to open its record.
+  talk to open its record. Makeups count toward the week they make up and are marked late, never hidden or merged
+  into on-time.
+- **Per person per week:** on time, made up (with the reason and how late), or still missing.
 - **Employee table:** signed / not signed / absent counts and last signed date; "only people with flags" switch.
 - **Recent flags** list.
 - **CSV export**, one row per person per talk.

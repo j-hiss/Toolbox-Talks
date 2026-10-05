@@ -1,7 +1,8 @@
 "use client";
 
-// Admin setup: people, teams, jobsites, the roles that can give talks, and company info. Owners and admins only.
-import { useEffect, useState, useSyncExternalStore } from "react";
+// Admin setup: people, teams, jobsites, the roles that can give talks, the weekly plan, and company info.
+// Owners and admins only.
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
 import {
   addJobsite, addPerson, addRole, addTeam, deactivateJobsite, deactivatePerson, deleteRole, deleteTeam, listJobsites,
@@ -10,6 +11,15 @@ import {
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { getLocation, LocationError } from "@/lib/location";
 import { mapsLink } from "@/core/geo";
+import { talksFor } from "@/core/talks";
+import { buildPlan } from "@/core/plan";
+import { climateFor } from "@/core/climate";
+import { canChangeWeek } from "@/core/makeup";
+import { weekLabel, isoDay, mondayOf, parseDay } from "@/core/weeks";
+import { TALKS } from "@/content/talks";
+import { usePlan } from "@/lib/usePlan";
+import { clearOverride, setOverride } from "@/lib/data/plan";
+import { listRecordedWeeks } from "@/lib/data/records";
 import { RequireCompany } from "@/components/Guard";
 import { CompanyForm } from "@/components/CompanyForm";
 import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
@@ -18,6 +28,7 @@ const TABS = [
   { id: "people", label: "People" },
   { id: "teams", label: "Teams" },
   { id: "jobsites", label: "Jobsites" },
+  { id: "plan", label: "Plan" },
   { id: "roles", label: "Roles" },
   { id: "company", label: "Company" },
 ] as const;
@@ -85,9 +96,11 @@ function Admin({ m }: { m: Membership }) {
       {error && <div className="mt-4"><Notice tone="error">{error}</Notice></div>}
 
       <div className="mt-5">
-        {tab === "company" ? (
+        {tab === "plan" ? (
+          <PlanTab m={m} />
+        ) : tab === "company" ? (
           <CompanyForm
-            initial={{ ...m.company }}
+            initial={{ ...m.company, makeup_weeks: m.company.makeup_weeks ?? 4 }}
             submitLabel="Save company info"
             onSubmit={async (c) => { await updateCompany(companyId, c); await s.refresh(); }}
           />
@@ -268,6 +281,7 @@ function RolesTab({ companyId, people, roles, act }: { companyId: string; people
 function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites: Jobsite[]; act: Act }) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [kind, setKind] = useState<Jobsite["kind"]>("site");
   const [fix, setFix] = useState<{ latitude: number; longitude: number; accuracyMeters: number } | null>(null);
   const [locating, setLocating] = useState<string | null>(null); // which form is waiting on GPS: "new" or a jobsite id
   const [msg, setMsg] = useState<string | null>(null);
@@ -288,7 +302,8 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
   return (
     <>
       <p className="text-sm text-muted">
-        Add the places your crews work. Stand on site and tap &quot;Use my location&quot; so the app can find the nearest jobsite later.
+        Add the places talks happen: jobsites, and your office or shop. Stand there and tap &quot;Use my location&quot; so the app can
+        find the nearest one later. GPS is optional.
       </p>
       <form
         className="mt-4 flex flex-col gap-3 rounded-lg border border-dashed border-line bg-surface p-3"
@@ -297,28 +312,29 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
           const n = name.trim();
           if (!n) { setMsg("Give the jobsite a name."); return; }
           act(async () => {
-            await addJobsite(companyId, { name: n, address: address.trim(), latitude: fix?.latitude ?? null, longitude: fix?.longitude ?? null });
-            setName(""); setAddress(""); setFix(null); setMsg(null);
+            await addJobsite(companyId, { name: n, kind, address: address.trim(), latitude: fix?.latitude ?? null, longitude: fix?.longitude ?? null });
+            setName(""); setAddress(""); setFix(null); setMsg(null); setKind("site");
           })();
         }}
       >
-        <Field label="Add a jobsite" id="js-name">
-          <input id="js-name" placeholder="Name, like Smith reroof or Plant 2" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+        <Field label="Add a place" id="js-name">
+          <input id="js-name" placeholder={kind === "office" ? "Name, like Main office or Shop" : "Name, like Smith reroof or Plant 2"} className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
+        <KindToggle value={kind} onChange={setKind} />
         <input aria-label="Address" placeholder="Address (optional)" autoComplete="street-address" className={inputClass} value={address} onChange={(e) => setAddress(e.target.value)} />
         <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="ghost" type="button" disabled={locating !== null} onClick={async () => { const f = await locate("new"); if (f) setFix(f); }}>
             {locating === "new" ? "Finding you…" : fix ? "Update location" : "Use my location"}
           </Button>
           {fix && <span className="text-sm text-muted tabular-nums">GPS set · within {Math.round(fix.accuracyMeters * 3.28084)} ft</span>}
-          <Button size="sm" type="submit" className="ml-auto">Add jobsite</Button>
+          <Button size="sm" type="submit" className="ml-auto">Add</Button>
         </div>
       </form>
       {msg && <div className="mt-3"><Notice tone="error">{msg}</Notice></div>}
 
-      <GroupHeading aside={`${jobsites.length}`}>Active jobsites</GroupHeading>
+      <GroupHeading aside={`${jobsites.length}`}>Active places</GroupHeading>
       {jobsites.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">No jobsites yet.</p>
+        <p className="mt-3 text-sm text-muted">Nothing added yet.</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {jobsites.map((j) => {
@@ -335,6 +351,7 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
                     else e.target.value = j.name;
                   }}
                 />
+                <KindToggle value={j.kind ?? "site"} onChange={(k) => act(() => updateJobsite(companyId, j.id, { kind: k }))()} />
                 <input
                   aria-label={`Address for ${j.name}`}
                   defaultValue={j.address}
@@ -351,7 +368,7 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
                       GPS set · open in Maps
                     </a>
                   ) : (
-                    <span className="text-warn font-bold">No GPS point yet</span>
+                    <span className="text-muted">No GPS point (optional)</span>
                   )}
                   <Button
                     size="sm"
@@ -371,7 +388,106 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
           })}
         </ul>
       )}
-      <p className="mt-4 text-xs text-muted">Removing a jobsite hides it from new talks. Past records keep it.</p>
+      <p className="mt-4 text-xs text-muted">Removing a place hides it from new talks. Past records keep it.</p>
     </>
   );
 }
+
+function KindToggle({ value, onChange }: { value: Jobsite["kind"]; onChange: (k: Jobsite["kind"]) => void }) {
+  const opt = (k: Jobsite["kind"], label: string) => (
+    <button
+      type="button"
+      aria-pressed={value === k}
+      onClick={() => value !== k && onChange(k)}
+      className={`rounded-full border px-3 py-1 text-sm font-bold ${value === k ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}
+    >
+      {label}
+    </button>
+  );
+  return <div className="flex gap-1.5" role="group" aria-label="Kind of place">{opt("site", "Jobsite")}{opt("office", "Office or shop")}</div>;
+}
+
+// The weekly plan. One talk per week for the whole company; every crew gives the same one. An admin can swap a
+// week's talk until the week is over or someone has given it. The database enforces the same lock.
+function PlanTab({ m }: { m: Membership }) {
+  const co = m.company;
+  const { plan, week, input, reload } = usePlan(co);
+  // What the plan itself gives each week, before any swap: picking that talk again removes the swap.
+  const planned = useMemo(() => new Map(buildPlan({ ...input, overrides: {} }).map((w) => [w.key, w.talkId])), [input]);
+  const [recorded, setRecorded] = useState<string[] | null>(null);
+  const [msg, setMsg] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [version, setVersion] = useState(0);
+  const thisMonday = isoDay(mondayOf(new Date()));
+
+  useEffect(() => {
+    let live = true;
+    listRecordedWeeks(co.id, thisMonday)
+      .then((w) => live && setRecorded(w))
+      .catch((e) => live && setMsg({ tone: "error", text: e instanceof Error ? e.message : String(e) }));
+    return () => { live = false; };
+  }, [co.id, thisMonday, version]);
+
+  const options = talksFor(TALKS, co.industry, climateFor(co.zip));
+  const title = (id: string) => TALKS.find((t) => t.id === id)?.content.en.title ?? id;
+  const weeks = plan.filter((w) => w.key >= thisMonday);
+
+  const change = async (key: string, talkId: string, planned: string) => {
+    setBusy(key);
+    setMsg(null);
+    try {
+      if (talkId === planned) await clearOverride(co.id, key);
+      else await setOverride(co.id, key, talkId);
+      reload();
+      setMsg({ tone: "ok", text: `${weekLabel(parseDay(key))}: ${title(talkId)}${talkId === planned ? " (back to the plan)" : ""}.` });
+    } catch (e) {
+      setMsg({ tone: "error", text: e instanceof Error ? e.message : String(e) });
+    }
+    setVersion((v) => v + 1);
+    setBusy(null);
+  };
+
+  if (!recorded) return msg ? <Notice tone="error">{msg.text}</Notice> : <Loading />;
+  return (
+    <>
+      <p className="text-sm text-muted">
+        Every crew gives the same talk each week, as many times as needed. You can swap a week&apos;s talk until someone gives
+        it; then it&apos;s locked for that week. Missed weeks are made up from Home.
+      </p>
+      {msg && <div className="mt-3"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
+      <ul className="mt-4 flex flex-col gap-2">
+        {weeks.map((w) => {
+          const locked = !canChangeWeek(w.key, recorded, new Date());
+          const base = planned.get(w.key) ?? w.talkId;
+          const isNow = week?.key === w.key;
+          return (
+            <li key={w.key} className={`rounded-lg border p-3 ${isNow ? "border-hivis bg-surface" : "border-line bg-surface"}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                <b>Week {w.n} · {weekLabel(w.monday)}</b>
+                <span className="flex gap-1.5">
+                  {isNow && <span className="rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold uppercase text-hivis-ink">This week</span>}
+                  {locked && <span className="rounded bg-fg px-2 py-0.5 font-display text-xs font-bold uppercase text-bg">Given · locked</span>}
+                  {!locked && w.changed && <span className="rounded border border-line px-2 py-0.5 font-display text-xs font-bold uppercase">Swapped</span>}
+                </span>
+              </div>
+              {locked ? (
+                <p className="mt-1 font-bold">{title(w.talkId)}</p>
+              ) : (
+                <select
+                  aria-label={`Talk for week ${w.n}`}
+                  className={`${inputClass} mt-2`}
+                  value={w.talkId}
+                  disabled={busy !== null}
+                  onChange={(e) => change(w.key, e.target.value, base)}
+                >
+                  {options.map((t) => <option key={t.id} value={t.id}>{t.content.en.title}{t.id === base ? " (planned)" : ""}</option>)}
+                </select>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
+

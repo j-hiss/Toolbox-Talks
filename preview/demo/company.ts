@@ -6,7 +6,7 @@ import { db, save, tick, uid } from "./store";
 
 const DEFAULT_ROLES = ["Owner", "Safety Manager", "Superintendent", "Supervisor", "Foreman", "Team Lead"];
 const byName = <T,>(k: keyof T) => (a: T, b: T) => String(a[k]).localeCompare(String(b[k]));
-const rows = <T,>(table: keyof Omit<ReturnType<typeof db>, "session" | "members" | "records">) => db()[table] as unknown as T[];
+const rows = <T,>(table: keyof Omit<ReturnType<typeof db>, "session" | "members" | "records" | "overrides">) => db()[table] as unknown as T[];
 
 function mustBeAdmin(companyId: string) {
   const user = db().session?.user.id;
@@ -34,7 +34,7 @@ export async function createCompany(input: NewCompany): Promise<string> {
   const iso = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
   rows<Company>("companies").push({
     id, name: input.name, industry: input.industry, zip: input.zip ?? null, licenses: input.licenses ?? "", address: input.address ?? "",
-    phone: input.phone ?? "", email: input.email ?? "", program_start: input.program_start ?? iso, default_jobsite: input.default_jobsite ?? "",
+    phone: input.phone ?? "", email: input.email ?? "", program_start: input.program_start ?? iso, default_jobsite: input.default_jobsite ?? "", makeup_weeks: input.makeup_weeks ?? 4,
   });
   db().members.push({ company_id: id, user_id: user, access: "owner" });
   DEFAULT_ROLES.forEach((name) => rows<Role>("roles").push({ id: uid(), company_id: id, name }));
@@ -99,11 +99,11 @@ export async function deactivatePerson(companyId: string, personId: string): Pro
 export async function listJobsites(companyId: string): Promise<Jobsite[]> {
   await tick(); return rows<Jobsite>("jobsites").filter((j) => j.company_id === companyId && j.active).sort(byName<Jobsite>("name"));
 }
-export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "address" | "latitude" | "longitude">): Promise<void> {
+export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">): Promise<void> {
   await tick(); mustBeAdmin(companyId);
   rows<Jobsite>("jobsites").push({ id: uid(), company_id: companyId, active: true, ...j }); save();
 }
-export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude">>): Promise<void> {
+export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">>): Promise<void> {
   await tick(); mustBeAdmin(companyId);
   Object.assign(rows<Jobsite>("jobsites").find((j) => j.company_id === companyId && j.id === id)!, patch); save();
 }

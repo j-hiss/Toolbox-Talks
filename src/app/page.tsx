@@ -1,9 +1,9 @@
 "use client";
 
-// Home: this week's talk from the company's own 52-week plan. The talk flow (read, attendance, sign) is next.
+// Home: this week's talk from the company's own 52-week plan (locked for the week: every crew gives the same one),
+// plus a way to make up a missed week.
 import { TALKS } from "@/content/talks";
 import { climateFor } from "@/core/climate";
-import { buildPlan, thisWeek } from "@/core/plan";
 import { weekLabel, parseDay } from "@/core/weeks";
 import { talkText } from "@/core/talks";
 import { INDUSTRIES } from "@/core/industries";
@@ -14,6 +14,7 @@ import { RequireCompany } from "@/components/Guard";
 import { JobsitePicker, readChosenJobsite } from "@/components/JobsitePicker";
 import { newDraft, useDraft } from "@/lib/draft";
 import { useOutbox } from "@/lib/useOutbox";
+import { usePlan } from "@/lib/usePlan";
 import { useRouter } from "next/navigation";
 import { Button, Eyebrow, GroupHeading, NavLink, Notice, Shell, Title } from "@/components/ui";
 
@@ -24,10 +25,8 @@ export default function HomePage() {
 function Home({ m }: { m: Membership }) {
   const s = useSession();
   const co = m.company;
-  const today = new Date();
   const climate = climateFor(co.zip);
-  const plan = buildPlan({ talks: TALKS, industry: co.industry, climate, programStart: co.program_start, today });
-  const week = thisWeek(plan, today);
+  const { plan, week } = usePlan(co);
   const talk = week ? TALKS.find((t) => t.id === week.talkId) : undefined;
   const text = talk ? talkText(talk, "en").text : undefined;
   const nextIdx = week ? week.n : 0;
@@ -94,10 +93,10 @@ function Home({ m }: { m: Membership }) {
           <Eyebrow>Week {week.n} of 52 · {weekLabel(week.monday)}</Eyebrow>
           <Title>{text.title}</Title>
           <p className="mt-3 font-bold">{text.hook}</p>
-          <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud</p>
+          <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every crew this week</p>
           <div className="mt-5 flex flex-col gap-2">
             <Button onClick={() => start(week.talkId)}>Start this talk</Button>
-            <Button size="sm" variant="ghost" onClick={() => start(null)}>Give a different talk</Button>
+            <Button size="sm" variant="ghost" onClick={() => start(null)}>Make up a missed week</Button>
           </div>
         </section>
       ) : (

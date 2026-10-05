@@ -8,7 +8,7 @@ import type { Membership, TalkRecordSummary } from "@/lib/data/types";
 import { countStatuses } from "@/core/attendance";
 import { useOutbox } from "@/lib/useOutbox";
 import { RequireCompany } from "@/components/Guard";
-import { Button, Eyebrow, FlagChip, GroupHeading, Loading, NavLink, Notice, Shell, Title } from "@/components/ui";
+import { Button, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, Shell, Title } from "@/components/ui";
 
 export default function RecordsPage() {
   return <RequireCompany>{(m) => <Records m={m} />}</RequireCompany>;
@@ -44,7 +44,7 @@ function Records({ m }: { m: Membership }) {
               return (
                 <li key={i.record.client_id} className="rounded-lg border border-dashed border-line bg-surface p-3">
                   <div className="flex items-start justify-between gap-2">
-                    <span><b className="block">{i.record.content.title}</b><small className="text-muted">{when(i.record.held_at)} · saved on this phone</small></span>
+                    <span><b className="block">{i.record.content.title}</b>{i.record.makeup_for_week && <MakeupTag weekStart={i.record.makeup_for_week} reason={i.record.makeup_reason} />}<small className="text-muted">{when(i.record.held_at)} · saved on this phone</small></span>
                     <FlagChip n={c.flagged + (i.record.presenter_signature ? 0 : 1)} />
                   </div>
                   {i.lastError && <p className="mt-1 text-xs text-muted">Last try: {i.lastError}</p>}
@@ -72,8 +72,9 @@ function Records({ m }: { m: Membership }) {
                 <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-lg border border-line bg-surface p-3 hover:border-hivis">
                   <span className="min-w-0">
                     <b className="block">{r.title}</b>
+                    {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}
                     <small className="text-muted tabular-nums">
-                      {r.week_number ? `Week ${r.week_number} · ` : ""}{when(r.held_at)}{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}
+                      {r.week_number ? `${r.makeup_for_week ? "Given in week" : "Week"} ${r.week_number} · ` : ""}{when(r.held_at)}{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}
                     </small>
                   </span>
                   <span className="flex flex-col items-end gap-1 text-sm tabular-nums">

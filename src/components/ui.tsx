@@ -121,3 +121,15 @@ export const STATUS_CHIP: Record<"signed" | "not_signed" | "absent", string> = {
   not_signed: "bg-warn text-white",
   absent: "bg-warn text-white",
 };
+
+/** "Makeup for the week of Sep 21 · Out sick". The record's own date stays its real date. */
+export function MakeupTag({ weekStart, reason }: { weekStart: string; reason: string | null }) {
+  const [y, m, d] = weekStart.split("-").map(Number);
+  const label = new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return (
+    <span className="mt-1 block text-sm">
+      <span className="mr-1.5 rounded border border-fg px-1.5 py-0.5 font-display text-xs font-bold uppercase">Makeup</span>
+      for the week of {label}{reason ? ` · ${reason}` : ""}
+    </span>
+  );
+}

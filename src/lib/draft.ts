@@ -9,11 +9,17 @@ import type { LanguageId } from "@/core/languages";
 export type TalkDraft = {
   clientId: string;
   companyId: string;
-  talkId: string | null;          // null = still picking a talk
+  talkId: string | null;          // null = still choosing which missed week to make up
   lang: LanguageId;
-  step: "pick" | "read" | "crew" | "sign";
+  step: "makeup" | "read" | "crew" | "sign";
+  /** Set when this talk makes up a missed week. The record still gets today's real date, week and GPS. */
+  makeup: { weekStart: string; weekNumber: number } | null;
+  makeupPick: string;             // one of MAKEUP_REASONS
+  makeupNote: string;
   presenterId: string;
-  teamId: string;                 // team id, "all", or "" for none
+  teamId: string;                 // team id, "all", "needs", or "" for none
+  /** For teamId "needs": the people who still needed the talk when the roster was chosen (kept for offline). */
+  needIds: string[] | null;
   jobsiteId: string;
   present: Record<string, boolean>;
   walkins: string[];
@@ -33,9 +39,16 @@ export function readDraft(companyId: string): TalkDraft | null {
   const hit = cache.get(companyId);
   if (hit && hit.raw === raw) return hit.draft;
   let draft: TalkDraft | null = null;
-  try { draft = raw ? (JSON.parse(raw) as TalkDraft) : null; } catch { draft = null; }
+  try { draft = raw ? upgrade(JSON.parse(raw)) : null; } catch { draft = null; }
   cache.set(companyId, { raw, draft });
   return draft;
+}
+
+/** Drafts saved by an earlier version of the app (free talk picking) become a makeup choice or carry on as is. */
+function upgrade(raw: unknown): TalkDraft {
+  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds"> & { step: string };
+  const step = (d.step === "pick" ? (d.talkId ? "read" : "makeup") : d.step) as TalkDraft["step"];
+  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, step };
 }
 
 export function writeDraft(d: TalkDraft) {
@@ -50,15 +63,20 @@ export function clearDraft(companyId: string) {
   listeners.forEach((l) => l());
 }
 
+/** Start this week's talk (talkId), or a makeup (talkId null: the presenter picks the missed week first). */
 export function newDraft(companyId: string, talkId: string | null, jobsiteId = ""): TalkDraft {
   const d: TalkDraft = {
     clientId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     companyId,
     talkId,
     lang: "en",
-    step: talkId ? "read" : "pick",
+    step: talkId ? "read" : "makeup",
+    makeup: null,
+    makeupPick: "",
+    makeupNote: "",
     presenterId: "",
     teamId: "",
+    needIds: null,
     jobsiteId,
     present: {},
     walkins: [],

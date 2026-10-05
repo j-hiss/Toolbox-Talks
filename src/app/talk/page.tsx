@@ -1,20 +1,22 @@
 "use client";
 
-// Giving a talk: pick → read → who's here → sign → saved. The talk in progress lives in a draft on the phone
+// Giving a talk: (choose a missed week, for makeups) → read → who's here → sign → saved. This week's talk is locked:
+// every crew gives the same one. A makeup gives a missed week's talk, keeps today's real date and GPS, and says why. The talk in progress lives in a draft on the phone
 // (src/lib/draft.ts), and the finished record goes through the offline outbox (src/lib/outbox.ts).
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TALKS } from "@/content/talks";
 import { crewText } from "@/content/ui";
-import { climateFor } from "@/core/climate";
-import { buildPlan, thisWeek } from "@/core/plan";
-import { talkText, talksFor } from "@/core/talks";
+import { talkText } from "@/core/talks";
+import { MAKEUP_REASONS, makeupReasonText, makeupWeeks, stillNeeds } from "@/core/makeup";
+import { weekLabel, parseDay } from "@/core/weeks";
 import { LANGUAGES, type LanguageId } from "@/core/languages";
 import { buildAttendees, recordPayload, unsignedPresent, type RosterEntry } from "@/core/record";
 import { countStatuses } from "@/core/attendance";
 import { listJobsites, listPeople, listRoles, listTeams } from "@/lib/data/company";
-import { saveTalkRecord } from "@/lib/data/records";
+import { saveTalkRecord, signedForWeek } from "@/lib/data/records";
+import { usePlan } from "@/lib/usePlan";
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { clearDraft, newDraft, useDraft, writeDraft, type TalkDraft } from "@/lib/draft";
 import { enqueue, flush, pending } from "@/lib/outbox";
@@ -30,7 +32,7 @@ export default function TalkPage() {
 }
 
 type Org = { people: Person[]; teams: Team[]; roles: Role[]; jobsites: Jobsite[] };
-type Done = { title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean };
+type Done = { title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean; makeupLabel: string | null };
 
 function Talk({ m }: { m: Membership }) {
   const co = m.company;
@@ -48,9 +50,18 @@ function Talk({ m }: { m: Membership }) {
     return () => { live = false; };
   }, [co.id]);
 
-  const climate = climateFor(co.zip);
-  const plan = useMemo(() => buildPlan({ talks: TALKS, industry: co.industry, climate, programStart: co.program_start }), [co.industry, climate, co.program_start]);
-  const week = thisWeek(plan);
+  const { week, input } = usePlan(co);
+
+  // Who has already signed for the week this talk counts toward, for the "everyone who still needs it" roster.
+  const creditKey = draft?.makeup?.weekStart ?? week?.key ?? null;
+  const [signed, setSigned] = useState<{ key: string; ids: string[] } | null>(null);
+  useEffect(() => {
+    if (!creditKey) return;
+    let live = true;
+    signedForWeek(co.id, creditKey).then((ids) => live && setSigned({ key: creditKey, ids })).catch(() => { /* offline: option hidden */ });
+    return () => { live = false; };
+  }, [co.id, creditKey]);
+  const signedIds = signed && signed.key === creditKey ? signed.ids : null;
 
   const nav = <NavLink href="/">Home</NavLink>;
   if (done) return <Shell nav={nav}><Saved done={done} /></Shell>;
@@ -62,7 +73,7 @@ function Talk({ m }: { m: Membership }) {
         <Title>No talk in progress</Title>
         <div className="mt-5 flex flex-col gap-3">
           {week && <Button onClick={() => newDraft(co.id, week.talkId, readChosenJobsite(co.id) ?? "")}>Start this week&apos;s talk</Button>}
-          <Button variant="ghost" size="sm" onClick={() => newDraft(co.id, null, readChosenJobsite(co.id) ?? "")}>Pick a talk</Button>
+          <Button variant="ghost" size="sm" onClick={() => newDraft(co.id, null, readChosenJobsite(co.id) ?? "")}>Make up a missed week</Button>
         </div>
       </Shell>
     );
@@ -81,9 +92,9 @@ function Talk({ m }: { m: Membership }) {
 
   return (
     <Shell nav={nav}>
-      {draft.step === "pick" && <Pick m={m} weekTalkId={week?.talkId ?? null} onPick={(talkId) => update({ talkId, step: "read" })} />}
+      {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} />}
       {draft.step === "read" && draft.talkId && <Read draft={draft} update={update} />}
-      {draft.step === "crew" && <Crew org={org} draft={draft} update={update} />}
+      {draft.step === "crew" && <Crew org={org} draft={draft} update={update} signedIds={signedIds} />}
       {draft.step === "sign" && (
         <Sign
           m={m}
@@ -111,22 +122,74 @@ function Steps({ n, label }: { n: 1 | 2 | 3; label: string }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-function Pick({ m, weekTalkId, onPick }: { m: Membership; weekTalkId: string | null; onPick: (id: string) => void }) {
-  const list = talksFor(TALKS, m.company.industry, climateFor(m.company.zip));
-  const scheduled = list.find((t) => t.id === weekTalkId);
-  const card = (t: (typeof TALKS)[number], tag?: string) => (
-    <button key={t.id} onClick={() => onPick(t.id)} className="flex w-full items-center gap-3 rounded-lg border border-line bg-surface p-3 text-left hover:border-hivis">
-      <span className="whitespace-nowrap rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold text-hivis-ink">{t.code}</span>
-      <span className="min-w-0 flex-1"><b className="block">{t.content.en.title}</b><small className="text-muted">About {t.minutes} min{tag ? ` · ${tag}` : ""}</small></span>
-    </button>
-  );
+function MakeupPick({ weeks, draft, update }: { weeks: ReturnType<typeof makeupWeeks>; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void }) {
+  const [msg, setMsg] = useState<string | null>(null);
+  const reason = makeupReasonText(draft.makeupPick, draft.makeupNote);
   return (
     <>
-      <Eyebrow>Toolbox talk</Eyebrow>
-      <Title>Pick a talk</Title>
-      {scheduled && <><GroupHeading>This week&apos;s scheduled talk</GroupHeading><div className="mt-3">{card(scheduled, "scheduled")}</div></>}
-      <GroupHeading>All talks for your work</GroupHeading>
-      <div className="mt-3 flex flex-col gap-2">{list.filter((t) => t.id !== weekTalkId).map((t) => card(t))}</div>
+      <Eyebrow>Makeup talk</Eyebrow>
+      <Title>Make up a missed week</Title>
+      <p className="mt-2 text-sm text-muted">
+        For people who missed a week&apos;s talk. It&apos;s saved with today&apos;s real date and location, marked as a makeup for the week
+        you pick, with the reason.
+      </p>
+      <GroupHeading>Which week?</GroupHeading>
+      {weeks.length === 0 ? (
+        <p className="mt-3 text-sm text-muted">No earlier weeks to make up yet.</p>
+      ) : (
+        <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Week to make up">
+          {weeks.map((w) => {
+            const t = TALKS.find((x) => x.id === w.talkId)!;
+            const on = draft.makeup?.weekStart === w.key;
+            return (
+              <button
+                key={w.key}
+                role="radio"
+                aria-checked={on}
+                onClick={() => update({ makeup: { weekStart: w.key, weekNumber: w.n }, talkId: w.talkId, teamId: draft.teamId === "needs" ? "" : draft.teamId, needIds: null })}
+                className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left ${on ? "border-hivis bg-surface shadow-[0_0_0_2px_var(--hivis)]" : "border-line bg-surface"}`}
+              >
+                <span className="whitespace-nowrap rounded bg-hivis px-2 py-0.5 font-display text-xs font-bold text-hivis-ink">{t.code}</span>
+                <span className="min-w-0 flex-1"><b className="block">{t.content.en.title}</b><small className="text-muted">Week {w.n} · {weekLabel(w.monday)}</small></span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <GroupHeading>Why is it being made up?</GroupHeading>
+      <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Reason">
+        {MAKEUP_REASONS.map((r) => (
+          <button
+            key={r}
+            aria-pressed={draft.makeupPick === r}
+            onClick={() => update({ makeupPick: r })}
+            className={`rounded-full border px-3 py-1.5 text-sm font-bold ${draft.makeupPick === r ? "border-fg bg-fg text-bg" : "border-line bg-surface"}`}
+          >
+            {r}
+          </button>
+        ))}
+      </div>
+      <input
+        aria-label="Note"
+        placeholder={draft.makeupPick === "Other" ? "Say why (required)" : "Note (optional)"}
+        className={`${inputClass} mt-3`}
+        value={draft.makeupNote}
+        onChange={(e) => update({ makeupNote: e.target.value })}
+      />
+      {msg && <div className="mt-4"><Notice tone="error">{msg}</Notice></div>}
+      <div className="mt-5">
+        <Button
+          disabled={weeks.length === 0}
+          onClick={() => {
+            if (!draft.makeup || !draft.talkId) return setMsg("Pick the week being made up.");
+            if (!reason) return setMsg(draft.makeupPick === "Other" ? "Add a note saying why." : "Pick a reason.");
+            setMsg(null);
+            update({ step: "read" });
+          }}
+        >
+          Continue to the talk
+        </Button>
+      </div>
     </>
   );
 }
@@ -171,6 +234,7 @@ function Read({ draft, update }: { draft: TalkDraft; update: (p: Partial<TalkDra
   return (
     <>
       <Steps n={1} label="Read to the crew" />
+      <MakeupBanner draft={draft} />
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="Language">
         {LANGUAGES.map((l) => (
           <button
@@ -206,13 +270,22 @@ function Read({ draft, update }: { draft: TalkDraft; update: (p: Partial<TalkDra
 
       <div className="mt-5 flex flex-col gap-2">
         <Button onClick={() => { stopRef.current?.(); update({ step: "crew" }); }}>Done reading · Who&apos;s here</Button>
-        <Button size="sm" variant="ghost" onClick={() => { stopRef.current?.(); update({ step: "pick" }); }}>Change talk</Button>
+        {draft.makeup && <Button size="sm" variant="ghost" onClick={() => { stopRef.current?.(); update({ step: "makeup" }); }}>Change week or reason</Button>}
       </div>
     </>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+function MakeupBanner({ draft }: { draft: TalkDraft }) {
+  if (!draft.makeup) return null;
+  return (
+    <p className="mb-3 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+      <b>Makeup for Week {draft.makeup.weekNumber}</b> ({weekLabel(parseDay(draft.makeup.weekStart))}) · {makeupReasonText(draft.makeupPick, draft.makeupNote)}
+    </p>
+  );
+}
+
 function rosterFor(org: Org, draft: TalkDraft): RosterEntry[] {
   const roleName = (p: Person) => {
     if (org.teams.some((t) => t.lead_person_id === p.id)) return "Team lead";
@@ -221,6 +294,7 @@ function rosterFor(org: Org, draft: TalkDraft): RosterEntry[] {
   const teamName = (p: Person) => org.teams.find((t) => t.id === p.team_id)?.name ?? "";
   const people =
     draft.teamId === "all" ? org.people.filter((p) => p.team_id)
+    : draft.teamId === "needs" ? org.people.filter((p) => draft.needIds?.includes(p.id))
     : draft.teamId ? org.people.filter((p) => p.team_id === draft.teamId)
     : [];
   const isLead = (p: Person) => org.teams.some((t) => t.lead_person_id === p.id);
@@ -231,7 +305,7 @@ function rosterFor(org: Org, draft: TalkDraft): RosterEntry[] {
     .concat(draft.walkins.map((name, i): RosterEntry => ({ key: `walkin:${i}`, personId: null, name, role: "Not on roster", teamName: "" })));
 }
 
-function Crew({ org, draft, update }: { org: Org; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void }) {
+function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; signedIds: string[] | null }) {
   const [walkin, setWalkin] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const presenters = org.people.filter((p) => p.role_id);
@@ -250,15 +324,18 @@ function Crew({ org, draft, update }: { org: Org; draft: TalkDraft; update: (p: 
 
   // Everyone on a newly chosen roster starts as "here"; the presenter unchecks who isn't.
   const setTeam = (teamId: string) => {
-    const next = { ...draft, teamId };
+    const needIds = teamId === "needs" && signedIds ? stillNeeds(org.people, signedIds).map((p) => p.id) : null;
+    const next = { ...draft, teamId, needIds };
     const present: Record<string, boolean> = {};
     for (const r of rosterFor(org, next)) present[r.key] = draft.present[r.key] ?? true;
-    update({ teamId, present });
+    update({ teamId, needIds, present });
   };
+  const needsLabel = draft.makeup ? `Everyone who still needs Week ${draft.makeup.weekNumber}` : "Everyone who hasn't had this week's talk";
 
   return (
     <>
       <Steps n={2} label="Who's here" />
+      <MakeupBanner draft={draft} />
       <Title>Who&apos;s here?</Title>
       <div className="mt-4 flex flex-col gap-4">
         <Field label="Presented by" id="presenter">
@@ -276,19 +353,20 @@ function Crew({ org, draft, update }: { org: Org; draft: TalkDraft; update: (p: 
             <option value="">Choose a team</option>
             {org.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             {org.teams.length > 1 && <option value="all">All teams</option>}
+            {(signedIds || draft.teamId === "needs") && <option value="needs">{needsLabel}</option>}
           </select>
         </Field>
-        <Field label="Jobsite" id="jobsite">
+        <Field label="Where" id="jobsite">
           <select id="jobsite" className={inputClass} value={draft.jobsiteId} onChange={(e) => update({ jobsiteId: e.target.value })}>
-            <option value="">{org.jobsites.length ? "Choose a jobsite" : "No jobsites set up"}</option>
-            {org.jobsites.map((j) => <option key={j.id} value={j.id}>{j.name}</option>)}
+            <option value="">{org.jobsites.length ? "Choose a jobsite or the office" : "No places set up"}</option>
+            {org.jobsites.map((j) => <option key={j.id} value={j.id}>{j.name}{j.kind === "office" ? " (office or shop)" : ""}</option>)}
           </select>
         </Field>
       </div>
 
       <GroupHeading aside={roster.length ? `${here} here · ${absent} absent` : undefined}>Roster</GroupHeading>
       {roster.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">{draft.teamId ? "No one on this team yet. Add walk-ins below, or add people in Admin." : "Choose a team to load its roster."}</p>
+        <p className="mt-3 text-sm text-muted">{draft.teamId === "needs" ? "Everyone has this week covered. Add walk-ins below if needed." : draft.teamId ? "No one on this team yet. Add walk-ins below, or add people in Admin." : "Choose a team to load its roster."}</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {roster.map((r) => {
@@ -376,7 +454,10 @@ function Sign({
         content: lang === "en" ? text : { ...text, en: talk.content.en },
         week,
         jobsite: jobsite ? { id: jobsite.id, name: jobsite.name } : null,
-        team: team ? { id: team.id, name: team.name, leadName: lead?.full_name ?? "" } : draft.teamId === "all" ? { id: "", name: "All teams", leadName: "" } : null,
+        team: team ? { id: team.id, name: team.name, leadName: lead?.full_name ?? "" }
+          : draft.teamId === "all" ? { id: "", name: "All teams", leadName: "" }
+          : draft.teamId === "needs" ? { id: "", name: "Still needed it", leadName: "" }
+          : null,
         presenter: {
           personId: presenter?.id ?? null,
           name: presenter?.full_name ?? "",
@@ -385,12 +466,16 @@ function Sign({
         },
         heldAt: new Date().toISOString(),
         gps: draft.gps,
+        makeup: draft.makeup ? { weekStart: draft.makeup.weekStart, reason: makeupReasonText(draft.makeupPick, draft.makeupNote) } : null,
       });
       if (record.team_id === "") record.team_id = null;
       enqueue(record, attendees);
       await flush(saveTalkRecord);
       const uploaded = !pending(m.company.id).some((i) => i.record.client_id === draft.clientId);
-      onSaved({ title: text.title, uploaded, counts: countStatuses(attendees), presenterSigned: !!draft.presenterSignature });
+      onSaved({
+        title: text.title, uploaded, counts: countStatuses(attendees), presenterSigned: !!draft.presenterSignature,
+        makeupLabel: draft.makeup ? `Makeup for Week ${draft.makeup.weekNumber}` : null,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setSaving(false);
@@ -400,6 +485,7 @@ function Sign({
   return (
     <>
       <Steps n={3} label="Pass the phone" />
+      <MakeupBanner draft={draft} />
       <Title>Sign in</Title>
       <p className="mt-2">{crewText("en").signNote}</p>
       {draft.lang !== "en" && <p className="mt-1 text-muted">{ui.signNote}</p>}
@@ -452,7 +538,7 @@ function Saved({ done }: { done: Done }) {
   const c = done.counts;
   return (
     <>
-      <Eyebrow>Recorded</Eyebrow>
+      <Eyebrow>Recorded{done.makeupLabel ? ` · ${done.makeupLabel}` : ""}</Eyebrow>
       <Title>{done.title}</Title>
       <div className="mt-4">
         {done.uploaded ? (
