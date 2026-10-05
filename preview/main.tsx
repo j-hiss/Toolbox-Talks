@@ -8,6 +8,9 @@ import HomePage from "@/app/page";
 import SignIn from "@/app/sign-in/page";
 import Setup from "@/app/setup/page";
 import AdminPage from "@/app/admin/page";
+import TalkPage from "@/app/talk/page";
+import RecordsPage from "@/app/records/page";
+import RecordPage from "@/app/record/page";
 import { usePreviewPath } from "./shims/router";
 import { DEMO_CODE } from "./demo/supabase";
 import { resetDemo } from "./demo/store";
@@ -19,6 +22,9 @@ const ROUTES: Record<string, () => React.ReactElement> = {
   "/sign-in/": () => <SignIn />,
   "/setup/": () => <Setup />,
   "/admin/": () => <AdminPage />,
+  "/talk/": () => <TalkPage />,
+  "/records/": () => <RecordsPage />,
+  "/record/": () => <RecordPage />,
 };
 
 function Banner() {

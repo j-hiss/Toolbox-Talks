@@ -6,7 +6,7 @@ import { db, save, tick, uid } from "./store";
 
 const DEFAULT_ROLES = ["Owner", "Safety Manager", "Superintendent", "Supervisor", "Foreman", "Team Lead"];
 const byName = <T,>(k: keyof T) => (a: T, b: T) => String(a[k]).localeCompare(String(b[k]));
-const rows = <T,>(table: keyof Omit<ReturnType<typeof db>, "session" | "members">) => db()[table] as unknown as T[];
+const rows = <T,>(table: keyof Omit<ReturnType<typeof db>, "session" | "members" | "records">) => db()[table] as unknown as T[];
 
 function mustBeAdmin(companyId: string) {
   const user = db().session?.user.id;

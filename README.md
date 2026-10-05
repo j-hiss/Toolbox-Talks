@@ -11,9 +11,9 @@ This app documents safety meetings. It does not by itself certify OSHA complianc
 
 ## Status
 - **Prototype:** complete (`prototype/index.html`, open it in a browser). It is the reference behavior.
-- **Real app:** sign-in (emailed 6-digit code), first-time company setup, and Admin (people, teams, roles, company
-  info) are built. Home shows this week's talk from the company's own 52-week plan. Core logic is tested and company
-  isolation is proven by a database test. Next: the talk flow (read, attendance, signatures) and the PDF record.
+- **Real app:** sign-in, company setup, Admin (people, teams, jobsites, roles, company info), jobsite GPS, and the
+  full talk flow (read with read-aloud, who's here, signatures, saved record) with offline saving and a Records
+  list. Core logic is tested and company isolation is proven by a database test. Next: the PDF record and reports.
 
 ## Run it on your Mac (free, nothing in the cloud)
 

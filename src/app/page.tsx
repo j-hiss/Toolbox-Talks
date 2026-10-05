@@ -11,7 +11,10 @@ import Link from "next/link";
 import { useSession } from "@/lib/session";
 import { canAdmin, type Membership } from "@/lib/data/types";
 import { RequireCompany } from "@/components/Guard";
-import { JobsitePicker } from "@/components/JobsitePicker";
+import { JobsitePicker, readChosenJobsite } from "@/components/JobsitePicker";
+import { newDraft, useDraft } from "@/lib/draft";
+import { useOutbox } from "@/lib/useOutbox";
+import { useRouter } from "next/navigation";
 import { Button, Eyebrow, GroupHeading, NavLink, Notice, Shell, Title } from "@/components/ui";
 
 export default function HomePage() {
@@ -30,9 +33,17 @@ function Home({ m }: { m: Membership }) {
   const nextIdx = week ? week.n : 0;
   const upcoming = plan.slice(nextIdx, nextIdx + 4).map((w) => ({ w, t: TALKS.find((t) => t.id === w.talkId)! }));
   const industry = INDUSTRIES.find((i) => i.id === co.industry)?.name;
+  const router = useRouter();
+  const draft = useDraft(co.id);
+  const outbox = useOutbox(co.id);
+  const draftTitle = draft?.talkId ? TALKS.find((t) => t.id === draft.talkId)?.content.en.title : null;
+  const start = (talkId: string | null) => {
+    newDraft(co.id, talkId, readChosenJobsite(co.id) ?? "");
+    router.push("/talk/");
+  };
 
   return (
-    <Shell nav={canAdmin(m.access) ? <NavLink href="/admin/">Admin</NavLink> : undefined}>
+    <Shell nav={<><NavLink href="/records/">Records</NavLink>{canAdmin(m.access) && <NavLink href="/admin/">Admin</NavLink>}</>}>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         {s.memberships.length > 1 ? (
           <select
@@ -50,6 +61,28 @@ function Home({ m }: { m: Membership }) {
         <span className="rounded-full border border-line px-3 py-1 text-muted">{climate.state ? climate.label : "No ZIP set"}</span>
       </div>
 
+      {outbox.items.length > 0 && (
+        <div className="mt-4">
+          <Notice>
+            <span className="flex flex-wrap items-center justify-between gap-2">
+              <span>{outbox.items.length === 1 ? "1 talk is" : `${outbox.items.length} talks are`} saved on this phone, waiting for signal to upload.</span>
+              <Button size="sm" variant="ghost" disabled={outbox.busy} onClick={() => outbox.upload()}>{outbox.busy ? "Uploading…" : "Upload now"}</Button>
+            </span>
+          </Notice>
+        </div>
+      )}
+
+      {draft && (
+        <div className="mt-4">
+          <Notice>
+            <span className="flex flex-wrap items-center justify-between gap-2">
+              <span>Talk in progress{draftTitle ? `: ${draftTitle}` : ""}.</span>
+              <Button size="sm" onClick={() => router.push("/talk/")}>Resume</Button>
+            </span>
+          </Notice>
+        </div>
+      )}
+
       {!co.zip && canAdmin(m.access) && (
         <div className="mt-4">
           <Notice>Add your ZIP code in <Link className="font-bold underline" href="/admin/#company">Admin</Link> so heat, cold and storm talks land in the right weeks.</Notice>
@@ -62,9 +95,9 @@ function Home({ m }: { m: Membership }) {
           <Title>{text.title}</Title>
           <p className="mt-3 font-bold">{text.hook}</p>
           <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud</p>
-          <div className="mt-5">
-            <Button disabled title="Coming in the next build">Start this talk</Button>
-            <p className="mt-2 text-center text-xs text-muted">Reading, attendance and signatures come in the next build.</p>
+          <div className="mt-5 flex flex-col gap-2">
+            <Button onClick={() => start(week.talkId)}>Start this talk</Button>
+            <Button size="sm" variant="ghost" onClick={() => start(null)}>Give a different talk</Button>
           </div>
         </section>
       ) : (

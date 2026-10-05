@@ -9,9 +9,10 @@ export type DemoDb = {
   teams: Record<string, unknown>[];
   people: Record<string, unknown>[];
   jobsites: Record<string, unknown>[];
+  records: Record<string, unknown>[];
 };
 
-const empty = (): DemoDb => ({ session: null, companies: [], members: [], roles: [], teams: [], people: [], jobsites: [] });
+const empty = (): DemoDb => ({ session: null, companies: [], members: [], roles: [], teams: [], people: [], jobsites: [], records: [] });
 
 let memory: DemoDb | null = null;
 
@@ -30,8 +31,12 @@ export function save() {
   try { localStorage.setItem(KEY, JSON.stringify(db())); } catch { /* private mode: kept in memory for this visit */ }
 }
 
+/** Erase everything the preview stored on this phone: demo data, talks in progress, the upload queue, choices. */
 export function resetDemo() {
   memory = empty();
+  try {
+    Object.keys(localStorage).filter((k) => k.startsWith("tt-")).forEach((k) => localStorage.removeItem(k));
+  } catch { /* nothing stored */ }
   save();
 }
 

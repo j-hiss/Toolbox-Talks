@@ -110,3 +110,14 @@ export function NavLink({ href, children }: { href: string; children: React.Reac
 export function Loading({ label = "Loading…" }: { label?: string }) {
   return <p className="py-10 text-center text-muted" role="status">{label}</p>;
 }
+
+/** Red count of flagged people (not signed or absent, plus an unsigned presenter). Shows nothing at zero. */
+export function FlagChip({ n }: { n: number }) {
+  return n > 0 ? <span className="whitespace-nowrap rounded bg-warn px-2 py-0.5 font-display text-xs font-bold uppercase text-white">{n} flagged</span> : null;
+}
+
+export const STATUS_CHIP: Record<"signed" | "not_signed" | "absent", string> = {
+  signed: "border border-ok text-ok",
+  not_signed: "bg-warn text-white",
+  absent: "bg-warn text-white",
+};

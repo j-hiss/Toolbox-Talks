@@ -98,6 +98,29 @@ async function main() {
     check("A sees only A's jobsites", sitesA.rows.length === 1 && sitesA.rows[0].company_id === coA, `${sitesA.rows.length} visible`);
     check("A cannot add a jobsite to B", await fails(() => as(userA, "insert into public.jobsites (company_id, name) values ($1, 'x')", [coB])));
     check("Jobsites can't be deleted, only deactivated", await fails(() => as(userA, "delete from public.jobsites where company_id = $1", [coA])));
+    // Talk records: append-only, company-scoped, idempotent uploads.
+    const rec = (company, clientId, attendees) => [
+      JSON.stringify({ company_id: company, client_id: clientId, talk_id: "fall", language: "en", content: { title: "Fall Protection" },
+        presenter_name: "Presenter", held_at: new Date().toISOString() }),
+      JSON.stringify(attendees),
+    ];
+    const sig = "data:image/png;base64,AAAA";
+    const clientA = randomUUID();
+    const save = (user, company, clientId, att) => as(user, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", rec(company, clientId, att));
+    const recA = (await save(userA, coA, clientA, [{ name: "W1", status: "signed", signature: sig }, { name: "W2", status: "absent" }])).rows[0].id;
+    const again = (await save(userA, coA, clientA, [{ name: "W1", status: "signed", signature: sig }])).rows[0].id;
+    const countA = (await as(userA, "select count(*)::int n from public.talk_records")).rows[0].n;
+    check("Saving the same talk twice keeps one record", again === recA && countA === 1, `${countA} record(s)`);
+    check("Attendees saved with the record", (await as(userA, "select status from public.talk_attendees order by position")).rows.map((r) => r.status).join(",") === "signed,absent");
+    check("B sees none of A's records or attendees",
+      (await as(userB, "select id from public.talk_records")).rows.length === 0 && (await as(userB, "select id from public.talk_attendees")).rows.length === 0);
+    check("Records can't be edited", await fails(() => as(userA, "update public.talk_records set presenter_name = 'changed' where id = $1", [recA])));
+    check("Records can't be deleted", await fails(() => as(userA, "delete from public.talk_records where id = $1", [recA])));
+    check("Attendance can't be edited", await fails(() => as(userA, "update public.talk_attendees set status = 'signed' where record_id = $1", [recA])));
+    check("B cannot save a record into A's company", await fails(() => save(userB, coA, randomUUID(), [])));
+    check("'Signed' without a signature is rejected", await fails(() => save(userA, coA, randomUUID(), [{ name: "W3", status: "signed" }])));
+    check("A presenter can record a talk", !!(await save(presenterA, coA, randomUUID(), [{ name: "W1", status: "not_signed" }])).rows[0].id);
+
     const rolesA = await as(userA, "select company_id from public.roles");
     check("New company gets its default roles, and A sees only A's", rolesA.rows.length === 6 && rolesA.rows.every((r) => r.company_id === coA), `${rolesA.rows.length} visible`);
     check("A cannot add a role to B", await fails(() => as(userA, "insert into public.roles (company_id, name) values ($1, 'Intruder')", [coB])));
@@ -126,7 +149,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 18;
+  const EXPECTED = 27;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

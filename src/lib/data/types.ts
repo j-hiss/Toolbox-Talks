@@ -44,3 +44,43 @@ export type Jobsite = {
   longitude: number | null;
   active: boolean;
 };
+
+export type AttendanceRow = {
+  person_id: string | null;
+  name: string;
+  role: string;
+  team_name: string;
+  status: "signed" | "not_signed" | "absent";
+  signature: string | null;
+  signed_at: string | null;
+};
+
+/** A saved talk as listed (no signatures). */
+export type TalkRecordSummary = {
+  id: string;
+  client_id: string;
+  talk_id: string;
+  language: string;
+  title: string;
+  week_number: number | null;
+  held_at: string;
+  jobsite_name: string;
+  team_name: string;
+  presenter_name: string;
+  statuses: AttendanceRow["status"][];
+  presenter_signed: boolean;
+};
+
+/** A saved talk with everything needed to show it or build its PDF. */
+export type TalkRecord = TalkRecordSummary & {
+  content: { title: string; hook: string; sections: { heading: string; items: string[] }[]; ask: string; en?: unknown };
+  week_start: string | null;
+  scheduled_talk_id: string | null;
+  team_lead_name: string;
+  presenter_role: string;
+  presenter_signature: string | null;
+  presenter_signed_at: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  attendees: AttendanceRow[];
+};

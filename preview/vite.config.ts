@@ -2,7 +2,7 @@
 // stored on the viewer's phone. Same components as the real app; only these swap out:
 //   next/link, next/navigation   -> tiny in-page router (preview/shims)
 //   @/lib/supabase               -> demo sign-in (code 123456)
-//   @/lib/data/company           -> demo data saved in the browser
+//   @/lib/data/company, records  -> demo data saved in the browser
 //   @/lib/location               -> explains GPS isn't available in the preview
 // Run: npm run preview:build   (output: preview/dist/preview.html)
 import { defineConfig } from "vite";
@@ -22,6 +22,7 @@ export default defineConfig({
       { find: /^next\/navigation$/, replacement: here("shims/navigation.ts") },
       { find: /^@\/lib\/supabase$/, replacement: here("demo/supabase.ts") },
       { find: /^@\/lib\/data\/company$/, replacement: here("demo/company.ts") },
+      { find: /^@\/lib\/data\/records$/, replacement: here("demo/records.ts") },
       { find: /^@\/lib\/location$/, replacement: here("demo/location.ts") },
       { find: /^@\//, replacement: here("../src") + "/" },
     ],

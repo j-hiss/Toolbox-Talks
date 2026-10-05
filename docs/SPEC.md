@@ -89,7 +89,20 @@ customer #1, not a special case.
 - Later: turn a typed address into a map point automatically (needs a geocoding service; not chosen yet), and log
   the presenter's GPS on each saved talk as extra proof of where it happened.
 
-## Running a talk
+## Running a talk (built)
+- **Home → Start this talk** opens this week's scheduled talk; **Give a different talk** opens the list (recorded
+  as a substitute). A talk in progress is saved on the phone after every tap; Home shows **Resume**.
+- **Read:** language buttons (English, Spanish; others "soon"), **Read it out loud** with each line highlighted,
+  a note when the translation isn't reviewed yet.
+- **Who's here:** presenter (anyone with a role other than crew member), team (or all teams), jobsite, roster
+  (team lead first, everyone checked; uncheck who's absent), walk-ins. A GPS point is taken quietly if allowed.
+- **Sign:** presenter first, then each person present. Saving with anyone unsigned names them and flags them.
+- **Saved:** goes into the phone's outbox first, then uploads. With no signal it says "saved on this phone" and
+  uploads automatically when the phone is back online (Home and Records also have **Upload now**).
+- **Records:** list (waiting + saved) with signed counts and flags; tap for the full record: details, sign-in
+  sheet with signatures, presenter signature, and the talk text that was read. Records can't be edited.
+
+## Running a talk (original plan)
 1. **Pick the talk** (this week's scheduled one is on top).
 2. **Read it** in the chosen language, or press play.
 3. **Who's here:** choose the presenter (dropdown of everyone who can present), the team, and the jobsite. The team's
@@ -123,6 +136,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **CSV export**, one row per person per talk.
 
 ## Not yet decided
+- **Where signatures live.** Today they're PNG images inside the record rows, protected by the same row-level
+  security as everything else (no public access, company-only). `CLAUDE.md` asks for private Storage with
+  short-lived signed URLs; moving them there is pending Joe's decision.
 - Pricing (per company per month vs per crew).
 - Whether RomanOS reads records from this app through an API (later, only if useful; no shared code).
 - Moving the repo from Joe's personal GitHub account to a company organization.
