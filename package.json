@@ -16,7 +16,7 @@
     "ios": "npm run app:sync && cap open ios",
     "android": "npm run app:sync && cap open android",
     "preview:build": "vite build --config preview/vite.config.ts && node preview/to-artifact.mjs",
-    "test:preview": "npm run preview:build && node scripts/preview-e2e.cjs"
+    "test:preview": "npm run preview:build && node scripts/preview-e2e.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",

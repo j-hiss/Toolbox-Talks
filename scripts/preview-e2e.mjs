@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // End-to-end in real Chromium at phone size: setup -> people/teams via the new admin -> talk with one-at-a-time
 // signing (draw on the pad, mark someone absent, undo) -> review -> save -> home status -> records -> admin undo.
-const { chromium } = require("playwright-core");
-const path = require("node:path");
-const fs = require("node:fs");
+import { chromium } from "playwright-core";
+import path from "node:path";
+import fs from "node:fs";
+const __dirname = import.meta.dirname;
 const OUT = process.env.OUT || path.join(__dirname, "..", "preview", "dist", "e2e");
 fs.mkdirSync(OUT, { recursive: true });
 const PAGE = "file://" + path.join(__dirname, "..", "preview", "dist", "index.html");
