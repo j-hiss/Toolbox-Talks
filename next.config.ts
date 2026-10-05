@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 // One build for every platform: `next build` writes a static site to out/.
 // The same out/ folder is hosted as the web app and copied into the iPhone and Android apps by Capacitor.
@@ -8,6 +9,8 @@ const nextConfig: NextConfig = {
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
+  // Pin the project root so a stray package-lock.json in a parent folder (e.g. your home folder) is ignored.
+  turbopack: { root: path.join(__dirname) },
 };
 
 export default nextConfig;
