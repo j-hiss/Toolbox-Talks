@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { conditionNotes, conditionsFor, conditionsLoud, parseWindMph, rainLevel, summarizeAlerts, windLevel } from "./conditions";
+import { conditionNotes, conditionsFor, conditionsLoud, parseWindMph, rainLevel, skyKind, summarizeAlerts, windLevel, windToward, worseSky } from "./conditions";
 
 // An hourly forecast in the site's own time (-04:00), like api.weather.gov returns.
 const hour = (h: number, o: { t?: number; rh?: number; pop?: number; wind?: string; dir?: string; sf?: string; day?: string } = {}) => ({
@@ -69,6 +69,28 @@ describe("jobsite conditions", () => {
     const calm = conditionsFor(fc([hour(9), hour(10)]), null, at("2026-10-06T09:10:00-04:00"))!;
     expect(conditionNotes(calm)).toEqual([]);
     expect(conditionsLoud(calm, false)).toBeNull();
+  });
+
+  it("reads the sky from the short forecast", () => {
+    expect(skyKind("Chance Showers And Thunderstorms")).toBe("thunder");
+    expect(skyKind("Slight Chance Rain Showers")).toBe("rain");
+    expect(skyKind("Patchy Fog")).toBe("fog");
+    expect(skyKind("Mostly Sunny")).toBe("partly");
+    expect(skyKind("Mostly Cloudy")).toBe("cloudy");
+    expect(skyKind("Sunny")).toBe("clear");
+    expect(worseSky("rain", "partly")).toBe("rain");
+    expect(windToward("N")).toBe(180);
+    expect(windToward("SW")).toBe(45);
+    expect(windToward("??")).toBeNull();
+  });
+
+  it("gives an hour-by-hour strip and leads with the sky now, or tomorrow's roughest", () => {
+    const today = conditionsFor(day, null, at("2026-10-06T10:20:00-04:00"))!;
+    expect(today.hours.map((h) => h.time.slice(11, 13))).toEqual(["10", "13", "16", "19"].filter((h) => h !== "19"));
+    expect(today.hours[1]).toMatchObject({ sky: "thunder", rainPct: 40, windMph: 25 });
+    expect(today.headline).toMatchObject({ sky: "clear", tempF: 86 });
+    const tmr = conditionsFor(day, null, at("2026-10-06T20:30:00-04:00"))!;
+    expect(tmr.headline).toMatchObject({ sky: "clear", highF: 85, lowF: 80, tempF: 85 });
   });
 
   it("no forecast hours means nothing to show", () => {

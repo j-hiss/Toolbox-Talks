@@ -110,6 +110,31 @@ body {
 .toast-in { animation: toast-in 180ms ease-out; }
 .sheet-in { animation: slide-up 200ms ease-out; }
 .skeleton { background: var(--line); animation: pulse-bg 1.2s ease-in-out infinite; }
+/* Jobsite weather sky (src/components/Weather.tsx). */
+@keyframes wx-spin { to { transform: rotate(360deg); } }
+@keyframes wx-pulse { 0%, 100% { opacity: 0.75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+@keyframes wx-drift { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
+@keyframes wx-fall { from { transform: translateY(-20px); } to { transform: translateY(210px); } }
+@keyframes wx-flash { 0%, 89%, 93%, 100% { opacity: 0; } 90% { opacity: 0.55; } 91.5% { opacity: 0.1; } 92% { opacity: 0.4; } }
+@keyframes wx-bolt { 0%, 89%, 94%, 100% { opacity: 0; } 90%, 93% { opacity: 1; } }
+@keyframes wx-twinkle { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.25; } }
+@keyframes wx-fog { from { transform: translateX(-40px); } to { transform: translateX(160px); } }
+@keyframes wx-gust { from { stroke-dashoffset: 260; } to { stroke-dashoffset: -260; } }
+.wx-spin, .wx-pulse { transform-box: fill-box; transform-origin: center; }
+.wx-spin { animation: wx-spin 60s linear infinite; }
+.wx-spin-fast { animation: wx-spin 1s linear infinite; }
+.wx-pulse { animation: wx-pulse 5s ease-in-out infinite; }
+.wx-drift { animation: wx-drift 40s ease-in-out infinite alternate; }
+.wx-fall { animation: wx-fall 0.9s linear infinite; }
+.wx-flash { opacity: 0; animation: wx-flash 7s linear infinite; }
+.wx-bolt { opacity: 0; animation: wx-bolt 7s linear infinite; }
+.wx-twinkle { animation: wx-twinkle 3s ease-in-out infinite; }
+.wx-fog { animation: wx-fog 14s ease-in-out infinite alternate; }
+.wx-gust { stroke-dasharray: 90 430; animation: wx-gust 3.2s ease-in infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .page-in, .toast-in, .sheet-in, .skeleton { animation: none; }
+  .wx-spin, .wx-spin-fast, .wx-pulse, .wx-drift, .wx-fall, .wx-twinkle, .wx-fog, .wx-gust { animation: none; }
+  .wx-flash { animation: none; opacity: 0; }
+  .wx-bolt { animation: none; opacity: 1; }
 }

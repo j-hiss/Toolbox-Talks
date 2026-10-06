@@ -24,6 +24,31 @@ export function parseWindMph(s: unknown): number | null {
   return n.length ? Math.max(...n) : null;
 }
 
+/** What the sky is doing, from the weather service's short forecast ("Chance Showers And Thunderstorms"). */
+export type SkyKind = "clear" | "partly" | "cloudy" | "rain" | "thunder" | "fog";
+const SKY_ORDER: SkyKind[] = ["clear", "partly", "cloudy", "fog", "rain", "thunder"];
+
+export function skyKind(shortForecast: string | undefined): SkyKind {
+  const s = (shortForecast ?? "").toLowerCase();
+  if (/thunder|t-storm/.test(s)) return "thunder";
+  if (/rain|shower|drizzle|sleet|snow|flurr/.test(s)) return "rain";
+  if (/fog|haze|smoke|mist/.test(s)) return "fog";
+  if (/partly|mostly sunny|mostly clear|few clouds|scattered clouds/.test(s)) return "partly";
+  if (/cloud|overcast/.test(s)) return "cloudy";
+  return "clear";
+}
+/** The rougher of two skies (thunder beats rain beats fog beats clouds beats clear). */
+export const worseSky = (a: SkyKind, b: SkyKind): SkyKind => (SKY_ORDER.indexOf(a) >= SKY_ORDER.indexOf(b) ? a : b);
+
+/** Compass direction ("SW") to the degrees an arrow should point (the way the wind is blowing toward). */
+export function windToward(dir: string): number | null {
+  const pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  const i = pts.indexOf((dir ?? "").toUpperCase());
+  return i < 0 ? null : (i * 22.5 + 180) % 360;
+}
+
+export type HourPoint = { time: string; tempF: number | null; rainPct: number; windMph: number | null; windDirection: string; sky: SkyKind; daytime: boolean };
+
 export type Alert = { event: string; severity: string; headline: string; ends: string | null; loud: boolean };
 
 const SEVERITY_ORDER = ["Extreme", "Severe", "Moderate", "Minor", "Unknown"];
@@ -57,9 +82,13 @@ export type Conditions = {
   /** First work hour with thunderstorms in the forecast. */
   thunderAt: string | null;
   alerts: Alert[];
+  /** Hour by hour for the rest of the work day (or tomorrow's). */
+  hours: HourPoint[];
+  /** The picture to lead with: the sky now (today) or the roughest sky of the day (tomorrow), and its temperature. */
+  headline: { sky: SkyKind; daytime: boolean; tempF: number | null; label: string; highF: number | null; lowF: number | null };
 };
 
-type Period = { startTime?: string; temperature?: number | { value: number | null }; temperatureUnit?: string; shortForecast?: string;
+type Period = { startTime?: string; isDaytime?: boolean; temperature?: number | { value: number | null }; temperatureUnit?: string; shortForecast?: string;
   windSpeed?: string; windDirection?: string; probabilityOfPrecipitation?: { value: number | null } | number | null };
 
 const num = (q: Period["probabilityOfPrecipitation"]) => (q == null ? null : typeof q === "number" ? q : q.value);
@@ -102,6 +131,23 @@ export function conditionsFor(forecast: unknown, alerts: unknown, now: Date = ne
     if (!thunderAt && /thunder/i.test(p.shortForecast ?? "")) thunderAt = p.startTime!;
   }
   const t = tempF(current);
+  const hours: HourPoint[] = work.slice(0, 14).map((p) => {
+    const tf = tempF(p);
+    return { time: p.startTime!, tempF: tf == null ? null : Math.round(tf), rainPct: num(p.probabilityOfPrecipitation) ?? 0, windMph: parseWindMph(p.windSpeed),
+      windDirection: p.windDirection ?? "", sky: skyKind(p.shortForecast), daytime: p.isDaytime ?? (() => { const h = Number(p.startTime!.slice(11, 13)); return h >= 7 && h < 19; })() };
+  });
+  const temps = hours.map((h) => h.tempF).filter((x): x is number => x != null);
+  let roughest: Period | null = null;
+  for (const p of work) if (!roughest || SKY_ORDER.indexOf(skyKind(p.shortForecast)) > SKY_ORDER.indexOf(skyKind(roughest.shortForecast))) roughest = p;
+  const lead = tomorrow ? roughest ?? current : current;
+  const headline = {
+    sky: skyKind(lead.shortForecast),
+    daytime: tomorrow ? true : current.isDaytime ?? (siteHour >= 7 && siteHour < 19),
+    tempF: tomorrow ? (temps.length ? Math.max(...temps) : null) : t == null ? null : Math.round(t),
+    label: lead.shortForecast ?? "",
+    highF: temps.length ? Math.max(...temps) : null,
+    lowF: temps.length ? Math.min(...temps) : null,
+  };
   return {
     day: tomorrow ? "tomorrow" : "today",
     dayKey,
@@ -112,6 +158,7 @@ export function conditionsFor(forecast: unknown, alerts: unknown, now: Date = ne
     heat: heatForDay(forecast, dayKey),
     rain, wind, thunderAt,
     alerts: summarizeAlerts(alerts, now),
+    hours, headline,
   };
 }
 

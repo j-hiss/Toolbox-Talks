@@ -149,6 +149,10 @@ customer #1, not a special case.
   manual refresh; shows the last check and its time when offline. Plain notes for the crew (thunder: get off the roof
   and out of lifts; windy: secure materials; high wind: check lift/crane/edge limits; rain likely: slick surfaces).
   Information only: the app never says a site is safe or unsafe to work; the crew lead decides.
+  Looks like a weather app: an animated sky matching the forecast and time of day (sun, drifting clouds, rain,
+  lightning flashes, fog, stars), the temperature and the work day's high/low, then hour by hour (sky icon, temp,
+  rain-chance bar, wind arrow and speed). All drawn in the app (no extra downloads); animation stops for people who
+  turn on reduced motion.
 - **Crew-raised issues:** on the review screen before saving, the presenter logs what the crew raised. Each gets an
   owner (presenter by default) and a fix-by date (a week out). They upload with the talk (same offline outbox,
   one transaction). Records → Issues lists open (overdue first) and fixed; tap to reassign, change the date, or mark
