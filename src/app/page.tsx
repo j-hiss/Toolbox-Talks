@@ -16,7 +16,7 @@ import { newDraft, useDraft } from "@/lib/draft";
 import { useOutbox } from "@/lib/useOutbox";
 import { usePlan } from "@/lib/usePlan";
 import { readLastSetup } from "@/lib/lastSetup";
-import { GettingStarted, HeatCard, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
+import { GettingStarted, WeatherCard, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
 import type { Jobsite } from "@/lib/data/types";
 import { useEffect, useState } from "react";
 import { planReminders } from "@/core/reminders";
@@ -148,7 +148,7 @@ function Home({ m }: { m: Membership }) {
       )}
 
       <JobsitePicker companyId={co.id} isAdmin={isAdmin} onChange={setSite} />
-      <HeatCard key={site?.id ?? "none"} site={site} />
+      <WeatherCard key={site?.id ?? "none"} site={site} />
 
       {upcoming.length > 0 && (
         <section>

@@ -75,7 +75,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.fill("#co-name", "Demo 2"); await q.click("text=Create company"); await q.waitForTimeout(800);
   await q.click("text=Preview"); await q.click("text=Add example history"); await q.waitForTimeout(1500);
   await q.selectOption("main select", { label: "Example Jobsite" }).catch(() => {}); await q.waitForTimeout(500);
-  log("2 home heat:", (await q.locator("main [role=alert]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).find((t) => /Heat index/.test(t)) ?? "none");
+  log("2 home weather:", (await q.locator("section[aria-label=\"Jobsite weather\"]").innerText().catch(() => "none")).replace(/\s+/g, " ")); await q.locator("section[aria-label=\"Jobsite weather\"]").screenshot({ path: `${OUT}/e-weather.png` }).catch(() => {});
   log("2 home week card:", (await q.locator("section:has-text('Signed this week')").last().innerText()).replace(/\s+/g, " "));
   await q.click("text=Give a makeup"); await q.waitForTimeout(600);
   await q.locator("[role=radio]").nth(0).click(); await q.click("button:has-text('Off that week')"); await q.click("text=Continue to the talk"); await q.waitForTimeout(400);
@@ -121,7 +121,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.click("[role=tab]:has-text('Jobsites')"); await r.fill("#js-name", "Example Jobsite");
   await r.click("form button:has-text('Add')"); await r.waitForTimeout(500);
   await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(900);
-  await r.click("text=Check today's heat here").catch(() => {}); await r.waitForTimeout(600);
+  await r.click("text=Check the weather here").catch(() => {}); await r.waitForTimeout(600);
   log("3 home heat:", (await r.locator("main [role=alert], main [role=status]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).find((t) => /Heat index/.test(t)) ?? "none");
   await r.screenshot({ path: `${OUT}/e-home-heat.png`, fullPage: true });
   await r.click("text=Start this talk"); await r.waitForTimeout(500);

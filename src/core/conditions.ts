@@ -1,0 +1,133 @@
+// Jobsite weather for the rest of the work day: rain chance, wind, thunderstorms and the weather service's own
+// active alerts, alongside heat (src/core/heat.ts). Pure module: reads api.weather.gov responses, judges them.
+// The app shows this as information for the crew; it never says a site is safe or unsafe to work.
+import { heatForDay, type HeatDay } from "./heat";
+
+export const WORK_START_HOUR = 6;
+export const WORK_END_HOUR = 19;
+
+export type RainLevel = "none" | "chance" | "likely";
+export type WindLevel = "calm" | "breezy" | "windy" | "high";
+
+export const RAIN_LABEL: Record<RainLevel, string> = { none: "Dry", chance: "Chance of rain", likely: "Rain likely" };
+export const WIND_LABEL: Record<WindLevel, string> = { calm: "Light wind", breezy: "Breezy", windy: "Windy", high: "High wind" };
+
+/** Rain chance: under 30% dry, 30–59% chance, 60% and up likely (the weather service's own wording bands). */
+export const rainLevel = (pct: number): RainLevel => (pct >= 60 ? "likely" : pct >= 30 ? "chance" : "none");
+/** Sustained wind in mph. */
+export const windLevel = (mph: number): WindLevel => (mph >= 35 ? "high" : mph >= 25 ? "windy" : mph >= 15 ? "breezy" : "calm");
+
+/** "10 mph" → 10, "10 to 15 mph" → 15, anything else → null. */
+export function parseWindMph(s: unknown): number | null {
+  if (typeof s !== "string") return null;
+  const n = [...s.matchAll(/\d+(\.\d+)?/g)].map((m) => Number(m[0]));
+  return n.length ? Math.max(...n) : null;
+}
+
+export type Alert = { event: string; severity: string; headline: string; ends: string | null; loud: boolean };
+
+const SEVERITY_ORDER = ["Extreme", "Severe", "Moderate", "Minor", "Unknown"];
+
+/** The weather service's active alerts for a point (warnings, watches, advisories), most severe first. */
+export function summarizeAlerts(geojson: unknown, now: Date = new Date()): Alert[] {
+  const features = (geojson as { features?: unknown[] })?.features;
+  if (!Array.isArray(features)) return [];
+  const out: Alert[] = [];
+  for (const f of features) {
+    const p = (f as { properties?: Record<string, unknown> })?.properties;
+    if (!p || typeof p.event !== "string") continue;
+    const ends = (typeof p.ends === "string" && p.ends) || (typeof p.expires === "string" && p.expires) || null;
+    if (ends && new Date(ends) < now) continue;
+    if (p.status && p.status !== "Actual") continue;
+    const severity = typeof p.severity === "string" ? p.severity : "Unknown";
+    out.push({ event: p.event, severity, headline: typeof p.headline === "string" ? p.headline : p.event, ends, loud: severity === "Extreme" || severity === "Severe" || /warning/i.test(p.event) });
+  }
+  const rank = (a: Alert) => (SEVERITY_ORDER.indexOf(a.severity) + 5) % 5 + (a.loud ? 0 : 5);
+  return out.sort((a, b) => rank(a) - rank(b)).filter((a, i, all) => all.findIndex((x) => x.event === a.event) === i);
+}
+
+export type Conditions = {
+  /** Which day the outlook is for: today, or tomorrow once today's work hours are over. */
+  day: "today" | "tomorrow";
+  dayKey: string;
+  now: { tempF: number; shortForecast: string; windMph: number | null; windDirection: string; rainPct: number } | null;
+  heat: HeatDay | null;
+  rain: { maxPct: number; atHour: string; level: RainLevel } | null;
+  wind: { maxMph: number; direction: string; atHour: string; level: WindLevel } | null;
+  /** First work hour with thunderstorms in the forecast. */
+  thunderAt: string | null;
+  alerts: Alert[];
+};
+
+type Period = { startTime?: string; temperature?: number | { value: number | null }; temperatureUnit?: string; shortForecast?: string;
+  windSpeed?: string; windDirection?: string; probabilityOfPrecipitation?: { value: number | null } | number | null };
+
+const num = (q: Period["probabilityOfPrecipitation"]) => (q == null ? null : typeof q === "number" ? q : q.value);
+const tempF = (p: Period) => {
+  const t = typeof p.temperature === "number" ? p.temperature : p.temperature?.value ?? null;
+  return t == null ? null : p.temperatureUnit === "C" ? t * 9 / 5 + 32 : t;
+};
+const localDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/**
+ * The work-day outlook from an api.weather.gov hourly forecast plus its active alerts. Looks from now to the end of
+ * work hours; after work hours it looks at tomorrow. Times compare in the site's own local time (startTime's offset).
+ */
+export function conditionsFor(forecast: unknown, alerts: unknown, now: Date = new Date()): Conditions | null {
+  const periods = ((forecast as { properties?: { periods?: Period[] } })?.properties?.periods ?? []).filter((p) => p.startTime);
+  if (!periods.length) return null;
+  // The site's local "now": the period that contains the current moment, else the first one.
+  const current = periods.find((p) => {
+    const s = new Date(p.startTime!).getTime();
+    return s <= now.getTime() && now.getTime() < s + 3600_000;
+  }) ?? periods[0];
+  const siteDay = current.startTime!.slice(0, 10);
+  const siteHour = Number(current.startTime!.slice(11, 13));
+  const tomorrow = siteHour >= WORK_END_HOUR;
+  const dayKey = tomorrow
+    ? (periods.find((p) => p.startTime!.slice(0, 10) > siteDay)?.startTime!.slice(0, 10) ?? localDay(new Date(now.getTime() + 864e5)))
+    : siteDay;
+
+  const work = periods.filter((p) => {
+    const day = p.startTime!.slice(0, 10), hour = Number(p.startTime!.slice(11, 13));
+    return day === dayKey && hour >= WORK_START_HOUR && hour <= WORK_END_HOUR && (tomorrow || new Date(p.startTime!).getTime() + 3600_000 > now.getTime());
+  });
+
+  let rain: Conditions["rain"] = null, wind: Conditions["wind"] = null, thunderAt: string | null = null;
+  for (const p of work) {
+    const pct = num(p.probabilityOfPrecipitation) ?? 0;
+    if (!rain || pct > rain.maxPct) rain = { maxPct: pct, atHour: p.startTime!, level: rainLevel(pct) };
+    const mph = parseWindMph(p.windSpeed);
+    if (mph != null && (!wind || mph > wind.maxMph)) wind = { maxMph: mph, direction: p.windDirection ?? "", atHour: p.startTime!, level: windLevel(mph) };
+    if (!thunderAt && /thunder/i.test(p.shortForecast ?? "")) thunderAt = p.startTime!;
+  }
+  const t = tempF(current);
+  return {
+    day: tomorrow ? "tomorrow" : "today",
+    dayKey,
+    now: tomorrow || t == null ? null : {
+      tempF: Math.round(t), shortForecast: current.shortForecast ?? "", windMph: parseWindMph(current.windSpeed),
+      windDirection: current.windDirection ?? "", rainPct: num(current.probabilityOfPrecipitation) ?? 0,
+    },
+    heat: heatForDay(forecast, dayKey),
+    rain, wind, thunderAt,
+    alerts: summarizeAlerts(alerts, now),
+  };
+}
+
+/** Short, plain notes for the crew. Information only: the crew lead decides what to do. */
+export function conditionNotes(c: Conditions): string[] {
+  const out: string[] = [];
+  if (c.thunderAt) out.push("Thunderstorms in the forecast. When thunder roars, get off the roof and out of lifts.");
+  if (c.wind?.level === "high") out.push("High wind. Check limits for lifts, cranes and edge work before you start.");
+  else if (c.wind?.level === "windy") out.push("Windy. Secure loose materials, sheets and debris on the roof.");
+  if (c.rain?.level === "likely") out.push("Rain likely. Plan for slick surfaces and cover open work.");
+  return out;
+}
+
+/** Worth calling out loudly on Home: an active warning, thunder, high wind, or heat from "extreme caution" up. */
+export function conditionsLoud(c: Conditions, heatLoud: boolean): "alert" | "caution" | null {
+  if (c.alerts.some((a) => a.loud)) return "alert";
+  if (heatLoud || c.thunderAt || c.wind?.level === "high" || c.wind?.level === "windy") return "caution";
+  return null;
+}

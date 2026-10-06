@@ -33,6 +33,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `buildAttendees` · `recordPayload` · `unsignedPresent` | `src/core/record.ts` | **The** saved-talk builder: every roster person gets one honest status; signatures from absent people are dropped |
 | `creditWeek` · `makeupWeeks` · `planWeekAt` · `canMakeUp` · `stillNeeds` · `signedFor` · `canChangeWeek` · `MAKEUP_REASONS` · `makeupReasonText` | `src/core/makeup.ts` | **The** weekly-lock and makeup rules: which week a talk counts toward (makeups keep their real date), past weeks inside the limit with their scheduled talk, who still needs a week, when an admin can still swap a week |
 | `buildCompliance` · `score` · `onTimeRate` · `onStaff` · `weekKeys` · `makeupDeadline` · `WEEK_STATE_LABEL` · `trend` · `periodChange` · `teamGrid` · `needsMakeup` · `makeupSummary` | `src/core/compliance.ts` | **The** compliance math: every person on staff, every week → on time / made up / open / missed / due. Makeups close a week and stay marked; this week isn't scored; presenters who signed count. Origin: prototype `reportData` (`prototype/index.html:684`) |
+| `conditionsFor` · `summarizeAlerts` · `conditionNotes` · `conditionsLoud` · `parseWindMph` · `rainLevel` · `windLevel` | `src/core/conditions.ts` | **The** work-day weather judgment: rain, wind, thunder and NWS alerts from the hourly forecast; tomorrow after work hours. Information only, never "safe to work" |
 | `heatIndexF` · `heatLevel` · `heatForDay` · `alertWorthy` · `HEAT_LABEL` | `src/core/heat.ts` | **The** heat judgment: NWS heat index formula and chart levels; hottest work hour from an NWS hourly forecast |
 | `planImport` · `parseCsv` · `templateCsv` · `IMPORT_COLUMNS` | `src/core/importPeople.ts` | **The** people-import plan: header aliases, add/update/skip with reasons, new crews/roles, matching by Employee ID |
 | `planReminders` | `src/core/reminders.ts` | Which phone reminders should be scheduled now (Monday talk, Thursday nudge, makeups running out) |
@@ -78,11 +79,11 @@ point the row at the real file and keep the prototype line as its origin.
 | `reportPeople` · `reportRecords` | `src/lib/data/reports.ts` | **The** report query layer: all people incl. deactivated (with dates), records held in or making up weeks in range. No signatures loaded |
 | `TrendChart` · `TeamGrid` · `HBars` · `BANDS` · `bandOf` | `src/components/charts.tsx` | **The** report charts, hand-built on app tokens (`--series-1/2`, `--grid`, `--band-*` in `globals.css`; series follow the brand and button colors, bands follow done/caution/missed). Reuse these for any new chart |
 | reports screen | `src/app/reports/page.tsx` | Score card, by week (tap for who), by person, flags, CSV export. Admins only |
-| `checkHeat` · `cachedHeat` | `src/lib/weather.ts` | Today's heat from api.weather.gov, cached on the phone for the day. Preview twin returns an example forecast |
+| `checkConditions` · `cachedConditions` · `checkHeat` · `cachedHeat` | `src/lib/weather.ts` | Live work-day conditions (forecast + active alerts, 15-minute reuse) for Home, and | Today's heat from api.weather.gov, cached on the phone for the day. Preview twin returns an example forecast |
 | `listIssues` · `listIssuesForRecord` · `updateIssue` | `src/lib/data/issues.ts` | Crew-raised issues (new ones save with their talk via `saveTalkRecord` → `save_talk`) |
 | `IssuesList` · `isOverdue` | `src/components/Issues.tsx` | Records → Issues: open/fixed, overdue first, edit panel, mark fixed with Undo |
 | `ImportPeople` | `src/components/ImportPeople.tsx` | Admin → People → Import sheet: pick file, preview plan, import |
-| `HeatCard` | `src/components/HomeCards.tsx` | Home's heat line/warning for the chosen jobsite or this phone |
+| `WeatherCard` | `src/components/HomeCards.tsx` | Home's live jobsite weather (heat, rain, wind, thunder, NWS alerts) for the chosen jobsite or this phone; auto-refresh |
 | `applyReminders` · `setReminders` · `remindersSupported` | `src/lib/reminders.ts` | Phone-scheduled notifications (Capacitor Local Notifications); no-op on the website |
 | `heatReminder` | `src/content/heat.ts` | The heat reminder text (EN reviewed, ES draft), versioned |
 | `MakeupTag` | `src/components/ui.tsx` | "Makeup for the week of … · reason" wherever a record is listed |

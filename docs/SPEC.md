@@ -143,6 +143,12 @@ customer #1, not a special case.
   ("extreme caution") Home shows a warning and every talk that day gets a short heat reminder added (not the heat
   talk itself). The record stores the max heat index, level, whether the reminder was read, and the exact reminder
   text; the PDF prints it. Checked once per site per few hours and kept on the phone for the day.
+- **Live jobsite weather (Home):** heat index, rain chance, wind and thunderstorms for the rest of the work day
+  (tomorrow's after 7 PM), plus the National Weather Service's active alerts for that spot (warnings first, red).
+  Refreshes every 15 minutes while the app is open, when it comes back on screen and when signal returns, with a
+  manual refresh; shows the last check and its time when offline. Plain notes for the crew (thunder: get off the roof
+  and out of lifts; windy: secure materials; high wind: check lift/crane/edge limits; rain likely: slick surfaces).
+  Information only: the app never says a site is safe or unsafe to work; the crew lead decides.
 - **Crew-raised issues:** on the review screen before saving, the presenter logs what the crew raised. Each gets an
   owner (presenter by default) and a fix-by date (a week out). They upload with the talk (same offline outbox,
   one transaction). Records → Issues lists open (overdue first) and fixed; tap to reassign, change the date, or mark
