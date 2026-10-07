@@ -186,6 +186,11 @@ customer #1, not a special case.
   (35+ mph) or extreme heat danger (heat index 125°+); amber and steady for thunderstorms, windy (25+ mph) or heat
   danger (103°+). A pill in the sky says why (a warning shows in its own red banner instead). An ordinary hot or
   rainy day gets no border, so the border keeps meaning something.
+- **Signing statement:** before the pad takes ink, each crew member taps "By signing, I confirm I attended this
+  talk." (in the language read, with English under it). The record saves the exact statement and its version
+  (talk_records.signing_statement) and each signer's tap time (talk_attendees.confirmed_at); the PDF prints the
+  statement above the sign-in sheet and "statement tapped" under each signer's time. Unticking it clears that
+  signature. This shows each person's intent to sign on the record itself (see docs/claims-and-evidence.md).
 - **Crew-raised issues:** on the review screen before saving, the presenter logs what the crew raised. Each gets an
   owner (presenter by default) and a fix-by date (a week out). They upload with the talk (same offline outbox,
   one transaction). Records → Issues lists open (overdue first) and fixed; tap to reassign, change the date, or mark

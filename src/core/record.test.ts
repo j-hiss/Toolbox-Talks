@@ -90,3 +90,33 @@ describe("signatures and the crew photo become private files", () => {
     expect(bare.record).toMatchObject({ photo_path: null, photo_taken_at: null, presenter_signature_path: null });
   });
 });
+
+describe("the signing statement", () => {
+  const roster: RosterEntry[] = [
+    { key: "a", personId: "a", name: "Ana", role: "", teamName: "" },
+    { key: "b", personId: "b", name: "Ben", role: "", teamName: "" },
+  ];
+  const sig = (confirmedAt?: string) => ({ image: "data:image/png;base64,AA", signedAt: "2030-01-01T12:01:00Z", confirmedAt });
+
+  it("keeps when each signer tapped it, and nothing for people who didn't sign", () => {
+    const rows = buildAttendees(roster, { a: true, b: false }, { a: sig("2030-01-01T12:00:30Z"), b: sig("2030-01-01T12:00:40Z") });
+    expect(rows[0]).toMatchObject({ status: "signed", confirmed_at: "2030-01-01T12:00:30Z" });
+    expect(rows[1]).toMatchObject({ status: "absent", confirmed_at: null });
+  });
+
+  it("a signature from before the statement existed saves with no tap time", () => {
+    expect(buildAttendees(roster.slice(0, 1), { a: true }, { a: sig() })[0].confirmed_at).toBeNull();
+  });
+
+  it("the exact statement travels with the record and survives the upload split", () => {
+    const statement = { text: "Al firmar, confirmo que asistí a esta charla.", en: "By signing, I confirm I attended this talk.", language: "es", version: 1 };
+    const record = recordPayload({
+      companyId: "co", clientId: "cl", talkId: "heat", language: "es", content: { title: "t", hook: "", sections: [], ask: "" }, week: null,
+      jobsite: null, team: null, presenter: { personId: null, name: "P", role: "", signature: null }, heldAt: "2030-01-01T12:00:00Z", gps: null,
+      signingStatement: statement,
+    });
+    const up = toUpload(record, buildAttendees(roster.slice(0, 1), { a: true }, { a: sig("2030-01-01T12:00:30Z") }));
+    expect(up.record.signing_statement).toEqual(statement);
+    expect(up.attendees[0].confirmed_at).toBe("2030-01-01T12:00:30Z");
+  });
+});

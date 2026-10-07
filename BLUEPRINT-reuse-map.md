@@ -93,6 +93,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `HourStrip` | `src/components/weather/HourStrip.tsx` | **The** hour-by-hour strip: icons, temperature curve, feels-like, rain bars, wind, sunrise/sunset markers, tap for details |
 | `applyReminders` · `setReminders` · `remindersSupported` | `src/lib/reminders.ts` | Phone-scheduled notifications (Capacitor Local Notifications); no-op on the website |
 | `heatReminder` | `src/content/heat.ts` | The heat reminder text (EN reviewed, ES draft), versioned |
+| `signingStatement` · `SIGNING_STATEMENT_VERSION` | `src/content/ui.ts` | **The** statement crew tap before signing, saved with each record (`SigningStatement` in `src/core/record.ts`; `confirmed_at` per attendee; printed by `buildRecordPdf`) |
 | `MakeupTag` | `src/components/ui.tsx` | "Makeup for the week of … · reason" wherever a record is listed |
 | offline outbox · `useOutbox` | `src/lib/outbox.ts` · `src/lib/useOutbox.ts` | **The** offline-first save path: phone first, upload when online, idempotent by `client_id` |
 | talk draft · `newMakeupDraft` | `src/lib/draft.ts` | The talk in progress, saved on the phone after every change. `newMakeupDraft` starts a makeup already pointed at a week and the people who owe it |

@@ -61,6 +61,7 @@ export type AttendanceRow = {
   status: "signed" | "not_signed" | "absent";
   signature: string | null;
   signed_at: string | null;
+  confirmed_at?: string | null; // when they tapped the signing statement
 };
 
 /** A saved talk as listed (no signatures). */
@@ -97,6 +98,8 @@ export type TalkRecord = TalkRecordSummary & {
   longitude: number | null;
   site_notes?: string;
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
+  /** The statement crew members tapped before signing (null on records from before it existed). */
+  signing_statement?: { text: string; en: string; language: string; version: number } | null;
   attendees: AttendanceRow[];
   /** Optional crew photo (image loaded from private storage) and when it was taken. */
   photo?: string | null;

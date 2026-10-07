@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TALKS } from "@/content/talks";
-import { crewText } from "@/content/ui";
+import { crewText, signingStatement } from "@/content/ui";
 import { talkText } from "@/core/talks";
 import { MAKEUP_REASONS, makeupReasonText, makeupWeeks, stillNeeds } from "@/core/makeup";
 import { weekLabel, parseDay } from "@/core/weeks";
@@ -579,6 +579,8 @@ function Sign({
   const sigOf = (t: Turn) => (t.presenter ? draft.presenterSignature : draft.signatures[t.key] ?? null);
   const firstOpen = turns.findIndex((t) => !sigOf(t));
   const [idx, setIdx] = useState(firstOpen === -1 ? turns.length : firstOpen);
+  // When each crew member tapped the signing statement on this phone (kept with their signature once they sign).
+  const [confirmed, setConfirmed] = useState<Record<string, string>>({});
   const signedCount = presentRoster.filter((r) => draft.signatures[r.key]).length;
   const go = (i: number) => { setIdx(i); window.scrollTo?.(0, 0); };
   const nextOpen = (from: number) => {
@@ -614,6 +616,7 @@ function Sign({
         makeup: draft.makeup ? { weekStart: draft.makeup.weekStart, reason: makeupReasonText(draft.makeupPick, draft.makeupNote) } : null,
         siteNotes: draft.siteNotes,
         photo: draft.photo,
+        signingStatement: signingStatement(lang),
         heat: draft.heat ? {
           max_heat_index_f: draft.heat.max_heat_index_f, level: draft.heat.level, reminder_read: draft.heat.reminder_read,
           checked_at: draft.heat.checked_at, source: draft.heat.source,
@@ -701,8 +704,10 @@ function Sign({
   // One person ---------------------------------------------------------------------------------------------------
   const t = turns[idx];
   const sig = sigOf(t);
+  const confirmedAt = t.presenter ? null : sig?.confirmedAt ?? confirmed[t.key] ?? null;
   const setSig = (s: Signature | null) => {
     if (s) buzz();
+    if (s && !t.presenter) s = { ...s, confirmedAt: confirmedAt ?? new Date().toISOString() };
     if (t.presenter) update({ presenterSignature: s });
     else {
       const signatures = { ...draft.signatures };
@@ -726,10 +731,34 @@ function Sign({
       <p className="mt-5 text-sm text-muted">{t.presenter ? "Presenter signs first" : "Pass the phone to"}</p>
       <h1 className="font-display text-5xl font-semibold leading-none text-balance tracking-tight">{t.name}</h1>
       <p className="mt-1 text-muted">{t.sub}</p>
-      <div className="mt-4">
-        <SignaturePad key={t.key} tall label={t.name} value={sig} onChange={setSig} hint={ui.signHere} />
+      {!t.presenter && (
+        // The signing statement: a deliberate tap before the pad takes ink, saved with the record (src/content/ui.ts).
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={!!confirmedAt}
+          className={`mt-4 flex w-full items-start gap-3 rounded-xl border-2 px-3.5 py-3 text-left ${confirmedAt ? "border-ok bg-ok-bg" : "border-brand bg-surface"}`}
+          onClick={() => {
+            if (confirmedAt) {
+              // Taking the statement back takes the signature back too.
+              setConfirmed((c) => { const n = { ...c }; delete n[t.key]; return n; });
+              if (sig) setSig(null);
+            } else setConfirmed((c) => ({ ...c, [t.key]: new Date().toISOString() }));
+          }}
+        >
+          <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] border-2 ${confirmedAt ? "border-ok bg-ok text-white" : "border-brand"}`} aria-hidden>
+            {confirmedAt && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-10" /></svg>}
+          </span>
+          <span>
+            <span className="block text-base font-semibold">{ui.signedBy}</span>
+            {draft.lang !== "en" && <span className="block text-sm text-muted">{crewText("en").signedBy}</span>}
+          </span>
+        </button>
+      )}
+      <div className="mt-3">
+        <SignaturePad key={t.key} tall label={t.name} value={sig} onChange={setSig} hint={ui.signHere}
+          locked={!t.presenter && !confirmedAt ? ui.tapFirst : null} />
       </div>
-      <p className="mt-2 text-sm text-muted">{ui.signedBy}{draft.lang !== "en" ? ` · ${crewText("en").signedBy}` : ""}</p>
 
       <div className="sticky bottom-0 -mx-4 mt-5 flex flex-col gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
         <Button onClick={() => go(nextOpen(idx))} disabled={!sig}>

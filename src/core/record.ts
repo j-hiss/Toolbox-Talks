@@ -4,7 +4,11 @@ import { resolveStatus, type AttendanceStatus } from "./attendance";
 import type { TalkText } from "./talks";
 import type { LanguageId } from "./languages";
 
-export type Signature = { image: string; signedAt: string };
+/** A finger signature, and when the signer tapped the signing statement before signing (see SigningStatement). */
+export type Signature = { image: string; signedAt: string; confirmedAt?: string };
+
+/** The exact statement each crew member tapped before signing, saved with the record so the PDF matches. */
+export type SigningStatement = { text: string; en: string; language: string; version: number };
 
 export type RosterEntry = {
   key: string;            // person id, or "walkin:<n>" for someone added on the spot
@@ -25,6 +29,7 @@ export type AttendeeRow = {
   status: AttendanceStatus;
   signature: string | null;
   signed_at: string | null;
+  confirmed_at: string | null; // when they tapped the signing statement (null on records from before it existed)
 };
 
 /**
@@ -45,6 +50,7 @@ export function buildAttendees(roster: RosterEntry[], present: Record<string, bo
       status,
       signature: status === "signed" ? sig!.image : null,
       signed_at: status === "signed" ? sig!.signedAt : null,
+      confirmed_at: status === "signed" ? sig!.confirmedAt ?? null : null,
     };
   });
 }
@@ -69,6 +75,8 @@ export type RecordInput = {
   siteNotes?: string;
   /** The heat forecast checked for this talk (src/core/heat.ts), and whether the heat reminder was read. */
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
+  /** The statement crew members tapped before signing. */
+  signingStatement?: SigningStatement | null;
 };
 
 /** Something the crew raised at a talk: a hazard or problem to fix, with an owner and a fix-by date. */
@@ -111,6 +119,7 @@ export function recordPayload(r: RecordInput) {
     makeup_reason: r.makeup?.reason.trim() || null,
     site_notes: (r.siteNotes ?? "").trim(),
     heat: r.heat ?? null,
+    signing_statement: r.signingStatement ?? null,
     photo: r.photo?.image ?? null,
     photo_taken_at: r.photo?.takenAt ?? null,
   };

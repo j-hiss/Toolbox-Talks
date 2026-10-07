@@ -178,6 +178,14 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
     const sub = [r.week_number ? `Week ${r.week_number} of 52` : "", r.makeup_for_week ? `Makeup for the week of ${weekLabel(parseDay(r.makeup_for_week), "en-US")}` : "", r.title, held.date, r.team_name]
       .filter(Boolean).join("  ·  ");
     doc.text(doc.splitTextToSize(sub, CW), M, y); doc.setTextColor(0); y += 18;
+    if (!cont && r.signing_statement) {
+      // What each person tapped before signing, exactly as shown on the phone.
+      const st = r.signing_statement;
+      const said = st.language !== "en" && st.text !== st.en ? `"${st.text}" ("${st.en}")` : `"${st.en}"`;
+      doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(70);
+      const lines = doc.splitTextToSize(`Before signing, each person tapped: ${said}`, CW);
+      doc.text(lines, M, y - 4); y += lines.length * 11 + 6; doc.setTextColor(0);
+    }
     doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY);
     doc.text("#", COL.n, y); doc.text("NAME / ROLE", COL.name, y); doc.text("STATUS", COL.status, y); doc.text("SIGNATURE", COL.sig + 3, y);
     doc.text("DATE AND TIME SIGNED", COL.when, y, { align: "right" });
@@ -205,6 +213,10 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
     image(a.signature, COL.sig, y + 2);
     doc.setDrawColor(120); doc.line(COL.sig, y + 40, COL.sig + 150, y + 40);
     stampCell(a.signed_at, y);
+    if (a.confirmed_at) {
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(110);
+      doc.text(`statement tapped ${stampParts(a.confirmed_at).time}`, COL.when, y + 39, { align: "right" }); doc.setTextColor(0);
+    }
     y += rowH;
   });
   if (r.attendees.length === 0) { doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.text("No one on the roster.", M, y + 12); y += 24; }

@@ -50,7 +50,13 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("sign 1:", await p.locator("h1").textContent(), "| next disabled:", await p.locator("button:has-text('Next')").isDisabled());
   await draw(); log("next after draw:", await p.locator("button:has-text('Next')").textContent());
   await p.click("button:has-text('Next')"); await p.waitForTimeout(300);
-  log("sign 2:", await p.locator("h1").textContent()); await draw(); await shot("sign-person");
+  log("sign 2:", await p.locator("h1").textContent());
+  // Crew sign only after tapping the signing statement: the pad takes no ink until then.
+  await draw(); log("next before statement (pad locked):", await p.locator("button:has-text('Next')").isDisabled());
+  await shot("sign-locked");
+  await p.click("[role=checkbox]:has-text('I confirm I attended')"); await p.waitForTimeout(150);
+  await draw(); log("statement checked:", await p.locator("[role=checkbox]").getAttribute("aria-checked"), "| next enabled:", !(await p.locator("button:has-text('Next')").isDisabled()));
+  await shot("sign-person");
   await p.click("button:has-text('Next')"); await p.waitForTimeout(300);
   log("sign 3:", await p.locator("h1").textContent());
   await p.click("button:has-text(\"Isn't here\")"); await p.waitForTimeout(300);
@@ -88,6 +94,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("text=Collect signatures"); await q.waitForTimeout(300);
   for (let i = 0; i < 6; i++) {
     const c = q.locator("canvas"); if (!(await c.count())) break;
+    const box = q.locator("[role=checkbox][aria-checked=false]"); if (await box.count()) await box.click(); // crew tap the statement first
     const bb = await c.boundingBox(); await q.mouse.move(bb.x + 30, bb.y + 80); await q.mouse.down(); await q.mouse.move(bb.x + 150, bb.y + 40, { steps: 5 }); await q.mouse.move(bb.x + 250, bb.y + 90, { steps: 5 }); await q.mouse.up();
     await q.locator("button:has-text('Next'), button:has-text('Done signing')").first().click(); await q.waitForTimeout(250);
   }
@@ -135,6 +142,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.click("text=Collect signatures"); await r.waitForTimeout(300);
   for (let i = 0; i < 6; i++) {
     const c = r.locator("canvas"); if (!(await c.count())) break;
+    const box = r.locator("[role=checkbox][aria-checked=false]"); if (await box.count()) await box.click(); // crew tap the statement first
     const bb = await c.boundingBox(); await r.mouse.move(bb.x + 30, bb.y + 80); await r.mouse.down(); await r.mouse.move(bb.x + 150, bb.y + 40, { steps: 5 }); await r.mouse.move(bb.x + 250, bb.y + 90, { steps: 5 }); await r.mouse.up();
     await r.locator("button:has-text('Next'), button:has-text('Done signing')").first().click(); await r.waitForTimeout(250);
   }

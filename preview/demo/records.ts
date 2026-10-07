@@ -51,7 +51,7 @@ export async function getRecord(companyId: string, id: string): Promise<TalkReco
     content: r.content as TalkRecord["content"],
     scheduled_talk_id: r.scheduled_talk_id, team_lead_name: r.team_lead_name,
     presenter_role: r.presenter_role, presenter_signature: r.presenter_signature, presenter_signed_at: r.presenter_signed_at,
-    latitude: r.latitude, longitude: r.longitude, site_notes: r.site_notes ?? "", heat: r.heat ?? null, attendees: r.attendees,
+    latitude: r.latitude, longitude: r.longitude, site_notes: r.site_notes ?? "", heat: r.heat ?? null, signing_statement: r.signing_statement ?? null, attendees: r.attendees,
     photo: r.photo ?? null, photo_taken_at: r.photo_taken_at ?? null,
   };
 }

@@ -255,6 +255,25 @@ async function main() {
     await as(userA, "select public.save_talk($1::jsonb, $2::jsonb, $3::jsonb) as id", talk(coA, tClient, iss)); // retry
     const saved = (await as(userA, "select site_notes, heat->>'level' lvl from public.talk_records where id = $1", [tId])).rows[0];
     check("Site notes and heat save with the record", saved.site_notes === "Tie off at the ridge" && saved.lvl === "danger");
+    // The signing statement: saved with the record, each signer's tap time with their row; absent people get none.
+    const stClient = randomUUID(), tapped = "2030-01-01T12:00:00.000Z";
+    const stId = (await as(userA, "select public.save_talk($1::jsonb, $2::jsonb, $3::jsonb) as id", [
+      JSON.stringify({ company_id: coA, client_id: stClient, talk_id: "heat", language: "es", content: { title: "Calor" }, presenter_name: "Presenter",
+        held_at: new Date().toISOString(), signing_statement: { text: "Al firmar, confirmo que asistí a esta charla.", en: "By signing, I confirm I attended this talk.", language: "es", version: 1 } }),
+      JSON.stringify([
+        { person_id: personA, name: "A worker", status: "absent", confirmed_at: tapped },
+        { person_id: null, name: "Walk-in", status: "not_signed", confirmed_at: tapped },
+      ]),
+      "[]",
+    ])).rows[0].id;
+    const st = (await as(userA, "select signing_statement from public.talk_records where id = $1", [stId])).rows[0]?.signing_statement;
+    check("The signing statement saves with the record, in the language read and in English", st?.version === 1 && st?.en.startsWith("By signing") && st?.text.startsWith("Al firmar"));
+    check("No statement time is kept for anyone who didn't sign",
+      (await as(userA, "select confirmed_at from public.talk_attendees where record_id = $1", [stId])).rows.every((r) => r.confirmed_at === null));
+    check("A malformed signing statement is refused", await fails(() => as(userA, "select public.save_talk($1::jsonb, '[]'::jsonb, '[]'::jsonb)", [
+      JSON.stringify({ company_id: coA, client_id: randomUUID(), talk_id: "heat", language: "en", content: { title: "Heat" }, presenter_name: "P", held_at: new Date().toISOString(), signing_statement: { text: 5 } })])));
+    check("B can't read A's signing statement", (await as(userB, "select signing_statement from public.talk_records where id = $1", [stId])).rows.length === 0);
+    check("A saved statement can't be changed", await fails(() => as(userA, "update public.talk_records set signing_statement = null where id = $1", [stId])));
     const issuesA = await as(userA, "select id, record_id, status from public.talk_issues");
     check("Issues save with their talk, once even when retried", issuesA.rows.length === 1 && issuesA.rows[0].record_id === tId && issuesA.rows[0].status === "open");
     const issueId = issuesA.rows[0].id;

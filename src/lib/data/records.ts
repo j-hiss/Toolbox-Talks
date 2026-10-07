@@ -74,7 +74,7 @@ export async function getRecord(companyId: string, id: string): Promise<TalkReco
   const row = check(
     await supabase()
       .from("talk_records")
-      .select("*, talk_attendees(person_id, name, role, team_name, company_name, status, signature, signature_path, signed_at, position)")
+      .select("*, talk_attendees(person_id, name, role, team_name, company_name, status, signature, signature_path, signed_at, confirmed_at, position)")
       .eq("company_id", companyId)
       .eq("id", id)
       .order("position", { referencedTable: "talk_attendees" })

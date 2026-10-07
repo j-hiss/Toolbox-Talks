@@ -6,8 +6,10 @@ import type { Signature } from "@/core/record";
 
 const EXPORT_WIDTH = 480;
 
-export function SignaturePad({ label, value, onChange, tall = false, hint = "Sign above" }: {
+export function SignaturePad({ label, value, onChange, tall = false, hint = "Sign above", locked = null }: {
   label: string; value: Signature | null; onChange: (s: Signature | null) => void; tall?: boolean; hint?: string;
+  /** When set, the pad takes no ink and shows this message over it (e.g. "Tap the box above first"). */
+  locked?: string | null;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
@@ -61,6 +63,7 @@ export function SignaturePad({ label, value, onChange, tall = false, hint = "Sig
 
   return (
     <div>
+      <div className="relative">
       <canvas
         ref={canvas}
         aria-label={`Signature pad for ${label}`}
@@ -81,7 +84,11 @@ export function SignaturePad({ label, value, onChange, tall = false, hint = "Sig
         }}
         onPointerUp={finish}
         onPointerCancel={finish}
+        style={locked ? { pointerEvents: "none", opacity: 0.35 } : undefined}
+        aria-disabled={!!locked}
       />
+      {locked && <p className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-base font-semibold text-[#3D4A5A]">{locked}</p>}
+      </div>
       <div className="mt-1 flex items-center justify-between text-sm">
         <span className={value ? "font-semibold text-ok-text" : "text-muted"}>
           {value ? `Signed ${new Date(value.signedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : hint}
