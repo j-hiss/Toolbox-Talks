@@ -9,7 +9,7 @@ export type HeatCheck = HeatDay & { checkedAt: string; source: "NWS"; place: str
 export type ConditionsCheck = Conditions & { checkedAt: string; source: "NWS"; place: string; alertsUnavailable: boolean; v: number };
 
 /** Bump when the saved shape changes, so a phone never shows a check saved by an older version of the app. */
-export const CONDITIONS_VERSION = 2;
+export const CONDITIONS_VERSION = 3;
 
 /** How long a live conditions check is reused before asking the weather service again. */
 export const CONDITIONS_FRESH_MS = 15 * 60_000;

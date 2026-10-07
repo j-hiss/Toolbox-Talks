@@ -4,13 +4,17 @@
 // like a weather app. Tile math in src/core/maptiles.ts; where the pictures come from in src/lib/radar.ts.
 // Plays on its own unless the phone asks for reduced motion; pause, step back and zoom are a tap away.
 import { useEffect, useRef, useState } from "react";
-import { milesAcross, tilesFor } from "@/core/maptiles";
-import { BASEMAP, RADAR, RADAR_FRAMES } from "@/lib/radar";
+import { milesAcross, tileXY, tilesFor } from "@/core/maptiles";
+import type { Ring } from "@/core/conditions";
+import { BASEMAP, RADAR, RADAR_FRAMES, radarLatest } from "@/lib/radar";
 
-const HEIGHT = 230;
 const LAST = RADAR_FRAMES.length - 1;
 
-export function RadarMap({ latitude, longitude }: { latitude: number; longitude: number }) {
+/** A weather service warning area to outline on the map. */
+export type MapArea = { event: string; rings: Ring[]; loud: boolean };
+
+export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { latitude: number; longitude: number; height?: number; areas?: MapArea[] }) {
+  const HEIGHT = height;
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(358);
   const [z, setZ] = useState(8);
@@ -18,6 +22,8 @@ export function RadarMap({ latitude, longitude }: { latitude: number; longitude:
   const [playing, setPlaying] = useState(() => typeof window === "undefined" || !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   const [baseFailed, setBaseFailed] = useState(0);
   const [radarFailed, setRadarFailed] = useState(0);
+  const [scanAt, setScanAt] = useState<Date | null>(null);
+  useEffect(() => { let live = true; radarLatest().then((d) => live && setScanAt(d)); return () => { live = false; }; }, []);
 
   useEffect(() => {
     const el = box.current;
@@ -37,7 +43,12 @@ export function RadarMap({ latitude, longitude }: { latitude: number; longitude:
   const tiles = tilesFor(latitude, longitude, z, width, HEIGHT);
   const offline = baseFailed >= tiles.length && tiles.length > 0;
   const minsAgo = RADAR_FRAMES[frame];
-  const label = minsAgo === 0 ? "Latest" : `${minsAgo} min earlier`;
+  const label = scanAt
+    ? new Date(scanAt.getTime() - minsAgo * 60_000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : minsAgo === 0 ? "Latest" : `${minsAgo} min earlier`;
+  // Warning areas, placed with the same tile math as the map (pixels from the center).
+  const c = tileXY(latitude, longitude, z);
+  const toPx = ([lat, lon]: [number, number]) => { const p = tileXY(lat, lon, z); return `${(width / 2 + (p.x - c.x) * 256).toFixed(1)},${(HEIGHT / 2 + (p.y - c.y) * 256).toFixed(1)}`; };
   const miles = Math.round(milesAcross(latitude, z, width));
 
   return (
@@ -61,6 +72,16 @@ export function RadarMap({ latitude, longitude }: { latitude: number; longitude:
           </div>
         ))}
 
+        {/* Weather service warning areas */}
+        {areas.length > 0 && (
+          <svg className="pointer-events-none absolute inset-0" width={width} height={HEIGHT} aria-hidden>
+            {areas.flatMap((a, ai) => a.rings.map((r, ri) => (
+              <polygon key={`${ai}-${ri}`} points={r.map(toPx).join(" ")} fill={a.loud ? "rgba(214,0,0,0.16)" : "rgba(245,183,0,0.16)"}
+                stroke={a.loud ? "#E00000" : "#E0A800"} strokeWidth="2.5" strokeLinejoin="round" strokeDasharray={a.loud ? undefined : "6 4"} className={a.loud ? "wx-area" : undefined} />
+            )))}
+          </svg>
+        )}
+
         {/* The jobsite */}
         <span className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: "50%", top: "50%" }} aria-hidden>
           <span className="wx-ping absolute inset-0 rounded-full bg-brand/50" />
@@ -77,6 +98,12 @@ export function RadarMap({ latitude, longitude }: { latitude: number; longitude:
         <div className="absolute top-2 left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] text-[#14202E] shadow">
           <span className="block h-1.5 w-24 rounded-full" style={{ background: "linear-gradient(90deg,#04E9E7,#019FF4,#02FD02,#008E00,#FDF802,#E5BC00,#FD9500,#FD0000,#D40000,#F800FD)" }} />
           <span className="mt-0.5 flex justify-between"><span>Light</span><span>Heavy</span></span>
+          {areas.length > 0 && (
+            <span className="mt-1 flex items-center gap-1.5 border-t border-black/10 pt-1">
+              <span className="inline-block h-2.5 w-3.5 rounded-sm border-2 border-[#E00000] bg-[#E00000]/15" />
+              {areas.length === 1 ? areas[0].event : "Warning areas"}
+            </span>
+          )}
         </div>
 
         {/* Play, timeline */}
@@ -93,7 +120,7 @@ export function RadarMap({ latitude, longitude }: { latitude: number; longitude:
               </button>
             ))}
           </div>
-          <span className="w-[86px] shrink-0 text-right text-xs tabular-nums">{label}</span>
+          <span className="w-[86px] shrink-0 text-right text-xs tabular-nums">{label}{scanAt && minsAgo === 0 ? <span className="block text-[10px] opacity-75">latest scan</span> : null}</span>
         </div>
 
         {offline && (

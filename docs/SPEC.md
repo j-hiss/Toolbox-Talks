@@ -154,13 +154,26 @@ customer #1, not a special case.
   rain-chance bar, wind arrow and speed). All drawn in the app (no extra downloads); animation stops for people who
   turn on reduced motion. The sky is layered: soft shaded clouds that keep crossing (faster in wind), rain at two
   depths that leans with the wind, branching lightning that lights the sky on an irregular rhythm, gust lines and
-  blowing debris on windy days, heat shimmer on dangerous-heat days.
+  blowing debris on windy days, heat shimmer on dangerous-heat days. The sky follows the jobsite's own sunrise and
+  sunset (worked out on the phone, no lookup): a low orange sun and warm glow at dawn and dusk, stars and moon at night.
+- **Day in one sentence:** under the sky, a plain-English line built from the hourly forecast, e.g. "Thunderstorms
+  likely from 2 PM, clearing by 6 PM. Heat index up to 109° around 1 PM. Wind up to 25 mph around 2 PM." or "Dry
+  through the work day." Times are the jobsite's local time.
+- **Hour by hour:** sky icon, rain chance, a temperature curve with each hour's temperature, "feels" when the heat
+  index runs 3°+ higher, a rain-chance bar and a wind arrow. Sunrise and sunset sit where they fall. Tap an hour for
+  its details (feels like and heat level, humidity, rain chance, wind).
+- **Full forecast (tap the sky or "Full forecast"):** a full-screen view with a taller sky, warnings with the weather
+  service's own instructions, the day sentence, the hour strip, a larger radar, the work-day numbers, sunrise, sunset
+  and daylight, and the crew notes. Back or Escape closes it.
 - **Radar map (tap "Show radar"):** a street map centered on the jobsite with the last 50 minutes of rain radar
   playing on top (a frame every 5 minutes, pausing on the latest), pause and tap-a-time, zoom in and out, a
   light-to-heavy rain scale and the jobsite pin. Opens on a tap because it loads map pictures; once opened it stays
   open on that phone. Street map: OpenStreetMap (free with attribution, fine for testing; switch to a paid map
   provider before selling, one line in `src/lib/radar.ts`). Radar: NWS NEXRAD mosaic tiles from the Iowa
-  Environmental Mesonet. With no signal it says the map needs signal.
+  Environmental Mesonet. With no signal it says the map needs signal. Active warnings and watches are drawn on the
+  map as their outlines from the weather service (red and pulsing for a warning that triggers the red border, amber
+  dashed otherwise) and named in the legend; the radar button shows a "Warning area" chip when one is drawn. Frame
+  labels show the scan's clock time when the radar source reports it, otherwise "N min earlier".
 - **Attention border, only on unusual days:** red and gently pulsing for a weather service warning, high wind
   (35+ mph) or extreme heat danger (heat index 125°+); amber and steady for thunderstorms, windy (25+ mph) or heat
   danger (103°+). A pill in the sky says why (a warning shows in its own red banner instead). An ordinary hot or

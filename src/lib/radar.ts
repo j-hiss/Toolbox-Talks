@@ -18,3 +18,38 @@ export const RADAR = {
   minZoom: 6,
   maxZoom: 10,
 };
+
+/**
+ * When the latest radar scan was taken, so the loop can show clock times. The Iowa Environmental Mesonet lists it in
+ * a small JSON file; if that can't be read, the loop falls back to "5 min earlier" style labels. Kept for 4 minutes.
+ */
+let latest: { at: number; value: Date | null } | null = null;
+export async function radarLatest(): Promise<Date | null> {
+  if (latest && Date.now() - latest.at < 240_000) return latest.value;
+  let value: Date | null = null;
+  try {
+    const r = await fetch("https://mesonet.agron.iastate.edu/json/tms.json");
+    if (r.ok) value = findValid(await r.json());
+  } catch { /* fall back to relative labels */ }
+  latest = { at: Date.now(), value };
+  return value;
+}
+
+/** Looks through the listing for the base-reflectivity mosaic's "utc_valid" time. Tolerant of the listing's shape. */
+export function findValid(json: unknown): Date | null {
+  const stack: unknown[] = [json];
+  while (stack.length) {
+    const v = stack.pop();
+    if (Array.isArray(v)) { stack.push(...v); continue; }
+    if (v && typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      const name = `${o.id ?? ""} ${o.layername ?? ""} ${o.name ?? ""}`;
+      if (/n0q/i.test(name) && typeof o.utc_valid === "string") {
+        const d = new Date(o.utc_valid);
+        if (!Number.isNaN(d.getTime())) return d;
+      }
+      stack.push(...Object.values(o));
+    }
+  }
+  return null;
+}

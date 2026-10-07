@@ -1,7 +1,7 @@
 // Jobsite weather for the rest of the work day: rain chance, wind, thunderstorms and the weather service's own
 // active alerts, alongside heat (src/core/heat.ts). Pure module: reads api.weather.gov responses, judges them.
 // The app shows this as information for the crew; it never says a site is safe or unsafe to work.
-import { heatForDay, type HeatDay } from "./heat";
+import { heatForDay, heatIndexF, type HeatDay } from "./heat";
 
 export const WORK_START_HOUR = 6;
 export const WORK_END_HOUR = 19;
@@ -47,9 +47,34 @@ export function windToward(dir: string): number | null {
   return i < 0 ? null : (i * 22.5 + 180) % 360;
 }
 
-export type HourPoint = { time: string; tempF: number | null; rainPct: number; windMph: number | null; windDirection: string; sky: SkyKind; daytime: boolean };
+export type HourPoint = {
+  time: string; tempF: number | null; rainPct: number; windMph: number | null; windDirection: string; sky: SkyKind; daytime: boolean;
+  /** The weather service's words for the hour ("Chance Showers And Thunderstorms"). */
+  label: string;
+  humidity: number | null;
+  /** Heat index when it's warm enough to matter (80°F and up), else the temperature. */
+  feelsF: number | null;
+};
 
-export type Alert = { event: string; severity: string; headline: string; ends: string | null; loud: boolean };
+/** A ring of [latitude, longitude] points (the outline of a warning area). */
+export type Ring = [number, number][];
+
+export type Alert = {
+  event: string; severity: string; headline: string; ends: string | null; loud: boolean;
+  /** What the weather service says to do, when it says ("Move to an interior room..."). */
+  instruction: string;
+  /** The warning's area, when the weather service drew one (storm-based warnings); empty for county-wide alerts. */
+  areas: Ring[];
+};
+
+/** GeoJSON Polygon/MultiPolygon (lon, lat) → outer rings as [lat, lon]. Anything else → none. */
+export function alertAreas(geometry: unknown): Ring[] {
+  const g = geometry as { type?: string; coordinates?: unknown } | null;
+  const ring = (r: unknown): Ring => (Array.isArray(r) ? r.filter((p) => Array.isArray(p) && p.length >= 2).map((p) => [Number(p[1]), Number(p[0])] as [number, number]) : []);
+  if (g?.type === "Polygon" && Array.isArray(g.coordinates)) return [ring(g.coordinates[0])].filter((r) => r.length > 2);
+  if (g?.type === "MultiPolygon" && Array.isArray(g.coordinates)) return (g.coordinates as unknown[]).map((poly) => ring(Array.isArray(poly) ? poly[0] : null)).filter((r) => r.length > 2);
+  return [];
+}
 
 const SEVERITY_ORDER = ["Extreme", "Severe", "Moderate", "Minor", "Unknown"];
 
@@ -60,12 +85,17 @@ export function summarizeAlerts(geojson: unknown, now: Date = new Date()): Alert
   const out: Alert[] = [];
   for (const f of features) {
     const p = (f as { properties?: Record<string, unknown> })?.properties;
+    const geometry = (f as { geometry?: unknown })?.geometry;
     if (!p || typeof p.event !== "string") continue;
     const ends = (typeof p.ends === "string" && p.ends) || (typeof p.expires === "string" && p.expires) || null;
     if (ends && new Date(ends) < now) continue;
     if (p.status && p.status !== "Actual") continue;
     const severity = typeof p.severity === "string" ? p.severity : "Unknown";
-    out.push({ event: p.event, severity, headline: typeof p.headline === "string" ? p.headline : p.event, ends, loud: severity === "Extreme" || severity === "Severe" || /warning/i.test(p.event) });
+    const instruction = typeof p.instruction === "string" ? p.instruction.replace(/\s+/g, " ").trim().slice(0, 400) : "";
+    out.push({
+      event: p.event, severity, headline: typeof p.headline === "string" ? p.headline : p.event, ends,
+      loud: severity === "Extreme" || severity === "Severe" || /warning/i.test(p.event), instruction, areas: alertAreas(geometry),
+    });
   }
   const rank = (a: Alert) => (SEVERITY_ORDER.indexOf(a.severity) + 5) % 5 + (a.loud ? 0 : 5);
   return out.sort((a, b) => rank(a) - rank(b)).filter((a, i, all) => all.findIndex((x) => x.event === a.event) === i);
@@ -88,7 +118,7 @@ export type Conditions = {
   headline: { sky: SkyKind; daytime: boolean; tempF: number | null; label: string; highF: number | null; lowF: number | null };
 };
 
-type Period = { startTime?: string; isDaytime?: boolean; temperature?: number | { value: number | null }; temperatureUnit?: string; shortForecast?: string;
+type Period = { startTime?: string; isDaytime?: boolean; relativeHumidity?: { value: number | null } | number | null; temperature?: number | { value: number | null }; temperatureUnit?: string; shortForecast?: string;
   windSpeed?: string; windDirection?: string; probabilityOfPrecipitation?: { value: number | null } | number | null };
 
 const num = (q: Period["probabilityOfPrecipitation"]) => (q == null ? null : typeof q === "number" ? q : q.value);
@@ -132,9 +162,11 @@ export function conditionsFor(forecast: unknown, alerts: unknown, now: Date = ne
   }
   const t = tempF(current);
   const hours: HourPoint[] = work.slice(0, 14).map((p) => {
-    const tf = tempF(p);
+    const tf = tempF(p), rh = num(p.relativeHumidity);
+    const feels = tf == null ? null : rh != null && tf >= 80 ? Math.round(heatIndexF(tf, rh)) : Math.round(tf);
     return { time: p.startTime!, tempF: tf == null ? null : Math.round(tf), rainPct: num(p.probabilityOfPrecipitation) ?? 0, windMph: parseWindMph(p.windSpeed),
-      windDirection: p.windDirection ?? "", sky: skyKind(p.shortForecast), daytime: p.isDaytime ?? (() => { const h = Number(p.startTime!.slice(11, 13)); return h >= 7 && h < 19; })() };
+      windDirection: p.windDirection ?? "", sky: skyKind(p.shortForecast), daytime: p.isDaytime ?? (() => { const h = Number(p.startTime!.slice(11, 13)); return h >= 7 && h < 19; })(),
+      label: p.shortForecast ?? "", humidity: rh == null ? null : Math.round(rh), feelsF: feels };
   });
   const temps = hours.map((h) => h.tempF).filter((x): x is number => x != null);
   let roughest: Period | null = null;
@@ -192,5 +224,39 @@ export function attention(c: Conditions, now: Date = new Date()): Attention | nu
   if (c.wind?.level === "windy") return { level: "caution", reason: `Windy, up to ${c.wind.maxMph} mph` };
   if (c.heat?.level === "danger") return { level: "caution", reason: `Heat danger, heat index ${c.heat.maxHeatIndexF}°` };
   return null;
+}
+
+/** "2026-10-06T14:00:00-04:00" → "2 PM", in the jobsite's own time (from the forecast's own offset). */
+export function siteHour(iso: string): string {
+  const h = Number(iso.slice(11, 13));
+  return `${h % 12 || 12} ${h < 12 ? "AM" : "PM"}`;
+}
+
+/**
+ * The work day in a sentence or two, the way a foreman would say it: "Thunderstorms likely from 2 PM, wettest around
+ * 3 PM, clearing by 6 PM. Heat index up to 104° around 1 PM." Information only.
+ */
+export function daySummary(c: Conditions): string {
+  const hs = c.hours;
+  if (!hs.length) return "";
+  const parts: string[] = [];
+  const wet = hs.map((h) => h.rainPct >= 50);
+  const first = wet.indexOf(true), last = wet.lastIndexOf(true);
+  if (first < 0) {
+    const peak = hs.reduce((a, b) => (b.rainPct > a.rainPct ? b : a));
+    parts.push(peak.rainPct >= 30 ? `Mostly dry, with a ${peak.rainPct}% chance of a shower around ${siteHour(peak.time)}.` : `Dry through the work day.`);
+  } else {
+    const window = hs.slice(first, last + 1);
+    const storm = window.some((h) => h.sky === "thunder");
+    const peak = window.reduce((a, b) => (b.rainPct > a.rainPct ? b : a));
+    const start = first === 0 ? (c.day === "today" ? "now" : "at the start of the day") : `from ${siteHour(hs[first].time)}`;
+    const bits = [`${storm ? "Thunderstorms" : "Rain"} likely ${start}`];
+    if (window.length > 2 && peak.time !== hs[first].time) bits.push(`wettest around ${siteHour(peak.time)}`);
+    bits.push(last === hs.length - 1 ? "through the end of the work day" : `clearing by ${siteHour(hs[last + 1].time)}`);
+    parts.push(bits.join(", ") + ".");
+  }
+  if (c.heat && c.heat.level !== "none" && c.heat.level !== "caution") parts.push(`Heat index up to ${c.heat.maxHeatIndexF}° around ${siteHour(c.heat.atHour)}.`);
+  if (c.wind && (c.wind.level === "windy" || c.wind.level === "high")) parts.push(`Wind up to ${c.wind.maxMph} mph around ${siteHour(c.wind.atHour)}.`);
+  return parts.join(" ");
 }
 

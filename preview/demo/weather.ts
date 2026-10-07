@@ -9,7 +9,7 @@ import { tick } from "./store";
 export type HeatCheck = Real.HeatCheck;
 export type ConditionsCheck = Real.ConditionsCheck;
 export const CONDITIONS_FRESH_MS = 15 * 60_000;
-export const CONDITIONS_VERSION = 2;
+export const CONDITIONS_VERSION = 3;
 
 const example = (): HeatCheck => {
   const hi = Math.round(heatIndexF(93, 62));

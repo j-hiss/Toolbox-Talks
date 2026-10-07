@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { attention, conditionNotes, conditionsFor, parseWindMph, rainLevel, skyKind, summarizeAlerts, windLevel, windToward, worseSky } from "./conditions";
+import { alertAreas, attention, conditionNotes, daySummary, siteHour, conditionsFor, parseWindMph, rainLevel, skyKind, summarizeAlerts, windLevel, windToward, worseSky } from "./conditions";
 
 // An hourly forecast in the site's own time (-04:00), like api.weather.gov returns.
 const hour = (h: number, o: { t?: number; rh?: number; pop?: number; wind?: string; dir?: string; sf?: string; day?: string } = {}) => ({
@@ -103,8 +103,34 @@ describe("jobsite conditions", () => {
     expect(attention({ ...base, wind: { maxMph: 28, direction: "E", atHour: "", level: "windy" } })).toMatchObject({ level: "caution", reason: "Windy, up to 28 mph" });
     expect(attention({ ...base, wind: { maxMph: 40, direction: "E", atHour: "", level: "high" } })?.level).toBe("alert");
     expect(attention({ ...base, thunderAt: "2026-10-06T09:00:00-04:00" }, at("2026-10-06T09:10:00-04:00"))?.reason).toBe("Thunderstorms now or within the hour");
-    const warn = { event: "Tornado Warning", severity: "Extreme", headline: "", ends: null, loud: true };
+    const warn = { event: "Tornado Warning", severity: "Extreme", headline: "", ends: null, loud: true, instruction: "", areas: [] };
     expect(attention({ ...base, thunderAt: "2026-10-06T09:00:00-04:00", alerts: [warn] })).toEqual({ level: "alert", reason: "Tornado Warning" });
+  });
+
+  it("says the day in plain words", () => {
+    const today = conditionsFor(day, null, at("2026-10-06T10:20:00-04:00"))!;
+    expect(daySummary(today)).toMatch(/^Thunderstorms likely from 4 PM, through the end of the work day\. Heat index up to \d+° around 1 PM\. Wind up to 25 mph around 1 PM\.$/);
+    const dry = conditionsFor(fc([hour(9, { pop: 10 }), hour(10, { pop: 35 }), hour(11, { pop: 5 })]), null, at("2026-10-06T09:10:00-04:00"))!;
+    expect(daySummary(dry)).toBe("Mostly dry, with a 35% chance of a shower around 10 AM.");
+    const shower = conditionsFor(fc([9, 10, 11, 12, 13, 14].map((h) => hour(h, { pop: h >= 10 && h <= 12 ? [60, 80, 55][h - 10] : 10, sf: h >= 10 && h <= 12 ? "Rain Showers" : "Sunny" }))), null, at("2026-10-06T09:10:00-04:00"))!;
+    expect(daySummary(shower)).toBe("Rain likely from 10 AM, wettest around 11 AM, clearing by 1 PM.");
+    expect(siteHour("2026-10-06T00:00:00-04:00")).toBe("12 AM");
+    expect(siteHour("2026-10-06T12:00:00-04:00")).toBe("12 PM");
+  });
+
+  it("gives each hour its words, humidity and feels-like", () => {
+    const c = conditionsFor(day, null, at("2026-10-06T10:20:00-04:00"))!;
+    expect(c.hours[1]).toMatchObject({ label: "Chance Showers And Thunderstorms", humidity: 65 });
+    expect(c.hours[1].feelsF!).toBeGreaterThan(c.hours[1].tempF!);
+  });
+
+  it("reads warning areas and what to do", () => {
+    expect(alertAreas({ type: "Polygon", coordinates: [[[-81.9, 26.6], [-81.8, 26.6], [-81.8, 26.7], [-81.9, 26.6]]] })).toEqual([[[26.6, -81.9], [26.6, -81.8], [26.7, -81.8], [26.6, -81.9]]]);
+    expect(alertAreas({ type: "MultiPolygon", coordinates: [[[[0, 1], [1, 1], [1, 2]]], [[[5, 6], [6, 6], [6, 7]]]] })).toHaveLength(2);
+    expect(alertAreas(null)).toEqual([]);
+    const a = summarizeAlerts({ features: [{ geometry: { type: "Polygon", coordinates: [[[-81.9, 26.6], [-81.8, 26.6], [-81.8, 26.7]]] },
+      properties: { event: "Tornado Warning", severity: "Extreme", status: "Actual", instruction: "  Take cover now.\n Move to an interior room.  " } }] });
+    expect(a[0]).toMatchObject({ instruction: "Take cover now. Move to an interior room.", areas: [[[26.6, -81.9], [26.6, -81.8], [26.7, -81.8]]] });
   });
 
   it("no forecast hours means nothing to show", () => {
