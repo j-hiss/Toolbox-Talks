@@ -6,7 +6,10 @@ import { conditionsFor, type Conditions } from "@/core/conditions";
 import type { Point } from "@/core/geo";
 
 export type HeatCheck = HeatDay & { checkedAt: string; source: "NWS"; place: string };
-export type ConditionsCheck = Conditions & { checkedAt: string; source: "NWS"; place: string; alertsUnavailable: boolean };
+export type ConditionsCheck = Conditions & { checkedAt: string; source: "NWS"; place: string; alertsUnavailable: boolean; v: number };
+
+/** Bump when the saved shape changes, so a phone never shows a check saved by an older version of the app. */
+export const CONDITIONS_VERSION = 2;
 
 /** How long a live conditions check is reused before asking the weather service again. */
 export const CONDITIONS_FRESH_MS = 15 * 60_000;
@@ -68,7 +71,8 @@ const condKey = (p: Point) => `tt-wx-${short(p)}`;
 
 /** The last conditions check for this place, however old (shown with its time when there's no signal). */
 export function cachedConditions(p: Point): ConditionsCheck | null {
-  return readJson<ConditionsCheck>(condKey(p));
+  const hit = readJson<ConditionsCheck>(condKey(p));
+  return hit?.v === CONDITIONS_VERSION ? hit : null;
 }
 
 /**
@@ -85,7 +89,7 @@ export async function checkConditions(p: Point, force = false): Promise<Conditio
   ]);
   const c = conditionsFor(forecast, alerts);
   if (!c) return null;
-  const out: ConditionsCheck = { ...c, checkedAt: new Date().toISOString(), source: "NWS", place: info.place, alertsUnavailable: alerts === null };
+  const out: ConditionsCheck = { ...c, checkedAt: new Date().toISOString(), source: "NWS", place: info.place, alertsUnavailable: alerts === null, v: CONDITIONS_VERSION };
   writeJson(condKey(p), out);
   return out;
 }

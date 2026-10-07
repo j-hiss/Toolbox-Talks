@@ -9,6 +9,7 @@ import { tick } from "./store";
 export type HeatCheck = Real.HeatCheck;
 export type ConditionsCheck = Real.ConditionsCheck;
 export const CONDITIONS_FRESH_MS = 15 * 60_000;
+export const CONDITIONS_VERSION = 2;
 
 const example = (): HeatCheck => {
   const hi = Math.round(heatIndexF(93, 62));
@@ -35,7 +36,7 @@ const exampleConditions = (): ConditionsCheck => {
     });
   }
   const c = conditionsFor({ properties: { periods } }, { features: [] })!;
-  return { ...c, checkedAt: new Date().toISOString(), source: "NWS", place: "Example forecast (preview)", alertsUnavailable: false };
+  return { ...c, checkedAt: new Date().toISOString(), source: "NWS", place: "Example forecast (preview)", alertsUnavailable: false, v: CONDITIONS_VERSION };
 };
 
 export function cachedHeat(p: Point): HeatCheck | null { void p; return example(); }
@@ -43,5 +44,5 @@ export async function checkHeat(p: Point): Promise<HeatCheck | null> { void p; a
 export function cachedConditions(p: Point): ConditionsCheck | null { void p; return null; }
 export async function checkConditions(p: Point, force = false): Promise<ConditionsCheck | null> { void p; void force; await tick(); return exampleConditions(); }
 
-const _sameShape = { cachedHeat, checkHeat, cachedConditions, checkConditions, CONDITIONS_FRESH_MS } satisfies Omit<typeof Real, never>;
+const _sameShape = { cachedHeat, checkHeat, cachedConditions, checkConditions, CONDITIONS_FRESH_MS, CONDITIONS_VERSION } satisfies Omit<typeof Real, never>;
 void _sameShape;

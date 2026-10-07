@@ -79,9 +79,8 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
   if (c === undefined) return msg ? <p className="mt-3 text-sm text-muted">Jobsite weather unavailable: {msg}</p> : <div className="skeleton mt-3 h-56 rounded-2xl" aria-label="Checking the weather" />;
   if (c === null) return null;
 
-  // A check saved by the earlier version has no hours or headline; fall back to what it has.
-  const hours = c.hours ?? [];
-  const head = c.headline ?? { sky: c.thunderAt ? "thunder" : "clear", daytime: true, tempF: c.now?.tempF ?? null, label: c.now?.shortForecast ?? "", highF: null, lowF: null };
+  const hours = c.hours;
+  const head = c.headline;
   const heatLoud = !!c.heat && alertWorthy(c.heat.level);
   const notes = conditionNotes(c);
   const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
