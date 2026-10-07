@@ -21,6 +21,24 @@ by an attorney or a certified safety professional.
 | Can support safety-program rate consideration in Florida | Fla. Stat. 627.0915(1) ("specific identifiable consideration in the setting of rates"); 440.1025(1) lists safety training and recordkeeping. No amount in statute |
 | Self-insurer credits (not insured premiums) | Fla. Admin. Code 69L-5.221 (safety, up to 2%), 69L-5.220 (drug-free, up to 5%) |
 
+## Federal and state rules (checked 2026-10-07)
+- E-SIGN exceptions (15 U.S.C. 7003): wills, family law, most UCC, court papers, certain consumer notices,
+  hazmat shipping papers. Training/safety-meeting records are not excluded. Caution: E-SIGN/UETA cover records of
+  a "transaction"; an attendance sign-in is untested, so OSHA's letters are the more direct support.
+- UETA in 49 states + DC + USVI; New York uses ESRA ("same force and effect").
+- OSHA training-record content: 1926.503(b)(1); 1910.178(l)(6) (adds evaluation date, evaluator); 1910.147(c)(7)(iv);
+  1910.1030(h)(2) (adds trainer qualifications, attendee job titles; keep 3 years); 1926.1060 none. No standard asks
+  for the trainee's signature.
+- State plans with private-sector coverage: AK AZ CA HI IN IA KY MD MI MN NV NM NC OR PR SC TN UT VT VA WA WY.
+  - WA WAC 296-155-110: meetings at job start + weekly; attendance, subjects, minutes at the site; must review
+    walk-around inspections, citations, accident investigations; keep 1 year. GAP: the three reviews and on-site
+    minutes are not prompted.
+  - OR OAR 437-001-0765: construction monthly + before jobs over a week; hazards, date, attendees; available to all
+    employees; keep 3 years. GAP: crew members can't view records.
+  - CA 8 CCR 1509: tailgate meetings every 10 working days; 3203(b)(2) training record (name, dates, type,
+    provider), keep 1 year.
+  - Other 18 state plans: not yet checked.
+
 ## How the app backs the signature claims
 - Intent to sign: crew tap the signing statement before the pad takes ink (src/content/ui.ts `signingStatement`);
   the record keeps the statement + version (talk_records.signing_statement) and each tap time
