@@ -110,31 +110,48 @@ body {
 .toast-in { animation: toast-in 180ms ease-out; }
 .sheet-in { animation: slide-up 200ms ease-out; }
 .skeleton { background: var(--line); animation: pulse-bg 1.2s ease-in-out infinite; }
-/* Jobsite weather sky (src/components/Weather.tsx). */
+/* Jobsite weather sky (src/components/Weather.tsx). Transform and opacity only, so it stays smooth on phones. */
 @keyframes wx-spin { to { transform: rotate(360deg); } }
-@keyframes wx-pulse { 0%, 100% { opacity: 0.75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
-@keyframes wx-drift { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
-@keyframes wx-fall { from { transform: translateY(-20px); } to { transform: translateY(210px); } }
-@keyframes wx-flash { 0%, 89%, 93%, 100% { opacity: 0; } 90% { opacity: 0.55; } 91.5% { opacity: 0.1; } 92% { opacity: 0.4; } }
-@keyframes wx-bolt { 0%, 89%, 94%, 100% { opacity: 0; } 90%, 93% { opacity: 1; } }
-@keyframes wx-twinkle { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.25; } }
-@keyframes wx-fog { from { transform: translateX(-40px); } to { transform: translateX(160px); } }
-@keyframes wx-gust { from { stroke-dashoffset: 260; } to { stroke-dashoffset: -260; } }
-.wx-spin, .wx-pulse { transform-box: fill-box; transform-origin: center; }
-.wx-spin { animation: wx-spin 60s linear infinite; }
+@keyframes wx-pulse { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes wx-flare { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes wx-cross { from { transform: translateX(-190px); } to { transform: translateX(470px); } }
+@keyframes wx-fall { from { transform: translateY(-10px); } to { transform: translateY(235px); } }
+@keyframes wx-twinkle { 0%, 100% { opacity: 0.95; } 50% { opacity: 0.2; } }
+@keyframes wx-fog { from { transform: translateX(-60px); } to { transform: translateX(180px); } }
+@keyframes wx-streak { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(640px); opacity: 0; } }
+@keyframes wx-debris { 0% { transform: translate(-30px, var(--wx-y)); } 50% { transform: translate(200px, calc(var(--wx-y) - 26px)); } 100% { transform: translate(440px, calc(var(--wx-y) - 8px)); } }
+@keyframes wx-tumble { to { transform: rotate(720deg); } }
+@keyframes wx-shimmer { 0%, 100% { transform: translateX(0) scaleY(1); } 50% { transform: translateX(-20px) scaleY(1.8); } }
+/* Lightning: long quiet, then a flicker (flash, dim, flash). Two strikes on different rhythms so it never looks looped. */
+@keyframes wx-flash { 0%, 86%, 100% { opacity: 0; } 87% { opacity: 0.85; } 88% { opacity: 0.15; } 89.5% { opacity: 0.7; } 92% { opacity: 0; } }
+@keyframes wx-strike { 0%, 86.5%, 100% { opacity: 0; } 87% { opacity: 1; } 88% { opacity: 0.2; } 89.5% { opacity: 1; } 91% { opacity: 0; } }
+/* The weather card's border on unusual days: red pulses (a warning), amber holds steady. */
+@keyframes wx-ring { 0% { box-shadow: 0 0 0 2px var(--warn), 0 0 0 0 color-mix(in srgb, var(--warn) 50%, transparent); } 70%, 100% { box-shadow: 0 0 0 2px var(--warn), 0 0 0 14px color-mix(in srgb, var(--warn) 0%, transparent); } }
+.wx-spin, .wx-pulse, .wx-tumble { transform-box: fill-box; transform-origin: center; }
+.wx-spin { animation: wx-spin 80s linear infinite; }
 .wx-spin-fast { animation: wx-spin 1s linear infinite; }
-.wx-pulse { animation: wx-pulse 5s ease-in-out infinite; }
-.wx-drift { animation: wx-drift 40s ease-in-out infinite alternate; }
-.wx-fall { animation: wx-fall 0.9s linear infinite; }
-.wx-flash { opacity: 0; animation: wx-flash 7s linear infinite; }
-.wx-bolt { opacity: 0; animation: wx-bolt 7s linear infinite; }
+.wx-pulse { animation: wx-pulse 6s ease-in-out infinite; }
+.wx-flare { animation: wx-flare 7s ease-in-out infinite; }
+.wx-cross { animation: wx-cross 90s linear infinite; }
+.wx-fall { animation: wx-fall 0.8s linear infinite; }
 .wx-twinkle { animation: wx-twinkle 3s ease-in-out infinite; }
 .wx-fog { animation: wx-fog 14s ease-in-out infinite alternate; }
-.wx-gust { stroke-dasharray: 90 430; animation: wx-gust 3.2s ease-in infinite; }
+.wx-streak { animation: wx-streak 2s ease-in infinite; }
+.wx-debris { animation: wx-debris 3s linear infinite; }
+.wx-tumble { animation: wx-tumble 0.9s linear infinite; }
+.wx-shimmer { transform-box: fill-box; transform-origin: center; animation: wx-shimmer 2.4s ease-in-out infinite; }
+.wx-flash-a, .wx-flash-a-bolt, .wx-flash-b, .wx-flash-b-bolt { opacity: 0; }
+.wx-flash-a { animation: wx-flash 6.3s linear infinite; }
+.wx-flash-a-bolt { animation: wx-strike 6.3s linear infinite; }
+.wx-flash-b { animation: wx-flash 9.7s linear infinite 2.9s; }
+.wx-flash-b-bolt { animation: wx-strike 9.7s linear infinite 2.9s; }
+.wx-ring-alert { box-shadow: 0 0 0 2px var(--warn); animation: wx-ring 1.8s ease-out infinite; }
+.wx-ring-caution { box-shadow: 0 0 0 2px var(--caution), 0 0 22px color-mix(in srgb, var(--caution) 40%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
   .page-in, .toast-in, .sheet-in, .skeleton { animation: none; }
-  .wx-spin, .wx-spin-fast, .wx-pulse, .wx-drift, .wx-fall, .wx-twinkle, .wx-fog, .wx-gust { animation: none; }
-  .wx-flash { animation: none; opacity: 0; }
-  .wx-bolt { animation: none; opacity: 1; }
+  .wx-spin, .wx-spin-fast, .wx-pulse, .wx-flare, .wx-cross, .wx-fall, .wx-twinkle, .wx-fog, .wx-streak, .wx-debris, .wx-tumble, .wx-shimmer, .wx-ring-alert { animation: none; }
+  .wx-flash-a, .wx-flash-b, .wx-flash-b-bolt { animation: none; opacity: 0; }
+  .wx-flash-a-bolt { animation: none; opacity: 1; } /* a still bolt still says "lightning" */
+  .wx-cross { transform: translateX(120px); }
 }

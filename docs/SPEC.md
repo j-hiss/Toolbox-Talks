@@ -152,7 +152,13 @@ customer #1, not a special case.
   Looks like a weather app: an animated sky matching the forecast and time of day (sun, drifting clouds, rain,
   lightning flashes, fog, stars), the temperature and the work day's high/low, then hour by hour (sky icon, temp,
   rain-chance bar, wind arrow and speed). All drawn in the app (no extra downloads); animation stops for people who
-  turn on reduced motion.
+  turn on reduced motion. The sky is layered: soft shaded clouds that keep crossing (faster in wind), rain at two
+  depths that leans with the wind, branching lightning that lights the sky on an irregular rhythm, gust lines and
+  blowing debris on windy days, heat shimmer on dangerous-heat days.
+- **Attention border, only on unusual days:** red and gently pulsing for a weather service warning, high wind
+  (35+ mph) or extreme heat danger (heat index 125°+); amber and steady for thunderstorms, windy (25+ mph) or heat
+  danger (103°+). A pill in the sky says why (a warning shows in its own red banner instead). An ordinary hot or
+  rainy day gets no border, so the border keeps meaning something.
 - **Crew-raised issues:** on the review screen before saving, the presenter logs what the crew raised. Each gets an
   owner (presenter by default) and a fix-by date (a week out). They upload with the talk (same offline outbox,
   one transaction). Records → Issues lists open (overdue first) and fixed; tap to reassign, change the date, or mark

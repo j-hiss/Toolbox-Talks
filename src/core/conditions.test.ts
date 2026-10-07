@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { conditionNotes, conditionsFor, conditionsLoud, parseWindMph, rainLevel, skyKind, summarizeAlerts, windLevel, windToward, worseSky } from "./conditions";
+import { attention, conditionNotes, conditionsFor, parseWindMph, rainLevel, skyKind, summarizeAlerts, windLevel, windToward, worseSky } from "./conditions";
 
 // An hourly forecast in the site's own time (-04:00), like api.weather.gov returns.
 const hour = (h: number, o: { t?: number; rh?: number; pop?: number; wind?: string; dir?: string; sf?: string; day?: string } = {}) => ({
@@ -65,10 +65,10 @@ describe("jobsite conditions", () => {
     expect(notes.some((n) => n.startsWith("Thunderstorms"))).toBe(true);
     expect(notes.some((n) => n.startsWith("Windy"))).toBe(true);
     expect(notes.some((n) => n.startsWith("Rain likely"))).toBe(true);
-    expect(conditionsLoud(c, false)).toBe("caution");
+    expect(attention(c)?.level).toBe("caution");
     const calm = conditionsFor(fc([hour(9), hour(10)]), null, at("2026-10-06T09:10:00-04:00"))!;
     expect(conditionNotes(calm)).toEqual([]);
-    expect(conditionsLoud(calm, false)).toBeNull();
+    expect(attention(calm)).toBeNull();
   });
 
   it("reads the sky from the short forecast", () => {
@@ -91,6 +91,20 @@ describe("jobsite conditions", () => {
     expect(today.headline).toMatchObject({ sky: "clear", tempF: 86 });
     const tmr = conditionsFor(day, null, at("2026-10-06T20:30:00-04:00"))!;
     expect(tmr.headline).toMatchObject({ sky: "clear", highF: 85, lowF: 80, tempF: 85 });
+  });
+
+  it("draws attention only on unusual days", () => {
+    const base = conditionsFor(fc([hour(9), hour(10)]), { features: [] }, at("2026-10-06T09:10:00-04:00"))!;
+    expect(attention(base)).toBeNull();
+    // An ordinary hot Florida day (extreme caution) gets no border.
+    expect(attention({ ...base, heat: { maxHeatIndexF: 98, atHour: "", level: "extreme_caution", tempF: 90, humidity: 60 } })).toBeNull();
+    expect(attention({ ...base, heat: { maxHeatIndexF: 108, atHour: "", level: "danger", tempF: 95, humidity: 60 } })?.level).toBe("caution");
+    expect(attention({ ...base, heat: { maxHeatIndexF: 126, atHour: "", level: "extreme_danger", tempF: 104, humidity: 60 } })?.level).toBe("alert");
+    expect(attention({ ...base, wind: { maxMph: 28, direction: "E", atHour: "", level: "windy" } })).toMatchObject({ level: "caution", reason: "Windy, up to 28 mph" });
+    expect(attention({ ...base, wind: { maxMph: 40, direction: "E", atHour: "", level: "high" } })?.level).toBe("alert");
+    expect(attention({ ...base, thunderAt: "2026-10-06T09:00:00-04:00" }, at("2026-10-06T09:10:00-04:00"))?.reason).toBe("Thunderstorms now or within the hour");
+    const warn = { event: "Tornado Warning", severity: "Extreme", headline: "", ends: null, loud: true };
+    expect(attention({ ...base, thunderAt: "2026-10-06T09:00:00-04:00", alerts: [warn] })).toEqual({ level: "alert", reason: "Tornado Warning" });
   });
 
   it("no forecast hours means nothing to show", () => {

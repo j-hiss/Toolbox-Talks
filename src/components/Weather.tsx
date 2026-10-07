@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import type { Jobsite } from "@/lib/data/types";
 import { alertWorthy, HEAT_LABEL } from "@/core/heat";
-import { conditionNotes, RAIN_LABEL, WIND_LABEL, windToward, type SkyKind } from "@/core/conditions";
+import { attention, conditionNotes, RAIN_LABEL, WIND_LABEL, windToward, type SkyKind, type WindLevel } from "@/core/conditions";
 import { cachedConditions, checkConditions, CONDITIONS_FRESH_MS, type ConditionsCheck } from "@/lib/weather";
 import { getLocation, LocationError } from "@/lib/location";
 
@@ -87,19 +87,39 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
   const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const hourOf = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "numeric" });
   const old = now - new Date(c.checkedAt).getTime() > 2 * CONDITIONS_FRESH_MS;
-  const windy = c.wind?.level === "windy" || c.wind?.level === "high";
+  const windy = c.wind?.level === "windy" || c.wind?.level === "high"; // stat highlight
   const [d1, d2, n1, n2] = SKY_BG[head.sky];
   const bg = head.daytime ? `linear-gradient(165deg, ${d1}, ${d2})` : `linear-gradient(165deg, ${n1}, ${n2})`;
   const maxRain = Math.max(30, ...hours.map((h) => h.rainPct));
+  const heads = attention(c);
+  // A weather service warning already has its own red banner under the sky; the pill is for the app's own calls.
+  const pill = heads && !c.alerts.some((a) => a.loud && a.event === heads.reason) ? heads : null;
+  const heatDanger = c.heat?.level === "danger" || c.heat?.level === "extreme_danger";
 
   return (
-    <section className="mt-3 overflow-hidden rounded-2xl bg-surface" aria-label="Jobsite weather">
+    <section
+      className={`mt-3 overflow-hidden rounded-2xl bg-surface ${heads?.level === "alert" ? "wx-ring-alert" : heads?.level === "caution" ? "wx-ring-caution" : ""}`}
+      aria-label="Jobsite weather"
+    >
       {/* The sky */}
-      <div className="relative h-48 overflow-hidden text-white" style={{ background: bg }}>
-        <Sky kind={head.sky} daytime={head.daytime} windy={windy} />
-        <div className="relative flex h-full flex-col justify-between p-4 [text-shadow:0_1px_8px_rgba(0,0,0,0.25)]">
+      <div className={`relative overflow-hidden text-white ${pill ? "h-60" : "h-52"}`} style={{ background: bg }}>
+        <Sky kind={head.sky} daytime={head.daytime} wind={c.wind?.level ?? "calm"} heatDanger={heatDanger && head.daytime && (head.sky === "clear" || head.sky === "partly")} />
+        {/* A soft shade on the left keeps the temperature readable while clouds pass behind it */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-black/5 to-transparent" aria-hidden />
+        <div className="relative flex h-full flex-col justify-between p-4 [text-shadow:0_1px_8px_rgba(0,0,0,0.3)]">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-medium">{c.day === "tomorrow" ? "Tomorrow" : "Now"}{c.place ? ` in ${c.place}` : ""}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{c.day === "tomorrow" ? "Tomorrow" : "Now"}{c.place ? ` in ${c.place}` : ""}</p>
+              {pill && (
+                <p
+                  role="alert"
+                  className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold [text-shadow:none] ${pill.level === "alert" ? "bg-warn text-warn-ink" : "bg-caution text-[#2B2000]"}`}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden><path d="M12 3 2 21h20L12 3z" fill="currentColor" /><path d="M12 10v5M12 17.5v.5" stroke={pill.level === "alert" ? "var(--warn)" : "var(--caution)"} strokeWidth="2.4" strokeLinecap="round" /></svg>
+                  {pill.reason}
+                </p>
+              )}
+            </div>
             <button
               className="flex min-h-9 shrink-0 items-center gap-1 rounded-full bg-white/15 px-2.5 text-xs backdrop-blur-sm"
               onClick={() => window.dispatchEvent(new Event("tt-weather-refresh"))}
@@ -189,77 +209,204 @@ function Stat({ label, value, note, hot }: { label: string; value: string; note:
 }
 
 // --- Drawing ----------------------------------------------------------------------------------------------------
+// Everything below is drawn in the app (SVG + CSS animations in globals.css, "wx-*"); nothing is downloaded.
+// Movement uses transform and opacity only, so it stays smooth on a phone, and stops with reduced motion.
 
-const CLOUD = "M25 40a14 14 0 0 1 3-27.7A19 19 0 0 1 63 10a15 15 0 0 1 12 30z";
+type CloudTone = "light" | "gray" | "storm";
+const CLOUD_TONES: Record<CloudTone, [string, string, string]> = {
+  // highlight, body, underside
+  light: ["#FFFFFF", "#EEF2F7", "#C3CCD8"],
+  gray: ["#E4E9F0", "#B5BFCC", "#7F8B9C"],
+  storm: ["#A3ADBF", "#636D82", "#2E3445"],
+};
+/** How much faster things move, and how far rain leans, for each wind level. */
+const WIND_FX: Record<WindLevel, { speed: number; slant: number; streaks: number; debris: number }> = {
+  calm: { speed: 1, slant: 6, streaks: 0, debris: 0 },
+  breezy: { speed: 1.5, slant: 14, streaks: 2, debris: 0 },
+  windy: { speed: 2.4, slant: 24, streaks: 4, debris: 3 },
+  high: { speed: 3.6, slant: 36, streaks: 7, debris: 6 },
+};
 
-/** The animated sky behind the temperature. Pure SVG + CSS; nothing loads from the network. */
-function Sky({ kind, daytime, windy }: { kind: SkyKind; daytime: boolean; windy: boolean }) {
-  const cloudFill = kind === "thunder" ? "#3A4256" : kind === "rain" ? "#7D8BA0" : kind === "cloudy" || kind === "fog" ? "#C9D1DC" : "#FFFFFF";
+/** One soft, shaded cumulus made of overlapping puffs (each puff lit from the upper left). */
+function Cloud({ tone }: { tone: CloudTone }) {
+  const id = `wx-cl-${tone}`;
+  return (
+    <g>
+      <ellipse cx="40" cy="20" rx="50" ry="13" fill={`url(#${id})`} />
+      {[[0, 6, 20], [22, -8, 26], [50, -2, 22], [72, 8, 15], [36, 10, 20]].map(([x, y, r], i) => (
+        <circle key={i} cx={x} cy={y} r={r} fill={`url(#${id})`} />
+      ))}
+    </g>
+  );
+}
+
+type CloudSpot = { y: number; scale: number; layer: 0 | 1 | 2; offset: number };
+// layer 0 = far (blurred, faint, slow), 1 = middle, 2 = near (crisp, fast). offset = where along its trip it starts.
+const CLOUDS: Record<SkyKind, CloudSpot[]> = {
+  clear: [],
+  partly: [{ y: 30, scale: 1.3, layer: 1, offset: 0.55 }, { y: 70, scale: 0.9, layer: 0, offset: 0.2 }, { y: 6, scale: 1, layer: 2, offset: 0.85 }],
+  cloudy: [{ y: 10, scale: 1.6, layer: 0, offset: 0.1 }, { y: 40, scale: 1.3, layer: 0, offset: 0.6 }, { y: 20, scale: 1.4, layer: 1, offset: 0.35 },
+    { y: 70, scale: 1.1, layer: 1, offset: 0.8 }, { y: 0, scale: 1.2, layer: 2, offset: 0.5 }, { y: 95, scale: 0.9, layer: 2, offset: 0.05 }],
+  fog: [{ y: 10, scale: 1.6, layer: 0, offset: 0.3 }, { y: 50, scale: 1.4, layer: 0, offset: 0.75 }, { y: 30, scale: 1.2, layer: 1, offset: 0.5 }],
+  rain: [{ y: -10, scale: 1.8, layer: 0, offset: 0.15 }, { y: 20, scale: 1.5, layer: 0, offset: 0.65 }, { y: 0, scale: 1.4, layer: 1, offset: 0.4 },
+    { y: 35, scale: 1.2, layer: 1, offset: 0.9 }, { y: -6, scale: 1.3, layer: 2, offset: 0.7 }, { y: 30, scale: 1.0, layer: 2, offset: 0.2 }],
+  thunder: [{ y: -14, scale: 2, layer: 0, offset: 0.1 }, { y: 16, scale: 1.7, layer: 0, offset: 0.6 }, { y: -4, scale: 1.5, layer: 1, offset: 0.35 },
+    { y: 30, scale: 1.3, layer: 1, offset: 0.85 }, { y: -10, scale: 1.4, layer: 2, offset: 0.55 }, { y: 26, scale: 1.1, layer: 2, offset: 0.15 }, { y: 4, scale: 1.2, layer: 2, offset: 0.95 }],
+};
+const LAYER = [
+  { dur: 150, opacity: 0.55, blur: "url(#wx-blur-far)" },
+  { dur: 95, opacity: 0.85, blur: "url(#wx-blur-soft)" },
+  { dur: 62, opacity: 0.95, blur: undefined },
+];
+
+// Lightning: a jagged main stroke with a branch, drawn at two places on different, irregular timings.
+const BOLTS = [
+  { d: "M262 40 252 66 262 70 246 98 256 101 238 136", branch: "M252 66 236 80 240 88 226 104", flash: "wx-flash-a", cx: 252 },
+  { d: "M148 30 156 54 146 58 160 84 150 88 166 120", branch: "M156 84 172 96 168 104 182 118", flash: "wx-flash-b", cx: 156 },
+];
+
+function Sky({ kind, daytime, wind, heatDanger }: { kind: SkyKind; daytime: boolean; wind: WindLevel; heatDanger: boolean }) {
+  const fx = WIND_FX[wind];
+  const tone: CloudTone = kind === "thunder" ? "storm" : kind === "rain" || kind === "cloudy" || kind === "fog" ? "gray" : "light";
   const showSun = daytime && (kind === "clear" || kind === "partly");
   const showMoon = !daytime && (kind === "clear" || kind === "partly");
-  const clouds = kind === "clear" ? 0 : kind === "partly" ? 2 : 4;
   const rain = kind === "rain" || kind === "thunder";
   return (
-    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" aria-hidden>
+    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden>
       <defs>
-        <radialGradient id="wx-sun-glow">
-          <stop offset="0" stopColor="#FFE9A3" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#FFE9A3" stopOpacity="0" />
-        </radialGradient>
+        {(Object.keys(CLOUD_TONES) as CloudTone[]).map((t) => (
+          <radialGradient key={t} id={`wx-cl-${t}`} cx="0.35" cy="0.25" r="0.85">
+            <stop offset="0" stopColor={CLOUD_TONES[t][0]} />
+            <stop offset="0.55" stopColor={CLOUD_TONES[t][1]} />
+            <stop offset="1" stopColor={CLOUD_TONES[t][2]} />
+          </radialGradient>
+        ))}
+        <filter id="wx-blur-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6" /></filter>
+        <filter id="wx-blur-far" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" /></filter>
+        <filter id="wx-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5" /></filter>
+        <radialGradient id="wx-sun-glow"><stop offset="0" stopColor="#FFF1B8" stopOpacity="0.95" /><stop offset="0.45" stopColor="#FFE08A" stopOpacity="0.35" /><stop offset="1" stopColor="#FFE08A" stopOpacity="0" /></radialGradient>
+        <radialGradient id="wx-sun-core" cx="0.4" cy="0.35"><stop offset="0" stopColor="#FFF6CF" /><stop offset="1" stopColor="#FFC93C" /></radialGradient>
+        <radialGradient id="wx-moon-glow"><stop offset="0" stopColor="#FFF8DC" stopOpacity="0.45" /><stop offset="1" stopColor="#FFF8DC" stopOpacity="0" /></radialGradient>
+        <linearGradient id="wx-drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#fff" stopOpacity="0.9" /></linearGradient>
+        {BOLTS.map((b) => (
+          <radialGradient key={b.flash} id={`${b.flash}-g`} cx={b.cx / 400} cy="0.35" r="0.75">
+            <stop offset="0" stopColor="#F2EEFF" stopOpacity="0.95" /><stop offset="0.5" stopColor="#C9C2FF" stopOpacity="0.35" /><stop offset="1" stopColor="#C9C2FF" stopOpacity="0" />
+          </radialGradient>
+        ))}
+        {/* Wind streaks and debris fade out on the left, so they never run through the temperature */}
+        <linearGradient id="wx-right-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0.45" stopColor="#000" /><stop offset="0.68" stopColor="#fff" /></linearGradient>
+        <mask id="wx-right" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="200"><rect width="400" height="200" fill="url(#wx-right-g)" /></mask>
+        <linearGradient id="wx-heat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#FFB070" stopOpacity="0" /><stop offset="1" stopColor="#FF9A4D" stopOpacity="0.35" /></linearGradient>
       </defs>
+
+      {/* Sun or moon, behind the clouds */}
       {showSun && (
-        <g transform="translate(318 58)">
-          <circle r="62" fill="url(#wx-sun-glow)" className="wx-pulse" />
-          <g className="wx-spin">
-            {Array.from({ length: 12 }, (_, i) => (
-              <rect key={i} x="-2" y="-46" width="4" height="12" rx="2" fill="#FFE58A" opacity="0.8" transform={`rotate(${i * 30})`} />
+        <g transform="translate(320 56)">
+          <circle r="80" fill="url(#wx-sun-glow)" className="wx-pulse" />
+          <g className="wx-spin" opacity="0.55">
+            {Array.from({ length: 16 }, (_, i) => (
+              <path key={i} d="M0 -40 L3 -64 L-3 -64Z" fill="#FFF0B3" transform={`rotate(${i * 22.5})`} opacity={i % 2 ? 0.5 : 0.9} />
             ))}
           </g>
-          <circle r="27" fill="#FFD45C" />
+          <circle r="26" fill="url(#wx-sun-core)" />
+          {kind === "clear" && (
+            <g fill="#FFF6D6" className="wx-flare">
+              <circle cx="-70" cy="44" r="7" opacity="0.18" /><circle cx="-112" cy="70" r="12" opacity="0.1" /><circle cx="-150" cy="94" r="4" opacity="0.22" />
+            </g>
+          )}
         </g>
       )}
       {showMoon && (
         <g>
-          {[[40, 30], [90, 60], [150, 22], [210, 48], [260, 18], [370, 120], [120, 110]].map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.6 : 1.1} fill="#fff" className="wx-twinkle" style={{ animationDelay: `${i * 0.7}s` }} />
+          {[[30, 24], [70, 58], [118, 18], [176, 44], [214, 14], [250, 70], [372, 126], [104, 96], [196, 96], [292, 22]].map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.5 : 1} fill="#fff" className="wx-twinkle" style={{ animationDelay: `${(i * 0.73) % 3}s` }} />
           ))}
-          <path d="M330 30a26 26 0 1 0 22 40 21 21 0 1 1-22-40z" fill="#F3EBC8" />
+          <circle cx="322" cy="54" r="46" fill="url(#wx-moon-glow)" />
+          <path d="M322 30a24 24 0 1 0 20 38 19 19 0 1 1-20-38z" fill="#F5EDCD" />
         </g>
       )}
-      {Array.from({ length: clouds }, (_, i) => {
-        // Clouds stay on the right and along the top, so the temperature on the left stays easy to read.
-        const x = [215, 300, 150, 290][i], y = [24, 72, -6, 118][i], s = [1.5, 1.15, 1.0, 1.0][i];
+
+      {/* A darker cloud deck along the top for rain and storms */}
+      {(kind === "rain" || kind === "thunder") && (
+        <rect x="-20" y="-20" width="440" height="90" rx="40" fill={kind === "thunder" ? "#2A3040" : "#6A788C"} opacity="0.55" filter="url(#wx-blur-far)" />
+      )}
+
+      {/* Clouds keep crossing the sky; far ones blurred and slow, near ones crisp and faster, all faster in wind */}
+      {CLOUDS[kind].map((cl, i) => {
+        const L = LAYER[cl.layer], dur = L.dur / fx.speed;
         return (
-          <g key={i} className="wx-drift" style={{ animationDuration: `${38 + i * 14}s`, animationDelay: `${-i * 9}s` }}>
-            <path d={CLOUD} transform={`translate(${x} ${y}) scale(${s})`} fill={cloudFill} opacity={kind === "partly" ? 0.95 : 0.85 - i * 0.08} />
+          <g key={i} className="wx-cross" style={{ animationDuration: `${dur}s`, animationDelay: `${-cl.offset * dur}s` }}>
+            <g transform={`translate(0 ${cl.y}) scale(${cl.scale})`} opacity={L.opacity} filter={L.blur}>
+              <Cloud tone={tone} />
+            </g>
           </g>
         );
       })}
+
+      {/* Lightning: the sky lights up, then the bolt; two strikes on their own irregular rhythms */}
+      {kind === "thunder" && BOLTS.map((b) => (
+        <g key={b.flash}>
+          <rect x="0" y="0" width="400" height="200" fill={`url(#${b.flash}-g)`} className={b.flash} />
+          <g className={`${b.flash}-bolt`} fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <path d={b.d} stroke="#B9B2FF" strokeWidth="7" filter="url(#wx-glow)" />
+            <path d={b.branch} stroke="#B9B2FF" strokeWidth="4" filter="url(#wx-glow)" />
+            <path d={b.d} stroke="#FFFFFF" strokeWidth="2.2" />
+            <path d={b.branch} stroke="#FFFFFF" strokeWidth="1.3" />
+          </g>
+        </g>
+      ))}
+
+      {/* Rain in two depths, leaning with the wind */}
       {rain && (
-        <g stroke={kind === "thunder" ? "#A9B8D6" : "#D6E4F5"} strokeWidth="1.6" strokeLinecap="round" opacity="0.75">
-          {Array.from({ length: 34 }, (_, i) => {
-            const x = (i * 37) % 400 + 6, d = ((i * 53) % 100) / 100;
-            return <line key={i} x1={x} y1={-12} x2={x - 4} y2={2} className="wx-fall" style={{ animationDelay: `${-d}s`, animationDuration: `${0.75 + (i % 4) * 0.12}s` }} />;
-          })}
+        <g transform={`skewX(${-fx.slant})`}>
+          {[{ n: 34, w: 1, h: 11, op: 0.35, dur: 1.05 }, { n: 26, w: 1.6, h: 19, op: 0.75, dur: 0.62 }].map((layer, li) =>
+            Array.from({ length: layer.n }, (_, i) => {
+              const x = ((i * 47 + li * 23) % 520) - 40 + (li ? 9 : 0), d = ((i * 37 + li * 11) % 100) / 100;
+              return (
+                <rect key={`${li}-${i}`} x={x} y={-24} width={layer.w} height={layer.h} rx={layer.w / 2} fill="url(#wx-drop)" opacity={layer.op}
+                  className="wx-fall" style={{ animationDuration: `${layer.dur + (i % 3) * 0.08}s`, animationDelay: `${-d * 1.2}s` }} />
+              );
+            }),
+          )}
         </g>
       )}
-      {kind === "thunder" && (
-        <>
-          <rect width="400" height="190" fill="#E9E4FF" className="wx-flash" />
-          <path d="M248 70 232 104h14l-10 32 30-44h-15l12-22z" fill="#FFE27A" className="wx-bolt" />
-        </>
-      )}
+
+      {/* Fog: soft banks sliding past */}
       {kind === "fog" && (
-        <g fill="#fff">
-          {[70, 100, 130, 160].map((y, i) => (
-            <rect key={y} x="-60" y={y} width="300" height="10" rx="5" opacity={0.28 - i * 0.03} className="wx-fog" style={{ animationDelay: `${-i * 3}s` }} />
+        <g fill="#fff" filter="url(#wx-blur-far)">
+          {[60, 92, 124, 156, 182].map((y, i) => (
+            <rect key={y} x="-80" y={y} width="320" height="16" rx="8" opacity={0.34 - i * 0.04} className="wx-fog" style={{ animationDelay: `${-i * 2.7}s`, animationDuration: `${12 + i * 3}s` }} />
           ))}
         </g>
       )}
-      {windy && (
-        <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" opacity="0.55">
-          {[44, 86, 128].map((y, i) => (
-            <path key={y} d={`M190 ${y} q50 -9 100 0 t100 0`} className="wx-gust" style={{ animationDelay: `${-i * 0.9}s` }} />
+
+      {/* Wind: gust lines and blowing debris, more and faster as the wind picks up */}
+      <g mask="url(#wx-right)">
+      {fx.streaks > 0 && (
+        <g fill="none" stroke="#fff" strokeLinecap="round">
+          {Array.from({ length: fx.streaks }, (_, i) => {
+            const y = 30 + ((i * 41) % 150), len = 70 + (i % 3) * 30;
+            return (
+              <path key={i} d={`M-120 ${y} q${len / 2} -8 ${len} 0 t${len} 0`} strokeWidth={i % 2 ? 1.2 : 1.8} opacity={0.35 + (i % 3) * 0.12}
+                className="wx-streak" style={{ animationDuration: `${(2.6 - fx.speed * 0.35 + (i % 3) * 0.4).toFixed(2)}s`, animationDelay: `${-i * 0.55}s` }} />
+            );
+          })}
+        </g>
+      )}
+      {fx.debris > 0 && Array.from({ length: fx.debris }, (_, i) => (
+        <g key={i} className="wx-debris" style={{ animationDuration: `${(3.4 - fx.speed * 0.4 + (i % 3) * 0.5).toFixed(2)}s`, animationDelay: `${-i * 0.8}s`, ["--wx-y" as string]: `${60 + ((i * 37) % 110)}px` }}>
+          <path d="M0 0c3-4 9-4 10 0-3 4-8 4-10 0z" fill={["#7C8F4E", "#A27B3E", "#8B9A6A"][i % 3]} className="wx-tumble" />
+        </g>
+      ))}
+      </g>
+
+      {/* Heat shimmer near the ground on dangerous heat days */}
+      {heatDanger && (
+        <g>
+          <rect x="0" y="140" width="400" height="60" fill="url(#wx-heat)" />
+          {[150, 162, 174, 186].map((y, i) => (
+            <path key={y} d={`M-40 ${y} q20 -4 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0`} fill="none" stroke="#FFF3E0"
+              strokeWidth="1.2" opacity={0.22 - i * 0.03} className="wx-shimmer" style={{ animationDelay: `${-i * 0.6}s` }} />
           ))}
         </g>
       )}

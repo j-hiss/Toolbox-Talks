@@ -172,9 +172,25 @@ export function conditionNotes(c: Conditions): string[] {
   return out;
 }
 
-/** Worth calling out loudly on Home: an active warning, thunder, high wind, or heat from "extreme caution" up. */
-export function conditionsLoud(c: Conditions, heatLoud: boolean): "alert" | "caution" | null {
-  if (c.alerts.some((a) => a.loud)) return "alert";
-  if (heatLoud || c.thunderAt || c.wind?.level === "high" || c.wind?.level === "windy") return "caution";
+export type Attention = { level: "alert" | "caution"; reason: string };
+
+/**
+ * When the weather card should draw attention to itself (a border around it), and why. Only for unusual days, so
+ * it keeps meaning something: red for a weather service warning, high wind, or extreme heat danger; amber for
+ * thunderstorms, wind, or heat danger. An ordinary hot or rainy day gets no border (its notes still show).
+ */
+export function attention(c: Conditions, now: Date = new Date()): Attention | null {
+  const fmt = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "numeric" });
+  const warning = c.alerts.find((a) => a.loud);
+  if (warning) return { level: "alert", reason: warning.event };
+  if (c.wind?.level === "high") return { level: "alert", reason: `High wind, up to ${c.wind.maxMph} mph` };
+  if (c.heat?.level === "extreme_danger") return { level: "alert", reason: `Extreme heat, heat index ${c.heat.maxHeatIndexF}°` };
+  if (c.thunderAt) {
+    const soon = new Date(c.thunderAt).getTime() <= now.getTime() + 3600_000 && c.day === "today";
+    return { level: "caution", reason: soon ? "Thunderstorms now or within the hour" : `Thunderstorms from about ${fmt(c.thunderAt)}` };
+  }
+  if (c.wind?.level === "windy") return { level: "caution", reason: `Windy, up to ${c.wind.maxMph} mph` };
+  if (c.heat?.level === "danger") return { level: "caution", reason: `Heat danger, heat index ${c.heat.maxHeatIndexF}°` };
   return null;
 }
+
