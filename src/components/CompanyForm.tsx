@@ -3,6 +3,7 @@
 // Company info form, shared by first-time setup and the Admin "Company" tab. Everything here prints on the PDF.
 import { useState } from "react";
 import { INDUSTRIES, type IndustryId } from "@/core/industries";
+import { DEFAULT_BY_INDUSTRY, WORK_SETTINGS, type WorkSetting } from "@/core/worksetting";
 import { climateFor } from "@/core/climate";
 import { isoDay, mondayOf, parseDay } from "@/core/weeks";
 import type { Company } from "@/lib/data/types";
@@ -59,6 +60,13 @@ export function CompanyForm({ initial, submitLabel, onSubmit }: { initial: Compa
         <select id="co-industry" className={inputClass} value={c.industry} onChange={(e) => set("industry", e.target.value as IndustryId)}>
           {INDUSTRIES.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
+      </Field>
+      <Field label="Where the crew works" id="co-setting" hint="Words the weather notes for your work">
+        <select id="co-setting" className={inputClass} value={c.work_setting ?? ""} onChange={(e) => set("work_setting", (e.target.value || null) as WorkSetting | null)}>
+          <option value="">Usual for {INDUSTRIES.find((i) => i.id === c.industry)?.name ?? "your industry"}: {WORK_SETTINGS.find((w) => w.id === DEFAULT_BY_INDUSTRY[c.industry])?.name.toLowerCase()}</option>
+          {WORK_SETTINGS.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+        </select>
+        <small className="text-muted">{WORK_SETTINGS.find((w) => w.id === (c.work_setting ?? DEFAULT_BY_INDUSTRY[c.industry]))?.sub}</small>
       </Field>
       <Field label="ZIP code" id="co-zip" hint="Times heat, cold and storm talks to your weather">
         <input id="co-zip" inputMode="numeric" maxLength={5} autoComplete="postal-code" className={inputClass} value={c.zip ?? ""} onChange={(e) => set("zip", e.target.value.replace(/\D/g, ""))} />

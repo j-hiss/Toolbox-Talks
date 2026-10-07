@@ -146,8 +146,12 @@ customer #1, not a special case.
 - **Live jobsite weather (Home):** heat index, rain chance, wind and thunderstorms for the rest of the work day
   (tomorrow's after 7 PM), plus the National Weather Service's active alerts for that spot (warnings first, red).
   Refreshes every 15 minutes while the app is open, when it comes back on screen and when signal returns, with a
-  manual refresh; shows the last check and its time when offline. Plain notes for the crew (thunder: get off the roof
-  and out of lifts; windy: secure materials; high wind: check lift/crane/edge limits; rain likely: slick surfaces).
+  manual refresh; shows the last check and its time when offline. Plain notes for the crew, worded for where the
+  crew works (Admin → Company → "Where the crew works"; until picked, the industry decides: Construction = inside and
+  outside, Agriculture = outside, Warehouse and Manufacturing = inside). Outside: get off the roof and out of lifts,
+  secure materials on the roof, slick surfaces. Inside and outside: stop outside work, inside work can go on, cover
+  materials and keep cords out of water. Inside: stop yard and dock work, watch dock doors, wet floors at doors and
+  docks. Same weather gives the same number of notes in every setting: only the wording changes, nothing is dropped.
   Information only: the app never says a site is safe or unsafe to work; the crew lead decides.
   Looks like a weather app: an animated sky matching the forecast and time of day (sun, drifting clouds, rain,
   lightning flashes, fog, stars), the temperature and the work day's high/low, then hour by hour (sky icon, temp,

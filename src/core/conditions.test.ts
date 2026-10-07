@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { alertAreas, attention, conditionNotes, daySummary, siteHour, conditionsFor, parseWindMph, rainLevel, skyKind, summarizeAlerts, windLevel, windToward, worseSky } from "./conditions";
+import { workSettingFor } from "./worksetting";
 
 // An hourly forecast in the site's own time (-04:00), like api.weather.gov returns.
 const hour = (h: number, o: { t?: number; rh?: number; pop?: number; wind?: string; dir?: string; sf?: string; day?: string } = {}) => ({
@@ -69,6 +70,27 @@ describe("jobsite conditions", () => {
     const calm = conditionsFor(fc([hour(9), hour(10)]), null, at("2026-10-06T09:10:00-04:00"))!;
     expect(conditionNotes(calm)).toEqual([]);
     expect(attention(calm)).toBeNull();
+  });
+
+  it("words the notes for where the crew works", () => {
+    const c = conditionsFor(day, { features: [] }, at("2026-10-06T10:20:00-04:00"))!;
+    const roof = conditionNotes(c, "outdoor"), mixed = conditionNotes(c, "mixed"), inside = conditionNotes(c, "indoor");
+    expect(roof[0]).toContain("get off the roof");
+    expect(mixed[0]).toContain("Inside work can go on");
+    expect(inside[0]).toContain("stop yard, dock and outside work");
+    expect(inside.join(" ")).not.toContain("roof");
+    expect(inside.some((n) => n.includes("wet floors"))).toBe(true);
+    // Same weather, same number of notes: only the wording changes, nothing is dropped.
+    expect(new Set([roof.length, mixed.length, inside.length]).size).toBe(1);
+  });
+
+  it("defaults where the crew works from the industry until the company picks", () => {
+    expect(workSettingFor({ industry: "con" })).toBe("mixed");
+    expect(workSettingFor({ industry: "wh" })).toBe("indoor");
+    expect(workSettingFor({ industry: "mfg" })).toBe("indoor");
+    expect(workSettingFor({ industry: "ag" })).toBe("outdoor");
+    expect(workSettingFor({ industry: "con", work_setting: "outdoor" })).toBe("outdoor");
+    expect(workSettingFor({ industry: "wh", work_setting: null })).toBe("indoor");
   });
 
   it("reads the sky from the short forecast", () => {

@@ -223,6 +223,14 @@ async function main() {
     check("Only hex colors for known parts are stored", await fails(() => as(userA, "update public.companies set theme = $2 where id = $1", [coA, { brand: "red" }]))
       && await fails(() => as(userA, "update public.companies set theme = $2 where id = $1", [coA, { logo: "#000000" }])));
 
+    // Where the crew works: starts unset (the industry default), admins set their own, nobody else can, only known values.
+    check("A new company has no work setting until it picks one", (await as(userA, "select work_setting from public.companies where id = $1", [coA])).rows[0]?.work_setting === null);
+    check("An admin can set where their crew works",
+      (await as(userA, "update public.companies set work_setting = 'outdoor' where id = $1 returning work_setting", [coA])).rows[0]?.work_setting === "outdoor");
+    check("A can't change where B's crew works", (await as(userA, "update public.companies set work_setting = 'indoor' where id = $1", [coB])).rowCount === 0);
+    check("A presenter can't change where the crew works", (await as(presenterA, "update public.companies set work_setting = 'indoor' where id = $1", [coA])).rowCount === 0);
+    check("Only known work settings are stored", await fails(() => as(userA, "update public.companies set work_setting = 'underwater' where id = $1", [coA])));
+
     // Site notes, heat, and issues raised at a talk.
     const personA = (await as(userA, "select id from public.people where company_id = $1 limit 1", [coA])).rows[0].id;
     const personB = (await as(userB, "select id from public.people where company_id = $1 limit 1", [coB])).rows[0].id;

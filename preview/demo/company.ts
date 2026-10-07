@@ -34,7 +34,7 @@ export async function createCompany(input: NewCompany): Promise<string> {
   const iso = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
   rows<Company>("companies").push({
     id, name: input.name, industry: input.industry, zip: input.zip ?? null, licenses: input.licenses ?? "", address: input.address ?? "",
-    phone: input.phone ?? "", email: input.email ?? "", program_start: input.program_start ?? iso, default_jobsite: input.default_jobsite ?? "", makeup_weeks: input.makeup_weeks ?? 4,
+    phone: input.phone ?? "", email: input.email ?? "", program_start: input.program_start ?? iso, default_jobsite: input.default_jobsite ?? "", makeup_weeks: input.makeup_weeks ?? 4, work_setting: input.work_setting ?? null,
   });
   db().members.push({ company_id: id, user_id: user, access: "owner" });
   DEFAULT_ROLES.forEach((name) => rows<Role>("roles").push({ id: uid(), company_id: id, name }));

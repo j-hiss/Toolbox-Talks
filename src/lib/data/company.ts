@@ -8,7 +8,7 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
-const COMPANY_COLUMNS = "id, name, licenses, address, phone, email, industry, zip, program_start, default_jobsite, makeup_weeks, theme";
+const COMPANY_COLUMNS = "id, name, licenses, address, phone, email, industry, zip, program_start, default_jobsite, makeup_weeks, theme, work_setting";
 
 export async function myMemberships(userId: string): Promise<Membership[]> {
   const rows = check(
@@ -31,7 +31,7 @@ export async function createCompany(input: NewCompany): Promise<string> {
     }),
   ) as string;
   const details: Partial<Omit<Company, "id">> = {};
-  for (const k of ["licenses", "address", "phone", "email", "program_start", "default_jobsite", "makeup_weeks"] as const) {
+  for (const k of ["licenses", "address", "phone", "email", "program_start", "default_jobsite", "makeup_weeks", "work_setting"] as const) {
     if (input[k] !== undefined) (details as Record<string, unknown>)[k] = input[k];
   }
   if (Object.keys(details).length) await updateCompany(id, details);

@@ -9,13 +9,14 @@ import type { Jobsite } from "@/lib/data/types";
 import { alertWorthy, HEAT_LABEL } from "@/core/heat";
 import { attention, conditionNotes, daySummary, RAIN_LABEL, siteHour, WIND_LABEL, type Attention } from "@/core/conditions";
 import { skyPhase, sunTimes, type SkyPhase } from "@/core/sun";
+import type { WorkSetting } from "@/core/worksetting";
 import { cachedConditions, checkConditions, CONDITIONS_FRESH_MS, type ConditionsCheck } from "@/lib/weather";
 import { getLocation, LocationError } from "@/lib/location";
 import { RadarMap, type MapArea } from "./RadarMap";
 import { Sky, SKY_WORDS, SkyIconDefs, skyBackground } from "./weather/Sky";
 import { HourStrip } from "./weather/HourStrip";
 
-export function WeatherCard({ site }: { site: Jobsite | null }) {
+export function WeatherCard({ site, setting = "outdoor" }: { site: Jobsite | null; setting?: WorkSetting }) {
   const sitePoint = site?.latitude != null && site.longitude != null ? { latitude: site.latitude, longitude: site.longitude } : null;
   const [herePoint, setHerePoint] = useState<{ latitude: number; longitude: number } | null>(null);
   const point = sitePoint ?? herePoint;
@@ -101,7 +102,7 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
         {radar && <RadarMap latitude={point.latitude} longitude={point.longitude} areas={ctx.areas} />}
 
         <Stats c={c} />
-        <Notes c={c} />
+        <Notes c={c} setting={setting} />
         <div className="flex items-center justify-between gap-3 px-4 pb-3">
           <p className="text-xs text-muted">
             Forecast and alerts from the National Weather Service. Information for the crew; the crew lead decides.
@@ -111,7 +112,7 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
           <button className="shrink-0 rounded-full bg-brand-soft px-3 py-2 text-xs font-semibold text-brand-text" onClick={() => setFull(true)}>Full forecast</button>
         </div>
       </section>
-      {full && <WeatherFull c={c} ctx={ctx} point={point} busy={busy} onRefresh={refresh} onClose={() => setFull(false)} />}
+      {full && <WeatherFull c={c} ctx={ctx} point={point} setting={setting} busy={busy} onRefresh={refresh} onClose={() => setFull(false)} />}
     </>
   );
 }
@@ -229,9 +230,9 @@ function Stats({ c }: { c: ConditionsCheck }) {
   );
 }
 
-function Notes({ c }: { c: ConditionsCheck }) {
+function Notes({ c, setting }: { c: ConditionsCheck; setting: WorkSetting }) {
   const heatLoud = !!c.heat && alertWorthy(c.heat.level);
-  const notes = conditionNotes(c);
+  const notes = conditionNotes(c, setting);
   if (!c.thunderAt && !notes.length && !heatLoud) return null;
   return (
     <div className="mx-3 mb-3 rounded-xl bg-caution-bg px-3.5 py-3 text-sm text-caution-text" role="alert">
@@ -274,7 +275,7 @@ function Toggle({ open, onClick, label, icon, chip }: { open: boolean; onClick: 
 }
 
 /** The whole forecast on one screen: bigger sky, warnings with what to do, hours, radar, sunrise and sunset. */
-function WeatherFull({ c, ctx, point, busy, onRefresh, onClose }: { c: ConditionsCheck; ctx: View; point: { latitude: number; longitude: number }; busy: boolean; onRefresh: () => void; onClose: () => void }) {
+function WeatherFull({ c, ctx, point, setting, busy, onRefresh, onClose }: { c: ConditionsCheck; ctx: View; point: { latitude: number; longitude: number }; setting: WorkSetting; busy: boolean; onRefresh: () => void; onClose: () => void }) {
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -315,7 +316,7 @@ function WeatherFull({ c, ctx, point, busy, onRefresh, onClose }: { c: Condition
               <div className="px-3 py-2.5"><p className="text-xs text-muted">Daylight</p><p className="font-display text-xl font-medium tabular-nums">{daylight != null ? `${Math.floor(daylight / 60)}h ${daylight % 60}m` : "–"}</p></div>
             </div>
           )}
-          <div className="pt-3"><Notes c={c} /></div>
+          <div className="pt-3"><Notes c={c} setting={setting} /></div>
         </div>
         <p className="mt-3 px-1 text-xs text-muted">Forecast and alerts from the National Weather Service. Information for the crew; the crew lead decides.</p>
       </div>

@@ -17,6 +17,7 @@ import { useOutbox } from "@/lib/useOutbox";
 import { usePlan } from "@/lib/usePlan";
 import { readLastSetup } from "@/lib/lastSetup";
 import { GettingStarted, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
+import { workSettingFor } from "@/core/worksetting";
 import { WeatherCard } from "@/components/Weather";
 import type { Jobsite } from "@/lib/data/types";
 import { useEffect, useState } from "react";
@@ -149,7 +150,7 @@ function Home({ m }: { m: Membership }) {
       )}
 
       <JobsitePicker companyId={co.id} isAdmin={isAdmin} onChange={setSite} />
-      <WeatherCard key={site?.id ?? "none"} site={site} />
+      <WeatherCard key={site?.id ?? "none"} site={site} setting={workSettingFor(co)} />
 
       {upcoming.length > 0 && (
         <section>
