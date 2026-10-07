@@ -27,6 +27,9 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
   // Radar opens on a tap (it loads map pictures); once opened, this phone keeps it open.
   const [radar, setRadar] = useState(() => { try { return localStorage.getItem("tt-radar-open") === "1"; } catch { return false; } });
   const toggleRadar = () => setRadar((v) => { try { localStorage.setItem("tt-radar-open", v ? "0" : "1"); } catch { /* fine */ } return !v; });
+  // Hour by hour opens and closes the same way; the day's sentence above it stays.
+  const [hourly, setHourly] = useState(() => { try { return localStorage.getItem("tt-hourly-open") === "1"; } catch { return false; } });
+  const toggleHourly = () => setHourly((v) => { try { localStorage.setItem("tt-hourly-open", v ? "0" : "1"); } catch { /* fine */ } return !v; });
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(t); }, []);
 
   // Live: every 15 minutes, when the app comes back on screen, when signal returns, and on tap.
@@ -88,21 +91,13 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
       >
         <Hero c={c} ctx={ctx} busy={busy} old={ctx.old} onRefresh={refresh} onOpen={() => setFull(true)} />
         <AlertBanners c={c} />
-        <Summary text={ctx.summary} />
-        <HourStrip hours={c.hours} sun={ctx.sun} firstIsNow={c.day === "today"} />
+        <Summary text={ctx.summary} divider={false} />
+        <Toggle open={hourly} onClick={toggleHourly} label="hourly" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>} />
+        {hourly && <HourStrip hours={c.hours} sun={ctx.sun} firstIsNow={c.day === "today"} />}
 
-        {/* Radar */}
-        <button
-          className="flex min-h-11 w-full items-center justify-between border-t border-line px-4 text-sm font-semibold text-brand-text focus:outline-none focus-visible:bg-brand-soft"
-          onClick={toggleRadar}
-          aria-expanded={radar}
-        >
-          <span className="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /><path d="M12 12 18.5 5.5" /></svg>
-            {radar ? "Hide radar" : "Show radar"}{ctx.areas.length > 0 && !radar ? <span className="rounded-full bg-warn px-2 py-0.5 text-[11px] text-warn-ink">Warning area</span> : null}
-          </span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden className={`transition-transform ${radar ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6" /></svg>
-        </button>
+        <Toggle open={radar} onClick={toggleRadar} label="radar"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /><path d="M12 12 18.5 5.5" /></svg>}
+          chip={ctx.areas.length > 0 && !radar ? "Warning area" : null} />
         {radar && <RadarMap latitude={point.latitude} longitude={point.longitude} areas={ctx.areas} />}
 
         <Stats c={c} />
@@ -212,10 +207,10 @@ function AlertBanners({ c, detail }: { c: ConditionsCheck; detail?: boolean }) {
   );
 }
 
-function Summary({ text }: { text: string }) {
+function Summary({ text, divider = true }: { text: string; divider?: boolean }) {
   if (!text) return null;
   return (
-    <p className="flex gap-2.5 border-b border-line px-4 py-3 text-[15px] leading-snug font-medium">
+    <p className={`flex gap-2.5 ${divider ? "border-b border-line" : ""} px-4 py-3 text-[15px] leading-snug font-medium`}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden className="mt-0.5 shrink-0 text-brand-text"><path d="M4 6h16M4 12h10M4 18h13" /></svg>
       {text}
     </p>
@@ -260,6 +255,23 @@ function Stat({ label, value, note, hot }: { label: string; value: string; note:
 }
 
 // --- Full screen ---------------------------------------------------------------------------------------------
+
+/** A row that opens and closes a section of the card (hour by hour, radar). */
+function Toggle({ open, onClick, label, icon, chip }: { open: boolean; onClick: () => void; label: string; icon: React.ReactNode; chip?: string | null }) {
+  return (
+    <button
+      className="flex min-h-11 w-full items-center justify-between border-t border-line px-4 text-sm font-semibold text-brand-text focus:outline-none focus-visible:bg-brand-soft"
+      onClick={onClick}
+      aria-expanded={open}
+    >
+      <span className="flex items-center gap-2">
+        {icon}
+        {open ? `Hide ${label}` : `Show ${label}`}{chip ? <span className="rounded-full bg-warn px-2 py-0.5 text-[11px] text-warn-ink">{chip}</span> : null}
+      </span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden className={`transition-transform ${open ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6" /></svg>
+    </button>
+  );
+}
 
 /** The whole forecast on one screen: bigger sky, warnings with what to do, hours, radar, sunrise and sunset. */
 function WeatherFull({ c, ctx, point, busy, onRefresh, onClose }: { c: ConditionsCheck; ctx: View; point: { latitude: number; longitude: number }; busy: boolean; onRefresh: () => void; onClose: () => void }) {

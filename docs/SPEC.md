@@ -159,7 +159,7 @@ customer #1, not a special case.
 - **Day in one sentence:** under the sky, a plain-English line built from the hourly forecast, e.g. "Thunderstorms
   likely from 2 PM, clearing by 6 PM. Heat index up to 109° around 1 PM. Wind up to 25 mph around 2 PM." or "Dry
   through the work day." Times are the jobsite's local time.
-- **Hour by hour:** sky icon, rain chance, a temperature curve with each hour's temperature, "feels" when the heat
+- **Hour by hour (tap "Show hourly"; opens and closes like the radar, remembered on that phone):** sky icon, rain chance, a temperature curve with each hour's temperature, "feels" when the heat
   index runs 3°+ higher, a rain-chance bar and a wind arrow. Sunrise and sunset sit where they fall. Tap an hour for
   its details (feels like and heat level, humidity, rain chance, wind).
 - **Full forecast (tap the sky or "Full forecast"):** a full-screen view with a taller sky, warnings with the weather
