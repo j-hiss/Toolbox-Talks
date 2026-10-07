@@ -1,7 +1,8 @@
 // What the weather card tells the crew, worded for where they work (src/core/worksetting.ts). Content, not code.
 // Every note says only what OSHA material says, and carries the reference so a crew lead can read the source.
 // Changing wording: bump WEATHER_NOTES_VERSION. English only for now; a translation is draft until reviewed.
-// Every reference below was read against its source on osha.gov on 2026-10-07 (see docs/claims-and-evidence.md).
+// Every reference below was read against its source on 2026-10-07 (see docs/claims-and-evidence.md), except HEAT_REF:
+// osha.gov returned an error for the heat page, so the heat reminder's wording is still to be checked against it.
 import type { WorkSetting } from "@/core/worksetting";
 import type { WeatherNoteKey } from "@/core/conditions";
 
