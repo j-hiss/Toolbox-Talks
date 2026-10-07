@@ -97,6 +97,11 @@ viewer at http://127.0.0.1:54324).
 - `npm run seed -- --dry-run` shows what it would make without saving anything.
 - Everything is labelled "Example"; the signatures are scribbles and the photos are drawings.
 
+### Radar map
+The weather card's radar uses OpenStreetMap street tiles (free with attribution, meant for light use) and NWS radar
+tiles from the Iowa Environmental Mesonet. That's fine for testing. Before the app is sold, switch the street map to
+a paid provider: it's the `BASEMAP` line in `src/lib/radar.ts`.
+
 ### Camera (crew photo)
 The optional crew photo uses the phone's camera through a normal file picker. In the native projects add:
 - **iPhone:** `Info.plist` → **Privacy - Camera Usage Description** ("Takes an optional photo of the crew at a

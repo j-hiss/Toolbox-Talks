@@ -10,6 +10,7 @@ import { alertWorthy, HEAT_LABEL } from "@/core/heat";
 import { attention, conditionNotes, RAIN_LABEL, WIND_LABEL, windToward, type SkyKind, type WindLevel } from "@/core/conditions";
 import { cachedConditions, checkConditions, CONDITIONS_FRESH_MS, type ConditionsCheck } from "@/lib/weather";
 import { getLocation, LocationError } from "@/lib/location";
+import { RadarMap } from "./RadarMap";
 
 const SKY_BG: Record<SkyKind, [string, string, string, string]> = {
   // [day top, day bottom, night top, night bottom]
@@ -30,6 +31,9 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now()); // ticks each minute so "Last checked" stays honest
+  // Radar opens on a tap (it loads map pictures); once opened, this phone keeps it open.
+  const [radar, setRadar] = useState(() => { try { return localStorage.getItem("tt-radar-open") === "1"; } catch { return false; } });
+  const toggleRadar = () => setRadar((v) => { try { localStorage.setItem("tt-radar-open", v ? "0" : "1"); } catch { /* fine */ } return !v; });
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(t); }, []);
 
   // Live: every 15 minutes, when the app comes back on screen, when signal returns, and on tap.
@@ -171,6 +175,20 @@ export function WeatherCard({ site }: { site: Jobsite | null }) {
           })}
         </ol>
       )}
+
+      {/* Radar */}
+      <button
+        className="flex min-h-11 w-full items-center justify-between border-t border-line px-4 text-sm font-semibold text-brand-text"
+        onClick={toggleRadar}
+        aria-expanded={radar}
+      >
+        <span className="flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /><path d="M12 12 18.5 5.5" /></svg>
+          {radar ? "Hide radar" : "Show radar"}
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden className={`transition-transform ${radar ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {radar && point && <RadarMap latitude={point.latitude} longitude={point.longitude} />}
 
       {/* The day at a glance */}
       <dl className="grid grid-cols-3 border-t border-line text-sm">

@@ -83,6 +83,8 @@ point the row at the real file and keep the prototype line as its origin.
 | `listIssues` · `listIssuesForRecord` · `updateIssue` | `src/lib/data/issues.ts` | Crew-raised issues (new ones save with their talk via `saveTalkRecord` → `save_talk`) |
 | `IssuesList` · `isOverdue` | `src/components/Issues.tsx` | Records → Issues: open/fixed, overdue first, edit panel, mark fixed with Undo |
 | `ImportPeople` | `src/components/ImportPeople.tsx` | Admin → People → Import sheet: pick file, preview plan, import |
+| `tileXY` · `tilesFor` · `milesAcross` | `src/core/maptiles.ts` | **The** web-map tile math (which tiles cover a view around a point, and where each goes). Reuse for any future map |
+| `RadarMap` · `BASEMAP` · `RADAR` · `RADAR_FRAMES` | `src/components/RadarMap.tsx` · `src/lib/radar.ts` | Radar loop over a street map centered on the jobsite; tile sources in one place (swap the street map provider there) |
 | `WeatherCard` · `Sky` · `SkyIcon` | `src/components/Weather.tsx` | Home's live jobsite weather in a weather-app style: animated sky that matches the forecast (sun, clouds, rain, lightning, fog, night), hour-by-hour strip (sky, temp, rain bar, wind arrow), heat/rain/wind at a glance, NWS warnings, crew notes; auto-refresh. Motion off with reduced motion. Animations in `globals.css` (`wx-*`) |
 | `applyReminders` · `setReminders` · `remindersSupported` | `src/lib/reminders.ts` | Phone-scheduled notifications (Capacitor Local Notifications); no-op on the website |
 | `heatReminder` | `src/content/heat.ts` | The heat reminder text (EN reviewed, ES draft), versioned |

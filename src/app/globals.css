@@ -145,12 +145,17 @@ body {
 .wx-flash-a-bolt { animation: wx-strike 6.3s linear infinite; }
 .wx-flash-b { animation: wx-flash 9.7s linear infinite 2.9s; }
 .wx-flash-b-bolt { animation: wx-strike 9.7s linear infinite 2.9s; }
+@keyframes wx-ping { 0% { transform: scale(1); opacity: 0.8; } 80%, 100% { transform: scale(3.2); opacity: 0; } }
+.wx-ping { animation: wx-ping 1.8s ease-out infinite; }
+/* Dark mode: a dimmed street map so the radar colors still stand out */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wx-basemap { filter: brightness(0.62) contrast(1.1) saturate(0.6); } }
+:root[data-theme="dark"] .wx-basemap { filter: brightness(0.62) contrast(1.1) saturate(0.6); }
 .wx-ring-alert { box-shadow: 0 0 0 2px var(--warn); animation: wx-ring 1.8s ease-out infinite; }
 .wx-ring-caution { box-shadow: 0 0 0 2px var(--caution), 0 0 22px color-mix(in srgb, var(--caution) 40%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
   .page-in, .toast-in, .sheet-in, .skeleton { animation: none; }
-  .wx-spin, .wx-spin-fast, .wx-pulse, .wx-flare, .wx-cross, .wx-fall, .wx-twinkle, .wx-fog, .wx-streak, .wx-debris, .wx-tumble, .wx-shimmer, .wx-ring-alert { animation: none; }
+  .wx-spin, .wx-spin-fast, .wx-pulse, .wx-flare, .wx-cross, .wx-fall, .wx-twinkle, .wx-fog, .wx-streak, .wx-debris, .wx-tumble, .wx-shimmer, .wx-ring-alert, .wx-ping { animation: none; }
   .wx-flash-a, .wx-flash-b, .wx-flash-b-bolt { animation: none; opacity: 0; }
   .wx-flash-a-bolt { animation: none; opacity: 1; } /* a still bolt still says "lightning" */
   .wx-cross { transform: translateX(120px); }

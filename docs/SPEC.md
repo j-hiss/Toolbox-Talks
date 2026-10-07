@@ -155,6 +155,12 @@ customer #1, not a special case.
   turn on reduced motion. The sky is layered: soft shaded clouds that keep crossing (faster in wind), rain at two
   depths that leans with the wind, branching lightning that lights the sky on an irregular rhythm, gust lines and
   blowing debris on windy days, heat shimmer on dangerous-heat days.
+- **Radar map (tap "Show radar"):** a street map centered on the jobsite with the last 50 minutes of rain radar
+  playing on top (a frame every 5 minutes, pausing on the latest), pause and tap-a-time, zoom in and out, a
+  light-to-heavy rain scale and the jobsite pin. Opens on a tap because it loads map pictures; once opened it stays
+  open on that phone. Street map: OpenStreetMap (free with attribution, fine for testing; switch to a paid map
+  provider before selling, one line in `src/lib/radar.ts`). Radar: NWS NEXRAD mosaic tiles from the Iowa
+  Environmental Mesonet. With no signal it says the map needs signal.
 - **Attention border, only on unusual days:** red and gently pulsing for a weather service warning, high wind
   (35+ mph) or extreme heat danger (heat index 125°+); amber and steady for thunderstorms, windy (25+ mph) or heat
   danger (103°+). A pill in the sky says why (a warning shows in its own red banner instead). An ordinary hot or
