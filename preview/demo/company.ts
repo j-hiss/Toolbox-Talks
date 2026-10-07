@@ -108,7 +108,7 @@ export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "a
   await tick(); mustBeAdmin(companyId);
   rows<Jobsite>("jobsites").push({ id: uid(), company_id: companyId, active: true, ...j }); save();
 }
-export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind" | "active">>): Promise<void> {
+export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind" | "work_setting" | "active">>): Promise<void> {
   await tick(); mustBeAdmin(companyId);
   Object.assign(rows<Jobsite>("jobsites").find((j) => j.company_id === companyId && j.id === id)!, patch); save();
 }

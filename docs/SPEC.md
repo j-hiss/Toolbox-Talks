@@ -148,10 +148,13 @@ customer #1, not a special case.
   Refreshes every 15 minutes while the app is open, when it comes back on screen and when signal returns, with a
   manual refresh; shows the last check and its time when offline. Plain notes for the crew, worded for where the
   crew works (Admin → Company → "Where the crew works"; until picked, the industry decides: Construction = inside and
-  outside, Agriculture = outside, Warehouse and Manufacturing = inside). Outside: get off the roof and out of lifts,
-  secure materials on the roof, slick surfaces. Inside and outside: stop outside work, inside work can go on, cover
-  materials and keep cords out of water. Inside: stop yard and dock work, watch dock doors, wet floors at doors and
-  docks. Same weather gives the same number of notes in every setting: only the wording changes, nothing is dropped.
+  outside, Agriculture = outside, Warehouse and Manufacturing = inside). Companies with crews in both set it per
+  jobsite (Admin → Jobsites); a jobsite left unset follows the company. Every note says only what OSHA material says
+  and links its source under it: thunder from the OSHA/NOAA lightning fact sheet (go indoors, enclosed building or
+  hard-topped vehicle, wait 30 minutes after the last thunder); high wind from 1926.451(f)(12) and 1926.1417(a);
+  windy from 1926.250(a)(1) or 1910.176(b); rain from 1926.451(f)(8) and 1926.404(b)(1), or 1910.22(a)(2) and
+  1910.178(n)(8) inside; the heat line links OSHA's heat page. Wording is content (src/content/weather-notes.ts,
+  versioned). Same weather gives the same notes in every setting: only the wording changes, nothing is dropped.
   Information only: the app never says a site is safe or unsafe to work; the crew lead decides.
   Looks like a weather app: an animated sky matching the forecast and time of day (sun, drifting clouds, rain,
   lightning flashes, fog, stars), the temperature and the work day's high/low, then hour by hour (sky icon, temp,

@@ -8,6 +8,7 @@ import {
   addJobsite, addPerson, addRole, addTeam, deactivateJobsite, deactivatePerson, deleteRole, deleteTeam, listJobsites,
   listPeople, listRoles, listTeams, updateCompany, updateJobsite, updatePerson, updateTeam,
 } from "@/lib/data/company";
+import { companyWorkSetting, WORK_SETTINGS, type WorkSetting } from "@/core/worksetting";
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { getLocation, LocationError } from "@/lib/location";
 import { mapsLink } from "@/core/geo";
@@ -137,7 +138,7 @@ function Admin({ m }: { m: Membership }) {
         ) : tab === "teams" ? (
           <TeamsTab companyId={companyId} people={people} teams={teams} act={act} />
         ) : tab === "jobsites" ? (
-          <JobsitesTab companyId={companyId} jobsites={jobsites} act={act} />
+          <JobsitesTab companyId={companyId} company={m.company} jobsites={jobsites} act={act} />
         ) : (
           <RolesTab companyId={companyId} people={people} roles={roles} act={act} />
         )}
@@ -361,7 +362,7 @@ function RolesTab({ companyId, people, roles, act }: { companyId: string; people
   );
 }
 
-function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites: Jobsite[]; act: Act }) {
+function JobsitesTab({ companyId, company, jobsites, act }: { companyId: string; company: Membership["company"]; jobsites: Jobsite[]; act: Act }) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [kind, setKind] = useState<Jobsite["kind"]>("site");
@@ -435,6 +436,17 @@ function JobsitesTab({ companyId, jobsites, act }: { companyId: string; jobsites
                   }}
                 />
                 <KindToggle value={j.kind ?? "site"} onChange={(k) => act(() => updateJobsite(companyId, j.id, { kind: k }))()} />
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-muted">Where the crew works here (words the weather notes)</span>
+                  <select
+                    className={inputClass}
+                    value={j.work_setting ?? ""}
+                    onChange={(e) => act(() => updateJobsite(companyId, j.id, { work_setting: (e.target.value || null) as WorkSetting | null }))()}
+                  >
+                    <option value="">Company setting: {WORK_SETTINGS.find((w) => w.id === companyWorkSetting(company))?.name.toLowerCase()}</option>
+                    {WORK_SETTINGS.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                  </select>
+                </label>
                 <input
                   aria-label={`Address for ${j.name}`}
                   defaultValue={j.address}

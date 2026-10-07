@@ -1,7 +1,6 @@
 // Jobsite weather for the rest of the work day: rain chance, wind, thunderstorms and the weather service's own
 // active alerts, alongside heat (src/core/heat.ts). Pure module: reads api.weather.gov responses, judges them.
 // The app shows this as information for the crew; it never says a site is safe or unsafe to work.
-import type { WorkSetting } from "./worksetting";
 import { heatForDay, heatIndexF, type HeatDay } from "./heat";
 
 export const WORK_START_HOUR = 6;
@@ -195,38 +194,18 @@ export function conditionsFor(forecast: unknown, alerts: unknown, now: Date = ne
   };
 }
 
-/**
- * Short, plain notes for the crew, worded for where they work (see src/core/worksetting.ts). Information only: the
- * crew lead decides what to do.
- */
-const NOTES: Record<WorkSetting, { thunder: string; high: string; windy: string; rain: string }> = {
-  outdoor: {
-    thunder: "Thunderstorms in the forecast. When thunder roars, get off the roof and out of lifts, and shelter in a building or hard-topped vehicle.",
-    high: "High wind. Check limits for lifts, cranes and edge work before you start.",
-    windy: "Windy. Secure loose materials, sheets and debris on the roof.",
-    rain: "Rain likely. Plan for slick surfaces and cover open work.",
-  },
-  mixed: {
-    thunder: "Thunderstorms in the forecast. When thunder roars, stop outside work: off roofs, scaffolds and lifts, and into a building or hard-topped vehicle. Inside work can go on.",
-    high: "High wind. Check limits for lifts, cranes and scaffolds before outside work.",
-    windy: "Windy. Secure loose materials and sheets outside, and watch open doors and wall openings.",
-    rain: "Rain likely. Cover materials, keep cords and tools out of water, and watch for slick floors at entrances.",
-  },
-  indoor: {
-    thunder: "Thunderstorms in the forecast. When thunder roars, stop yard, dock and outside work and stay inside.",
-    high: "High wind. Hold off on yard work, and secure trailers, dock doors and anything loose outside.",
-    windy: "Windy. Watch dock and overhead doors, and secure loose items in the yard.",
-    rain: "Rain likely. Expect wet floors at doors and docks: put out mats and wet-floor signs, and slow forklifts on wet ramps.",
-  },
-};
+export type WeatherNoteKey = "thunder" | "high" | "windy" | "rain";
 
-export function conditionNotes(c: Conditions, setting: WorkSetting = "outdoor"): string[] {
-  const n = NOTES[setting];
-  const out: string[] = [];
-  if (c.thunderAt) out.push(n.thunder);
-  if (c.wind?.level === "high") out.push(n.high);
-  else if (c.wind?.level === "windy") out.push(n.windy);
-  if (c.rain?.level === "likely") out.push(n.rain);
+/**
+ * Which crew notes today's weather calls for, in order. The wording (per work setting, with its OSHA reference) is
+ * content: src/content/weather-notes.ts. Information only: the crew lead decides what to do.
+ */
+export function conditionNotes(c: Conditions): WeatherNoteKey[] {
+  const out: WeatherNoteKey[] = [];
+  if (c.thunderAt) out.push("thunder");
+  if (c.wind?.level === "high") out.push("high");
+  else if (c.wind?.level === "windy") out.push("windy");
+  if (c.rain?.level === "likely") out.push("rain");
   return out;
 }
 

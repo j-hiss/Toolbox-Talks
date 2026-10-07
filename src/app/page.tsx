@@ -150,7 +150,7 @@ function Home({ m }: { m: Membership }) {
       )}
 
       <JobsitePicker companyId={co.id} isAdmin={isAdmin} onChange={setSite} />
-      <WeatherCard key={site?.id ?? "none"} site={site} setting={workSettingFor(co)} />
+      <WeatherCard key={site?.id ?? "none"} site={site} setting={workSettingFor(co, site)} />
 
       {upcoming.length > 0 && (
         <section>

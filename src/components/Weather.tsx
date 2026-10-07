@@ -10,6 +10,7 @@ import { alertWorthy, HEAT_LABEL } from "@/core/heat";
 import { attention, conditionNotes, daySummary, RAIN_LABEL, siteHour, WIND_LABEL, type Attention } from "@/core/conditions";
 import { skyPhase, sunTimes, type SkyPhase } from "@/core/sun";
 import type { WorkSetting } from "@/core/worksetting";
+import { HEAT_REF, weatherNote, type Ref } from "@/content/weather-notes";
 import { cachedConditions, checkConditions, CONDITIONS_FRESH_MS, type ConditionsCheck } from "@/lib/weather";
 import { getLocation, LocationError } from "@/lib/location";
 import { RadarMap, type MapArea } from "./RadarMap";
@@ -232,16 +233,25 @@ function Stats({ c }: { c: ConditionsCheck }) {
 
 function Notes({ c, setting }: { c: ConditionsCheck; setting: WorkSetting }) {
   const heatLoud = !!c.heat && alertWorthy(c.heat.level);
-  const notes = conditionNotes(c, setting);
+  const notes = conditionNotes(c).map((k) => ({ key: k, ...weatherNote(setting, k) }));
   if (!c.thunderAt && !notes.length && !heatLoud) return null;
   return (
     <div className="mx-3 mb-3 rounded-xl bg-caution-bg px-3.5 py-3 text-sm text-caution-text" role="alert">
       {c.thunderAt && <p className="font-semibold">Thunderstorms possible from about {siteHour(c.thunderAt)}</p>}
-      <ul className="mt-1 flex flex-col gap-1">
-        {notes.map((n) => <li key={n}>{n}</li>)}
-        {heatLoud && c.day === "today" && <li>The heat reminder is added to today&apos;s talks.</li>}
+      <ul className="mt-1 flex flex-col gap-2">
+        {notes.map((n) => <li key={n.key}>{n.text}<Refs refs={n.refs} /></li>)}
+        {heatLoud && c.day === "today" && <li>The heat reminder is added to today&apos;s talks.<Refs refs={[HEAT_REF]} /></li>}
       </ul>
     </div>
+  );
+}
+
+/** Where a note comes from, so a crew lead can read the OSHA source. */
+function Refs({ refs }: { refs: Ref[] }) {
+  return (
+    <span className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] opacity-75">
+      {refs.map((r) => <a key={r.label} href={r.url} target="_blank" rel="noreferrer" className="underline underline-offset-2">{r.label}</a>)}
+    </span>
   );
 }
 

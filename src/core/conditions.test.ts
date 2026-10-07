@@ -60,28 +60,13 @@ describe("jobsite conditions", () => {
     expect(a[1].loud).toBe(false);
   });
 
-  it("gives plain notes and says when to call it out", () => {
+  it("picks the notes the weather calls for and says when to call it out", () => {
     const c = conditionsFor(day, { features: [] }, at("2026-10-06T10:20:00-04:00"))!;
-    const notes = conditionNotes(c);
-    expect(notes.some((n) => n.startsWith("Thunderstorms"))).toBe(true);
-    expect(notes.some((n) => n.startsWith("Windy"))).toBe(true);
-    expect(notes.some((n) => n.startsWith("Rain likely"))).toBe(true);
+    expect(conditionNotes(c)).toEqual(["thunder", "windy", "rain"]);
     expect(attention(c)?.level).toBe("caution");
     const calm = conditionsFor(fc([hour(9), hour(10)]), null, at("2026-10-06T09:10:00-04:00"))!;
     expect(conditionNotes(calm)).toEqual([]);
     expect(attention(calm)).toBeNull();
-  });
-
-  it("words the notes for where the crew works", () => {
-    const c = conditionsFor(day, { features: [] }, at("2026-10-06T10:20:00-04:00"))!;
-    const roof = conditionNotes(c, "outdoor"), mixed = conditionNotes(c, "mixed"), inside = conditionNotes(c, "indoor");
-    expect(roof[0]).toContain("get off the roof");
-    expect(mixed[0]).toContain("Inside work can go on");
-    expect(inside[0]).toContain("stop yard, dock and outside work");
-    expect(inside.join(" ")).not.toContain("roof");
-    expect(inside.some((n) => n.includes("wet floors"))).toBe(true);
-    // Same weather, same number of notes: only the wording changes, nothing is dropped.
-    expect(new Set([roof.length, mixed.length, inside.length]).size).toBe(1);
   });
 
   it("defaults where the crew works from the industry until the company picks", () => {
@@ -91,6 +76,10 @@ describe("jobsite conditions", () => {
     expect(workSettingFor({ industry: "ag" })).toBe("outdoor");
     expect(workSettingFor({ industry: "con", work_setting: "outdoor" })).toBe("outdoor");
     expect(workSettingFor({ industry: "wh", work_setting: null })).toBe("indoor");
+    // A jobsite's own setting wins; unset, it follows the company.
+    expect(workSettingFor({ industry: "con", work_setting: "mixed" }, { work_setting: "indoor" })).toBe("indoor");
+    expect(workSettingFor({ industry: "con", work_setting: "outdoor" }, { work_setting: null })).toBe("outdoor");
+    expect(workSettingFor({ industry: "wh" }, null)).toBe("indoor");
   });
 
   it("reads the sky from the short forecast", () => {

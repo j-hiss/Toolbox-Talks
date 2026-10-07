@@ -230,6 +230,13 @@ async function main() {
     check("A can't change where B's crew works", (await as(userA, "update public.companies set work_setting = 'indoor' where id = $1", [coB])).rowCount === 0);
     check("A presenter can't change where the crew works", (await as(presenterA, "update public.companies set work_setting = 'indoor' where id = $1", [coA])).rowCount === 0);
     check("Only known work settings are stored", await fails(() => as(userA, "update public.companies set work_setting = 'underwater' where id = $1", [coA])));
+    const siteA = (await as(userA, "insert into public.jobsites (company_id, name) values ($1, 'Example warehouse') returning id", [coA])).rows[0].id;
+    check("A jobsite starts on the company's work setting", (await as(userA, "select work_setting from public.jobsites where id = $1", [siteA])).rows[0]?.work_setting === null);
+    check("An admin can set where the crew works at a jobsite",
+      (await as(userA, "update public.jobsites set work_setting = 'indoor' where id = $1 returning work_setting", [siteA])).rows[0]?.work_setting === "indoor");
+    check("B can't change A's jobsite setting", (await as(userB, "update public.jobsites set work_setting = 'outdoor' where id = $1", [siteA])).rowCount === 0);
+    check("A presenter can't change a jobsite setting", (await as(presenterA, "update public.jobsites set work_setting = 'outdoor' where id = $1", [siteA])).rowCount === 0);
+    check("Only known jobsite work settings are stored", await fails(() => as(userA, "update public.jobsites set work_setting = 'space' where id = $1", [siteA])));
 
     // Site notes, heat, and issues raised at a talk.
     const personA = (await as(userA, "select id from public.people where company_id = $1 limit 1", [coA])).rows[0].id;
