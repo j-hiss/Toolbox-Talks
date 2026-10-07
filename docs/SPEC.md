@@ -165,12 +165,13 @@ customer #1, not a special case.
 - **Full forecast (tap the sky or "Full forecast"):** a full-screen view with a taller sky, warnings with the weather
   service's own instructions, the day sentence, the hour strip, a larger radar, the work-day numbers, sunrise, sunset
   and daylight, and the crew notes. Back or Escape closes it.
-- **Radar map (tap "Show radar"):** a street map centered on the jobsite with the last 50 minutes of rain radar
-  playing on top (a frame every 5 minutes, pausing on the latest), pause and tap-a-time, zoom in and out, a
+- **Radar map (tap "Show radar"):** a street map centered on the jobsite with rain radar playing on top, pausing on
+  the latest scan. Choose how far back: 1 hour (a frame every 5 minutes, the default), 3 hours (every 15) or 6 hours
+  (every 30); each loop is 13 frames so a longer loop costs no more data, and the choice is remembered on the phone, pause and tap-a-time, zoom in and out, a
   light-to-heavy rain scale and the jobsite pin. Opens on a tap because it loads map pictures; once opened it stays
   open on that phone. Street map: OpenStreetMap (free with attribution, fine for testing; switch to a paid map
   provider before selling, one line in `src/lib/radar.ts`). Radar: NWS NEXRAD mosaic tiles from the Iowa
-  Environmental Mesonet. With no signal it says the map needs signal. Active warnings and watches are drawn on the
+  Environmental Mesonet (named layers for the last 50 minutes, its 5-minute archive by UTC time for older scans). With no signal it says the map needs signal. Active warnings and watches are drawn on the
   map as their outlines from the weather service (red and pulsing for a warning that triggers the red border, amber
   dashed otherwise) and named in the legend; the radar button shows a "Warning area" chip when one is drawn. Frame
   labels show the scan's clock time when the radar source reports it, otherwise "N min earlier".

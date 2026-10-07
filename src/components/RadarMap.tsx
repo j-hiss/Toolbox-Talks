@@ -1,14 +1,17 @@
 "use client";
 
-// A small radar map centered on the jobsite: a street map with the last 50 minutes of rain radar playing on top,
+// A small radar map centered on the jobsite: a street map with the last 1, 3 or 6 hours of rain radar playing on top,
 // like a weather app. Tile math in src/core/maptiles.ts; where the pictures come from in src/lib/radar.ts.
 // Plays on its own unless the phone asks for reduced motion; pause, step back and zoom are a tap away.
 import { useEffect, useRef, useState } from "react";
 import { milesAcross, tileXY, tilesFor } from "@/core/maptiles";
 import type { Ring } from "@/core/conditions";
-import { BASEMAP, RADAR, RADAR_FRAMES, radarLatest } from "@/lib/radar";
+import { BASEMAP, RADAR, RADAR_SPANS, agoLabel, guessLatest, radarFrames, radarLatest, type RadarSpan } from "@/lib/radar";
 
-const LAST = RADAR_FRAMES.length - 1;
+const SPAN_KEY = "tt-radar-span";
+function savedSpan(): RadarSpan {
+  try { const v = Number(localStorage.getItem(SPAN_KEY)); return RADAR_SPANS.some((s) => s.hours === v) ? (v as RadarSpan) : 1; } catch { return 1; }
+}
 
 /** A weather service warning area to outline on the map. */
 export type MapArea = { event: string; rings: Ring[]; loud: boolean };
@@ -18,7 +21,14 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(358);
   const [z, setZ] = useState(8);
+  const [span, setSpan] = useState<RadarSpan>(savedSpan);
+  const frames = radarFrames(span);
+  const LAST = frames.length - 1;
   const [frame, setFrame] = useState(LAST);
+  const pickSpan = (h: RadarSpan) => {
+    setSpan(h); setFrame(radarFrames(h).length - 1); setRadarFailed(0);
+    try { localStorage.setItem(SPAN_KEY, String(h)); } catch { /* fine */ }
+  };
   const [playing, setPlaying] = useState(() => typeof window === "undefined" || !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   const [baseFailed, setBaseFailed] = useState(0);
   const [radarFailed, setRadarFailed] = useState(0);
@@ -36,16 +46,16 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
   // The loop: one frame every half second, then a pause on the latest scan.
   useEffect(() => {
     if (!playing) return;
-    const t = setTimeout(() => setFrame((f) => (f + 1) % RADAR_FRAMES.length), frame === LAST ? 1600 : 450);
+    const t = setTimeout(() => setFrame((f) => (f + 1) % frames.length), frame === LAST ? 1600 : 450);
     return () => clearTimeout(t);
-  }, [playing, frame]);
+  }, [playing, frame, frames.length, LAST]);
 
   const tiles = tilesFor(latitude, longitude, z, width, HEIGHT);
   const offline = baseFailed >= tiles.length && tiles.length > 0;
-  const minsAgo = RADAR_FRAMES[frame];
-  const label = scanAt
-    ? new Date(scanAt.getTime() - minsAgo * 60_000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    : minsAgo === 0 ? "Latest" : `${minsAgo} min earlier`;
+  const minsAgo = frames[Math.min(frame, LAST)];
+  const base = scanAt ?? guessLatest();
+  const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const label = scanAt ? clock(new Date(scanAt.getTime() - minsAgo * 60_000)) : agoLabel(minsAgo);
   // Warning areas, placed with the same tile math as the map (pixels from the center).
   const c = tileXY(latitude, longitude, z);
   const toPx = ([lat, lon]: [number, number]) => { const p = tileXY(lat, lon, z); return `${(width / 2 + (p.x - c.x) * 256).toFixed(1)},${(HEIGHT / 2 + (p.y - c.y) * 256).toFixed(1)}`; };
@@ -62,11 +72,11 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
             onError={() => setBaseFailed((n) => n + 1)} />
         ))}
         {/* Radar: every frame is loaded up front and only the current one shows, so the loop never flickers */}
-        {RADAR_FRAMES.map((m, i) => (
-          <div key={m} className="pointer-events-none absolute inset-0 transition-opacity duration-150" style={{ opacity: i === frame ? 0.78 : 0 }}>
+        {frames.map((m, i) => (
+          <div key={`${span}-${m}`} className="pointer-events-none absolute inset-0 transition-opacity duration-150" style={{ opacity: i === frame ? 0.78 : 0 }}>
             {tiles.map((t) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img key={`r-${m}-${t.z}-${t.x}-${t.y}`} src={RADAR.tile(m, t.z, t.x, t.y)} alt="" width={256} height={256} draggable={false}
+              <img key={`r-${m}-${t.z}-${t.x}-${t.y}`} src={RADAR.tile(m, t.z, t.x, t.y, base)} alt="" width={256} height={256} draggable={false}
                 className="absolute max-w-none select-none" style={{ left: t.left, top: t.top }} onError={() => setRadarFailed((n) => n + 1)} />
             ))}
           </div>
@@ -106,6 +116,15 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
           )}
         </div>
 
+        {/* How far back */}
+        <div className="absolute bottom-[52px] left-2 flex overflow-hidden rounded-lg bg-white/90 text-[11px] font-semibold text-[#14202E] shadow" role="group" aria-label="How far back the radar goes">
+          {RADAR_SPANS.map((s) => (
+            <button key={s.hours} className={`h-7 px-2.5 ${span === s.hours ? "bg-[#14202E] text-white" : ""}`} onClick={() => pickSpan(s.hours)} aria-pressed={span === s.hours}>
+              {s.hours}h
+            </button>
+          ))}
+        </div>
+
         {/* Play, timeline */}
         <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-lg bg-[#14202E]/80 px-2 py-1.5 text-white backdrop-blur-sm">
           <button className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "Pause radar" : "Play radar"}>
@@ -114,8 +133,8 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
               : <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>}
           </button>
           <div className="flex flex-1 items-center gap-0.5" role="group" aria-label="Radar time">
-            {RADAR_FRAMES.map((m, i) => (
-              <button key={m} className="flex h-8 flex-1 items-center" onClick={() => { setPlaying(false); setFrame(i); }} aria-label={m === 0 ? "Latest radar" : `${m} minutes earlier`}>
+            {frames.map((m, i) => (
+              <button key={`${span}-${m}`} className="flex h-8 flex-1 items-center" onClick={() => { setPlaying(false); setFrame(i); }} aria-label={m === 0 ? "Latest radar" : agoLabel(m)}>
                 <span className={`block h-1.5 w-full rounded-full ${i <= frame ? "bg-white" : "bg-white/25"}`} />
               </button>
             ))}
@@ -131,7 +150,7 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
       </div>
       <p className="mt-1.5 text-[11px] text-muted">
         About {miles} miles across. {RADAR.credit}. Map {BASEMAP.credit}.
-        {!offline && radarFailed >= tiles.length * RADAR_FRAMES.length && tiles.length > 0 ? " Radar couldn't load just now." : ""}
+        {!offline && radarFailed >= tiles.length * frames.length && tiles.length > 0 ? " Radar couldn't load just now." : ""}
       </p>
     </div>
   );
