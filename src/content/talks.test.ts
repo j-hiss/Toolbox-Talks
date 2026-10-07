@@ -17,11 +17,25 @@ describe("talk sources and wording", () => {
       }
     }
   });
-  it("standard sources point at the OSHA regulation page", () => {
+  it("standard sources point at the regulation itself", () => {
+    // An OSHA section or appendix page (1904 recordkeeping, 1910, 1926, 1928), or EPA's rule on eCFR (pesticides).
+    const osha = /^https:\/\/www\.osha\.gov\/laws-regs\/regulations\/standardnumber\/(1904|1910|1926|1928)\/(\1\.\d+(App[A-Z]\d*)?|\1Subpart[A-Z]+App[A-Z]\d*)$/;
+    const ecfr = /^https:\/\/www\.ecfr\.gov\/current\/title-40\/chapter-I\/subchapter-E\/part-170$/;
     for (const t of TALKS) {
       for (const s of t.sources.filter((x) => x.kind === "standard")) {
-        expect(s.url, t.id).toMatch(/^https:\/\/www\.osha\.gov\/laws-regs\/regulations\/standardnumber\/19(10|26|28)\/19(10|26|28)\.\d+$/);
+        expect(osha.test(s.url) || ecfr.test(s.url), `${t.id}: ${s.url}`).toBe(true);
       }
+    }
+  });
+
+  it("every talk has English and Spanish with the same shape, and unique ids", () => {
+    const ids = TALKS.map((t) => t.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const t of TALKS) {
+      const en = t.content.en, es = t.content.es;
+      expect(es, t.id).toBeDefined();
+      expect(es!.sections.length, t.id).toBe(en.sections.length);
+      en.sections.forEach((sec, i) => expect(es!.sections[i].items.length, `${t.id} section ${i}`).toBe(sec.items.length));
     }
   });
   it("no talk claims compliance", () => {

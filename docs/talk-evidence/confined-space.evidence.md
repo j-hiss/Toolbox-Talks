@@ -1,0 +1,36 @@
+# confined-space evidence
+
+Standard page: https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.146
+Guidance: OSHA Confined Spaces (https://www.osha.gov/confined-spaces); OSHA 3138-01R (2004) Permit-Required Confined Spaces; NIOSH 86-110 (https://www.cdc.gov/niosh/docs/86-110/).
+
+| English sentence | Source | Supporting quote |
+|---|---|---|
+| A tank, pit or silo can look harmless from the outside. | n/a | Framing; examples from OSHA Confined Spaces page ("tanks, vessels, silos ... pits"). |
+| NIOSH reports that more than 60 percent of confined space deaths are would-be rescuers. | guidance: NIOSH 86-110 | exact: "More than 60% of confined space fatalities occur among would-be rescuers." |
+| A confined space is big enough to get into and work in, has a limited way in and out, and isn't built for people to stay in. | 1910.146(b) "Confined space" | paraphrase: "large enough and so configured that an employee can bodily enter and perform assigned work"; "limited or restricted means for entry or exit"; "not designed for continuous employee occupancy." |
+| Think tanks, vessels, silos, bins, hoppers, vaults, pits and ductwork. | guidance: OSHA Confined Spaces | exact list: "tanks, vessels, silos, storage bins, hoppers, vaults, pits, manholes, tunnels, equipment housings, ductwork, pipelines" |
+| It's permit-required if it has, or could have, a hazardous atmosphere, liquid or loose material that could engulf you, a shape that could trap you, or any other serious hazard. | 1910.146(b) "Permit-required confined space" (1)-(4); "Engulfment" | paraphrase: "Contains or has a potential to contain a hazardous atmosphere"; engulfment = capture "by a liquid or finely divided (flowable) solid substance"; converging walls/sloping floors that could trap (OSHA page); "any other recognized serious safety or health hazard." |
+| Your company has to find these spaces and warn you, usually with a danger sign. | 1910.146(c)(1)-(c)(2) | paraphrase: "The employer shall evaluate the workplace to determine if any spaces are permit-required confined spaces"; inform exposed employees "by posting danger signs or by any other equally effective means". |
+| If you see one, you don't go in unless you're on the permit. | 1910.146(b) "Authorized entrant"; (f) | paraphrase: authorized entrant = "an employee who is authorized by the employer to enter a permit space"; the permit lists the authorized entrants. |
+| Before anyone enters, a written permit is filled out and posted at the entry. | 1910.146(e)(1), (e)(3) | paraphrase: "Before entry is authorized, the employer shall document ... by preparing an entry permit"; made available "by posting it at the entry portal or by any other equally effective means." |
+| It lists the hazards, the safe entry conditions, who's going in, who the attendant is, the air test results, and how to call rescue. | 1910.146(f) | paraphrase: permit identifies the space, hazards, "The acceptable entry conditions", entrants, attendants, test results, rescue services and means of summoning them. |
+| Entry starts the moment any part of your body breaks the plane of the opening. Leaning your head in counts. | 1910.146(b) "Entry" | exact: "considered to have occurred as soon as any part of the entrant's body breaks the plane of an opening into the space." (head = example of "any part") |
+| The entry supervisor cancels the permit when the work is done, or when a condition the permit doesn't allow shows up. | 1910.146(e)(5) | paraphrase: "The entry supervisor shall terminate entry and cancel the entry permit when:" entry is complete or "A condition that is not allowed under the entry permit arises in or near the permit space." |
+| The air is tested before anyone goes in, in this order: oxygen first, then flammable gases, then toxic gases. | 1910.146(d)(5)(i), (d)(5)(iii) | exact: "test first for oxygen, then for combustible gases and vapors, and then for toxic gases and vapors"; OSHA 3138 same sequence. |
+| Oxygen below 19.5 percent or above 23.5 percent is a hazardous atmosphere. | 1910.146(b) "Hazardous atmosphere" (3) | exact: "Atmospheric oxygen concentration below 19.5 percent or above 23.5 percent" |
+| So is flammable gas above 10 percent of its lower flammable limit. | 1910.146(b) "Hazardous atmosphere" (1) | exact: "Flammable gas, vapor, or mist in excess of 10 percent of its lower flammable limit (LFL)" |
+| Testing continues during the work as needed. | 1910.146(d)(5)(ii) | exact: "Test or monitor the permit space as necessary to determine if acceptable entry conditions are being maintained" |
+| You get the chance to watch the testing. | 1910.146(d)(5)(iv) | paraphrase: "Provide each authorized entrant or that employee's authorized representative an opportunity to observe the pre-entry" and subsequent testing. |
+| The attendant stays outside the whole time, keeps track of who's inside, and orders everyone out if something's wrong. | 1910.146(i)(4), (i)(6); OSHA 3138 | exact: "Remains outside the permit space during entry operations until relieved by another attendant"; OSHA 3138: "keep an accurate account of those workers entering the permit space"; (i)(6) orders evacuation on prohibited condition, behavioral effects, outside danger. |
+| If you're inside and notice a warning sign or symptom, a condition the permit doesn't allow, or an alarm, tell the attendant and get out fast. | 1910.146(h)(4), (h)(5) | paraphrase: alert the attendant on "any warning sign or symptom of exposure" or a prohibited condition; exit "as quickly as possible" on those or when "An evacuation alarm is activated." |
+| Same if the attendant or entry supervisor says get out. | 1910.146(h)(5)(i) | exact: "An order to evacuate is given by the attendant or the entry supervisor." |
+| If someone goes down, the attendant calls rescue. | 1910.146(i)(7) | paraphrase: "Summon rescue and other emergency services as soon as the attendant determines" entrants may need assistance to escape. |
+| Where a retrieval line is set up, they're pulled out from outside. | 1910.146(k)(3) | paraphrase: "To facilitate non-entry rescue, retrieval systems or methods shall be used" unless they would increase risk or not help; line attached outside the space. Kept conditional ("where ... set up") because of the exceptions. |
+| Unless you're on the trained rescue team, never go in after them. | 1910.146(d)(9); note to (i)(4); OSHA 3138 | paraphrase: procedures for "preventing unauthorized personnel from attempting a rescue" (OSHA 3138 wording); attendants may enter for rescue only "if they have been trained and equipped for rescue operations" and are relieved. |
+| Ask: Where is the nearest permit space in our area, and who do we call to rescue someone from it? | n/a | Discussion prompt. |
+
+Dropped / not used:
+- OSHA Confined Spaces page has no rescuer statistic; the 60% figure is from NIOSH 86-110 (fetched on cdc.gov).
+- Rescue team training/CPR/annual practice (1910.146(k)(2)) — employer-side detail, left out for length.
+
+Paragraph corrections: (i)(10) does not itself bar the attendant from entering; that limit is (i)(4) and its note. (d)(5)(iii) holds the testing order. In the (c)(5) alternate procedures, forced-air ventilation is (c)(5)(ii)(E) and periodic testing is (c)(5)(ii)(F) (not used in the talk).

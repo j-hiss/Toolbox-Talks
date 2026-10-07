@@ -92,6 +92,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `Sky` · `skyBackground` · `SkyIcon` · `SkyIconDefs` · `SunEventIcon` | `src/components/weather/Sky.tsx` | **The** weather drawing: animated sky by forecast and dawn/day/dusk/night, shaded sky icons (shared gradients defined once), sunrise/sunset icons |
 | `HourStrip` | `src/components/weather/HourStrip.tsx` | **The** hour-by-hour strip: icons, temperature curve, feels-like, rain bars, wind, sunrise/sunset markers, tap for details |
 | `applyReminders` · `setReminders` · `remindersSupported` | `src/lib/reminders.ts` | Phone-scheduled notifications (Capacitor Local Notifications); no-op on the website |
+| `TALKS` | `src/content/talks.ts` | **The** talk library (79 talks: con 49, wh 31, mfg 36, ag 25 incl. shared). Every talk lists its `sources`; evidence trail in `docs/talk-evidence/`; coverage tracked in the shared doc "Talk Library: OSHA Coverage Map" |
 | `heatReminder` | `src/content/heat.ts` | The heat reminder text (EN reviewed, ES draft), versioned |
 | `signingStatement` · `SIGNING_STATEMENT_VERSION` | `src/content/ui.ts` | **The** statement crew tap before signing, saved with each record (`SigningStatement` in `src/core/record.ts`; `confirmed_at` per attendee; printed by `buildRecordPdf`) |
 | `MakeupTag` | `src/components/ui.tsx` | "Makeup for the week of … · reason" wherever a record is listed |
