@@ -16,6 +16,8 @@ export type Talk = {
   code: string;
   /** Roughly how long it takes to read aloud. */
   minutes: number;
+  /** Where the talk's content comes from: OSHA standards (paragraph-level) and OSHA guidance pages. Every talk has at least one. */
+  sources: { label: string; url: string; kind: "standard" | "guidance" }[];
   content: Partial<Record<LanguageId, TalkText>> & { en: TalkText };
   translationStatus: Partial<Record<LanguageId, TranslationStatus>>;
 };

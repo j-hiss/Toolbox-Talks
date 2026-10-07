@@ -1,6 +1,8 @@
 // Talk library, ported from prototype/index.html (TALKS + ES).
 // Content is data: changing wording means a new version, and saved records keep the version that was read.
 // Spanish is "draft" until a native speaker who knows jobsite safety reviews it (see CLAUDE.md).
+// Every talk lists its sources: OSHA standards (paragraph-level, in the label) and OSHA guidance pages.
+// A source backs the wording. It is not a claim about any company's legal standing.
 import type { Talk } from "@/core/talks";
 
 export const TALKS: Talk[] = [
@@ -9,8 +11,40 @@ export const TALKS: Talk[] = [
     "industries": [
       "con"
     ],
-    "code": "1926.501",
+    "code": "1926.501 / 1926.502",
     "minutes": 6,
+    "sources": [
+      {
+        "label": "OSHA 1926.501(b)(1): unprotected sides and edges",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.501(b)(4): holes, including skylights",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.502(d): personal fall arrest systems, incl. (d)(15) anchorages, (d)(19), (d)(21) inspection",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.502",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.502(i): covers",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.502",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Stop Falls",
+        "url": "https://www.osha.gov/stop-falls",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Subpart M Appendix C: personal fall arrest systems",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926SubpartMAppC",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Fall Protection",
@@ -19,7 +53,7 @@ export const TALKS: Talk[] = [
           {
             "heading": "The rule",
             "items": [
-              "If you're 6 feet or more above a lower level, you need fall protection. That's the federal construction line.",
+              "If you're 6 feet or more above a lower level, you need fall protection. That's the federal construction line. Scaffolds and ladders have their own rules.",
               "That can be a guardrail, a safety net, or a personal fall arrest system. Your supervisor will tell you which one this job uses."
             ]
           },
@@ -27,14 +61,14 @@ export const TALKS: Talk[] = [
             "heading": "Before you clip in",
             "items": [
               "Inspect your harness every time: frayed webbing, cracked buckles, a deployed impact indicator. Any of those and it goes out of service today.",
-              "Anchor point rated for 5,000 lbs per worker, or designed by a qualified person. A vent pipe is not an anchor.",
-              "Check your clearance. A 6-foot lanyard can need nearly 18 feet below you before it stops you."
+              "Your anchor has to hold 5,000 pounds for each person tied to it, or be part of a system a qualified person set up and oversees. A vent pipe is not an anchor.",
+              "Check your clearance. A 6-foot lanyard plus the shock pack stretch can drop you well past 6 feet. Make sure you won't hit the ground or anything below before it stops you."
             ]
           },
           {
             "heading": "Holes and skylights",
             "items": [
-              "Every hole over 2 inches gets covered, secured, and marked HOLE or COVER.",
+              "Any hole 2 inches or bigger gets a cover. Secure it so it can't move, and mark it HOLE or COVER or color-code it.",
               "Skylights are holes. People fall through them every year."
             ]
           }
@@ -48,7 +82,7 @@ export const TALKS: Talk[] = [
           {
             "heading": "La regla",
             "items": [
-              "Si estás a 6 pies o más sobre un nivel más bajo, necesitas protección contra caídas. Esa es la regla federal para la construcción.",
+              "Si estás a 6 pies o más sobre un nivel más bajo, necesitas protección contra caídas. Esa es la regla federal para la construcción. Los andamios y las escaleras tienen sus propias reglas.",
               "Puede ser una baranda, una red de seguridad o un sistema personal de detención de caídas. Tu supervisor te dirá cuál se usa en este trabajo."
             ]
           },
@@ -56,14 +90,14 @@ export const TALKS: Talk[] = [
             "heading": "Antes de engancharte",
             "items": [
               "Revisa tu arnés cada vez: correas deshilachadas, hebillas rotas o un indicador de impacto activado. Si tiene cualquiera de esas, se saca de servicio hoy.",
-              "El punto de anclaje debe aguantar 5,000 libras por trabajador, o estar diseñado por una persona calificada. Un tubo de ventilación no es un anclaje.",
-              "Revisa el espacio libre. Una línea de 6 pies puede necesitar casi 18 pies debajo de ti para detenerte."
+              "Tu anclaje tiene que aguantar 5,000 libras por cada persona amarrada a él, o ser parte de un sistema que una persona calificada instaló y supervisa. Un tubo de ventilación no es un anclaje.",
+              "Revisa el espacio libre. Una línea de 6 pies más lo que se estira el amortiguador te puede dejar caer mucho más de 6 pies. Asegúrate de que no vas a pegar contra el suelo ni contra nada abajo antes de que te detenga."
             ]
           },
           {
             "heading": "Huecos y tragaluces",
             "items": [
-              "Todo hueco de más de 2 pulgadas se cubre, se asegura y se marca HOLE o COVER (hueco o tapa).",
+              "Todo hueco de 2 pulgadas o más lleva tapa. Asegúrala para que no se mueva, y márcala HOLE o COVER (hueco o tapa) o márcala con un color.",
               "Los tragaluces son huecos. Cada año hay gente que se cae a través de ellos."
             ]
           }
@@ -81,32 +115,49 @@ export const TALKS: Talk[] = [
     "industries": [
       "all"
     ],
-    "code": "HEAT",
+    "code": "OSHA HEAT",
     "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Heat: Water. Rest. Shade.",
+        "url": "https://www.osha.gov/heat-exposure/water-rest-shade",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Heat: illness and first aid",
+        "url": "https://www.osha.gov/heat-exposure/illness-first-aid",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Heat: protecting new workers",
+        "url": "https://www.osha.gov/heat-exposure/protecting-new-workers",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Heat Illness: Water, Rest, Shade",
-        "hook": "Roofs, attics, pavement and enclosed spaces can run far hotter than the air temperature. Heat illness can take down the strongest person on the crew.",
+        "hook": "Roofs and attics can be a lot hotter than the weather report says. Heat illness can take down the strongest person on the crew.",
         "sections": [
           {
             "heading": "Water, rest, shade",
             "items": [
               "Drink about a cup of water every 15 to 20 minutes, even if you're not thirsty.",
               "Take breaks in the shade. Longer breaks as the heat index climbs.",
-              "New or returning workers need about a week to build up to full workload. Most heat deaths happen in the first few days."
+              "Almost half of heat deaths happen on a worker's first day. New or returning workers build up over about a week."
             ]
           },
           {
             "heading": "Know the signs",
             "items": [
-              "Heat exhaustion: heavy sweating, dizziness, headache, cramps, nausea. Move them to shade, cool them down, give water.",
-              "Heat stroke: confusion, slurred speech, passing out, hot skin, seizures. This is a 911 call. Cool them with water and ice while you wait."
+              "Heat exhaustion: heavy sweating, dizziness, nausea, feeling weak, thirsty or cranky. Move them somewhere cool, cool them down, and don't leave them alone. If it gets worse, call 911.",
+              "Heat stroke: confusion, slurred speech, passing out, hot skin that may be dry or still sweaty, seizures. This is a 911 call. Cool them with water and ice while you wait."
             ]
           },
           {
             "heading": "Look out for each other",
             "items": [
-              "People with heat stroke often don't know they're in trouble. Watch your partner."
+              "Heat stroke makes people confused, so they may not notice. Watch your partner."
             ]
           }
         ],
@@ -114,27 +165,27 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Enfermedades por calor: agua, descanso y sombra",
-        "hook": "Los techos, áticos, el pavimento y los espacios cerrados pueden estar mucho más calientes que el aire. El calor puede tumbar hasta al más fuerte del equipo.",
+        "hook": "Los techos y los áticos pueden estar mucho más calientes de lo que dice el pronóstico del tiempo. El calor puede tumbar hasta al más fuerte del equipo.",
         "sections": [
           {
             "heading": "Agua, descanso y sombra",
             "items": [
               "Toma más o menos una taza de agua cada 15 a 20 minutos, aunque no tengas sed.",
               "Descansa en la sombra. Los descansos deben ser más largos cuando sube el índice de calor.",
-              "Los trabajadores nuevos o que regresan necesitan como una semana para acostumbrarse a la carga completa. La mayoría de las muertes por calor pasan en los primeros días."
+              "Casi la mitad de las muertes por calor pasan en el primer día de trabajo. Los trabajadores nuevos o que regresan se van acostumbrando en más o menos una semana."
             ]
           },
           {
             "heading": "Conoce las señales",
             "items": [
-              "Agotamiento por calor: sudor abundante, mareo, dolor de cabeza, calambres, náuseas. Llévalo a la sombra, refréscalo y dale agua.",
-              "Golpe de calor: confusión, habla arrastrada, desmayo, piel caliente, convulsiones. Esto es para llamar al 911. Enfríalo con agua y hielo mientras esperas."
+              "Agotamiento por calor: sudor abundante, mareo, náuseas, sentirse débil, con sed o de mal humor. Llévalo a un lugar fresco, refréscalo y no lo dejes solo. Si empeora, llama al 911.",
+              "Golpe de calor: confusión, habla arrastrada, desmayo, piel caliente que puede estar seca o todavía sudada, convulsiones. Esto es para llamar al 911. Enfríalo con agua y hielo mientras esperas."
             ]
           },
           {
             "heading": "Cuídense entre todos",
             "items": [
-              "Quien sufre un golpe de calor muchas veces no se da cuenta. Vigila a tu compañero."
+              "El golpe de calor confunde a la persona, así que puede que no se dé cuenta. Vigila a tu compañero."
             ]
           }
         ],
@@ -153,17 +204,44 @@ export const TALKS: Talk[] = [
     ],
     "code": "1926.1053",
     "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1926.1053(b)(1): side rails 3 feet above the landing",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1053",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.1053(b)(5)(i), (b)(6)-(7): 4-to-1 angle, firm footing, secured against displacement",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1053",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.1053(b)(12)-(13): no metal ladders near energized lines; no standing on the top step",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1053",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.1053(b)(15)-(16), (b)(20)-(22): inspection, defective ladders tagged out, facing the ladder, no loads that could cause a fall",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1053",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Portable Ladder Safety QuickCard",
+        "url": "https://www.osha.gov/sites/default/files/publications/portable_ladder_qc.pdf",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Ladder Setup and Use",
-        "hook": "Most ladder falls happen getting on or off at the top, not from way up high.",
+        "hook": "Ladder falls can kill even from a few feet up. Setup and climbing habits matter every time.",
         "sections": [
           {
             "heading": "Setup",
             "items": [
               "Extend the ladder at least 3 feet above the landing so you have something to grab.",
               "Use the 4-to-1 rule: for every 4 feet up, the base goes 1 foot out.",
-              "Secure it at the top. Firm, level footing at the bottom."
+              "Tie it off or secure it so it can't slide or kick out. Firm, level footing at the bottom."
             ]
           },
           {
@@ -171,7 +249,7 @@ export const TALKS: Talk[] = [
             "items": [
               "Face the ladder and keep three points of contact.",
               "No carrying bundles in your hands. Use a hoist or a hand line.",
-              "Stay off the top step of a stepladder, and keep metal ladders away from power lines."
+              "Stay off the top step of a stepladder. Near power lines, use a fiberglass ladder, never metal, and look up before you move it."
             ]
           },
           {
@@ -185,14 +263,14 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Instalación y uso de escaleras",
-        "hook": "La mayoría de las caídas de escalera pasan al subir o bajar en la parte de arriba, no desde muy alto.",
+        "hook": "Una caída de escalera puede matar aunque sea de unos pocos pies. Cómo la instalas y cómo subes importa cada vez.",
         "sections": [
           {
             "heading": "Instalación",
             "items": [
               "Extiende la escalera por lo menos 3 pies sobre el nivel de llegada para tener de dónde agarrarte.",
               "Usa la regla de 4 a 1: por cada 4 pies de altura, la base va 1 pie hacia afuera.",
-              "Asegúrala arriba. Abajo, que quede en suelo firme y nivelado."
+              "Amárrala o asegúrala para que no se deslice ni se le corra la base. Abajo, que quede en suelo firme y nivelado."
             ]
           },
           {
@@ -200,7 +278,7 @@ export const TALKS: Talk[] = [
             "items": [
               "Mira hacia la escalera y mantén tres puntos de contacto.",
               "No subas con bultos en las manos. Usa un polipasto o una cuerda.",
-              "No te pares en el último escalón de una escalera de tijera, y mantén las escaleras de metal lejos de las líneas eléctricas."
+              "No te pares en el último escalón de una escalera de tijera. Cerca de líneas eléctricas, usa una escalera de fibra de vidrio, nunca de metal, y mira hacia arriba antes de moverla."
             ]
           },
           {
@@ -221,31 +299,59 @@ export const TALKS: Talk[] = [
   {
     "id": "loto",
     "industries": [
-      "mfg"
+      "mfg",
+      "wh"
     ],
     "code": "1910.147",
     "minutes": 6,
+    "sources": [
+      {
+        "label": "OSHA 1910.147(c)(9): notify affected employees",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.147",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.147(d)(1)-(d)(6): preparation, shutdown, isolation, lockout, stored energy, verification",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.147",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.147(e)(3): lock removed only by the employee who applied it, or by the employer's written procedure",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.147",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.147(f)(3)(ii)(D): each authorized employee applies their own lock",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.147",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Control of Hazardous Energy",
+        "url": "https://www.osha.gov/control-hazardous-energy",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Lockout/Tagout",
-        "hook": "Machines that start up during cleaning or repair cause amputations and deaths every year. A lock is the only thing that keeps the power off while you're inside.",
+        "hook": "Machines that start up during cleaning or repair cause amputations and deaths every year. A lock you control is the best way to keep the power off while you're inside.",
         "sections": [
           {
             "heading": "Six steps",
             "items": [
-              "Tell the operators the machine is going down.",
+              "Know every energy source on the machine, and tell the operators it's going down.",
               "Shut it down the normal way.",
               "Isolate every energy source: electrical, air, hydraulic, gravity, steam.",
               "Put your own lock and tag on each isolation point.",
               "Release stored energy. Bleed air lines, block raised parts, discharge capacitors.",
-              "Verify. Try to start it. Nothing should move."
+              "Verify. Try to start it. Nothing should move. Then put the controls back to off."
             ]
           },
           {
             "heading": "The rules that don't bend",
             "items": [
               "One person, one lock. If three people are working on it, there are three locks.",
-              "Only the person who put the lock on takes it off.",
+              "Only the person who put the lock on takes it off. If they're gone, only a supervisor can, using our written steps.",
               "Never rely on an e-stop or a switch someone else is watching."
             ]
           }
@@ -254,24 +360,24 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Bloqueo y etiquetado (Lockout/Tagout)",
-        "hook": "Las máquinas que arrancan durante una limpieza o reparación causan amputaciones y muertes cada año. Un candado es lo único que mantiene la energía apagada mientras estás adentro.",
+        "hook": "Las máquinas que arrancan durante una limpieza o reparación causan amputaciones y muertes cada año. Un candado que tú controlas es la mejor forma de mantener la energía apagada mientras estás adentro.",
         "sections": [
           {
             "heading": "Seis pasos",
             "items": [
-              "Avisa a los operadores que la máquina se va a apagar.",
+              "Conoce todas las fuentes de energía de la máquina y avisa a los operadores que se va a apagar.",
               "Apágala de la forma normal.",
               "Aísla todas las fuentes de energía: eléctrica, aire, hidráulica, gravedad, vapor.",
               "Pon tu propio candado y etiqueta en cada punto de aislamiento.",
               "Libera la energía acumulada. Purga las líneas de aire, bloquea las piezas levantadas, descarga los capacitores.",
-              "Verifica. Intenta arrancarla. Nada debe moverse."
+              "Verifica. Intenta arrancarla. Nada debe moverse. Luego regresa los controles a apagado."
             ]
           },
           {
             "heading": "Reglas que no se doblan",
             "items": [
               "Una persona, un candado. Si tres personas trabajan en ella, hay tres candados.",
-              "Solo quien puso el candado lo quita.",
+              "Solo quien puso el candado lo quita. Si esa persona no está, solo un supervisor puede quitarlo, siguiendo nuestros pasos por escrito.",
               "Nunca confíes en un paro de emergencia o un interruptor que otra persona está vigilando."
             ]
           }
@@ -291,6 +397,28 @@ export const TALKS: Talk[] = [
     ],
     "code": "1910.212",
     "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA 1910.212(a)(1): machine guarding required",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.212",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.212(a)(3)(ii): point-of-operation guarding",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.212",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.147(a)(2)(ii): lockout during servicing, including clearing jams",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.147",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Amputations QuickCard",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA-amputations.pdf",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Machine Guarding",
@@ -346,26 +474,50 @@ export const TALKS: Talk[] = [
     "id": "hazcom",
     "industries": [
       "ag",
-      "mfg"
+      "mfg",
+      "con",
+      "wh"
     ],
-    "code": "1910.1200",
+    "code": "1910.1200 / 1926.59",
     "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1200(f)(1), (f)(6), (f)(8): container labels, workplace labels, labels kept legible",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1200(g)(2), (g)(8): Safety Data Sheet sections, SDS readily accessible",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.59: Hazard Communication in construction",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.59",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Hazard Communication",
+        "url": "https://www.osha.gov/hazcom",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Chemical Labels and SDS",
-        "hook": "Every chemical on site comes with instructions for staying safe. Most people never read them.",
+        "hook": "Every chemical on site comes with a label that tells you how to stay safe. Read it before you open it.",
         "sections": [
           {
             "heading": "Read before you handle",
             "items": [
-              "Check the label: the signal word, the pictograms, and the PPE it calls for.",
+              "Check the label: the signal word, the pictograms, and the safety steps it lists, like gloves or goggles.",
               "Know where the Safety Data Sheets are kept. Section 4 tells you first aid, Section 8 tells you PPE."
             ]
           },
           {
             "heading": "Handling",
             "items": [
-              "Never move a chemical into an unlabeled container. Drink bottles are the worst offender.",
+              "Don't put chemicals in drink bottles or unlabeled containers. If you fill a container and walk away, it needs a label.",
               "Know where the nearest eyewash and water are before you open anything.",
               "Wash your hands before you eat, drink or smoke."
             ]
@@ -375,19 +527,19 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Etiquetas de químicos y hojas SDS",
-        "hook": "Cada químico en el trabajo viene con instrucciones para usarlo con seguridad. La mayoría de la gente nunca las lee.",
+        "hook": "Cada químico en el trabajo trae una etiqueta que te dice cómo cuidarte. Léela antes de abrirlo.",
         "sections": [
           {
             "heading": "Lee antes de usar",
             "items": [
-              "Revisa la etiqueta: la palabra de advertencia, los pictogramas y el equipo de protección que pide.",
+              "Revisa la etiqueta: la palabra de advertencia, los pictogramas y las medidas de seguridad que indica, como guantes o gafas.",
               "Sabe dónde están las Hojas de Datos de Seguridad (SDS). La Sección 4 dice los primeros auxilios y la Sección 8 dice el equipo de protección."
             ]
           },
           {
             "heading": "Manejo",
             "items": [
-              "Nunca pases un químico a un envase sin etiqueta. Las botellas de bebida son lo peor.",
+              "No pongas químicos en botellas de bebida ni en envases sin etiqueta. Si llenas un envase y lo dejas, tiene que llevar etiqueta.",
               "Sabe dónde están el lavaojos y el agua más cercanos antes de abrir cualquier cosa.",
               "Lávate las manos antes de comer, beber o fumar."
             ]
@@ -406,12 +558,29 @@ export const TALKS: Talk[] = [
     "industries": [
       "ag"
     ],
-    "code": "1910.111",
+    "code": "1910.111(b)",
     "minutes": 6,
+    "sources": [
+      {
+        "label": "OSHA 1910.111(b): anhydrous ammonia systems and equipment",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.111",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1928.21(a)(2): 1910.111 applies to agricultural operations",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.21",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.151(c): eye and body flushing where corrosives are used",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.151",
+        "kind": "standard"
+      }
+    ],
     "content": {
       "en": {
         "title": "Anhydrous Ammonia Safety",
-        "hook": "Anhydrous ammonia pulls water out of whatever it touches, including your eyes, skin and lungs. Seconds matter.",
+        "hook": "Anhydrous ammonia burns eyes, skin and lungs fast. Seconds matter.",
         "sections": [
           {
             "heading": "Gear up",
@@ -425,13 +594,13 @@ export const TALKS: Talk[] = [
             "items": [
               "Inspect hoses, valves and couplers. Cracks, bulges or a strong smell mean stop.",
               "Bleed pressure from hoses before you disconnect.",
-              "Carry clean water on the tank and on you."
+              "Carry plenty of clean water on the rig, and a squeeze bottle on you."
             ]
           },
           {
             "heading": "If you're exposed",
             "items": [
-              "Flush with water right away for at least 15 minutes. Remove clothing that got hit.",
+              "Flush with lots of water right away and keep flushing. Take off clothes that got wet with it.",
               "Get medical help. Eye exposure always gets checked by a doctor."
             ]
           }
@@ -440,7 +609,7 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Seguridad con amoníaco anhidro",
-        "hook": "El amoníaco anhidro le saca el agua a todo lo que toca, incluyendo tus ojos, tu piel y tus pulmones. Los segundos cuentan.",
+        "hook": "El amoníaco anhidro quema los ojos, la piel y los pulmones rápido. Los segundos cuentan.",
         "sections": [
           {
             "heading": "Equípate",
@@ -454,13 +623,13 @@ export const TALKS: Talk[] = [
             "items": [
               "Revisa mangueras, válvulas y acoples. Grietas, abultamientos o un olor fuerte significan alto.",
               "Libera la presión de las mangueras antes de desconectar.",
-              "Lleva agua limpia en el tanque y contigo."
+              "Lleva bastante agua limpia en el equipo, y una botella de chorro con agua contigo."
             ]
           },
           {
             "heading": "Si te expones",
             "items": [
-              "Enjuágate con agua de inmediato por lo menos 15 minutos. Quítate la ropa que haya recibido el químico.",
+              "Enjuágate con mucha agua de inmediato y sigue enjuagando. Quítate la ropa que se haya mojado con el químico.",
               "Busca atención médica. Si fue en los ojos, siempre debe revisarlo un médico."
             ]
           }
@@ -481,17 +650,39 @@ export const TALKS: Talk[] = [
     ],
     "code": "1910.178",
     "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.178(l)(1)(ii), (l)(4)(iii): trained and evaluated operators, re-evaluated at least every 3 years",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.178(m)(3), (m)(5)(i): no riders; parked truck forks lowered, controls neutral, power off, brakes set, wheels blocked on an incline",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.178(n)(6), (q)(7): watch for pedestrians; pre-shift examination",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Powered Industrial Trucks eTool",
+        "url": "https://www.osha.gov/etools/powered-industrial-trucks",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Forklift Safety",
-        "hook": "Forklifts weigh several tons and the operator can't always see you.",
+        "hook": "Forklifts are hard to stop, and the operator can't always see you.",
         "sections": [
           {
             "heading": "Operators",
             "items": [
               "Only trained and evaluated operators drive. Evaluations repeat at least every 3 years.",
               "Do a pre-shift check: forks, chains, tires, horn, brakes, leaks.",
-              "Wear the seatbelt. If it tips, stay in the seat, hold on, and lean away from the fall."
+              "Wear the seatbelt. On a sit-down truck, if it tips: don't jump. Hold the wheel, brace your feet, lean away. On a stand-up truck, step off the back."
             ]
           },
           {
@@ -499,7 +690,7 @@ export const TALKS: Talk[] = [
             "items": [
               "Make eye contact with the driver before you walk into their path.",
               "No riders. Nobody stands on the forks.",
-              "Parked means forks down, controls neutral, brake set."
+              "Parked means forks down, controls neutral, power off, brake set. Block the wheels on a slope."
             ]
           }
         ],
@@ -507,14 +698,14 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Seguridad con montacargas",
-        "hook": "Los montacargas pesan varias toneladas y el operador no siempre te puede ver.",
+        "hook": "Los montacargas no frenan rápido, y el operador no siempre te puede ver.",
         "sections": [
           {
             "heading": "Operadores",
             "items": [
               "Solo manejan operadores entrenados y evaluados. Las evaluaciones se repiten por lo menos cada 3 años.",
               "Haz la revisión antes del turno: horquillas, cadenas, llantas, claxon, frenos, fugas.",
-              "Usa el cinturón. Si se vuelca, quédate en el asiento, agárrate fuerte e inclínate hacia el lado contrario de la caída."
+              "Usa el cinturón. En un montacargas de asiento, si se vuelca: no brinques. Agárrate del volante, apoya bien los pies e inclínate hacia el lado contrario. En un montacargas de pie, bájate por atrás."
             ]
           },
           {
@@ -522,7 +713,7 @@ export const TALKS: Talk[] = [
             "items": [
               "Haz contacto visual con el operador antes de cruzar por su camino.",
               "No se lleva a nadie de pasajero. Nadie se para en las horquillas.",
-              "Estacionado significa horquillas abajo, controles en neutral y freno puesto."
+              "Estacionado significa horquillas abajo, controles en neutral, máquina apagada y freno puesto. En una pendiente, calza las ruedas."
             ]
           }
         ],
@@ -543,10 +734,22 @@ export const TALKS: Talk[] = [
     ],
     "code": "ERGO",
     "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA Materials Handling eTool: Heavy Lifting",
+        "url": "https://www.osha.gov/etools/electrical-contractors/materials-handling/heavy",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA ergonomics interpretation letter, 2024-03-18",
+        "url": "https://www.osha.gov/laws-regs/standardinterpretations/2024-03-18",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Lifting Without Getting Hurt",
-        "hook": "Back injuries are among the most common injuries on the job, and they can follow you for life.",
+        "hook": "Lifting is one of the leading causes of injury at work, and back injuries can follow you for life.",
         "sections": [
           {
             "heading": "Plan the lift",
@@ -558,7 +761,7 @@ export const TALKS: Talk[] = [
           {
             "heading": "Do the lift",
             "items": [
-              "Feet apart, bend your knees, keep your back straight.",
+              "Feet apart. Bend at your knees, not your waist, and keep your back in a natural straight line.",
               "Keep the load close to your body.",
               "Don't twist. Turn your feet instead."
             ]
@@ -568,7 +771,7 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Cargar sin lastimarte",
-        "hook": "Las lesiones de espalda están entre las más comunes en el trabajo, y te pueden seguir toda la vida.",
+        "hook": "Levantar cosas es una de las principales causas de lesiones en el trabajo, y las lesiones de espalda te pueden seguir toda la vida.",
         "sections": [
           {
             "heading": "Planea la carga",
@@ -580,7 +783,7 @@ export const TALKS: Talk[] = [
           {
             "heading": "Al levantar",
             "items": [
-              "Pies separados, dobla las rodillas, espalda recta.",
+              "Pies separados. Dobla las rodillas, no la cintura, y mantén la espalda recta en su posición natural.",
               "Mantén la carga cerca del cuerpo.",
               "No gires la cintura. Mejor mueve los pies."
             ]
@@ -599,8 +802,15 @@ export const TALKS: Talk[] = [
     "industries": [
       "all"
     ],
-    "code": "COLD",
+    "code": "OSHA COLD",
     "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Cold Stress card (OSHA 3156)",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA3156.pdf",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Cold Stress",
@@ -609,7 +819,7 @@ export const TALKS: Talk[] = [
           {
             "heading": "Dress for it",
             "items": [
-              "Wear layers you can take off as you warm up. Cotton next to the skin stays wet; synthetics and wool don't.",
+              "Wear loose layers you can take off as you warm up. Wet clothes pull heat out fast.",
               "Cover your head, hands and feet. Keep a dry pair of socks and gloves in the truck.",
               "Wind makes it colder than the thermometer says."
             ]
@@ -617,15 +827,15 @@ export const TALKS: Talk[] = [
           {
             "heading": "Know the signs",
             "items": [
-              "Frostbite: numb, white or grayish skin on fingers, toes, ears or nose. Warm it slowly. Don't rub it.",
-              "Hypothermia: uncontrolled shivering, then confusion, slurred speech, clumsiness and drowsiness. Call 911, get them somewhere warm, and swap wet clothes for dry ones."
+              "Frostbite: numb, white or grayish skin on fingers, toes, ears or nose. Don't rub it, and don't walk on frozen feet. Get medical help.",
+              "Hypothermia: shivering at first. If the shivering stops, or they get confused or slur their words, it's serious. Call 911, get them somewhere warm, and swap wet clothes for dry ones."
             ]
           },
           {
             "heading": "On the job",
             "items": [
               "Take warm-up breaks somewhere out of the wind.",
-              "Warm, sweet drinks help. Skip alcohol; it makes you lose heat faster."
+              "Warm drinks help. Skip alcohol."
             ]
           }
         ],
@@ -638,7 +848,7 @@ export const TALKS: Talk[] = [
           {
             "heading": "Vístete para el frío",
             "items": [
-              "Usa capas que te puedas quitar cuando entres en calor. El algodón pegado a la piel se queda mojado; la lana y las telas sintéticas no.",
+              "Usa capas holgadas que te puedas quitar cuando entres en calor. La ropa mojada te saca el calor rápido.",
               "Cúbrete la cabeza, las manos y los pies. Deja un par de calcetines y guantes secos en la camioneta.",
               "El viento hace que se sienta más frío de lo que marca el termómetro."
             ]
@@ -646,15 +856,15 @@ export const TALKS: Talk[] = [
           {
             "heading": "Conoce las señales",
             "items": [
-              "Congelación: piel entumecida, blanca o grisácea en dedos, orejas o nariz. Caliéntala despacio. No la frotes.",
-              "Hipotermia: temblor que no se controla, luego confusión, habla arrastrada, torpeza y sueño. Llama al 911, llévalo a un lugar caliente y cámbiale la ropa mojada por ropa seca."
+              "Congelación: piel entumecida, blanca o grisácea en dedos, orejas o nariz. No la frotes, y no camines con los pies congelados. Busca atención médica.",
+              "Hipotermia: primero temblores. Si deja de temblar, o se confunde o se le traba la lengua, es grave. Llama al 911, llévalo a un lugar caliente y cámbiale la ropa mojada por ropa seca."
             ]
           },
           {
             "heading": "En el trabajo",
             "items": [
               "Toma descansos para calentarte en un lugar sin viento.",
-              "Las bebidas calientes y dulces ayudan. Evita el alcohol; hace que pierdas calor más rápido."
+              "Las bebidas calientes ayudan. Evita el alcohol."
             ]
           }
         ],
@@ -671,25 +881,36 @@ export const TALKS: Talk[] = [
     "industries": [
       "all"
     ],
-    "code": "HEALTH",
+    "code": "OSHA FATIGUE",
     "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA Worker Fatigue",
+        "url": "https://www.osha.gov/worker-fatigue",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Drowsy Driving",
+        "url": "https://www.osha.gov/motor-vehicle-safety/drowsy-driving",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Fatigue and Sleep",
-        "hook": "Being awake 17 to 19 hours can slow you down about as much as having a couple of drinks. Tired people get hurt.",
+        "hook": "After 17 hours awake, you can be as slow as someone who's been drinking. Tired people get hurt.",
         "sections": [
           {
             "heading": "The basics",
             "items": [
               "Most adults need at least 7 hours of sleep. Long shifts and early starts eat into that fast.",
-              "Eat real food and drink water through the day. Energy drinks wear off right when you need focus."
+              "Eat real food and drink water through the day. Caffeine doesn't replace sleep."
             ]
           },
           {
             "heading": "On the job",
             "items": [
               "Watch for nodding off, missed steps, or short tempers in yourself and others.",
-              "Save the riskiest work for when you're sharpest, not the end of a long shift.",
               "If you're too tired to drive home safely, say so. That's a safety call, not a weakness."
             ]
           }
@@ -698,20 +919,19 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Cansancio y sueño",
-        "hook": "Estar despierto de 17 a 19 horas te puede hacer tan lento como haber tomado un par de tragos. La gente cansada se lastima.",
+        "hook": "Después de 17 horas despierto, puedes estar tan lento como alguien que ha estado tomando. La gente cansada se lastima.",
         "sections": [
           {
             "heading": "Lo básico",
             "items": [
               "La mayoría de los adultos necesitan por lo menos 7 horas de sueño. Los turnos largos y las madrugadas te las quitan rápido.",
-              "Come comida de verdad y toma agua durante el día. Las bebidas energéticas se te pasan justo cuando más necesitas concentrarte."
+              "Come comida de verdad y toma agua durante el día. La cafeína no reemplaza el sueño."
             ]
           },
           {
             "heading": "En el trabajo",
             "items": [
               "Fíjate si alguien cabecea, se salta pasos o anda de mal humor, incluyéndote a ti.",
-              "Deja el trabajo más riesgoso para cuando estés más alerta, no para el final de un turno largo.",
               "Si estás demasiado cansado para manejar a casa con seguridad, dilo. Es una decisión de seguridad, no una debilidad."
             ]
           }
@@ -729,18 +949,40 @@ export const TALKS: Talk[] = [
     "industries": [
       "all"
     ],
-    "code": "1910.22",
+    "code": "1910.22 / 1926.25",
     "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA 1910.22(a)(1)-(3): clean, orderly and dry walking-working surfaces",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.22",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.22(d)(2): hazardous conditions corrected or guarded",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.22",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.25(a): housekeeping on construction sites",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.25",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Walking-Working Surfaces",
+        "url": "https://www.osha.gov/walking-working-surfaces",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Slips, Trips and Falls",
-        "hook": "Falls on the same level are one of the most common injuries in every industry. Most come down to housekeeping.",
+        "hook": "Slips, trips and falls are among the leading causes of serious injuries at work. Good housekeeping prevents a lot of them.",
         "sections": [
           {
             "heading": "Keep it clear",
             "items": [
               "Cords, hoses and scrap don't belong in walkways. Route them along the edges or overhead.",
-              "Clean up spills right away, or mark them until you can."
+              "Clean up spills right away. If you can't, block the area off so nobody walks through it."
             ]
           },
           {
@@ -756,13 +998,13 @@ export const TALKS: Talk[] = [
       },
       "es": {
         "title": "Resbalones, tropiezos y caídas",
-        "hook": "Las caídas al mismo nivel son de las lesiones más comunes en todas las industrias. La mayoría se deben al orden y la limpieza.",
+        "hook": "Los resbalones, tropiezos y caídas están entre las principales causas de lesiones graves en el trabajo. El buen orden y la limpieza evitan muchos de ellos.",
         "sections": [
           {
             "heading": "Mantén despejado",
             "items": [
               "Los cables, mangueras y desperdicios no van en los pasillos. Pásalos por las orillas o por arriba.",
-              "Limpia los derrames de inmediato, o márcalos hasta que puedas limpiarlos."
+              "Limpia los derrames de inmediato. Si no puedes, bloquea el área para que nadie pase por ahí."
             ]
           },
           {
@@ -787,8 +1029,20 @@ export const TALKS: Talk[] = [
     "industries": [
       "all"
     ],
-    "code": "1910.132",
+    "code": "1910.132 / 1926.95",
     "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA 1910.132(a), (d)(1)(iii), (e): PPE provided, fitted to each worker, defective PPE not used",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.132",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.95(a), (c)(2): construction PPE, properly fitted",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.95",
+        "kind": "standard"
+      }
+    ],
     "content": {
       "en": {
         "title": "PPE: Wear It Right",
@@ -805,7 +1059,7 @@ export const TALKS: Talk[] = [
             "heading": "Fit matters",
             "items": [
               "Gloves that are too big get caught. Earplugs that aren't seated don't protect.",
-              "If your PPE doesn't fit or makes the job harder, say so. There's usually a better option."
+              "If it doesn't fit, tell your supervisor. Your PPE is supposed to fit you."
             ]
           }
         ],
@@ -826,7 +1080,7 @@ export const TALKS: Talk[] = [
             "heading": "La talla importa",
             "items": [
               "Los guantes muy grandes se atoran. Los tapones de oído mal puestos no protegen.",
-              "Si tu equipo no te queda o te complica el trabajo, dilo. Casi siempre hay una mejor opción."
+              "Si no te queda, avísale a tu supervisor. Tu equipo de protección tiene que quedarte bien."
             ]
           }
         ],
@@ -843,8 +1097,35 @@ export const TALKS: Talk[] = [
     "industries": [
       "all"
     ],
-    "code": "EMERG",
+    "code": "1926.35 / 1926.50",
     "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA 1926.35(b): emergency action plan elements",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.35",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.50(f): emergency phone numbers posted",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.50",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.38: emergency action plans",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.38",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.151: medical services and first aid",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.151",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA eTool: using portable fire extinguishers",
+        "url": "https://www.osha.gov/etools/evacuation-plans-procedures/emergency-standards/portable-extinguishers/use",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "If Something Goes Wrong",
@@ -862,7 +1143,7 @@ export const TALKS: Talk[] = [
             "heading": "Fire extinguisher: P.A.S.S.",
             "items": [
               "Pull the pin. Aim at the base of the fire. Squeeze the handle. Sweep side to side.",
-              "If it's spreading or the room is filling with smoke, get out and call 911."
+              "If it's spreading, your extinguisher runs out, smoke is between you and the exit, or you have any doubt, get out and call 911."
             ]
           }
         ],
@@ -884,7 +1165,7 @@ export const TALKS: Talk[] = [
             "heading": "Extintor: P.A.S.S.",
             "items": [
               "Jala el seguro. Apunta a la base del fuego. Aprieta la manija. Barre de lado a lado.",
-              "Si el fuego se está extendiendo o el cuarto se llena de humo, sal y llama al 911."
+              "Si el fuego se está extendiendo, se te acaba el extintor, hay humo entre tú y la salida, o tienes cualquier duda, sal y llama al 911."
             ]
           }
         ],
@@ -901,8 +1182,30 @@ export const TALKS: Talk[] = [
     "industries": [
       "all"
     ],
-    "code": "STORM",
+    "code": "OSHA STORM",
     "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA/NOAA lightning safety fact sheet",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA3863.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA downed electrical wires fact sheet",
+        "url": "https://www.osha.gov/sites/default/files/downed_electrical_wires.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA hurricane preparedness",
+        "url": "https://www.osha.gov/hurricane/preparedness",
+        "kind": "guidance"
+      },
+      {
+        "label": "NOAA hurricane season",
+        "url": "https://www.nhc.noaa.gov/climo/",
+        "kind": "guidance"
+      }
+    ],
     "content": {
       "en": {
         "title": "Hurricane and Storm Prep",
@@ -912,7 +1215,7 @@ export const TALKS: Talk[] = [
             "heading": "Before a storm",
             "items": [
               "Secure or bring down loose materials, tools and debris. Anything that can blow away will.",
-              "Lower and secure lifts and booms within the manufacturer's wind limits.",
+              "Follow the manufacturer's wind limits for lifts and booms. Lower and secure them before the storm.",
               "Know the company's call: when work stops and how you'll be told."
             ]
           },
@@ -926,8 +1229,8 @@ export const TALKS: Talk[] = [
           {
             "heading": "After the storm",
             "items": [
-              "Treat every downed line as live. Stay far away and call the utility.",
-              "Watch for weakened structures, standing water, and debris with nails. Cleanup brings its own hazards."
+              "Treat every downed line as live. Stay at least 10 feet away. Farther is better. Call the utility.",
+              "Treat floodwater as dirty. Watch for weak structures and sharp debris. Cleanup brings its own hazards."
             ]
           }
         ],
@@ -941,7 +1244,7 @@ export const TALKS: Talk[] = [
             "heading": "Antes de una tormenta",
             "items": [
               "Asegura o baja los materiales sueltos, las herramientas y los desperdicios. Todo lo que pueda volar, va a volar.",
-              "Baja y asegura las plataformas y brazos elevadores dentro de los límites de viento del fabricante.",
+              "Sigue los límites de viento del fabricante para plataformas y brazos elevadores. Bájalos y asegúralos antes de la tormenta.",
               "Conoce la decisión de la empresa: cuándo se para el trabajo y cómo te van a avisar."
             ]
           },
@@ -955,8 +1258,8 @@ export const TALKS: Talk[] = [
           {
             "heading": "Después de la tormenta",
             "items": [
-              "Trata todo cable caído como si tuviera corriente. Mantente lejos y llama a la compañía de luz.",
-              "Cuidado con estructuras debilitadas, agua estancada y escombros con clavos. La limpieza trae sus propios peligros."
+              "Trata todo cable caído como si tuviera corriente. Mantente por lo menos a 10 pies de distancia. Más lejos es mejor. Llama a la compañía de luz.",
+              "Trata el agua de inundación como agua sucia. Cuidado con estructuras débiles y escombros filosos. La limpieza trae sus propios peligros."
             ]
           }
         ],
