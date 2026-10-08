@@ -1,0 +1,24 @@
+# demolition-survey — evidence
+
+Pages fetched 2026-10-07 with WebFetch (summaries plus short exact quotes; curl to osha.gov blocked).
+
+Paragraph check vs. assignment: (a) survey and (c) utilities confirmed. (b) is damaged structures (shoring/bracing). Hazardous substances are (e); glass (f); wall openings (g); debris drops through floor holes (h); floor-opening covers (i); top-down order (j); entrance sheds (k). Fall protection height (6 ft) comes from 1926.501(b)(1), not 1926.850.
+
+| # | English sentence | Source | Support |
+|---|---|---|---|
+| hook | Before the first wall comes down, you need to know three things: what's holding the building up, what's still live, and what's hiding inside. | framing of 1926.850(a), (c), (e) | — |
+| 1.1 | Before demolition starts, a competent person has to survey the structure: the framing, floors and walls, and the chance of an unplanned collapse. | 1926.850(a) | paraphrase: prior to demolition, an engineering survey by a competent person of the condition of the framing, floors, and walls, and possibility of unplanned collapse |
+| 1.2 | Nearby buildings where you could be exposed get checked too. Your company has to keep written proof that the survey was done. | 1926.850(a) | paraphrase: adjacent structures where employees may be exposed also checked; employer shall have written evidence that the survey was performed |
+| 1.3 | If the building was damaged by fire, flood or explosion, the walls or floors get shored or braced before anyone works inside. | 1926.850(b) | paraphrase: when employees must work within a structure damaged by fire, flood, explosion or other cause, walls or floors shall be shored or braced |
+| 2.1 | Electric, gas, water, steam, sewer and other service lines are shut off, capped or controlled outside the building line before work starts. | 1926.850(c) | paraphrase: all electric, gas, water, steam, sewer, and other service lines shut off, capped, or otherwise controlled outside the building line before demolition is started |
+| 2.2 | The utility companies involved get notified ahead of time. | 1926.850(c) | paraphrase: the appropriate utility company notified in advance |
+| 2.3 | If a utility has to stay on during the work, the line gets moved as needed and protected. | 1926.850(d) | paraphrase: if necessary to maintain power, water or other utilities during demolition, lines temporarily relocated as necessary and protected |
+| 3.1 | Old buildings can hide lead, asbestos and silica in the structure. Those need special handling, and health hazards should be assessed before any demolition work takes place. | guidance: https://www.osha.gov/demolition | paraphrase: hazardous materials hidden in structural members, such as lead, asbestos, silica, require special handling; exact: "An assessment of health hazards completed before any demolition work takes place." ("Old buildings" is framing; the page says "structural members") |
+| 3.2 | Your company has to find out if pipes, tanks or equipment held hazardous chemicals, gases, explosives or flammables. If so, or if it's suspected, they're tested and purged before demolition starts. | 1926.850(e) | paraphrase: determine whether hazardous chemicals, gases, explosives, flammable materials or similar substances have been used in pipes, tanks or equipment; when apparent or suspected, testing and purging performed and hazard eliminated before demolition |
+| 3.3 | Hazards from broken glass get removed. | 1926.850(f) | paraphrase: any hazard from fragmentation of glass shall be removed |
+| 4.1 | At an unprotected edge 6 feet or more above a lower level, you need a guardrail, a safety net, or a personal fall arrest system. | 1926.501(b)(1) | exact: "6 feet (1.8 m) or more above a lower level shall be protected from falling"; by guardrail, safety net, or personal fall arrest systems |
+| 4.2 | Wall openings you could fall through are protected up to about 42 inches high. | 1926.850(g) | paraphrase: wall openings where employees could fall through protected to a height of approximately 42 inches |
+| 4.3 | Floor openings that aren't used for dropping material get covered with material strong enough for the load, and secured so the cover can't slide. | 1926.850(i) | paraphrase: floor openings not used as material drops covered with material substantial enough to support expected loads, secured against accidental movement |
+| ask | Who has seen the survey for this building, and which utilities have been confirmed off? | question | — |
+
+Dropped: 1926.850(h) debris-drop barricades (covered in debris-chute talk), (j) top-down order and (k) entrance sheds (used in / better suited to demolition-walls). Calling 811 (demolition page) left out because it applies to digging, not building demolition. PFAS/PPE line from the demolition page folded into the 1926.501(b)(1) line.

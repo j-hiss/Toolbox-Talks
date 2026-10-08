@@ -1,0 +1,32 @@
+# oil-fires evidence
+
+FRC: OSHA has no FRC-specific standard. The 2010 memo ("Enforcement Policy for Flame-Resistant Clothing in Oil and
+Gas Drilling, Well Servicing, and Production-Related Operations") enforces FRC under 1910.132(a), with (d) hazard
+assessment and (h) payment. It was fetched at https://www.osha.gov/laws-regs/standardinterpretations/2010-03-19-0
+(the URL without "-0" returned 404). NFPA 2112/2113 are mentioned by OSHA as guidance only and are not cited.
+
+| English sentence | Source | Supporting quote |
+|---|---|---|
+| Fires and explosions are a leading cause of death at well sites. | guidance: eTool Common Wellsite Incidents | "Fires and explosions are another leading cause of fatalities at well sites." (paraphrase) |
+| A hydrocarbon flash fire can reach 1,000 to 1,900 degrees Fahrenheit. | guidance: 2010 FRC memo | memo: hydrocarbon flash fires reach 1,000 to 1,900 degrees Fahrenheit (paraphrase of memo figure) |
+| Well gas, vapors and hydrogen sulfide can come off wells, trucks, production equipment, tanks and shale shakers. | guidance: osha.gov/oil-and-gas-extraction/hazards | "Flammable gases, such as well gases, vapors, and hydrogen sulfide, can be released from wells, trucks," production equipment, tanks, shale shakers (exact fragment + paraphrase) |
+| Stay out of zones that could hold flammable vapors: the wellhead, tanks, heater-treaters, tanker trucks and hot oilers. | guidance: eTool | "Establish barriers, or zones, and stay out of areas that could contain flammable liquids, vapors, and/or gases." "These areas include the well head, tanks (including produced fluid tanks), heater-treaters, tanker trucks, hot oilers" (paraphrase) |
+| Keep hatches on tanks and vessels closed. | guidance: eTool | "Keep hatches and other openings on vessels and other equipment closed." (paraphrase) |
+| Use an LEL meter. If it reads over 10 percent LEL, get out, and stay out until it's safe to go back. | guidance: eTool | "Use lower explosive limit (LEL) monitors/meters and evacuate areas with greater than 10% LEL until it is safe to re-enter." (paraphrase) |
+| Fire starters include open flames, smoking, static, sparks from hand tools, engines, vehicles with catalytic converters, generators, and phones or radios that aren't intrinsically safe. | guidance: eTool (ignition sources); hazards page | Listed ignition sources: "Flames or sparks from any source, including non-spark-resistant hand tools", "Internal-combustion engines, including vehicles", "Smoking", "Non-bonded or grounded equipment (producing static charge)", "Vehicles with catalytic converters", "Portable generators", "Non-intrinsically safe cell phones ... two-way radios" (paraphrase) |
+| Bond and ground hoses, buckets and fluid-handling equipment so static can't spark. | guidance: eTool | "Ensure that equipment is properly bonded and/or grounded, including hoses, buckets, and other fluid handling equipment." (paraphrase) |
+| Engines get spark arrestors. | guidance: eTool | "Provide spark arrestors for internal-combustion engines." (paraphrase) |
+| If there's a release, don't try to move a vehicle away from it. That has caused fires and explosions. | guidance: eTool | "It should be noted that attempting to move vehicles away from a release has resulted in fires and explosions." (paraphrase; eTool states the fact, the "don't" is the plain-language takeaway) |
+| Get a hot work permit before welding, cutting or grinding where flammable vapors could be. | guidance: eTool Common Wellsite Incidents; Hot Work | "Use hot work permits when performing hot work in areas that could contain flammable liquids, vapors, or gases."; "Obtain appropriate hot work permits before beginning work." (paraphrase) |
+| Follow every step. Skipping steps gets people hurt. | guidance: eTool Hot Work | "Follow hot work procedures and permits as written. Skipping steps can lead to serious injuries." (paraphrase) |
+| Test the air for flammable gas before you start, and keep monitoring while you work. | guidance: eTool Hot Work | "Always test for flammable gases and vapors in the work area before starting any hot work."; "Continuously monitor for O2 and LELs during hot work." (paraphrase) |
+| Clear out combustible materials first, and have a fire watch with the right equipment. | guidance: eTool Hot Work | "Remove combustible materials from the work area before beginning hot work."; "Ensure properly equipped fire watches are used when performing hot work." (paraphrase) |
+| Your company has to check the site for burn hazards and provide the protective gear those hazards call for. | OSHA 1910.132(d)(1), (a); FRC memo | (d)(1) "The employer shall assess the workplace to determine if hazards are present, or are likely to be present"; (a) PPE "shall be provided, used, and maintained"; memo cites (d) where employer "fails to conduct a hazard assessment to identify the potential for burn hazards" (paraphrase) |
+| Required gear is provided at no cost to you. | OSHA 1910.132(h)(1); FRC memo | "shall be provided by the employer at no cost to employees" (exact fragment); exceptions in (h)(2)-(h)(6) exist, none of which is FRC per the memo's (h) citation language. Reviewer: line kept general ("required gear"). |
+| OSHA inspectors look for FRC during work like gauging, line breaking, hot work, fracturing and cementing, and on drilling sites before drilling into gas zones. | guidance: FRC memo | Well servicing: inspectors check FRC during snubbing, swabbing, fracturing, cementing, wireline; production: gauging, line breaking, hot work, tank heating; drilling: "Appropriate FRC shall be worn by exposed employees working on the well site prior to drilling" into identified gas or hydrocarbon zones (paraphrase) |
+| Wear your FRC, but never wear FRC or any clothing that's soaked in flammable liquid. | guidance: eTool | "Wear FRC, but DO NOT wear FRC or any other clothing that is soaked in flammable liquids." (exact) |
+| Ask: What could light a fire on this site today, and what are we doing about each one? | guidance: eTool | "Identification and elimination of ignition sources during the RA/HA/JSA is a key to fire and explosion prevention." |
+
+Dropped: 35-foot hot work distance (not on the fetched oil and gas eTool page; that's 1910.252 and wasn't fetched);
+fire extinguisher specifics (not on fetched pages); FRC outer-layer/undergarment rules (memo doesn't address them);
+NFPA 2112/2113 (not OSHA sources).

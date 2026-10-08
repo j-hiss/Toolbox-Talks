@@ -36,9 +36,15 @@ customer #1, not a special case.
   sections, and one question to ask the crew. About 4–6 minutes read aloud.
 - **Check licensing on every source.** Federal OSHA material is generally public domain. Many "free" talk libraries
   online are copyrighted and can't be repackaged.
-- **Industries:** Construction · Manufacturing · Agriculture & Fertilizer · Warehouse & Logistics. Each industry has its
-  own talks plus an **"Every job"** set shown to everyone (heat, cold, fatigue and sleep, slips/trips/falls, PPE,
-  emergencies, hurricane and storm prep).
+- **Industries (18):** Construction, plus the trades that also get every construction talk (Roofing, Electrical,
+  Plumbing & HVAC, Solar, Demolition & site work) · Manufacturing · Warehouse · Trucking · Agriculture · Landscaping &
+  tree care · Oil & gas · Utilities & telecom · Healthcare · Retail · Restaurants & food service · Hotels, janitorial &
+  facilities · Auto repair & fleet. Each industry has its own talks, shares the talks that fit it (a talk lists every
+  industry it serves), and gets the **"Every job"** set shown to everyone (heat, cold, fatigue and sleep,
+  slips/trips/falls, PPE, emergencies, storm prep, and the rest).
+- **Where a topic has no OSHA rule** (vehicle lifts, patient handling, late-night retail, crowds), the talk says so and
+  rests on OSHA or NIOSH guidance. Other agencies' rules are named plainly (EPA pesticides and refrigerants, DOT cargo
+  securement).
 - **Target size:** 25–30 talks per industry so a topic comes up once or twice a year, not every few months. Use the
   Roman Roofing 52-week calendar as a topic checklist for construction (topics only; nothing Roman-specific ships).
 - Talks are versioned content. A record stores the exact version that was read.

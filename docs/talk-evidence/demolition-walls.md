@@ -1,0 +1,27 @@
+# demolition-walls — evidence
+
+Pages fetched 2026-10-07 with WebFetch (summaries plus short exact quotes; curl to osha.gov blocked).
+
+Paragraph notes: top-down order is 1926.850(j) (added as a source). 1926.851 is stairs/passageways/ladders: (a) designated access, (b) inspection, (c) stairwell lighting and cover.
+
+| # | English sentence | Source | Support |
+|---|---|---|---|
+| hook-1 | Demolition goes from the top down, one story at a time. | 1926.850(j) | paraphrase: exterior walls and floors demolished from the top downward, each story removed before work on the story below |
+| hook-2 | Walls, floors and debris each have rules for how they come out. | framing | — |
+| 1.1 | Exterior walls and floors come down starting at the top. Each story is removed before work starts on the story below, except for prep work like cutting chute holes. | 1926.850(j) | paraphrase: demolition begins at top and proceeds downward; each story removed and placed in storage before work on the story below; exceptions for cutting chute and drop holes, preparing storage space, similar preparatory work |
+| 1.2 | A wall more than one story tall can't stand without bracing unless it was built to stand on its own. Every wall is left stable at the end of each shift. | 1926.854(b) | paraphrase: walls over one story not permitted to stand alone without lateral bracing unless designed and constructed to stand without lateral support and self-supporting; exact: "All walls shall be left in a stable condition at the end of each shift." |
+| 1.3 | Nobody works on top of a wall when the weather makes it dangerous. | 1926.854(c) | paraphrase: employees not permitted on top of a wall when weather constitutes a hazard |
+| 1.4 | Don't pile masonry on a floor beyond what that floor can safely hold. | 1926.854(a) | paraphrase: masonry not dropped onto floors in quantities exceeding the floor's safe load capacity |
+| 2.1 | Floor openings within 10 feet of a wall being torn down are fully planked, unless workers are kept out of the area below. | 1926.854(e) | paraphrase: floor openings within 10 feet of any wall being demolished planked solid, except when employees are kept out of the area below |
+| 2.2 | Beams and other members holding up a floor aren't cut or removed until every story above is demolished. There are only narrow exceptions. | 1926.854(d) | paraphrase: load-supporting structural members on any floor not cut or removed until all stories above are demolished; exception: cutting floor beams for debris disposal or equipment installation per 1926.853 and 1926.855 |
+| 2.3 | When floor arches are taken out by hand, nobody is allowed directly underneath, and that area is barricaded. | 1926.855(f) | exact: "Employees shall not be allowed in the area directly underneath" arches being removed; area barricaded |
+| 2.4 | Don't walk on exposed beams. Use walkways at least 18 inches wide, made of 2-inch planks or equal metal. | 1926.855(c) | paraphrase: walkways not less than 18 inches wide, of 2-inch wood planking or equivalent metal, provided so employees need not walk on exposed beams |
+| 3.1 | No dropping material outside the walls unless the area below is effectively protected. | 1926.852(a) | paraphrase: no material dropped to any point outside the exterior walls unless that area is "effectively protected" (exact) |
+| 3.2 | A chute steeper than 45 degrees is fully enclosed, except for loading openings. On floors below the top, those openings stay closed when not in use. | 1926.852(b) | paraphrase: chutes at an angle of more than 45° from horizontal "entirely enclosed" (exact), except floor-level loading openings with closures (not over 48 inches high); below the top floor these kept closed when not in use |
+| 3.3 | Where you dump into a chute, there's a guardrail about 42 inches high. Where wheelbarrows or equipment dump, there's a toeboard or bumper at least 4 inches thick and 6 inches high. | 1926.852(e), (f) | exact: "substantial guardrail" approximately 42 inches above the surface; exact: "securely attached toeboard or bumper", not less than 4 inches thick and 6 inches high |
+| 3.4 | The bottom of the chute has a gate run by a competent person, who also directs trucks backing in. When work stops, the discharge area is closed off. | 1926.852(c), (d) | exact: "substantial gate" at or near the discharge end; competent employee controls the gate and backing and loading of trucks; area around discharge end securely closed off when operations are not in progress |
+| 4.1 | Use only the stairs, passageways and ladders marked as access. All other ways in stay closed. | 1926.851(a) | paraphrase: only designated stairways, passageways, ladders used; exact: "Other access ways shall be entirely closed at all times." |
+| 4.2 | A stairwell in use is lit, and covered two floors below the floor being worked on. | 1926.851(c) | paraphrase: stairwell in use in multistory building adequately lighted, and covered over at a point "two floors below the floor on which work is being performed" (exact) |
+| ask | Where is the chute discharge today, and who is running the gate? | question | — |
+
+Dropped: 1926.851(b) periodic inspection, 1926.851(c) separate protected passageway (kept talk short), 1926.852(e) second clause (gap between chute and floor opening covered), 1926.854(f)-(i) (skeleton steel, scaffold access, retaining walls, debris piles), 1926.855(a), (b), (d), (e), (g) arch-plank details.

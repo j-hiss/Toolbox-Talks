@@ -1,0 +1,45 @@
+# test-before-touch evidence
+
+Fetched 2026-10-07 with WebFetch (quotes capped near 125 chars by the tool):
+- 1910.333: https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.333
+- 1910.334: https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.334
+- 1926.416: https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.416
+- 1926.417: https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.417
+- 1926.962: https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.962
+- 1910.147 checked for scope only: (a)(1)(ii)(D) excludes electrical hazards in electric-utilization installations covered by Subpart S, so 1910.333 is the right general-industry rule here.
+- FAILED: 1910.269(n)(5). The osha.gov page 1, eCFR and Cornell LII copies all truncated before paragraph (n); page 2 (1910.269_2) starts at (n)(7). Used the construction twin 1926.962(e) instead (same requirement). Reviewer: if 1910.269(n)(5) is wanted for general-industry utility work, confirm its text by hand.
+
+Scope note: 1910.333/1910.334 are general industry (Subpart S). Construction is covered by 1926.416/1926.417 and, for power line work, 1926.962. The talk names construction separately.
+
+| # | English sentence | Source | Support |
+|---|---|---|---|
+| hook-1 | Until a circuit is locked out, tagged, and tested, treat it as live. | 1910.333(b)(1), (b)(2)(iv) | paraphrase: deenergized parts not locked out or tagged "shall be treated as energized parts"; (b)(2)(iv) requirements "shall be met before any circuits or equipment can be considered and worked as deenergized." |
+| hook-2 | Parts that are shut off but not locked out or tagged count as energized. | 1910.333(b)(1) | exact: "Conductors and parts of electric equipment that have been deenergized but have not been locked out or tagged" ... "shall be treated as energized parts" |
+| 1.1 | Live parts get shut off before you work on or near them. | 1910.333(a)(1) | exact: "Live parts to which an employee may be exposed shall be deenergized before the employee works on or near them" |
+| 1.1b | The exceptions are narrow, like when shutting off would create a bigger hazard or can't be done, and your company has to be able to show that. | 1910.333(a)(1) | exact: "unless the employer can demonstrate that deenergizing introduces additional or increased hazards" "or is infeasible due to equipment design or operational limitations." (The under-50-volt exception is not listed; "like" keeps the list open.) |
+| 1.2 | Disconnect every source that feeds the circuit, not just one. | 1910.333(b)(2)(ii)(B) | exact: "The circuits and equipment to be worked on shall be disconnected from all electric energy sources." |
+| 1.3 | Each disconnect gets a lock and a tag. | 1910.333(b)(2)(iii)(A) | exact: "A lock and a tag shall be placed on each disconnecting means used to deenergize circuits" |
+| 1.3b | The tag says no one may operate it or remove the tag. | 1910.333(b)(2)(iii)(B) | exact: "Each tag shall contain a statement prohibiting unauthorized operation of the disconnecting means and removal of the tag." (talk drops "unauthorized" for voice; reviewer may restore) |
+| 1.3c | A tag alone is allowed only if a lock can't go on, or your company can show the tag is just as safe. | 1910.333(b)(2)(iii)(C) | exact: "If a lock cannot be applied, or if the employer can demonstrate that tagging procedures will provide" "a level of safety equivalent to that obtained by the use of a lock, a tag may be used without a lock." |
+| 1.4 | On construction jobs, the circuit is shut off and grounded, or guarded, before anyone works close enough to touch it. | 1926.416(a)(1) | exact: "No employer shall permit an employee to work in such proximity to any part of an electric power circuit" "that the employee could contact" ... "unless the employee is protected against electric shock by deenergizing the circuit and grounding it" "or by guarding it effectively by insulation or other means." |
+| 1.4b | Tags go on at every point where it could be turned back on. | 1926.417(b) | exact: deenergized equipment or circuits "shall have tags attached at all points where such equipment or circuits can be energized." |
+| 2.1 | A qualified person tries the controls, or checks another way, to make sure the equipment can't restart. | 1910.333(b)(2)(iv)(A) | exact: "A qualified person shall operate the equipment operating controls" "or otherwise verify that the equipment cannot be restarted." |
+| 2.2 | Then a qualified person uses a tester on every part you'll be exposed to and confirms it's dead. | 1910.333(b)(2)(iv)(B) | exact: "A qualified person shall use test equipment to test the circuit elements and electrical parts of equipment" "to which employees will be exposed and shall verify that the circuit elements and equipment parts are deenergized." |
+| 2.2b | The test also looks for voltage that sneaks in, like induced voltage or backfeed, even after the circuit was shut off. | 1910.333(b)(2)(iv)(B) | exact: "The test shall also determine if any energized condition exists as a result of inadvertently induced voltage" "or unrelated voltage backfeed even though specific parts of the circuit have been deenergized" |
+| 2.3 | Stored energy counts too. Capacitors are discharged if the stored energy could hurt someone. | 1910.333(b)(2)(ii)(C) | exact: "Capacitors shall be discharged and high capacitance elements shall be short-circuited and grounded," "if the stored electric energy might endanger personnel." |
+| 2.4 | On power lines and utility equipment, test for voltage before any ground goes on, unless a ground is already installed. | 1926.962(e) | exact: "unless a previously installed ground is present, employees test lines and equipment" "and verify the absence of nominal voltage before employees install any ground" (1926 Subpart V, power transmission and distribution construction) |
+| 3.1 | Only qualified people do testing on electric circuits. | 1910.334(c)(1) | exact: "Only qualified persons may perform testing work on electric circuits or equipment." |
+| 3.2 | Before each use, look over the meter, leads, probes, and connectors for damage. | 1910.334(c)(2) | exact: "Test instruments and equipment and all associated test leads, cables, power cords, probes, and connectors" "shall be visually inspected for external defects and damage before the equipment is used." |
+| 3.2b | If it's damaged, it's out of service until it's repaired and tested. | 1910.334(c)(2) | paraphrase: defective or damaged item "shall be removed from service, and no employee may use it until repairs and tests necessary to render the equipment safe have been made." (rule is conditioned on damage "that might expose an employee to injury"; talk simplifies) |
+| 3.3 | The tester has to be rated for the circuit you're testing and made for the place you're using it. | 1910.334(c)(3) | exact: "shall be rated for the circuits and equipment to which they will be connected and shall be designed for the environment in which they will be used." |
+| 3.4 | Over 600 volts, the tester has to be checked for proper operation right before and right after the test. | 1910.333(b)(2)(iv)(B) | exact: "If the circuit to be tested is over 600 volts, nominal, the test equipment shall be checked for proper operation" "immediately before and immediately after this test." |
+| 4.1 | A qualified person checks that all tools, jumpers, shorts, and grounds are removed. | 1910.333(b)(2)(v)(A) | exact: "A qualified person shall conduct tests and visual inspections, as necessary, to verify that all tools," "electrical jumpers, shorts, grounds, and other such devices have been removed" |
+| 4.2 | Everyone who could be hurt is warned, and someone looks to make sure they're all clear. | 1910.333(b)(2)(v)(B), (D) | exact: "Employees exposed to the hazards associated with reenergizing the circuit or equipment shall be warned"; "There shall be a visual determination that all employees are clear of the circuits and equipment." |
+| 4.3 | Each lock and tag comes off by the person who put it on, or under their direct supervision. | 1910.333(b)(2)(v)(C) | exact: "Each lock and tag shall be removed by the employee who applied it or under his or her direct supervision." |
+| 4.3b | Any other way has to follow your company's strict procedure. | 1910.333(b)(2)(v)(C)(1)-(2) | paraphrase: the exception requires the employer to ensure the employee who applied it is not available and is made aware before resuming work. "strict" is framing. |
+| ask | Who's the qualified person testing today, and when did they last look over the tester and leads? | question | — |
+
+Dropped for lack of a source:
+- "Live-dead-live" check of the tester on a known source for circuits under 600 volts: no OSHA page fetched requires or recommends it. Only the over-600-volt before/after check is in the talk.
+- "A meter that's broken reads the same as a dead circuit": inference, not in any fetched source.
+- 1910.333(a)(1) under-50-volt exception: verified but omitted for length.
