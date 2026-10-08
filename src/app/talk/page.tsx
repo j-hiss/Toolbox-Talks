@@ -25,7 +25,9 @@ import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/con
 import { addDays, isoDay } from "@/core/weeks";
 import { readWalkinCompanies, rememberWalkinCompany, writeLastSetup } from "@/lib/lastSetup";
 import { buzz, toast } from "@/components/toast";
-import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
+import type { Company, Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
+import { sinceLastSettings, sinceLastSnapshot } from "@/core/safetylog";
+import { loadSinceLast } from "@/lib/sinceLast";
 import { clearDraft, newDraft, readDraft, useDraft, writeDraft, type DraftIssue, type TalkDraft } from "@/lib/draft";
 import { enqueue, flush, pending } from "@/lib/outbox";
 import { CrewPhoto } from "@/components/CrewPhoto";
@@ -103,7 +105,7 @@ function Talk({ m }: { m: Membership }) {
   return (
     <Shell nav={nav} tabs={false}>
       {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} open={openMakeups} />}
-      {draft.step === "read" && draft.talkId && <Read draft={draft} update={update} org={org} />}
+      {draft.step === "read" && draft.talkId && <Read co={co} draft={draft} update={update} org={org} />}
       {draft.step === "crew" && <Crew org={org} draft={draft} update={update} signedIds={signedIds} />}
       {draft.step === "sign" && (
         <Sign
@@ -242,7 +244,7 @@ function MakeupPick({ weeks, draft, update, open }: {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; org: Org }) {
+function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; org: Org }) {
   const talk = TALKS.find((t) => t.id === draft.talkId)!;
   const { text } = talkText(talk, draft.lang);
   const ui = crewText(draft.lang);
@@ -274,11 +276,27 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
     return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [point?.latitude, point?.longitude]);
+  // Since last talk: the safety log's approved crew summaries, when the company reads them at talks. Not for makeups
+  // (a makeup covers an earlier talk). Loaded once into the draft, so it stays put offline and as the crew reads.
+  const useSinceLast = sinceLastSettings(co).enabled && !draft.makeup;
+  useEffect(() => {
+    if (!useSinceLast || draft.sinceLast) return;
+    let live = true;
+    loadSinceLast(co, draft.jobsiteId || null).then((sl) => {
+      const cur = readDraft(draft.companyId);
+      if (live && cur && !cur.sinceLast) writeDraft({ ...cur, sinceLast: sl });
+    });
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useSinceLast, draft.jobsiteId]);
+  const since = useSinceLast ? draft.sinceLast : undefined;
+  const sinceItems = since?.status === "read" ? since.items : [];
+  const unchecked = sinceItems.filter((i) => !since?.checked[i.event_id]).length;
   const hot = !!draft.heat && alertWorthy(draft.heat.level as HeatLevel) && talk.id !== "heat";
   const reminder = heatReminder(draft.lang);
   const notes = draft.siteNotes.trim();
 
-  type Line = { text: string; heading?: boolean; kind: "title" | "hook" | "h" | "item" | "askh" | "ask" | "noteh" | "note" | "heath" | "heat" };
+  type Line = { text: string; heading?: boolean; kind: "title" | "hook" | "h" | "item" | "askh" | "ask" | "noteh" | "note" | "heath" | "heat" | "sinceh" | "sincei" | "since"; eventId?: string };
   const lines = useMemo(() => {
     const out: Line[] = [
       { text: text.title, heading: true, kind: "title" },
@@ -289,13 +307,18 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
       out.push({ text: `${reminder.title} · ${draft.heat!.max_heat_index_f}°F`, heading: true, kind: "heath" });
       reminder.items.forEach((i) => out.push({ text: i, kind: "heat" }));
     }
+    if (since && since.status !== "unavailable") {
+      out.push({ text: "Since last talk", heading: true, kind: "sinceh" });
+      if (since.status === "none") out.push({ text: "No new inspections, citations, incidents or near misses logged.", kind: "since" });
+      since.items.forEach((i) => out.push({ text: i.heading, kind: "sincei", eventId: i.event_id }, { text: i.text, kind: "since", eventId: i.event_id }));
+    }
     text.sections.forEach((s) => {
       out.push({ text: s.heading, heading: true, kind: "h" });
       s.items.forEach((i) => out.push({ text: i, kind: "item" }));
     });
     out.push({ text: ui.ask, heading: true, kind: "askh" }, { text: text.ask, kind: "ask" });
     return out;
-  }, [text, ui.ask, notes, hot, reminder, draft.lang, draft.heat]);
+  }, [text, ui.ask, notes, hot, reminder, draft.lang, draft.heat, since]);
 
   const voice = LANGUAGES.find((l) => l.id === draft.lang)!.voice;
   const playing = line !== null;
@@ -344,6 +367,9 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
         </p>
       )}
       {heatMsg && !draft.heat && <p className="mt-2 text-xs text-muted">Heat check unavailable: {heatMsg}</p>}
+      {since?.status === "unavailable" && (
+        <p className="mt-2 text-xs text-muted">Couldn&apos;t load the safety log for &ldquo;Since last talk&rdquo; (no signal?). The talk saves without it, marked as not loaded.</p>
+      )}
 
       <div className="mt-3">
         {editingNotes || notes ? (
@@ -374,6 +400,28 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
           if (l.kind === "noteh" || l.kind === "heath") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-semibold ${l.kind === "heath" ? "text-warn-text" : ""} ${hl(i)}`}>{l.text}</h3>;
           if (l.kind === "note") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-fg bg-bg px-3 py-2 font-semibold ${hl(i)}`}>{l.text}</p>;
           if (l.kind === "heat") return <p key={i} id={`line-${i}`} className={`mt-1.5 border-l-4 border-warn pl-4 before:-ml-2 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "sinceh") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-semibold ${hl(i)}`}>{l.text}{draft.lang !== "en" && <small className="ml-2 font-sans text-xs font-normal text-muted">in English</small>}</h3>;
+          if (l.kind === "sincei") return <p key={i} id={`line-${i}`} className={`mt-3 text-sm font-semibold text-muted ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "since") {
+            const id = l.eventId;
+            return (
+              <div key={i}>
+                <p id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-brand bg-bg px-3 py-2 ${hl(i)}`}>{l.text}</p>
+                {id && (
+                  <label className="mt-1 flex min-h-11 items-center gap-2 text-sm font-semibold">
+                    <input type="checkbox" className="size-5 accent-[var(--brand)]" checked={!!since?.checked[id]}
+                      onChange={(e) => {
+                        if (!since) return;
+                        const checked = { ...since.checked };
+                        if (e.target.checked) checked[id] = new Date().toISOString(); else delete checked[id];
+                        update({ sinceLast: { ...since, checked } });
+                      }} />
+                    Reviewed with the crew
+                  </label>
+                )}
+              </div>
+            );
+          }
           if (l.kind === "h" || l.kind === "askh") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-semibold ${hl(i)}`}>{l.text}</h3>;
           if (l.kind === "ask") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-brand bg-bg px-3 py-2 ${hl(i)}`}>{l.text}</p>;
           return <p key={i} id={`line-${i}`} className={`mt-1.5 pl-4 before:-ml-4 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
@@ -385,10 +433,10 @@ function Read({ draft, update, org }: { draft: TalkDraft; update: (p: Partial<Ta
       {/* Always in reach while reading: play/stop and done. */}
       <div className="sticky bottom-0 -mx-4 mt-5 flex gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
         <Button size="sm" onClick={toggle} className="shrink-0 bg-fg text-bg" aria-label={playing ? ui.stop : ui.play}>{playing ? `■ ${ui.stop}` : `▶ ${ui.play}`}</Button>
-        <Button className="!py-3" onClick={() => {
+        <Button className="!py-3" disabled={unchecked > 0} onClick={() => {
           stopRef.current?.();
           update({ step: "crew", siteNotes: draft.siteNotes.trim(), heat: draft.heat ? { ...draft.heat, reminder_read: hot } : null });
-        }}>Done reading</Button>
+        }}>{unchecked > 0 ? `Check off ${unchecked} more` : "Done reading"}</Button>
       </div>
     </>
   );
@@ -604,7 +652,11 @@ function Sign({
         clientId: draft.clientId,
         talkId: talk.id,
         language: lang,
-        content: lang === "en" ? text : { ...text, en: talk.content.en },
+        content: {
+          ...(lang === "en" ? text : { ...text, en: talk.content.en }),
+          // What was read from the safety log, with when each item was checked off (src/core/safetylog.ts).
+          ...(draft.sinceLast ? { since_last: sinceLastSnapshot(draft.sinceLast) } : {}),
+        },
         week,
         jobsite: jobsite ? { id: jobsite.id, name: jobsite.name } : null,
         team: team ? { id: team.id, name: team.name, leadName: lead?.full_name ?? "" }

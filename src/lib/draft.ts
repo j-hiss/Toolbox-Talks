@@ -6,6 +6,7 @@ import { useSyncExternalStore } from "react";
 import type { Signature } from "@/core/record";
 import type { LanguageId } from "@/core/languages";
 import { readLastSetup } from "./lastSetup";
+import type { SinceLastDraft } from "./sinceLast";
 
 export type TalkDraft = {
   clientId: string;
@@ -38,6 +39,8 @@ export type TalkDraft = {
   issues: DraftIssue[];
   /** Optional crew photo (shrunk JPEG data URL) and when it was taken. */
   photo: { image: string; takenAt: string } | null;
+  /** The "Since last talk" section (safety log), once loaded; undefined = not loaded or not used. */
+  sinceLast?: SinceLastDraft;
 };
 
 export type Walkin = { name: string; company: string };

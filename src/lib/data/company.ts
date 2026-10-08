@@ -8,7 +8,7 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
-const COMPANY_COLUMNS = "id, name, licenses, address, phone, email, industry, zip, program_start, default_jobsite, makeup_weeks, theme, work_setting";
+const COMPANY_COLUMNS = "id, name, licenses, address, phone, email, industry, zip, program_start, default_jobsite, makeup_weeks, theme, work_setting, since_last_enabled, since_last_window, since_last_scope, since_last_kinds, since_last_open_only";
 
 export async function myMemberships(userId: string): Promise<Membership[]> {
   const rows = check(

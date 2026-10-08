@@ -149,6 +149,22 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   });
   para(`Crew discussion: ${t.ask}`, false); y += 10;
 
+  // Since last talk: safety-log summaries read with this talk, each checked off by the presenter ---------------------
+  const sl = r.content.since_last;
+  if (sl) {
+    newPageIf(40);
+    para("Since last talk (from the company's safety log)", true);
+    if (sl.status === "unavailable") para("The safety log couldn't be loaded when this talk was given (no connection).", false);
+    else if (sl.items.length === 0) para("No new inspections, citations, incidents or near misses logged.", false);
+    sl.items.forEach((it) => {
+      newPageIf(30);
+      para(it.heading, true);
+      para(it.text, false, 12);
+      para(`Reviewed with the crew ${new Date(it.reviewed_with_crew_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`, false, 12);
+    });
+    y += 8;
+  }
+
   // Site notes, heat, and what the crew raised ----------------------------------------------------------------------
   if (r.site_notes) { newPageIf(40); para("Today on this site", true); para(r.site_notes, false); y += 8; }
   if (r.heat) {

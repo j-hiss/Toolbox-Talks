@@ -139,6 +139,23 @@ function RecordView({ m }: { m: Membership }) {
         </>
       )}
 
+      {rec.content.since_last && (
+        <>
+          <GroupHeading>Since last talk</GroupHeading>
+          <div className="mt-3 flex flex-col gap-2 text-sm">
+            {rec.content.since_last.status === "unavailable" && <p className="text-muted">The safety log couldn&apos;t be loaded when this talk was given.</p>}
+            {rec.content.since_last.status !== "unavailable" && rec.content.since_last.items.length === 0 && <p className="text-muted">No new inspections, citations, incidents or near misses logged.</p>}
+            {rec.content.since_last.items.map((it) => (
+              <div key={it.event_id} className="rounded-xl bg-surface px-3 py-2">
+                <small className="block font-semibold text-muted">{it.heading}</small>
+                <p>{it.text}</p>
+                <small className="text-muted">Reviewed with the crew {new Date(it.reviewed_with_crew_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</small>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {(rec.site_notes || rec.heat || issues.length > 0) && (
         <>
           <GroupHeading>On site</GroupHeading>

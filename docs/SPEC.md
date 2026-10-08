@@ -73,6 +73,22 @@ customer #1, not a special case.
   still need it.
 
 
+## Safety log and "Since last talk" (2026-10-08)
+- Admin → **Safety log** records inspections, walk-arounds, citations, incidents and near misses: date, jobsite (or
+  company-wide), a title, kind-specific fields, admin-only details, and a PDF or photos (private, admins only).
+- Each has a short **crew summary**. It's a draft until an admin approves it, and once approved it never changes
+  (a new wording is a new entry). The app blocks approving a summary that names someone on the roster or says
+  "compliant" / "passed". Citations are read as *alleged* with their case status until final.
+- Findings go on the crew **issues** list, linked to their event. Nothing is deleted; an entry can be withdrawn from
+  future talks with a reason.
+- When a company turns it on, each talk (not makeups) gets a **"Since last talk"** section: the approved summaries
+  for that jobsite (plus company-wide ones) since its last talk, or the last 30/60/90 days. The presenter reads each
+  and checks "Reviewed with the crew"; reading can't finish until all are checked. With nothing logged it says so.
+  Offline, it says the log couldn't be loaded. The record and PDF keep exactly what was read and when each was
+  checked. Washington's construction meeting rule asks for this review (WAC 296-155-110).
+- **Not built (waiting on Joe):** AI-drafted summaries. The table already has `summary_source` ('typed' / 'ai'); an
+  AI draft would still need the same approval.
+
 ## Scheduling and cadence (decided with Joe, 2026-10-07)
 - **Talk picks:** built (Admin → Talks, above).
 - **Cadence:** built for the whole company (Admin → Plan → How often): every week (default), every 2 weeks, or every

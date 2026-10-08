@@ -1,7 +1,7 @@
 "use client";
 
-// Admin setup: people, teams, jobsites, the roles that can give talks, the talks the plan uses, the weekly plan, and
-// company info.
+// Admin setup: people, teams, jobsites, the roles that can give talks, the talks the plan uses, the weekly plan, the
+// safety log, and company info.
 // Owners and admins only.
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
@@ -28,6 +28,7 @@ import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
 import { TalkPicker } from "@/components/TalkPicker";
 import { CadencePicker } from "@/components/CadencePicker";
+import { SafetyLog } from "@/components/SafetyLog";
 import { BrandEditor } from "@/components/BrandEditor";
 
 const TABS = [
@@ -36,6 +37,7 @@ const TABS = [
   { id: "jobsites", label: "Jobsites" },
   { id: "talks", label: "Talks" },
   { id: "plan", label: "Plan" },
+  { id: "safety", label: "Safety log" },
   { id: "roles", label: "Roles" },
   { id: "company", label: "Company" },
   { id: "brand", label: "Brand" },
@@ -144,6 +146,8 @@ function Admin({ m }: { m: Membership }) {
           <TeamsTab companyId={companyId} people={people} teams={teams} act={act} />
         ) : tab === "jobsites" ? (
           <JobsitesTab companyId={companyId} company={m.company} jobsites={jobsites} act={act} />
+        ) : tab === "safety" ? (
+          <SafetyLog company={m.company} state={climateFor(m.company.zip).state} jobsites={jobsites} people={people} />
         ) : (
           <RolesTab companyId={companyId} people={people} roles={roles} act={act} />
         )}

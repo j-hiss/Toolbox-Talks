@@ -349,6 +349,55 @@ async function main() {
     check("What was raised can't be rewritten", fixed.description === "East ladder cracked");
     check("Issues can't be deleted", await fails(() => as(userA, "delete from public.talk_issues where id = $1", [issueId])));
 
+    // Safety log (Admin → Safety log): admins only; crews see approved crew summaries through crew_bulletins.
+    const logEvent = (user, company, extra = {}) => as(user,
+      "insert into public.safety_events (company_id, client_id, kind, occurred_on, title, details, crew_summary, case_status, summary_status) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id",
+      [company, randomUUID(), extra.kind ?? "inspection", extra.on ?? new Date().toISOString().slice(0, 10), extra.title ?? "Scaffold check",
+        extra.details ?? "Inspector: Pat Example. Plank cracked.", extra.summary ?? "A cracked plank on the north scaffold was replaced.",
+        extra.case_status ?? null, extra.status ?? "draft"]);
+    const evA = (await logEvent(userA, coA)).rows[0].id;
+    const evB = (await logEvent(userB, coB, { summary: "B's summary" })).rows[0].id;
+    const since = new Date(Date.now() - 7 * 86400000).toISOString();
+    const bulletins = (user, company) => as(user, "select id, crew_summary from public.crew_bulletins($1, $2)", [company, since]);
+    check("A sees only A's safety log", (await as(userA, "select company_id from public.safety_events")).rows.every((r) => r.company_id === coA)
+      && (await as(userA, "select 1 from public.safety_events")).rows.length === 1);
+    check("A presenter can't read the safety log itself (details and names stay with admins)", (await as(presenterA, "select 1 from public.safety_events")).rows.length === 0);
+    check("A presenter can't log an event", await fails(() => logEvent(presenterA, coA)));
+    check("A can't log an event in B", await fails(() => logEvent(userA, coB)));
+    check("An event can't be logged as already approved", await fails(() => logEvent(userA, coA, { status: "reviewed" })));
+    check("Only citations carry a case status", await fails(() => logEvent(userA, coA, { case_status: "contested" })));
+    check("A draft summary isn't read to crews", (await bulletins(presenterA, coA)).rows.length === 0);
+    await as(userA, "update public.safety_events set summary_status = 'reviewed' where id = $1", [evA]);
+    const approved = (await as(userA, "select reviewed_by, reviewed_at from public.safety_events where id = $1", [evA])).rows[0];
+    check("Approving stamps who and when", approved.reviewed_by === userA && approved.reviewed_at);
+    const crew = (await bulletins(presenterA, coA)).rows;
+    check("Once approved, crews get the summary (and only crew-safe columns)", crew.length === 1 && crew[0].crew_summary.includes("cracked plank") && !("details" in crew[0]));
+    check("B can't read A's crew summaries", (await bulletins(userB, coA)).rows.length === 0);
+    await as(userA, "update public.safety_events set crew_summary = 'rewritten', summary_status = 'draft', occurred_on = '2020-01-01' where id = $1", [evA]);
+    const kept = (await as(userA, "select crew_summary, summary_status, occurred_on::text d from public.safety_events where id = $1", [evA])).rows[0];
+    check("An approved summary can't be changed or un-approved", kept.crew_summary.includes("cracked plank") && kept.summary_status === "reviewed" && kept.d !== "2020-01-01");
+    check("B can't change A's events", (await as(userB, "update public.safety_events set title = 'x' where id = $1", [evA])).rowCount === 0);
+    check("A presenter can't change events", (await as(presenterA, "update public.safety_events set title = 'x' where id = $1", [evA])).rowCount === 0);
+    check("Events can't be deleted", await fails(() => as(userA, "delete from public.safety_events where id = $1", [evA])));
+    check("Withdrawing needs a reason", await fails(() => as(userA, "update public.safety_events set withdrawn_at = now() where id = $1", [evA])));
+    await as(userA, "update public.safety_events set withdrawn_at = now(), withdrawn_reason = 'Logged twice' where id = $1", [evA]);
+    check("A withdrawn event isn't read to crews", (await bulletins(presenterA, coA)).rows.length === 0);
+    await as(userA, "update public.safety_events set withdrawn_at = null, withdrawn_reason = '' where id = $1", [evA]);
+    check("…and stays withdrawn", (await as(userA, "select withdrawn_reason from public.safety_events where id = $1", [evA])).rows[0].withdrawn_reason === "Logged twice");
+    const cit = (await logEvent(userA, coA, { kind: "citation", case_status: "contested", summary: "Alleged: guardrail missing on the east edge." })).rows[0].id;
+    check("A citation keeps its case status", (await as(userA, "select case_status from public.safety_events where id = $1", [cit])).rows[0].case_status === "contested");
+    await as(userA, "insert into public.talk_issues (company_id, client_id, description, event_id) values ($1, $2, 'Add guardrail on east edge', $3)", [coA, randomUUID(), cit]);
+    check("A finding goes on the issues list, linked to its event", (await as(userA, "select 1 from public.talk_issues where event_id = $1", [cit])).rows.length === 1);
+    check("An issue can't point at another company's event", await fails(() => as(userA, "insert into public.talk_issues (company_id, client_id, description, event_id) values ($1, $2, 'x', $3)", [coA, randomUUID(), evB])));
+    const eventFile = (user, path) => as(user, "insert into storage.objects (bucket_id, name) values ('event-files', $1)", [path]);
+    check("An admin can attach a file to their company's event", !(await fails(() => eventFile(userA, `${coA}/${evA}/report.pdf`))));
+    check("A presenter can't attach event files", await fails(() => eventFile(presenterA, `${coA}/${evA}/x.pdf`)));
+    check("A presenter can't read event files", (await as(presenterA, "select 1 from storage.objects where bucket_id = 'event-files'")).rows.length === 0);
+    check("A can't attach a file to B's folder", await fails(() => eventFile(userA, `${coB}/${evB}/x.pdf`)));
+    check("Event files can't be deleted", (await as(userA, "delete from storage.objects where bucket_id = 'event-files'")).rowCount === 0);
+    check("A presenter can't turn on the Since last talk section", (await as(presenterA, "update public.companies set since_last_enabled = true where id = $1", [coA])).rowCount === 0);
+    check("The Since last talk window is one of the set choices", await fails(() => as(userA, "update public.companies set since_last_window = '7' where id = $1", [coA])));
+
     const rolesA = await as(userA, "select company_id from public.roles");
     check("New company gets its default roles, and A sees only A's", rolesA.rows.length === 6 && rolesA.rows.every((r) => r.company_id === coA), `${rolesA.rows.length} visible`);
     check("A cannot add a role to B", await fails(() => as(userA, "insert into public.roles (company_id, name) values ($1, 'Intruder')", [coB])));

@@ -1,4 +1,5 @@
 // Row shapes as stored in Supabase (snake_case, matching supabase/migrations/).
+import type { CaseStatus, EventKind, SinceLastSnapshot, SinceLastWindow } from "@/core/safetylog";
 import type { Theme } from "@/core/theme";
 import type { IndustryId } from "@/core/industries";
 import type { WorkSetting } from "@/core/worksetting";
@@ -20,6 +21,12 @@ export type Company = {
   makeup_weeks: number; // how many weeks back a missed talk can be made up
   work_setting?: WorkSetting | null; // where crews work (Admin → Company); null = the industry default, src/core/worksetting.ts
   theme?: Partial<Theme> | null; // only the colors this company changed (Admin → Brand); see src/core/theme.ts
+  // "Since last talk" settings (Admin → Safety log); see sinceLastSettings in src/core/safetylog.ts.
+  since_last_enabled?: boolean;
+  since_last_window?: SinceLastWindow;
+  since_last_scope?: "jobsite" | "all";
+  since_last_kinds?: EventKind[];
+  since_last_open_only?: boolean;
 };
 
 export type Membership = { company: Company; access: Access };
@@ -90,7 +97,7 @@ export type PlanOverride = { week_start: string; talk_id: string };
 
 /** A saved talk with everything needed to show it or build its PDF. */
 export type TalkRecord = TalkRecordSummary & {
-  content: { title: string; hook: string; sections: { heading: string; items: string[] }[]; ask: string; en?: unknown };
+  content: { title: string; hook: string; sections: { heading: string; items: string[] }[]; ask: string; en?: unknown; since_last?: SinceLastSnapshot };
   scheduled_talk_id: string | null;
   team_lead_name: string;
   presenter_role: string;
@@ -123,4 +130,29 @@ export type Issue = {
   raised_at: string;
   fixed_at: string | null;
   fixed_note: string;
+  /** The safety-log event this issue came from (a finding), if any. */
+  event_id?: string | null;
+};
+
+/** A safety-log entry as admins see it (Admin → Safety log). Crews only ever see Bulletin (src/core/safetylog.ts). */
+export type SafetyEvent = {
+  id: string;
+  client_id: string;
+  kind: EventKind;
+  occurred_on: string;
+  jobsite_id: string | null;
+  jobsite_name: string;
+  title: string;
+  details: string;
+  fields: Record<string, string>;
+  case_status: CaseStatus | null;
+  crew_summary: string;
+  summary_source: "typed" | "ai";
+  summary_status: "draft" | "reviewed";
+  reviewed_at: string | null;
+  status: "open" | "closed";
+  closed_at: string | null;
+  withdrawn_at: string | null;
+  withdrawn_reason: string;
+  created_at: string;
 };
