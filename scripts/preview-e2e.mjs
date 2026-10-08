@@ -190,6 +190,23 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("4 unsaved change dropped on leaving:", await brandVar(r));
   await r.click("[role=tab]:has-text('Brand')"); await r.click("button:has-text('Back to default')"); await r.click("button:has-text('Save colors')"); await r.waitForTimeout(700);
   log("4 back to default:", await brandVar(r));
+  // Scenario 5: Admin -> Talks. Add a talk from another industry, save (starts next week), see it in the Plan, undo.
+  await r.click("[role=tab]:has-text('Talks')"); await r.waitForTimeout(400);
+  log("5 talks start:", (await r.locator("main span.font-semibold:has-text('picked')").innerText()), "| groups:", (await r.locator("main section h2").allTextContents()).join(", "));
+  await r.selectOption('select[aria-label="Show talks for"]', "all"); await r.fill('input[aria-label="Search talks"]', "forklift safety"); await r.waitForTimeout(200);
+  await r.locator("main label:has-text('Forklift Safety')").first().click();
+  log("5 save button:", await r.locator("main button:has-text('Save')").innerText());
+  await r.click("main button:has-text('Save')"); await r.waitForTimeout(700);
+  log("5 after save:", (await r.locator("main [role=status], main [role=alert]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
+  await r.screenshot({ path: `${OUT}/e-talks.png`, fullPage: false });
+  await r.click("[role=tab]:has-text('Plan')"); await r.waitForTimeout(500);
+  const weekHas = (label) => r.locator(`main li:has-text("${label}")`).first().locator("option", { hasText: "Forklift Safety" }).count();
+  const nextMon = new Date(); nextMon.setDate(nextMon.getDate() - ((nextMon.getDay() + 6) % 7) + 7);
+  const nextLabel = nextMon.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  log("5 this week offers it:", await weekHas("This week"), `| week of ${nextLabel} offers it:`, await weekHas(nextLabel));
+  await r.click("[role=tab]:has-text('Talks')"); await r.waitForTimeout(400);
+  await r.click("main button:has-text('Undo it')"); await r.waitForTimeout(700);
+  log("5 after undo:", (await r.locator("main [role=status], main [role=alert]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

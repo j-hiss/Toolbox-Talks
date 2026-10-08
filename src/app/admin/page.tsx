@@ -1,6 +1,7 @@
 "use client";
 
-// Admin setup: people, teams, jobsites, the roles that can give talks, the weekly plan, and company info.
+// Admin setup: people, teams, jobsites, the roles that can give talks, the talks the plan uses, the weekly plan, and
+// company info.
 // Owners and admins only.
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
@@ -12,9 +13,7 @@ import { companyWorkSetting, WORK_SETTINGS, type WorkSetting } from "@/core/work
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { getLocation, LocationError } from "@/lib/location";
 import { mapsLink } from "@/core/geo";
-import { talksFor } from "@/core/talks";
-import { buildPlan } from "@/core/plan";
-import { climateFor } from "@/core/climate";
+import { buildPlan, talksInPlan } from "@/core/plan";
 import { canChangeWeek } from "@/core/makeup";
 import { weekLabel, isoDay, mondayOf, parseDay } from "@/core/weeks";
 import { TALKS } from "@/content/talks";
@@ -26,12 +25,14 @@ import { CompanyForm } from "@/components/CompanyForm";
 import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, Sheet, Shell, Title, inputClass } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
+import { TalkPicker } from "@/components/TalkPicker";
 import { BrandEditor } from "@/components/BrandEditor";
 
 const TABS = [
   { id: "people", label: "People" },
   { id: "teams", label: "Teams" },
   { id: "jobsites", label: "Jobsites" },
+  { id: "talks", label: "Talks" },
   { id: "plan", label: "Plan" },
   { id: "roles", label: "Roles" },
   { id: "company", label: "Company" },
@@ -110,7 +111,9 @@ function Admin({ m }: { m: Membership }) {
       {error && <div className="mt-4"><Notice tone="error">{error}</Notice></div>}
 
       <div className="mt-5">
-        {tab === "plan" ? (
+        {tab === "talks" ? (
+          <TalksTab m={m} />
+        ) : tab === "plan" ? (
           <PlanTab m={m} />
         ) : tab === "brand" ? (
           <BrandEditor
@@ -505,6 +508,17 @@ function KindToggle({ value, onChange }: { value: Jobsite["kind"]; onChange: (k:
   return <div className="flex gap-1.5" role="group" aria-label="Kind of place">{opt("site", "Jobsite")}{opt("office", "Office or shop")}</div>;
 }
 
+// Which talks the plan draws from (src/components/TalkPicker.tsx). The plan hook is the same one every screen uses.
+function TalksTab({ m }: { m: Membership }) {
+  const { input, lists, reload } = usePlan(m.company);
+  const [msg, setMsg] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
+  // A fresh picker whenever the saved lists change (loaded, saved, undone), so its checkboxes match what's saved.
+  return (
+    <TalkPicker key={JSON.stringify(lists)} companyId={m.company.id} industry={m.company.industry} input={input} lists={lists}
+      reload={reload} msg={msg} setMsg={setMsg} />
+  );
+}
+
 // The weekly plan. One talk per week for the whole company; every crew gives the same one. An admin can swap a
 // week's talk until the week is over or someone has given it. The database enforces the same lock.
 function PlanTab({ m }: { m: Membership }) {
@@ -526,7 +540,6 @@ function PlanTab({ m }: { m: Membership }) {
     return () => { live = false; };
   }, [co.id, thisMonday, version]);
 
-  const options = talksFor(TALKS, co.industry, climateFor(co.zip));
   const title = (id: string) => TALKS.find((t) => t.id === id)?.content.en.title ?? id;
   const weeks = plan.filter((w) => w.key >= thisMonday);
 
@@ -578,7 +591,7 @@ function PlanTab({ m }: { m: Membership }) {
                   disabled={busy !== null}
                   onChange={(e) => change(w.key, e.target.value, base)}
                 >
-                  {options.map((t) => <option key={t.id} value={t.id}>{t.content.en.title}{t.id === base ? " (planned)" : ""}</option>)}
+                  {talksInPlan(input, w.key).map((t) => <option key={t.id} value={t.id}>{t.content.en.title}{t.id === base ? " (planned)" : ""}</option>)}
                 </select>
               )}
             </li>

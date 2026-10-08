@@ -55,6 +55,9 @@ customer #1, not a special case.
   Florida, Hawaii or Puerto Rico, hurricane prep before and during storm season only in hurricane states.
 - **Each week's talk is locked.** Every crew gives the same talk that week, as many times a day or week as needed
   (several crews, several shifts). There is no "give a different talk" button.
+- Admin → **Talks** picks which talks the plan draws from: the industry's talks and the Every-job set by default;
+  an admin can drop talks or add ones from other industries. A new pick list starts next Monday, so weeks already
+  planned keep their talks (the database refuses to change a list that has started).
 - Admin → **Plan** can swap a week's talk **until someone gives it** or the week is over; after that the week is
   locked. The database enforces the lock (`plan_overrides` trigger), not just the app.
 - **Makeups.** Someone who missed a week (off, sick, new hire, no work) gets that week's talk later through
@@ -68,6 +71,16 @@ customer #1, not a special case.
   a makeup) lists active people with no signature for that week, on time or by makeup. Absent and not-signed people
   still need it.
 
+
+## Scheduling and cadence (decided with Joe, 2026-10-07)
+- **Talk picks:** built (Admin → Talks, above).
+- **Cadence:** set once for the company, with an override per crew or jobsite (same pattern as work settings).
+  Weekly by default; also every 2 weeks or monthly. The app warns when the chosen cadence is slower than a state
+  rule (California construction every 10 working days, Washington weekly, Oregon monthly). Not built yet.
+- **Daily tailgate talks:** separate records that count on their own; the weekly (or slower) talk stays the main
+  record and its grading doesn't change. Not built yet.
+- **Who changes the plan:** office admins only. Crew leads give the talk that's scheduled.
+- **Required repeats:** talks a company must repeat (for example yearly) come back on schedule. Not built yet.
 ## Languages and read-aloud
 - Language toggle on every talk. English and Spanish first; Portuguese, Haitian Creole, Vietnamese and Chinese next.
 - **Read-aloud** so the presenter doesn't need to speak the crew's language. Each line highlights as it's read.

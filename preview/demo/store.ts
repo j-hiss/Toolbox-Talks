@@ -11,6 +11,7 @@ export type DemoDb = {
   jobsites: Record<string, unknown>[];
   records: Record<string, unknown>[];
   overrides: { company_id: string; week_start: string; talk_id: string }[];
+  talkLists?: { company_id: string; from_week: string; talk_ids: string[] }[];
   issues: (import("@/lib/data/types").Issue & { company_id: string })[];
 };
 

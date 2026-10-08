@@ -1,5 +1,6 @@
 // Demo version of src/lib/data/plan.ts: same functions and the same lock the database enforces.
 import type * as Real from "@/../src/lib/data/plan";
+import type { TalkList } from "@/core/plan";
 import type { PlanOverride } from "@/lib/data/types";
 import { isoDay, mondayOf } from "@/core/weeks";
 import { db, save, tick } from "./store";
@@ -36,5 +37,31 @@ export async function clearOverride(companyId: string, weekStart: string): Promi
   save();
 }
 
-const _sameShape = { listOverrides, setOverride, clearOverride } satisfies Omit<typeof Real, never>;
+// Talk lists, with the same rule the database enforces: only a list that starts after this week can change.
+const lists = () => (db().talkLists ??= []);
+function listGuard(fromWeek: string) {
+  if (fromWeek <= isoDay(new Date())) throw new Error(`A talk list has to start next week or later (${fromWeek}), so weeks already planned keep their talks.`);
+}
+
+export async function listTalkLists(companyId: string): Promise<TalkList[]> {
+  await tick();
+  return lists().filter((l) => l.company_id === companyId).sort((a, b) => a.from_week.localeCompare(b.from_week))
+    .map(({ from_week, talk_ids }) => ({ from_week, talk_ids: [...talk_ids] }));
+}
+
+export async function saveTalkList(companyId: string, fromWeek: string, talkIds: string[]): Promise<void> {
+  await tick(); mustBeAdmin(companyId); listGuard(fromWeek);
+  if (talkIds.length === 0) throw new Error("Pick at least one talk.");
+  const hit = lists().find((l) => l.company_id === companyId && l.from_week === fromWeek);
+  if (hit) hit.talk_ids = [...talkIds]; else lists().push({ company_id: companyId, from_week: fromWeek, talk_ids: [...talkIds] });
+  save();
+}
+
+export async function removeTalkList(companyId: string, fromWeek: string): Promise<void> {
+  await tick(); mustBeAdmin(companyId); listGuard(fromWeek);
+  db().talkLists = lists().filter((l) => !(l.company_id === companyId && l.from_week === fromWeek));
+  save();
+}
+
+const _sameShape = { listOverrides, setOverride, clearOverride, listTalkLists, saveTalkList, removeTalkList } satisfies Omit<typeof Real, never>;
 void _sameShape;

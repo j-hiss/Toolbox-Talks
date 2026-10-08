@@ -181,6 +181,31 @@ async function main() {
     check("A presenter can read the plan", (await as(presenterA, "select week_start from public.plan_overrides")).rows.length === 1);
     check("A week that's over can't be changed", await fails(() => setOverride(userA, coA, pastWk)));
     check("Plan weeks must start on a Monday", await fails(() => setOverride(userA, coA, tuesday)));
+    // Picked talk lists (Admin → Talks): company-scoped, admins only, and only for weeks that haven't started.
+    const setList = (user, company, wk, ids = ["fork", "racking"]) =>
+      as(user, "insert into public.company_talk_lists (company_id, from_week, talk_ids) values ($1, $2, $3) on conflict (company_id, from_week) do update set talk_ids = excluded.talk_ids", [company, wk, ids]);
+    await setList(userA, coA, nextWk);
+    await setList(userB, coB, nextWk);
+    const tlA = await as(userA, "select company_id from public.company_talk_lists");
+    check("A sees only A's talk lists", tlA.rows.length === 1 && tlA.rows[0].company_id === coA, `${tlA.rows.length} visible`);
+    check("A cannot set B's talk list", await fails(() => setList(userA, coB, laterWk)));
+    check("A cannot remove B's talk list", (await as(userA, "delete from public.company_talk_lists where company_id = $1 returning 1", [coB])).rows.length === 0
+      && (await as(userB, "select 1 from public.company_talk_lists where company_id = $1", [coB])).rows.length === 1);
+    check("A presenter can read the talk list", (await as(presenterA, "select 1 from public.company_talk_lists")).rows.length === 1);
+    check("A presenter cannot change the talk list", await fails(() => setList(presenterA, coA, laterWk)));
+    check("A talk list can't start this week", await fails(() => setList(userA, coA, monday(0))));
+    check("A talk list can't start in the past", await fails(() => setList(userA, coA, pastWk)));
+    check("A talk list starts on a Monday", await fails(() => setList(userA, coA, tuesday)));
+    check("A talk list needs at least one talk", await fails(() => setList(userA, coA, laterWk, [])));
+    check("A future talk list can be replaced", !(await fails(() => setList(userA, coA, nextWk, ["fork"]))));
+    check("A future talk list can be removed", (await as(userA, "delete from public.company_talk_lists where company_id = $1 and from_week = $2 returning 1", [coA, nextWk])).rows.length === 1);
+    // A list that has started is kept as it was: backdate one as the database owner, then try to change it.
+    await db.query("alter table public.company_talk_lists disable trigger company_talk_lists_lock");
+    await db.query("insert into public.company_talk_lists (company_id, from_week, talk_ids, set_by) values ($1, $2, $3, $4)", [coA, pastWk, ["fork"], userA]);
+    await db.query("alter table public.company_talk_lists enable trigger company_talk_lists_lock");
+    check("A talk list that has started can't be changed", await fails(() => setList(userA, coA, pastWk, ["racking"])));
+    check("…or removed", await fails(() => as(userA, "delete from public.company_talk_lists where company_id = $1 and from_week = $2", [coA, pastWk])));
+
     const recWk = (company, clientId, wk, extra = {}) => [
       JSON.stringify({ company_id: company, client_id: clientId, talk_id: "heat", language: "en", content: { title: "Heat" },
         presenter_name: "Presenter", held_at: new Date().toISOString(), week_number: 2, week_start: wk, ...extra }),
