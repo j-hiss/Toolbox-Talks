@@ -1,8 +1,9 @@
 // What the weather card tells the crew, worded for where they work (src/core/worksetting.ts). Content, not code.
 // Every note says only what OSHA material says, and carries the reference so a crew lead can read the source.
 // Changing wording: bump WEATHER_NOTES_VERSION. English only for now; a translation is draft until reviewed.
-// Every reference below was read against its source on 2026-10-07 (see docs/claims-and-evidence.md), except HEAT_REF:
-// osha.gov returned an error for the heat page, so the heat reminder's wording is still to be checked against it.
+// Every reference below was read against its source on 2026-10-07 (see docs/claims-and-evidence.md). HEAT_REF was
+// moved to the water-rest-shade page on 2026-10-08 (the main heat page blocks checks); the heat reminder's wording
+// was matched to OSHA's and NIOSH's pages then (src/content/heat.ts, version 3).
 import type { WorkSetting } from "@/core/worksetting";
 import type { WeatherNoteKey } from "@/core/conditions";
 
@@ -18,7 +19,7 @@ const std = (part: "1910" | "1926", section: string, para = ""): Ref => ({
 
 /** OSHA/NOAA fact sheet FS-3863, "Lightning Safety When Working Outdoors". */
 const LIGHTNING: Ref = { label: "OSHA lightning fact sheet", url: "https://www.osha.gov/Publications/OSHA3863.pdf" };
-export const HEAT_REF: Ref = { label: "OSHA heat", url: "https://www.osha.gov/heat-exposure" };
+export const HEAT_REF: Ref = { label: "OSHA heat: water, rest, shade", url: "https://www.osha.gov/heat-exposure/water-rest-shade" };
 
 const SCAFFOLD_WIND = std("1926", "1926.451", "(f)(12)");   // no scaffold work in storms or high winds unless a competent person decides
 const SCAFFOLD_SLIP = std("1926", "1926.451", "(f)(8)");    // no work on scaffolds covered with slippery material, except to remove it

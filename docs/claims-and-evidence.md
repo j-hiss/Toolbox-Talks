@@ -52,7 +52,7 @@ Each crew note cites its OSHA source in src/content/weather-notes.ts (lightning 
 "lifts stay within the manufacturer's wind limits" (1926.453 says nothing about wind).
 
 ## Open
-- Heat reminder vs OSHA's heat page (osha.gov returned an error).
+- Heat reminder: checked 2026-10-08 against OSHA water-rest-shade, protecting-new-workers and illness-first-aid, and NIOSH heat-stress recommendations (water amount); wording fixed (heat talk, reminder v3). OSHA's main heat page still blocks automated checks.
 - Wind levels for the card's border (25 / 35 mph) are ours, not OSHA's.
 - Spanish talks and signing statement: draft until a native speaker reviews.
 - Attorney and safety-professional review before sales use.

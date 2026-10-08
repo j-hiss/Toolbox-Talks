@@ -119,6 +119,11 @@ export const TALKS: Talk[] = [
     "minutes": 5,
     "sources": [
       {
+        "label": "NIOSH heat stress recommendations: 1 cup (8 oz.) of water every 15–20 minutes",
+        "url": "https://www.cdc.gov/niosh/heat-stress/recommendations/index.html",
+        "kind": "guidance"
+      },
+      {
         "label": "OSHA Heat: Water. Rest. Shade.",
         "url": "https://www.osha.gov/heat-exposure/water-rest-shade",
         "kind": "guidance"
@@ -129,7 +134,7 @@ export const TALKS: Talk[] = [
         "kind": "guidance"
       },
       {
-        "label": "OSHA Heat: protecting new workers",
+        "label": "OSHA Heat: protecting new workers (20 percent rule; 1–2 weeks; returning workers at least one week)",
         "url": "https://www.osha.gov/heat-exposure/protecting-new-workers",
         "kind": "guidance"
       }
@@ -142,9 +147,9 @@ export const TALKS: Talk[] = [
           {
             "heading": "Water, rest, shade",
             "items": [
-              "Drink about a cup of water every 15 to 20 minutes, even if you're not thirsty.",
+              "Drink 1 cup (8 ounces) of water every 15 to 20 minutes, even if you're not thirsty.",
               "Take breaks in the shade. Longer breaks as the heat index climbs.",
-              "Almost half of heat deaths happen on a worker's first day. New or returning workers build up over about a week."
+              "Almost half of heat deaths happen on a worker's first day. New workers start with about a fifth of a normal day in the heat and add a fifth each day, over 1 to 2 weeks. Workers back after a week or more away ease in for at least a week."
             ]
           },
           {
@@ -170,9 +175,9 @@ export const TALKS: Talk[] = [
           {
             "heading": "Agua, descanso y sombra",
             "items": [
-              "Toma más o menos una taza de agua cada 15 a 20 minutos, aunque no tengas sed.",
+              "Toma 1 taza (8 onzas) de agua cada 15 a 20 minutos, aunque no tengas sed.",
               "Descansa en la sombra. Los descansos deben ser más largos cuando sube el índice de calor.",
-              "Casi la mitad de las muertes por calor pasan en el primer día de trabajo. Los trabajadores nuevos o que regresan se van acostumbrando en más o menos una semana."
+              "Casi la mitad de las muertes por calor pasan en el primer día de trabajo. Los trabajadores nuevos empiezan con más o menos una quinta parte de un día normal en el calor y suben una quinta parte cada día, durante 1 a 2 semanas. Los que regresan después de una semana o más fuera se acostumbran poco a poco por lo menos una semana."
             ]
           },
           {
