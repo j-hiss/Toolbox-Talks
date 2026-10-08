@@ -13,10 +13,9 @@ export const WORK_SETTINGS: { id: WorkSetting; name: string; sub: string }[] = [
 ];
 
 export const DEFAULT_BY_INDUSTRY: Record<IndustryId, WorkSetting> = {
-  con: "mixed",
-  ag: "outdoor",
-  mfg: "indoor",
-  wh: "indoor",
+  con: "mixed", roof: "outdoor", elec: "mixed", plumb: "mixed", solar: "outdoor", site: "outdoor",
+  mfg: "indoor", wh: "indoor", truck: "mixed", ag: "outdoor", land: "outdoor",
+  oil: "outdoor", util: "outdoor", health: "indoor", retail: "indoor", food: "indoor", facil: "indoor", auto: "indoor",
 };
 
 /** The company's own choice, or its industry's default. */

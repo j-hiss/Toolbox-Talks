@@ -223,6 +223,11 @@ async function main() {
     check("Only hex colors for known parts are stored", await fails(() => as(userA, "update public.companies set theme = $2 where id = $1", [coA, { brand: "red" }]))
       && await fails(() => as(userA, "update public.companies set theme = $2 where id = $1", [coA, { logo: "#000000" }])));
 
+    // Industries: the 14 added codes are accepted, unknown ones refused.
+    check("A company can be a roofing or healthcare company", (await as(userA, "update public.companies set industry = 'roof' where id = $1 returning industry", [coA])).rows[0]?.industry === "roof"
+      && (await as(userA, "update public.companies set industry = 'health' where id = $1 returning industry", [coA])).rows[0]?.industry === "health");
+    check("Unknown industries are refused", await fails(() => as(userA, "update public.companies set industry = 'pirates' where id = $1", [coA])));
+    await as(userA, "update public.companies set industry = 'con' where id = $1", [coA]);
     // Where the crew works: starts unset (the industry default), admins set their own, nobody else can, only known values.
     check("A new company has no work setting until it picks one", (await as(userA, "select work_setting from public.companies where id = $1", [coA])).rows[0]?.work_setting === null);
     check("An admin can set where their crew works",

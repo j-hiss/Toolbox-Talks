@@ -1,7 +1,7 @@
 // Talk model and lookups. Pure module: no React, no Supabase, no "use client".
 // Origin: prototype/index.html TALKS, talksFor, talkFits.
 import type { Climate } from "./climate";
-import type { IndustryId } from "./industries";
+import { industryTags, type IndustryId } from "./industries";
 import type { LanguageId } from "./languages";
 
 export type TalkSection = { heading: string; items: string[] };
@@ -35,8 +35,9 @@ export function talkFitsClimate(talk: Talk, climate: Climate): boolean {
 
 /** Every talk available to a company: its industry's talks plus the "Every job" set, filtered by local climate. */
 export function talksFor(talks: Talk[], industry: IndustryId, climate: Climate): Talk[] {
+  const tags = industryTags(industry);
   return talks.filter(
-    (t) => (t.industries.includes(industry) || t.industries.includes("all")) && talkFitsClimate(t, climate),
+    (t) => (t.industries.includes("all") || tags.some((i) => t.industries.includes(i))) && talkFitsClimate(t, climate),
   );
 }
 
