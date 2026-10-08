@@ -94,4 +94,12 @@ describe("reminders", () => {
   it("after Thursday noon there's no nudge", () => {
     expect(planReminders({ ...base, today: new Date(2026, 9, 8, 13, 0) }).map((x) => x.id)).toEqual([101]);
   });
+  it("every 4 weeks: the next talk when the period ends, the nudge in its last week", () => {
+    const period = { start: new Date(2026, 9, 5), weeks: 4 };
+    const r = planReminders({ ...base, today: new Date(2026, 9, 14, 9, 0), period }); // Wed of week 2
+    expect(r.map((x) => [x.id, x.at.toString().slice(0, 21), x.title])).toEqual([
+      [101, "Mon Nov 02 2026 06:30", "New toolbox talk"],
+      [102, "Thu Oct 29 2026 12:00", "Toolbox talk not done yet"],
+    ]);
+  });
 });

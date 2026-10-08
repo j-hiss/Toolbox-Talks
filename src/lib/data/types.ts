@@ -73,6 +73,8 @@ export type TalkRecordSummary = {
   title: string;
   week_number: number | null;
   week_start: string | null;
+  /** Weeks in the talk period this record belongs to (1 = weekly; older records have 1). */
+  period_weeks?: number;
   makeup_for_week: string | null;
   makeup_reason: string | null;
   held_at: string;

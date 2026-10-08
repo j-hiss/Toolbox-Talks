@@ -1,6 +1,7 @@
 // Weekly compliance. Pure module: the one report query layer's math (see BLUEPRINT-reuse-map.md).
 //
-// Each person on staff that week has to sign that week's talk. Per person, per week:
+// Each person on staff that week has to sign that week's talk. Per person, per week (or per talk period, for a
+// company that gives a talk every 2 or 4 weeks: the same rules, over the whole period):
 //   on_time  signed in that week's own talk
 //   made_up  signed later in a makeup for that week. It closes the week, and stays marked as made up (late).
 //   open     past week, not signed yet, still inside the makeup limit
@@ -61,10 +62,10 @@ export function onTimeRate(t: Tally): number | null {
 }
 export const pct = (v: number | null) => (v === null ? "–" : `${Math.round(v * 100)}%`);
 
-/** Was this person on staff during the week of `weekKey`? Added before it ended, not deactivated before it began. */
-export function onStaff(p: ReportPerson, weekKey: string): boolean {
+/** Was this person on staff during the period starting `weekKey` (`weeks` long)? Added before it ended, not deactivated before it began. */
+export function onStaff(p: ReportPerson, weekKey: string, weeks = 1): boolean {
   const start = parseDay(weekKey);
-  const end = addDays(start, 7);
+  const end = addDays(start, 7 * weeks);
   if (new Date(p.createdAt) >= end) return false;
   return !p.deactivatedAt || new Date(p.deactivatedAt) >= start;
 }
@@ -77,8 +78,12 @@ export function weekKeys(fromKey: string, today: Date = new Date()): string[] {
   return out;
 }
 
+/** A talk period to score: its first Monday and how many weeks it covers (a bare key = one week). */
+export type PeriodKey = string | { key: string; weeks: number };
+const asPeriod = (k: PeriodKey) => (typeof k === "string" ? { key: k, weeks: 1 } : k);
+
 export type Compliance = {
-  weeks: { key: string; tally: Tally; people: PersonWeek[]; recordIds: string[] }[];
+  weeks: { key: string; weeks: number; tally: Tally; people: PersonWeek[]; recordIds: string[] }[];
   people: { person: ReportPerson; tally: Tally; weeks: PersonWeek[] }[];
   total: Tally;
 };
@@ -86,7 +91,7 @@ export type Compliance = {
 export function buildCompliance(input: {
   people: ReportPerson[];
   records: ReportRecord[];
-  weeks: string[];            // newest first, from weekKeys()
+  weeks: PeriodKey[];         // newest first: weekKeys(), or the plan's periods (periodKeys in src/core/makeup.ts)
   makeupWeeks: number;        // the company's makeup limit
   today?: Date;
 }): Compliance {
@@ -114,34 +119,37 @@ export function buildCompliance(input: {
 
   const total = zero();
   const people = input.people.map((person) => ({ person, tally: zero(), weeks: [] as PersonWeek[] }));
-  const weeks = input.weeks.map((key) => {
+  const weeks = input.weeks.map(asPeriod).map(({ key, weeks: len }) => {
     const tally = zero();
     const rows: PersonWeek[] = [];
+    const ended = isoDay(addDays(parseDay(key), 7 * len)) <= thisWeek;
+    const lastWeek = isoDay(addDays(parseDay(key), 7 * (len - 1)));
     for (const p of people) {
-      if (!onStaff(p.person, key)) continue;
+      if (!onStaff(p.person, key, len)) continue;
       const c = closed.get(`${p.person.id}|${key}`);
-      const state: WeekState = c ? c.state : key >= thisWeek ? "due" : key >= oldestMakeup ? "open" : "missed";
+      const state: WeekState = c ? c.state : !ended ? "due" : lastWeek >= oldestMakeup ? "open" : "missed";
       const row: PersonWeek = { personId: p.person.id, week: key, state, recordId: c?.recordId ?? null, signedOn: c?.signedOn ?? null, reason: c?.state === "made_up" ? c.reason : null };
       rows.push(row);
       p.weeks.push(row);
-      // This week isn't over: it shows on its own row but stays out of the score until it ends.
-      for (const t of key >= thisWeek ? [tally] : [tally, p.tally, total]) { t.expected++; t[state]++; }
+      // This period isn't over: it shows on its own row but stays out of the score until it ends.
+      for (const t of !ended ? [tally] : [tally, p.tally, total]) { t.expected++; t[state]++; }
     }
     const recordIds = input.records.filter((r) => creditWeek({ week_start: r.weekStart, makeup_for_week: r.makeupForWeek }) === key).map((r) => r.id);
-    return { key, tally, people: rows, recordIds };
+    return { key, weeks: len, tally, people: rows, recordIds };
   });
   return { weeks, people: people.filter((p) => p.weeks.length > 0), total };
 }
 
-/** Last day a missed week can still be made up (the Sunday it falls out of the limit). */
-export function makeupDeadline(weekKey: string, makeupWeeks: number): Date {
-  return addDays(parseDay(weekKey), 7 * (makeupWeeks + 1) - 1);
+/** Last day a missed period can still be made up (the Sunday its last week falls out of the limit). */
+export function makeupDeadline(weekKey: string, makeupWeeks: number, weeks = 1): Date {
+  return addDays(parseDay(weekKey), 7 * (weeks - 1) + 7 * (makeupWeeks + 1) - 1);
 }
 
 // Views for the charts -------------------------------------------------------------------------------------------
 
 export type Week = Compliance["weeks"][number];
-const finished = (c: Compliance, today: Date) => c.weeks.filter((w) => w.key < isoDay(mondayOf(today)));
+const finished = (c: Compliance, today: Date) =>
+  c.weeks.filter((w) => isoDay(addDays(parseDay(w.key), 7 * w.weeks)) <= isoDay(mondayOf(today)));
 
 /** Finished weeks, oldest first, with their compliance and on-time rates (null when no one was expected). */
 export function trend(c: Compliance, today: Date = new Date()) {
@@ -176,9 +184,9 @@ export function teamGrid(c: Compliance) {
 export function needsMakeup(c: Compliance, makeupWeeks: number, today: Date = new Date()) {
   const day = 86_400_000;
   return c.weeks
-    .flatMap((w) => w.people.filter((p) => p.state === "open"))
-    .map((p) => {
-      const deadline = makeupDeadline(p.week, makeupWeeks);
+    .flatMap((w) => w.people.filter((p) => p.state === "open").map((p) => ({ ...p, weeks: w.weeks })))
+    .map(({ weeks, ...p }) => {
+      const deadline = makeupDeadline(p.week, makeupWeeks, weeks);
       return { ...p, deadline, daysLeft: Math.max(0, Math.ceil((addDays(deadline, 1).getTime() - today.getTime()) / day)) }; // through the deadline day
     })
     .sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
@@ -186,13 +194,13 @@ export function needsMakeup(c: Compliance, makeupWeeks: number, today: Date = ne
 
 /** Why weeks were made up (the reason's quick pick), and how late on average, in days after the week ended. */
 export function makeupSummary(c: Compliance, reasons: readonly string[]) {
-  const made = c.weeks.flatMap((w) => w.people.filter((p) => p.state === "made_up"));
+  const made = c.weeks.flatMap((w) => w.people.filter((p) => p.state === "made_up").map((p) => ({ ...p, weeks: w.weeks })));
   const counts = new Map<string, number>();
   for (const p of made) {
     const pick = reasons.find((r) => p.reason === r || p.reason?.startsWith(`${r}: `)) ?? "Other";
     counts.set(pick, (counts.get(pick) ?? 0) + 1);
   }
-  const late = made.filter((p) => p.signedOn).map((p) => (new Date(p.signedOn!).getTime() - addDays(parseDay(p.week), 7).getTime()) / 86_400_000);
+  const late = made.filter((p) => p.signedOn).map((p) => (new Date(p.signedOn!).getTime() - addDays(parseDay(p.week), 7 * p.weeks).getTime()) / 86_400_000);
   return {
     total: made.length,
     reasons: [...counts.entries()].map(([reason, n]) => ({ reason, n })).sort((a, b) => b.n - a.n),

@@ -3,7 +3,8 @@
 // Saved talks for the current company, newest first, plus any still waiting on this phone to upload.
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { IssuesList } from "@/components/Issues";
-import { isoDay, mondayOf, weekLabel } from "@/core/weeks";
+import { isoDay, mondayOf, periodLabel } from "@/core/weeks";
+import { weekNumbers } from "@/core/plan";
 import Link from "next/link";
 import { listRecords } from "@/lib/data/records";
 import type { Membership, TalkRecordSummary } from "@/lib/data/types";
@@ -111,11 +112,13 @@ function Records({ m }: { m: Membership }) {
           {weeks.length === 0 && <p className="mt-3 text-sm text-muted">Nothing matches.</p>}
           {weeks.map(([k, list]) => {
             const monday = new Date(`${k}T12:00:00`);
-            const wk = list.find((r) => r.week_number && !r.makeup_for_week)?.week_number ?? list[0].week_number;
+            const first = list.find((r) => r.week_number && !r.makeup_for_week) ?? list[0];
+            const wk = first.week_number;
+            const len = first.period_weeks ?? 1;
             return (
               <section key={k} className="mt-5">
                 <h3 className="sticky top-[3.6rem] z-10 -mx-4 bg-bg/95 px-4 py-1.5 font-display text-sm font-semibold text-muted backdrop-blur">
-                  {wk ? `Week ${wk} · ` : ""}{weekLabel(monday)} <span className="font-sans font-normal normal-case tracking-normal">· {list.length} talk{list.length === 1 ? "" : "s"}</span>
+                  {wk ? `${weekNumbers({ n: wk, weeks: len })} · ` : ""}{periodLabel(monday, len)} <span className="font-sans font-normal normal-case tracking-normal">· {list.length} talk{list.length === 1 ? "" : "s"}</span>
                 </h3>
                 <ul className="mt-1 flex flex-col gap-2">
                   {list.map((r) => {

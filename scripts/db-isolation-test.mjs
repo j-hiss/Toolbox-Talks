@@ -206,6 +206,38 @@ async function main() {
     check("A talk list that has started can't be changed", await fails(() => setList(userA, coA, pastWk, ["racking"])));
     check("…or removed", await fails(() => as(userA, "delete from public.company_talk_lists where company_id = $1 and from_week = $2", [coA, pastWk])));
 
+    // Cadence (Admin → Plan): company-scoped, admins only, only for changes that start after today.
+    const setCad = (user, company, wk, weeks = 4) =>
+      as(user, "insert into public.company_cadences (company_id, from_week, weeks) values ($1, $2, $3) on conflict (company_id, from_week) do update set weeks = excluded.weeks", [company, wk, weeks]);
+    await setCad(userB, coB, nextWk, 2);
+    check("A cannot set B's cadence", await fails(() => setCad(userA, coB, laterWk)));
+    check("A sees no cadence of B's", (await as(userA, "select 1 from public.company_cadences")).rows.length === 0);
+    check("A presenter cannot set the cadence", await fails(() => setCad(presenterA, coA, nextWk)));
+    check("A cadence can't start today or earlier", await fails(() => setCad(userA, coA, monday(0))));
+    check("A cadence is 1, 2 or 4 weeks", await fails(() => setCad(userA, coA, nextWk, 3)));
+    check("A cadence starts on a Monday", await fails(() => setCad(userA, coA, tuesday)));
+    check("A future cadence can be set and removed", !(await fails(() => setCad(userA, coA, laterWk)))
+      && (await as(userA, "delete from public.company_cadences where company_id = $1 and from_week = $2 returning 1", [coA, laterWk])).rows.length === 1);
+    // Every 4 weeks since 10 weeks ago: periods start at -10, -6 and -2 weeks. The one that started two weeks ago can
+    // still be swapped (it isn't over), then locks once given; the one before it is over. Backdate the cadence as
+    // the database owner, since the app can't.
+    const periodStart = monday(-2);
+    await db.query("alter table public.company_cadences disable trigger company_cadences_lock");
+    await db.query("insert into public.company_cadences (company_id, from_week, weeks, set_by) values ($1, $2, 4, $3)", [coB, monday(-10), userB]);
+    await db.query("alter table public.company_cadences enable trigger company_cadences_lock");
+    check("A cadence that has started can't be changed", await fails(() => setCad(userB, coB, monday(-10), 1)));
+    check("A 4-week period's talk can be swapped until the period ends", !(await fails(() => setOverride(userB, coB, periodStart, "ppe"))));
+    check("…but not a 4-week period that's over", await fails(() => setOverride(userB, coB, monday(-6), "ppe")));
+    const recB = (wk, extra = {}) => [JSON.stringify({ company_id: coB, client_id: randomUUID(), talk_id: "ppe", language: "en", content: { title: "PPE" },
+      presenter_name: "Presenter", held_at: new Date().toISOString(), week_number: 1, week_start: wk, ...extra }), "[]"];
+    const savedB = (await as(userB, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", recB(periodStart, { period_weeks: 4 }))).rows[0].id;
+    check("A record keeps how many weeks its talk period covered",
+      (await as(userB, "select period_weeks from public.talk_records where id = $1", [savedB])).rows[0]?.period_weeks === 4);
+    check("Once a 4-week period's talk is given, it's locked", await fails(() => setOverride(userB, coB, periodStart, "fall")));
+    const oldRec = (await as(userB, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", recB(monday(-8)))).rows[0].id;
+    check("A record saved without a period length counts as one week",
+      (await as(userB, "select period_weeks from public.talk_records where id = $1", [oldRec])).rows[0]?.period_weeks === 1);
+
     const recWk = (company, clientId, wk, extra = {}) => [
       JSON.stringify({ company_id: company, client_id: clientId, talk_id: "heat", language: "en", content: { title: "Heat" },
         presenter_name: "Presenter", held_at: new Date().toISOString(), week_number: 2, week_start: wk, ...extra }),

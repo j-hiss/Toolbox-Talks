@@ -13,9 +13,10 @@ import { companyWorkSetting, WORK_SETTINGS, type WorkSetting } from "@/core/work
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { getLocation, LocationError } from "@/lib/location";
 import { mapsLink } from "@/core/geo";
-import { buildPlan, talksInPlan } from "@/core/plan";
+import { buildPlan, periodEnd, talksInPlan, weekNumbers } from "@/core/plan";
+import { climateFor } from "@/core/climate";
 import { canChangeWeek } from "@/core/makeup";
-import { weekLabel, isoDay, mondayOf, parseDay } from "@/core/weeks";
+import { weekLabel, isoDay, mondayOf, parseDay, periodLabel } from "@/core/weeks";
 import { TALKS } from "@/content/talks";
 import { usePlan } from "@/lib/usePlan";
 import { clearOverride, setOverride } from "@/lib/data/plan";
@@ -26,6 +27,7 @@ import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, S
 import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
 import { TalkPicker } from "@/components/TalkPicker";
+import { CadencePicker } from "@/components/CadencePicker";
 import { BrandEditor } from "@/components/BrandEditor";
 
 const TABS = [
@@ -523,25 +525,29 @@ function TalksTab({ m }: { m: Membership }) {
 // week's talk until the week is over or someone has given it. The database enforces the same lock.
 function PlanTab({ m }: { m: Membership }) {
   const co = m.company;
-  const { plan, week, input, reload } = usePlan(co);
+  const { plan, week, input, cadences, reload } = usePlan(co);
   // What the plan itself gives each week, before any swap: picking that talk again removes the swap.
   const planned = useMemo(() => new Map(buildPlan({ ...input, overrides: {} }).map((w) => [w.key, w.talkId])), [input]);
   const [recorded, setRecorded] = useState<string[] | null>(null);
   const [msg, setMsg] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
+  const [cadenceMsg, setCadenceMsg] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
   const thisMonday = isoDay(mondayOf(new Date()));
+  // The current talk period can have started before this Monday (every 2 or 4 weeks).
+  const from = week?.key ?? thisMonday;
 
   useEffect(() => {
     let live = true;
-    listRecordedWeeks(co.id, thisMonday)
+    listRecordedWeeks(co.id, from)
       .then((w) => live && setRecorded(w))
       .catch((e) => live && setMsg({ tone: "error", text: e instanceof Error ? e.message : String(e) }));
     return () => { live = false; };
-  }, [co.id, thisMonday, version]);
+  }, [co.id, from, version]);
 
   const title = (id: string) => TALKS.find((t) => t.id === id)?.content.en.title ?? id;
-  const weeks = plan.filter((w) => w.key >= thisMonday);
+  const weeks = plan.filter((w) => isoDay(periodEnd(w)) > thisMonday);
+  const unit = plan.some((w) => w.weeks > 1) ? "talk period" : "week";
 
   const change = async (key: string, talkId: string, planned: string) => {
     setBusy(key);
@@ -550,7 +556,8 @@ function PlanTab({ m }: { m: Membership }) {
       if (talkId === planned) await clearOverride(co.id, key);
       else await setOverride(co.id, key, talkId);
       reload();
-      setMsg({ tone: "ok", text: `${weekLabel(parseDay(key))}: ${title(talkId)}${talkId === planned ? " (back to the plan)" : ""}.` });
+      const w = plan.find((x) => x.key === key);
+      setMsg({ tone: "ok", text: `${w ? periodLabel(w.monday, w.weeks) : weekLabel(parseDay(key))}: ${title(talkId)}${talkId === planned ? " (back to the plan)" : ""}.` });
     } catch (e) {
       setMsg({ tone: "error", text: e instanceof Error ? e.message : String(e) });
     }
@@ -561,22 +568,24 @@ function PlanTab({ m }: { m: Membership }) {
   if (!recorded) return msg ? <Notice tone="error">{msg.text}</Notice> : <Loading />;
   return (
     <>
-      <p className="text-sm text-muted">
-        Every crew gives the same talk each week, as many times as needed. You can swap a week&apos;s talk until someone gives
-        it; then it&apos;s locked for that week. Missed weeks are made up from Home.
+      <CadencePicker key={JSON.stringify(cadences)} companyId={co.id} industry={co.industry} state={climateFor(co.zip).state}
+        input={input} cadences={cadences} reload={reload} msg={cadenceMsg} setMsg={setCadenceMsg} />
+      <p className="mt-4 text-sm text-muted">
+        Every crew gives the same talk each {unit}, as many times as needed. You can swap a {unit}&apos;s talk until someone
+        gives it; then it&apos;s locked. Missed talks are made up from Home.
       </p>
       {msg && <div className="mt-3"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
       <ul className="mt-4 flex flex-col gap-2">
         {weeks.map((w) => {
-          const locked = !canChangeWeek(w.key, recorded, new Date());
+          const locked = !canChangeWeek(w.key, recorded, new Date(), w.weeks);
           const base = planned.get(w.key) ?? w.talkId;
           const isNow = week?.key === w.key;
           return (
             <li key={w.key} className={`rounded-lg border p-3 ${isNow ? "border-brand bg-surface" : "border-line bg-surface"}`}>
               <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                <b>Week {w.n} · {weekLabel(w.monday)}</b>
+                <b>{weekNumbers(w)} · {periodLabel(w.monday, w.weeks)}</b>
                 <span className="flex gap-1.5">
-                  {isNow && <span className="rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">This week</span>}
+                  {isNow && <span className="rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{w.weeks > 1 ? "Now" : "This week"}</span>}
                   {locked && <span className="rounded bg-fg px-2 py-0.5 font-display text-xs font-semibold text-bg">Given · locked</span>}
                   {!locked && w.changed && <span className="rounded border border-line px-2 py-0.5 font-display text-xs font-semibold">Swapped</span>}
                 </span>
@@ -585,7 +594,7 @@ function PlanTab({ m }: { m: Membership }) {
                 <p className="mt-1 font-semibold">{title(w.talkId)}</p>
               ) : (
                 <select
-                  aria-label={`Talk for week ${w.n}`}
+                  aria-label={`Talk for ${weekNumbers(w).toLowerCase()}`}
                   className={`${inputClass} mt-2`}
                   value={w.talkId}
                   disabled={busy !== null}

@@ -6,7 +6,8 @@ import { jsPDF } from "jspdf";
 import { countStatuses, STATUS_LABEL } from "@/core/attendance";
 import { INDUSTRIES } from "@/core/industries";
 import { LANGUAGES } from "@/core/languages";
-import { parseDay, weekLabel } from "@/core/weeks";
+import { parseDay, periodLabel, weekLabel } from "@/core/weeks";
+import { weekNumbers } from "@/core/plan";
 import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { normalizeTheme, rgb } from "@/core/theme";
@@ -75,19 +76,23 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   doc.setTextColor(0); y += 6; doc.setDrawColor(30); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); doc.setLineWidth(0.6); y += 26;
 
   // Week line and title -------------------------------------------------------------------------------------------
-  const heldWeek = r.week_start ? weekLabel(parseDay(r.week_start), "en-US") : "";
+  // Weekly companies: "WEEK 12 OF 52 · WEEK OF OCT 5 – OCT 9". Every 2 or 4 weeks: the whole talk period.
+  const len = r.period_weeks ?? 1;
+  const heldWeek = r.week_start ? periodLabel(parseDay(r.week_start), len, "en-US") : "";
+  const weekNo = r.week_number ? weekNumbers({ n: r.week_number, weeks: len }).toUpperCase() : "";
+  const weekOf = len > 1 ? "PERIOD" : "WEEK OF";
   doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(GREY);
   if (r.makeup_for_week) {
     doc.setTextColor(...RED);
     doc.text(`MAKEUP FOR THE WEEK OF ${weekLabel(parseDay(r.makeup_for_week), "en-US").toUpperCase()}`, M, y); y += 14;
     doc.setTextColor(GREY);
-    if (r.week_number) { doc.text(`GIVEN IN WEEK ${r.week_number} OF 52  ·  WEEK OF ${heldWeek.toUpperCase()}`, M, y); y += 14; }
+    if (r.week_number) { doc.text(`GIVEN IN ${weekNo} OF 52  ·  ${weekOf} ${heldWeek.toUpperCase()}`, M, y); y += 14; }
     doc.setFont("helvetica", "normal"); doc.setTextColor(0);
     doc.splitTextToSize(`Reason: ${r.makeup_reason ?? ""}`, CW).forEach((l: string) => { doc.text(l, M, y); y += 13; });
     y += 18;
   } else if (r.week_number) {
     const kind = r.scheduled_talk_id && r.scheduled_talk_id !== r.talk_id ? "DIFFERENT FROM THE PLAN" : "SCHEDULED TALK";
-    doc.text(`WEEK ${r.week_number} OF 52  ·  WEEK OF ${heldWeek.toUpperCase()}  ·  ${kind}`, M, y); y += 20;
+    doc.text(`${weekNo} OF 52  ·  ${weekOf} ${heldWeek.toUpperCase()}  ·  ${kind}`, M, y); y += 20;
   }
   doc.setTextColor(0); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
   doc.splitTextToSize(r.content.title || r.title, CW).forEach((l: string) => { doc.text(l, M, y); y += 24; });
@@ -175,7 +180,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   const sheetHead = (cont: boolean) => {
     doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text(`Sign-in sheet${cont ? " (continued)" : ""}`, M, y);
     doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(80); y += 13;
-    const sub = [r.week_number ? `Week ${r.week_number} of 52` : "", r.makeup_for_week ? `Makeup for the week of ${weekLabel(parseDay(r.makeup_for_week), "en-US")}` : "", r.title, held.date, r.team_name]
+    const sub = [r.week_number ? `${weekNumbers({ n: r.week_number, weeks: r.period_weeks ?? 1 })} of 52` : "", r.makeup_for_week ? `Makeup for the week of ${weekLabel(parseDay(r.makeup_for_week), "en-US")}` : "", r.title, held.date, r.team_name]
       .filter(Boolean).join("  ·  ");
     doc.text(doc.splitTextToSize(sub, CW), M, y); doc.setTextColor(0); y += 18;
     if (!cont && r.signing_statement) {

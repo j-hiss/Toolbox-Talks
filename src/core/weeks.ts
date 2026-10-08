@@ -34,3 +34,9 @@ export function weekLabel(monday: Date, locale?: string): string {
   const f = (d: Date) => d.toLocaleDateString(locale, { month: "short", day: "numeric" });
   return `${f(monday)} – ${f(addDays(monday, 4))}`;
 }
+
+/** "Oct 5 – Oct 30": Monday of the first week through Friday of the last (a one-week period is weekLabel). */
+export function periodLabel(monday: Date, weeks: number, locale?: string): string {
+  const f = (d: Date) => d.toLocaleDateString(locale, { month: "short", day: "numeric" });
+  return `${f(monday)} – ${f(addDays(monday, 7 * (weeks - 1) + 4))}`;
+}

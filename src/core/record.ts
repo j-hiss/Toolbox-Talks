@@ -61,7 +61,8 @@ export type RecordInput = {
   talkId: string;
   language: LanguageId;
   content: TalkText & { en?: TalkText };
-  week: { number: number; start: string; scheduledTalkId: string } | null;
+  /** The plan period this talk belongs to: first week number, first Monday, and how many weeks it covers (1 = weekly). */
+  week: { number: number; start: string; scheduledTalkId: string; weeks?: number } | null;
   jobsite: { id: string; name: string } | null;
   team: { id: string; name: string; leadName: string } | null;
   presenter: { personId: string | null; name: string; role: string; signature: Signature | null };
@@ -100,6 +101,7 @@ export function recordPayload(r: RecordInput) {
     content: r.content,
     week_number: r.week?.number ?? null,
     week_start: r.week?.start ?? null,
+    period_weeks: r.week?.weeks ?? 1,
     scheduled_talk_id: r.week?.scheduledTalkId ?? null,
     jobsite_id: r.jobsite?.id ?? null,
     jobsite_name: r.jobsite?.name ?? "",

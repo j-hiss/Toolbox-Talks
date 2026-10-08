@@ -4,7 +4,8 @@
 // plus a way to make up a missed week.
 import { TALKS } from "@/content/talks";
 import { climateFor } from "@/core/climate";
-import { weekLabel, parseDay } from "@/core/weeks";
+import { parseDay, periodLabel } from "@/core/weeks";
+import { weekNumbers } from "@/core/plan";
 import { talkText } from "@/core/talks";
 import { INDUSTRIES } from "@/core/industries";
 import Link from "next/link";
@@ -34,23 +35,23 @@ function Home({ m }: { m: Membership }) {
   const s = useSession();
   const co = m.company;
   const climate = climateFor(co.zip);
-  const { plan, week } = usePlan(co);
+  const { plan, week, input } = usePlan(co);
   const talk = week ? TALKS.find((t) => t.id === week.talkId) : undefined;
   const text = talk ? talkText(talk, "en").text : undefined;
-  const nextIdx = week ? week.n : 0;
+  const nextIdx = week ? plan.indexOf(week) + 1 : 0;
   const upcoming = plan.slice(nextIdx, nextIdx + 4).map((w) => ({ w, t: TALKS.find((t) => t.id === w.talkId)! }));
   const industry = INDUSTRIES.find((i) => i.id === co.industry)?.name;
   const router = useRouter();
   const draft = useDraft(co.id);
   const outbox = useOutbox(co.id);
   const draftTitle = draft?.talkId ? TALKS.find((t) => t.id === draft.talkId)?.content.en.title : null;
-  const st = useHomeStatus(co, outbox.items.length);
+  const st = useHomeStatus(co, input, outbox.items.length);
   const [site, setSite] = useState<Jobsite | null>(null);
   const isAdmin = canAdmin(m.access);
   const last = readLastSetup(co.id);
   const lastCrew = last?.teamId === "all" ? "All teams" : st?.teams.find((t) => t.id === last?.teamId)?.name;
   const [remind, setRemind] = useState(() => remindersOn());
-  const nextWeek = week ? plan.find((w) => w.n === week.n + 1) : plan[0];
+  const nextWeek = plan[nextIdx];
   const crewGrid = st?.week.find((g) => g.teamId === (last?.teamId || null))?.weeks[0]?.tally;
   // Keep this phone's reminders matching the latest plan and records (phone app only; nothing on the website).
   useEffect(() => {
@@ -62,6 +63,7 @@ function Home({ m }: { m: Membership }) {
       crewName: lastCrew ?? null,
       crewDone: !!crewGrid && crewGrid.expected > 0 && crewGrid.on_time >= crewGrid.expected,
       expiringSoon: st.expiringSoon,
+      period: week ? { start: week.monday, weeks: week.weeks } : null,
     })).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [st, remind, talk?.id, nextWeek?.key]);
@@ -121,17 +123,17 @@ function Home({ m }: { m: Membership }) {
         <section className="mt-5">
           <div className="overflow-hidden rounded-2xl bg-surface">
             <div className="bg-brand px-5 pt-5 pb-4 text-brand-ink">
-              <p className="text-sm opacity-80">Week {week.n} of 52 · {weekLabel(week.monday)}</p>
+              <p className="text-sm opacity-80">{weekNumbers(week)} of 52 · {periodLabel(week.monday, week.weeks)}</p>
               <h1 className="mt-1.5 font-display text-[30px] font-semibold leading-[1.08] tracking-tight text-balance">{text.title}</h1>
               <div className="mt-4 flex gap-0.5" aria-hidden>
                 <span className="h-1.5 rounded-full bg-current opacity-60" style={{ flex: week.n - 1 }} />
-                <span className="h-1.5 rounded-full bg-action" style={{ flex: 1 }} />
-                <span className="h-1.5 rounded-full bg-current opacity-20" style={{ flex: 52 - week.n }} />
+                <span className="h-1.5 rounded-full bg-action" style={{ flex: week.weeks }} />
+                <span className="h-1.5 rounded-full bg-current opacity-20" style={{ flex: 52 - (week.n - 1) - week.weeks }} />
               </div>
             </div>
             <div className="px-5 pt-4 pb-5">
               <p className="leading-relaxed">{text.hook}</p>
-              <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every crew this week</p>
+              <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every crew {week.weeks > 1 ? `through ${periodLabel(week.monday, week.weeks).split(" – ")[1]}` : "this week"}</p>
               <div className="mt-4 flex flex-col gap-2">
                 <Button onClick={() => start(week.talkId)}>Start this talk</Button>
                 {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
@@ -160,7 +162,7 @@ function Home({ m }: { m: Membership }) {
               <li key={w.key} className="flex items-center justify-between gap-3 rounded-xl bg-surface px-4 py-3">
                 <span className="min-w-0">
                   <b className="block">{t.content.en.title}</b>
-                  <small className="text-muted">Week {w.n} · {weekLabel(w.monday)}</small>
+                  <small className="text-muted">{weekNumbers(w)} · {periodLabel(w.monday, w.weeks)}</small>
                 </span>
                 <span className="whitespace-nowrap rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{t.code}</span>
               </li>

@@ -14,7 +14,8 @@ export type TalkDraft = {
   lang: LanguageId;
   step: "makeup" | "read" | "crew" | "sign";
   /** Set when this talk makes up a missed week. The record still gets today's real date, week and GPS. */
-  makeup: { weekStart: string; weekNumber: number } | null;
+  /** The past talk period being made up: its first Monday, first week number, and length in weeks (1 = weekly). */
+  makeup: { weekStart: string; weekNumber: number; weeks?: number } | null;
   makeupPick: string;             // one of MAKEUP_REASONS
   makeupNote: string;
   presenterId: string;
@@ -113,9 +114,9 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
  * Start a makeup already pointed at a week and the people who owe it (from Reports or Home), so the presenter only
  * picks a reason, reads, and collects signatures.
  */
-export function newMakeupDraft(companyId: string, m: { weekStart: string; weekNumber: number; talkId: string; personIds: string[] }, jobsiteId = ""): TalkDraft {
+export function newMakeupDraft(companyId: string, m: { weekStart: string; weekNumber: number; weeks?: number; talkId: string; personIds: string[] }, jobsiteId = ""): TalkDraft {
   const d = newDraft(companyId, m.talkId, jobsiteId);
-  const out: TalkDraft = { ...d, step: "makeup", makeup: { weekStart: m.weekStart, weekNumber: m.weekNumber }, teamId: m.personIds.length ? "needs" : d.teamId, needIds: m.personIds.length ? m.personIds : null };
+  const out: TalkDraft = { ...d, step: "makeup", makeup: { weekStart: m.weekStart, weekNumber: m.weekNumber, weeks: m.weeks ?? 1 }, teamId: m.personIds.length ? "needs" : d.teamId, needIds: m.personIds.length ? m.personIds : null };
   writeDraft(out);
   return out;
 }

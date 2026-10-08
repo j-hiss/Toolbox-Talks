@@ -14,6 +14,7 @@ import { countStatuses, STATUS_LABEL } from "@/core/attendance";
 import { TALKS } from "@/content/talks";
 import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
+import { weekNumbers } from "@/core/plan";
 import { RequireCompany } from "@/components/Guard";
 import { Button, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
 
@@ -76,7 +77,7 @@ function RecordView({ m }: { m: Membership }) {
   return (
     <Shell nav={nav}>
       <Eyebrow>
-        {rec.week_number ? `${rec.makeup_for_week ? "Given in week" : "Week"} ${rec.week_number} of 52 · ` : ""}{rec.makeup_for_week ? "Makeup talk" : rec.scheduled_talk_id ? (scheduled ? "Different from the plan" : "Scheduled talk") : "Talk record"}
+        {rec.week_number ? `${rec.makeup_for_week ? "Given in " : ""}${weekNumbers({ n: rec.week_number, weeks: rec.period_weeks ?? 1 })} of 52 · ` : ""}{rec.makeup_for_week ? "Makeup talk" : rec.scheduled_talk_id ? (scheduled ? "Different from the plan" : "Scheduled talk") : "Talk record"}
       </Eyebrow>
       <Title>{rec.title}</Title>
       {rec.makeup_for_week && <MakeupTag weekStart={rec.makeup_for_week} reason={rec.makeup_reason} />}

@@ -1,6 +1,6 @@
 // Demo version of src/lib/data/plan.ts: same functions and the same lock the database enforces.
 import type * as Real from "@/../src/lib/data/plan";
-import type { TalkList } from "@/core/plan";
+import type { Cadence, CadenceSetting, TalkList } from "@/core/plan";
 import type { PlanOverride } from "@/lib/data/types";
 import { isoDay, mondayOf } from "@/core/weeks";
 import { db, save, tick } from "./store";
@@ -63,5 +63,30 @@ export async function removeTalkList(companyId: string, fromWeek: string): Promi
   save();
 }
 
-const _sameShape = { listOverrides, setOverride, clearOverride, listTalkLists, saveTalkList, removeTalkList } satisfies Omit<typeof Real, never>;
+// Cadences, with the database's rule: only a change that starts after today can be added, changed or removed.
+const cads = () => (db().cadences ??= []);
+function cadenceGuard(fromWeek: string) {
+  if (fromWeek <= isoDay(new Date())) throw new Error(`A new cadence has to start after today (${fromWeek}), so talk periods already planned keep their shape.`);
+}
+
+export async function listCadences(companyId: string): Promise<CadenceSetting[]> {
+  await tick();
+  return cads().filter((c) => c.company_id === companyId).sort((a, b) => a.from_week.localeCompare(b.from_week))
+    .map(({ from_week, weeks }) => ({ from_week, weeks }));
+}
+
+export async function saveCadence(companyId: string, fromWeek: string, weeks: Cadence): Promise<void> {
+  await tick(); mustBeAdmin(companyId); cadenceGuard(fromWeek);
+  const hit = cads().find((c) => c.company_id === companyId && c.from_week === fromWeek);
+  if (hit) hit.weeks = weeks; else cads().push({ company_id: companyId, from_week: fromWeek, weeks });
+  save();
+}
+
+export async function removeCadence(companyId: string, fromWeek: string): Promise<void> {
+  await tick(); mustBeAdmin(companyId); cadenceGuard(fromWeek);
+  db().cadences = cads().filter((c) => !(c.company_id === companyId && c.from_week === fromWeek));
+  save();
+}
+
+const _sameShape = { listOverrides, setOverride, clearOverride, listTalkLists, saveTalkList, removeTalkList, listCadences, saveCadence, removeCadence } satisfies Omit<typeof Real, never>;
 void _sameShape;

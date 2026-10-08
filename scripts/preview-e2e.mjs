@@ -207,6 +207,22 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.click("[role=tab]:has-text('Talks')"); await r.waitForTimeout(400);
   await r.click("main button:has-text('Undo it')"); await r.waitForTimeout(700);
   log("5 after undo:", (await r.locator("main [role=status], main [role=alert]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
+  // Scenario 6: Admin -> Plan -> How often. Switch to every 4 weeks (starts when this week ends), then keep weekly.
+  await r.click("[role=tab]:has-text('Plan')"); await r.waitForTimeout(500);
+  const cad = r.locator('section[aria-label="How often"]');
+  log("6 cadence now:", (await cad.locator("p").first().innerText()).replace(/\s+/g, " "));
+  await cad.locator("label:has-text('Every 4 weeks')").click();
+  log("6 button:", await cad.locator("button").innerText());
+  await cad.locator("button").click(); await r.waitForTimeout(700);
+  log("6 after save:", (await r.locator('section[aria-label="How often"]').innerText()).split("\n").filter((l) => /Now:|starts|Changing/.test(l)).join(" | "));
+  await r.screenshot({ path: `${OUT}/e-cadence.png`, fullPage: false });
+  log("6 plan after:", (await r.locator("main li b").allTextContents()).slice(0, 3).join(" | "));
+  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(700);
+  log("6 home coming up:", (await r.locator("section:has-text('Coming up') li small").allTextContents()).slice(0, 3).join(" | "));
+  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Plan')"); await r.waitForTimeout(500);
+  await r.locator('section[aria-label="How often"] label:has-text("Every week")').click();
+  await r.locator('section[aria-label="How often"] button').click(); await r.waitForTimeout(700);
+  log("6 after keep:", (await r.locator('section[aria-label="How often"]').innerText()).split("\n").filter((l) => /Now:|Staying/.test(l)).join(" | "));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

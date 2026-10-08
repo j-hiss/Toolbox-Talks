@@ -4,7 +4,9 @@
 // a getting-started checklist. Both reuse the report query layer and compliance math; nothing is counted twice.
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { buildCompliance, needsMakeup, teamGrid, weekKeys } from "@/core/compliance";
+import { buildCompliance, needsMakeup, teamGrid } from "@/core/compliance";
+import { periodKeys } from "@/core/makeup";
+import type { PlanInput } from "@/core/plan";
 import { addDays, isoDay, mondayOf, parseDay } from "@/core/weeks";
 import { reportPeople, reportRecords } from "@/lib/data/reports";
 import { listJobsites, listTeams } from "@/lib/data/company";
@@ -18,13 +20,15 @@ type Status = {
   records: number;
   week: ReturnType<typeof teamGrid>;
   thisWeek: { signed: number; expected: number };
+  periodWeeks: number;            // weeks in the current talk period (1 = weekly)
   owed: number;
   expiringSoon: number;           // makeups whose deadline is within 7 days
   openIssues: number;
   overdueIssues: number;
 };
 
-export function useHomeStatus(co: Company, version = 0): Status | null {
+/** `input` is the plan (usePlan), so talk periods match the company's cadence. */
+export function useHomeStatus(co: Company, input: Omit<PlanInput, "today">, version = 0): Status | null {
   const [st, setSt] = useState<Status | null>(null);
   useEffect(() => {
     let live = true;
@@ -32,13 +36,13 @@ export function useHomeStatus(co: Company, version = 0): Status | null {
     const thisMonday = mondayOf(today);
     const limit = co.makeup_weeks ?? 4;
     const start = isoDay(mondayOf(parseDay(co.program_start)));
-    const fromKey = [isoDay(addDays(thisMonday, -7 * limit)), start].sort().at(-1)!;
+    const keys = start > isoDay(thisMonday) ? [] : periodKeys(input, [isoDay(addDays(thisMonday, -7 * limit)), start].sort().at(-1)!, today);
+    const fromKey = keys.at(-1)?.key ?? isoDay(thisMonday);
     Promise.all([reportPeople(co.id), reportRecords(co.id, fromKey), listTeams(co.id), listJobsites(co.id), listIssues(co.id).catch(() => [])])
       .then(([people, records, teams, sites, issues]) => {
         if (!live) return;
-        const keys = start > isoDay(thisMonday) ? [] : weekKeys(fromKey, today);
         const c = buildCompliance({ people, records, weeks: keys, makeupWeeks: limit, today });
-        const now = c.weeks.find((w) => w.key === isoDay(thisMonday));
+        const now = keys.length ? c.weeks[0] : undefined; // newest first: the current talk period
         setSt({
           teams,
           hasJobsite: sites.length > 0,
@@ -46,6 +50,7 @@ export function useHomeStatus(co: Company, version = 0): Status | null {
           records: records.length,
           week: teamGrid({ ...c, weeks: now ? [now] : [] }),
           thisWeek: { signed: now ? now.tally.on_time : 0, expected: now ? now.tally.expected : 0 },
+          periodWeeks: now?.weeks ?? 1,
           owed: needsMakeup(c, limit, today).length,
           expiringSoon: needsMakeup(c, limit, today).filter((o) => o.daysLeft <= 7).length,
           openIssues: issues.filter((i) => i.status === "open").length,
@@ -54,7 +59,7 @@ export function useHomeStatus(co: Company, version = 0): Status | null {
       })
       .catch(() => { /* offline: Home works without the cards */ });
     return () => { live = false; };
-  }, [co.id, co.makeup_weeks, co.program_start, version]);
+  }, [co.id, co.makeup_weeks, co.program_start, input, version]);
   return st;
 }
 
@@ -69,7 +74,7 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
   return (
     <section className="mt-3 rounded-2xl bg-surface p-4">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="text-sm text-muted">Signed this week</p>
+        <p className="text-sm text-muted">Signed this {st.periodWeeks > 1 ? "talk period" : "week"}</p>
         <p className="tabular-nums text-muted"><b className="font-display text-3xl font-medium tracking-tight text-fg">{st.thisWeek.signed}</b>/{st.thisWeek.expected}</p>
       </div>
       {crews.length > 0 && (
@@ -88,7 +93,7 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
       )}
       {st.owed > 0 && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-sm">
-          <span><b>{st.owed}</b> {st.owed === 1 ? "person-week needs" : "person-weeks need"} a makeup{st.expiringSoon ? <b className="text-warn-text"> · {st.expiringSoon} run out within 7 days</b> : null}</span>
+          <span><b>{st.owed}</b> {st.periodWeeks > 1 ? (st.owed === 1 ? "missed talk needs" : "missed talks need") : st.owed === 1 ? "person-week needs" : "person-weeks need"} a makeup{st.expiringSoon ? <b className="text-warn-text"> · {st.expiringSoon} run out within 7 days</b> : null}</span>
           <span className="flex gap-3">
             <button className="min-h-11 font-semibold text-brand-text underline underline-offset-2" onClick={onMakeup}>Give a makeup</button>
             {isAdmin && <Link href="/reports/" className="flex min-h-11 items-center font-semibold text-brand-text underline underline-offset-2">See who</Link>}

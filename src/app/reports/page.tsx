@@ -5,14 +5,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onTimeRate, pct, periodChange, score, teamGrid, trend, weekKeys,
+  buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onTimeRate, pct, periodChange, score, teamGrid, trend,
   WEEK_STATE_LABEL, type Compliance, type ReportPerson, type ReportRecord, type Tally, type WeekState,
 } from "@/core/compliance";
-import { MAKEUP_REASONS, planWeekAt } from "@/core/makeup";
+import { MAKEUP_REASONS, periodKeys, planWeekAt } from "@/core/makeup";
 import { HBars, TeamGrid, TrendChart } from "@/components/charts";
-import { cycleStart } from "@/core/plan";
+import { cycleStart, weekNumbers } from "@/core/plan";
 import { STATUS_LABEL } from "@/core/attendance";
-import { addDays, isoDay, mondayOf, parseDay, weekLabel } from "@/core/weeks";
+import { addDays, isoDay, mondayOf, parseDay, periodLabel } from "@/core/weeks";
 import { TALKS } from "@/content/talks";
 import { reportPeople, reportRecords } from "@/lib/data/reports";
 import { listIssues } from "@/lib/data/issues";
@@ -61,8 +61,8 @@ function Reports({ m }: { m: Membership }) {
   const [error, setError] = useState<string | null>(null);
   const [csvMsg, setCsvMsg] = useState<string | null>(null);
   const router = useRouter();
-  const startMakeup = (weekStart: string, weekNumber: number, talkId: string, personIds: string[]) => {
-    newMakeupDraft(co.id, { weekStart, weekNumber, talkId, personIds }, readChosenJobsite(co.id) ?? "");
+  const startMakeup = (pw: { key: string; n: number; weeks: number; talkId: string }, personIds: string[]) => {
+    newMakeupDraft(co.id, { weekStart: pw.key, weekNumber: pw.n, weeks: pw.weeks, talkId: pw.talkId, personIds }, readChosenJobsite(co.id) ?? "");
     router.push("/talk/");
   };
 
@@ -73,19 +73,23 @@ function Reports({ m }: { m: Membership }) {
     return start < programStart ? programStart : start;
   }, [range, co.program_start, programStart, today]);
 
+  // The company's talk periods in range (weeks, or every 2 or 4 weeks), newest first.
+  const keys = useMemo(() => periodKeys(input, from, today), [input, from, today]);
+  const fetchFrom = keys.at(-1)?.key ?? from;
+
   useEffect(() => {
     let live = true;
-    Promise.all([reportPeople(co.id), reportRecords(co.id, from), listTeams(co.id), listIssues(co.id)])
+    Promise.all([reportPeople(co.id), reportRecords(co.id, fetchFrom), listTeams(co.id), listIssues(co.id)])
       .then(([people, records, teams, issues]) => live && setData({ people, records, teams, from, issues }))
       .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
     return () => { live = false; };
-  }, [co.id, from]);
+  }, [co.id, from, fetchFrom]);
 
   const report: Compliance | null = useMemo(() => {
     if (!data) return null;
     const people = data.people.filter((p) => team === "all" || (team === "none" ? !p.teamId : p.teamId === team));
-    return buildCompliance({ people, records: data.records, weeks: weekKeys(data.from, today), makeupWeeks: co.makeup_weeks ?? 4, today });
-  }, [data, team, today, co.makeup_weeks]);
+    return buildCompliance({ people, records: data.records, weeks: keys, makeupWeeks: co.makeup_weeks ?? 4, today });
+  }, [data, team, today, co.makeup_weeks, keys]);
 
   if (error) return <Shell><Notice tone="error">Couldn&apos;t load reports: {error}</Notice></Shell>;
   if (parseDay(co.program_start) > today) {
@@ -102,7 +106,9 @@ function Reports({ m }: { m: Membership }) {
     return TALKS.find((t) => t.id === id)?.content.en.title ?? "";
   };
   const t = report.total;
-  const current = report.weeks.find((w) => w.key === isoDay(mondayOf(today)));
+  const current = report.weeks.find((w) => w.key <= isoDay(mondayOf(today)) && isoDay(addDays(parseDay(w.key), 7 * w.weeks)) > isoDay(mondayOf(today)));
+  const periodName = (w: { key: string; weeks: number }) => periodLabel(parseDay(w.key), w.weeks);
+  const multi = report.weeks.some((w) => w.weeks > 1);
   const people = report.people
     .filter((p) => !onlyGaps || p.tally.open + p.tally.missed > 0)
     .sort((a, b) => (score(a.tally) ?? 2) - (score(b.tally) ?? 2) || a.person.name.localeCompare(b.person.name));
@@ -126,17 +132,17 @@ function Reports({ m }: { m: Membership }) {
   const exportCsv = async () => {
     setCsvMsg(null);
     const q = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-    const rows = [["Week of", "Week #", "Talk", "Person", "Team", "Status", "Signed on", "Makeup reason", "Record ID"]];
+    const rows = [["Week of", "Week #", "Weeks in period", "Talk", "Person", "Team", "Status", "Signed on", "Makeup reason", "Record ID"]];
     for (const w of [...report.weeks].reverse()) {
       for (const p of w.people) {
         const person = names.get(p.personId)!;
-        rows.push([w.key, String(plan(w.key)?.n ?? ""), talkTitle(w.key), person.name, teamName(person.teamId), WEEK_STATE_LABEL[p.state],
+        rows.push([w.key, String(plan(w.key)?.n ?? ""), String(w.weeks), talkTitle(w.key), person.name, teamName(person.teamId), WEEK_STATE_LABEL[p.state],
           p.signedOn ? isoDay(new Date(p.signedOn)) : "", p.reason ?? "", p.recordId ?? ""]);
       }
     }
     const csv = rows.map((r) => r.map(q).join(",")).join("\r\n");
     try {
-      const res = await saveFile(`Weekly compliance ${data.from} to ${isoDay(today)}.csv`, new Blob([csv], { type: "text/csv" }));
+      const res = await saveFile(`${multi ? "Talk" : "Weekly"} compliance ${data.from} to ${isoDay(today)}.csv`, new Blob([csv], { type: "text/csv" }));
       if (res === "canceled") setCsvMsg("Canceled.");
     } catch (e) { setCsvMsg(e instanceof Error ? e.message : String(e)); }
   };
@@ -144,7 +150,7 @@ function Reports({ m }: { m: Membership }) {
   return (
     <Shell>
       <Eyebrow>Reports · {co.name}</Eyebrow>
-      <Title>Weekly compliance</Title>
+      <Title>{multi ? "Talk compliance" : "Weekly compliance"}</Title>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Date range">
@@ -195,7 +201,7 @@ function Reports({ m }: { m: Membership }) {
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {current && (
           <div className="rounded-xl bg-surface p-3 text-sm tabular-nums">
-            <p className="font-display text-xs font-semibold text-muted">This week so far</p>
+            <p className="font-display text-xs font-semibold text-muted">{current.weeks > 1 ? "This talk period so far" : "This week so far"}</p>
             <p className="mt-1"><b className="text-2xl">{current.tally.on_time}</b> of {current.tally.expected} signed</p>
           </div>
         )}
@@ -219,8 +225,8 @@ function Reports({ m }: { m: Membership }) {
               <li key={g.week} className={`rounded-lg border p-3 ${urgent ? "border-caution bg-caution-bg" : "border-line bg-surface"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <span className="min-w-0">
-                    <b className="block">{pw ? `Week ${pw.n} · ` : ""}{talkTitle(g.week)}</b>
-                    <small className="text-muted">{weekLabel(parseDay(g.week))}</small>
+                    <b className="block">{pw ? `${weekNumbers(pw)} · ` : ""}{talkTitle(g.week)}</b>
+                    <small className="text-muted">{periodName({ key: g.week, weeks: pw?.weeks ?? 1 })}</small>
                   </span>
                   <span className="shrink-0 text-right text-sm tabular-nums">
                     <b className="block">{g.daysLeft === 0 ? "Last day" : `${g.daysLeft} day${g.daysLeft === 1 ? "" : "s"} left`}</b>
@@ -229,7 +235,7 @@ function Reports({ m }: { m: Membership }) {
                 </div>
                 <p className="mt-2 text-sm"><b>{g.people.length} still need it:</b> {g.people.map((p) => names.get(p)?.name).join(", ")}</p>
                 {pw && (
-                  <Button className="mt-2 !py-3" onClick={() => startMakeup(g.week, pw.n, pw.talkId, g.people)}>
+                  <Button className="mt-2 !py-3" onClick={() => startMakeup(pw, g.people)}>
                     Give this makeup now
                   </Button>
                 )}
@@ -259,7 +265,7 @@ function Reports({ m }: { m: Membership }) {
         <>
           <GroupHeading>By team</GroupHeading>
           <p className="mt-1 text-sm text-muted">Score per team per week (team as of today). Tap a square for the count.</p>
-          <div className="mt-3"><TeamGrid rows={grid} weeks={gridWeeks} currentKey={isoDay(mondayOf(today))} /></div>
+          <div className="mt-3"><TeamGrid rows={grid} weeks={gridWeeks} currentKey={current?.key ?? isoDay(mondayOf(today))} /></div>
         </>
       )}
 
@@ -299,7 +305,7 @@ function Reports({ m }: { m: Membership }) {
       })()}
 
       {/* Weeks ------------------------------------------------------------------------------------------------------- */}
-      <GroupHeading>By week</GroupHeading>
+      <GroupHeading>{multi ? "By talk period" : "By week"}</GroupHeading>
       <ul className="mt-3 flex flex-col gap-2">
         {report.weeks.map((w) => {
           const pw = plan(w.key);
@@ -311,7 +317,7 @@ function Reports({ m }: { m: Membership }) {
               <button className="w-full p-3 text-left" aria-expanded={expanded} onClick={() => setOpenWeek(expanded ? null : w.key)}>
                 <span className="flex items-start justify-between gap-3">
                   <span className="min-w-0">
-                    <b className="block">{pw ? `Week ${pw.n} · ` : ""}{weekLabel(parseDay(w.key))}</b>
+                    <b className="block">{pw ? `${weekNumbers(pw)} · ` : ""}{periodName(w)}</b>
                     <small className="text-muted">{talkTitle(w.key)}</small>
                   </span>
                   <span className="text-right tabular-nums">
@@ -324,9 +330,9 @@ function Reports({ m }: { m: Membership }) {
               {expanded && (
                 <div className="border-t border-line p-3 text-sm">
                   {w.tally.expected === 0 && <p className="text-muted">No one was on staff this week.</p>}
-                  <PeopleList title="Open: can still be made up" tone="open" rows={by("open")} names={names} note={`Make up by ${short(makeupDeadline(w.key, co.makeup_weeks ?? 4))}`} />
+                  <PeopleList title="Open: can still be made up" tone="open" rows={by("open")} names={names} note={`Make up by ${short(makeupDeadline(w.key, co.makeup_weeks ?? 4, w.weeks))}`} />
                   {by("open").length > 0 && pw && (
-                    <Button size="sm" className="mt-2" onClick={() => startMakeup(w.key, pw.n, pw.talkId, by("open").map((p) => p.personId))}>
+                    <Button size="sm" className="mt-2" onClick={() => startMakeup(pw, by("open").map((p) => p.personId))}>
                       Give the makeup for these {by("open").length}
                     </Button>
                   )}

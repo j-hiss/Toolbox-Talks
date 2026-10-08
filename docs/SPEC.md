@@ -50,7 +50,8 @@ customer #1, not a special case.
 - Talks are versioned content. A record stores the exact version that was read.
 
 ## The 52-week plan
-- One talk per week, per company, with a **Week 1 start date** set in Admin. Weeks start Monday.
+- One talk per week (or per 2- or 4-week talk period, see Scheduling below), per company, with a **Week 1 start
+  date** set in Admin. Weeks start Monday.
 - **Timed to local weather by ZIP code.** Long heat season in hot states, no cold-weather talks in South/Southwest
   Florida, Hawaii or Puerto Rico, hurricane prep before and during storm season only in hurricane states.
 - **Each week's talk is locked.** Every crew gives the same talk that week, as many times a day or week as needed
@@ -74,9 +75,12 @@ customer #1, not a special case.
 
 ## Scheduling and cadence (decided with Joe, 2026-10-07)
 - **Talk picks:** built (Admin → Talks, above).
-- **Cadence:** set once for the company, with an override per crew or jobsite (same pattern as work settings).
-  Weekly by default; also every 2 weeks or monthly. The app warns when the chosen cadence is slower than a state
-  rule (California construction every 10 working days, Washington weekly, Oregon monthly). Not built yet.
+- **Cadence:** built for the whole company (Admin → Plan → How often): every week (default), every 2 weeks, or every
+  4 weeks ("monthly": 13 talks a year, never more than a month apart). Each entry in the plan is then a talk period
+  keyed by its first Monday; makeups, reports, Home and the database lock all work per period. A change starts when
+  the current period ends and is kept once it starts, so past periods never re-shape. The app warns when a cadence is
+  less often than a checked state rule (Washington construction weekly, California construction every 10 working
+  days, Oregon construction monthly). **Override per crew or jobsite: not built yet** (needs a plan per crew).
 - **Daily tailgate talks:** separate records that count on their own; the weekly (or slower) talk stays the main
   record and its grading doesn't change. Not built yet.
 - **Who changes the plan:** office admins only. Crew leads give the talk that's scheduled.

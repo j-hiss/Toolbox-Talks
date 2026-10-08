@@ -33,7 +33,7 @@ export async function saveTalkRecord(record: RecordPayload, attendees: AttendeeR
 
 const summary = (r: Stored): TalkRecordSummary => ({
   id: r.id, client_id: r.client_id, talk_id: r.talk_id, language: r.language, title: (r.content as { en?: { title?: string } }).en?.title ?? r.content.title,
-  week_number: r.week_number, week_start: r.week_start, makeup_for_week: r.makeup_for_week ?? null, makeup_reason: r.makeup_reason ?? null, held_at: r.held_at, jobsite_name: r.jobsite_name, team_name: r.team_name,
+  week_number: r.week_number, week_start: r.week_start, period_weeks: (r as { period_weeks?: number }).period_weeks ?? 1, makeup_for_week: r.makeup_for_week ?? null, makeup_reason: r.makeup_reason ?? null, held_at: r.held_at, jobsite_name: r.jobsite_name, team_name: r.team_name,
   presenter_name: r.presenter_name, statuses: r.attendees.map((a) => a.status), presenter_signed: !!r.presenter_signed_at,
 });
 

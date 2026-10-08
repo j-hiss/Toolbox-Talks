@@ -10,7 +10,8 @@ import { TALKS } from "@/content/talks";
 import { crewText, signingStatement } from "@/content/ui";
 import { talkText } from "@/core/talks";
 import { MAKEUP_REASONS, makeupReasonText, makeupWeeks, stillNeeds } from "@/core/makeup";
-import { weekLabel, parseDay } from "@/core/weeks";
+import { parseDay, periodLabel } from "@/core/weeks";
+import { weekNumbers } from "@/core/plan";
 import { LANGUAGES, type LanguageId } from "@/core/languages";
 import { buildAttendees, recordPayload, unsignedPresent, type RosterEntry, type Signature } from "@/core/record";
 import { countStatuses } from "@/core/attendance";
@@ -59,7 +60,7 @@ function Talk({ m }: { m: Membership }) {
   }, [co.id]);
 
   const { week, input } = usePlan(co);
-  const openMakeups = useOpenMakeups(co);
+  const openMakeups = useOpenMakeups(co, input);
 
   // Who has already signed for the week this talk counts toward, for the "everyone who still needs it" roster.
   const creditKey = draft?.makeup?.weekStart ?? week?.key ?? null;
@@ -110,7 +111,7 @@ function Talk({ m }: { m: Membership }) {
           org={org}
           draft={draft}
           update={update}
-          week={week ? { number: week.n, start: week.key, scheduledTalkId: week.talkId } : null}
+          week={week ? { number: week.n, start: week.key, scheduledTalkId: week.talkId, weeks: week.weeks } : null}
           onSaved={(d) => { clearDraft(co.id); setDone(d); }}
         />
       )}
@@ -140,7 +141,7 @@ function MakeupPick({ weeks, draft, update, open }: {
   const choose = (w: (typeof weeks)[number]) => {
     const people = owed(w.key);
     update({
-      makeup: { weekStart: w.key, weekNumber: w.n }, talkId: w.talkId,
+      makeup: { weekStart: w.key, weekNumber: w.n, weeks: w.weeks }, talkId: w.talkId,
       // the roster is the people who still owe that week; the presenter can still change it on the next screen
       teamId: people.length ? "needs" : draft.teamId === "needs" ? "" : draft.teamId,
       needIds: people.length ? people.map((p) => p.id) : null,
@@ -160,11 +161,11 @@ function MakeupPick({ weeks, draft, update, open }: {
   return (
     <>
       <Eyebrow>Makeup talk</Eyebrow>
-      <Title>Make up a missed week</Title>
-      <p className="mt-2 text-sm text-muted">Saved with today&apos;s real date, marked as a makeup for the week you pick.</p>
-      <GroupHeading>Which week?</GroupHeading>
+      <Title>Make up a missed talk</Title>
+      <p className="mt-2 text-sm text-muted">Saved with today&apos;s real date, marked as a makeup for the week or talk period you pick.</p>
+      <GroupHeading>Which talk?</GroupHeading>
       {weeks.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">No earlier weeks to make up yet.</p>
+        <p className="mt-3 text-sm text-muted">No earlier talks to make up yet.</p>
       ) : (
         <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Week to make up">
           {weeks.map((w) => {
@@ -182,10 +183,10 @@ function MakeupPick({ weeks, draft, update, open }: {
                 <span className="mt-0.5 whitespace-nowrap rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{t.code}</span>
                 <span className="min-w-0 flex-1">
                   <b className="block">{t.content.en.title}</b>
-                  <small className="text-muted">Week {w.n} · {weekLabel(w.monday)}</small>
+                  <small className="text-muted">{weekNumbers(w)} · {periodLabel(w.monday, w.weeks)}</small>
                   {open && (
                     <small className={`block ${people.length ? "font-semibold" : "text-muted"}`}>
-                      {people.length ? `${people.length} still need it: ${people.map((p) => p.name).join(", ")}` : "Everyone has this week"}
+                      {people.length ? `${people.length} still need it: ${people.map((p) => p.name).join(", ")}` : `Everyone has this ${w.weeks > 1 ? "talk" : "week"}`}
                     </small>
                   )}
                 </span>
@@ -398,7 +399,7 @@ function MakeupBanner({ draft }: { draft: TalkDraft }) {
   if (!draft.makeup) return null;
   return (
     <p className="mb-3 rounded-xl bg-surface px-3 py-2 text-sm">
-      <b>Makeup for Week {draft.makeup.weekNumber}</b> ({weekLabel(parseDay(draft.makeup.weekStart))}) · {makeupReasonText(draft.makeupPick, draft.makeupNote)}
+      <b>Makeup for {weekNumbers({ n: draft.makeup.weekNumber, weeks: draft.makeup.weeks ?? 1 })}</b> ({periodLabel(parseDay(draft.makeup.weekStart), draft.makeup.weeks ?? 1)}) · {makeupReasonText(draft.makeupPick, draft.makeupNote)}
     </p>
   );
 }
@@ -557,7 +558,7 @@ function Sign({
   m, org, draft, update, week, onSaved,
 }: {
   m: Membership; org: Org; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void;
-  week: { number: number; start: string; scheduledTalkId: string } | null; onSaved: (d: Done) => void;
+  week: { number: number; start: string; scheduledTalkId: string; weeks?: number } | null; onSaved: (d: Done) => void;
 }) {
   const ui = crewText(draft.lang);
   const presenter = org.people.find((p) => p.id === draft.presenterId);
