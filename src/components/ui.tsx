@@ -8,6 +8,8 @@ import { useSession } from "@/lib/session";
 import { canAdmin, canPresent, canReport, isStaff } from "@/lib/data/types";
 import { pending, onOutboxChange } from "@/lib/outbox";
 import { BRAND } from "@/content/brand";
+import { Wordmark } from "./Logo";
+import { markSvgInner } from "@/content/logo";
 
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" | "lg" };
 
@@ -121,14 +123,12 @@ export function ErrorNotice({ what, detail, onRetry }: { what: string; detail: s
   );
 }
 
-/** The app mark (PLACEHOLDER until the real logo): a keel under a level line, in the brand color. See src/content/brand.ts. */
+/** The app mark (PLACEHOLDER, logo direction D): a lowercase k over a level line and the keel, on the brand color.
+ *  See src/components/Logo.tsx and src/content/brand.ts. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
-    <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[8px] bg-brand text-brand-ink" style={{ width: size, height: size }}>
-      <svg width={size * 0.64} height={size * 0.64} viewBox="0 0 24 24" fill="currentColor">
-        <rect x="3" y="6" width="18" height="2.6" rx="1.3" />
-        <path d="M6.5 10.5h11l-4 8.2a1.7 1.7 0 0 1-3 0z" />
-      </svg>
+    <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[22%] bg-brand text-brand-ink" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox="0 0 64 64" dangerouslySetInnerHTML={{ __html: markSvgInner("currentColor") }} />
     </span>
   );
 }
@@ -233,7 +233,7 @@ function SideNav({ name }: { name: string }) {
     <nav aria-label="Menu" className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line/60 bg-surface/60 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-6 backdrop-blur-xl lg:flex">
       <Link href="/" className="flex min-w-0 items-center gap-3 px-2">
         <Mark size={34} />
-        <span className="min-w-0"><span className="block truncate text-[15px] font-semibold">{name}</span><span className="block text-xs text-muted">{BRAND.name}</span></span>
+        <span className="block min-w-0 truncate text-[15px] font-semibold">{name}</span>
       </Link>
       <ul className="mt-8 flex flex-col gap-1">
         {tabs.map((t) => {
@@ -248,6 +248,7 @@ function SideNav({ name }: { name: string }) {
           );
         })}
       </ul>
+      <div className="mt-auto px-2 text-fg"><Wordmark height={30} /><p className="mt-2 text-xs text-muted">{BRAND.tagline}</p></div>
     </nav>
   );
 }

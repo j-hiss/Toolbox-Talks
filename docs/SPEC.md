@@ -468,7 +468,13 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 
 ## Product name (placeholder, 2026-10-09)
-- Working name **Keel** with a placeholder mark (a keel under a level line), set in one place:
+- **Logo direction D picked (Joe, 2026-10-09; "Keel logo ideas" design board):** the name in heavy, wide lowercase
+  letters (Archivo at width 125, weight 900, drawn as outlines so it needs no font), a level line under it and the
+  keel hanging below, line and keel in the brand green. App icon: a lowercase k over the line and keel on the green.
+  Taglines Joe chose: **"Every talk. Every signature. Every time."** (main: app stores, install, sign-in, side menu)
+  and **"Safety that stays the course."** (explains the name: website, signs, gear). Still placeholders until the
+  trademark search; a designer finishes the artwork from this direction.
+- Working name **Keel**, set in one place:
   `src/content/brand.ts` (plus `appName` in `capacitor.config.ts`). "Toolbox Talks" is already another App Store
   app and reads as construction-only. Shortlist and design directions: the Look and Name Board artifact. Final name
   waits on Joe's pick and a trademark search; the real logo and app icon come from a human designer.
