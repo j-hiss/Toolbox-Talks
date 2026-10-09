@@ -30,3 +30,13 @@ export function resolveStatus(present: boolean, hasSignature: boolean): Attendan
   if (!present) return "absent";
   return hasSignature ? "signed" : "not_signed";
 }
+
+/**
+ * The one signed-count line every screen shows for a talk: signed out of the people who were there, then absent
+ * people separately. "2 of 3 here signed · 1 absent". The presenter is never in these counts; screens say
+ * separately whether the presenter signed.
+ */
+export function signedSummary(c: Pick<StatusCounts, "signed" | "not_signed" | "absent">): string {
+  const here = c.signed + c.not_signed;
+  return `${c.signed} of ${here} here signed${c.absent ? ` · ${c.absent} absent` : ""}`;
+}

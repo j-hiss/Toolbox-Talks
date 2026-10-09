@@ -1,19 +1,23 @@
 "use client";
 
 // Finger signature. Exports a small PNG (max 480 px wide) so signatures fit in the phone's offline outbox.
-import { useEffect, useRef } from "react";
-import type { Signature } from "@/core/record";
+import { useEffect, useRef, useState } from "react";
+import { enoughInk, type Signature } from "@/core/record";
 
 const EXPORT_WIDTH = 480;
 
-export function SignaturePad({ label, value, onChange, tall = false, hint = "Sign above", locked = null }: {
-  label: string; value: Signature | null; onChange: (s: Signature | null) => void; tall?: boolean; hint?: string;
+export function SignaturePad({ label, value, onChange, tall = false, hint = "Sign above", locked = null, tooShortText = "Sign your name. A dot or a tap doesn't count." }: {
+  label: string; value: Signature | null; onChange: (s: Signature | null) => void; tall?: boolean; hint?: string; tooShortText?: string;
   /** When set, the pad takes no ink and shows this message over it (e.g. "Tap the box above first"). */
   locked?: string | null;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const dirty = useRef(false);
+  // How much ink is on the pad (total stroke length), so a tap or a dot isn't taken as a signature.
+  const ink = useRef(value ? Infinity : 0);
+  const last = useRef<readonly [number, number] | null>(null);
+  const [tooShort, setTooShort] = useState(false);
 
   // Size the canvas to its box (sharp on high-density screens) and redraw a saved signature.
   useEffect(() => {
@@ -46,6 +50,8 @@ export function SignaturePad({ label, value, onChange, tall = false, hint = "Sig
     if (!drawing.current) return;
     drawing.current = false;
     if (!dirty.current) return;
+    if (!enoughInk(ink.current)) { setTooShort(true); return; }
+    setTooShort(false);
     const cv = canvas.current!;
     const out = document.createElement("canvas");
     out.width = Math.min(EXPORT_WIDTH, cv.width);
@@ -58,6 +64,8 @@ export function SignaturePad({ label, value, onChange, tall = false, hint = "Sig
     const cv = canvas.current!;
     cv.getContext("2d")!.clearRect(0, 0, cv.width, cv.height);
     dirty.current = false;
+    ink.current = 0;
+    setTooShort(false);
     onChange(null);
   };
 
@@ -67,33 +75,39 @@ export function SignaturePad({ label, value, onChange, tall = false, hint = "Sig
       <canvas
         ref={canvas}
         aria-label={`Signature pad for ${label}`}
-        className={`block w-full touch-none rounded-md border-2 border-dashed bg-white ${tall ? "h-[min(42vh,320px)] border-muted" : "h-36 border-line"}`}
+        className={`block w-full touch-none rounded-md border-2 border-dashed bg-white ${tall ? "h-[min(42vh,320px)]" : "h-36"} border-muted`}
         onPointerDown={(e) => {
           drawing.current = true;
           dirty.current = true;
           canvas.current!.setPointerCapture(e.pointerId);
           const ctx = canvas.current!.getContext("2d")!;
+          const p = point(e);
+          last.current = p;
           ctx.beginPath();
-          ctx.moveTo(...point(e));
+          ctx.moveTo(...p);
         }}
         onPointerMove={(e) => {
           if (!drawing.current) return;
           const ctx = canvas.current!.getContext("2d")!;
-          ctx.lineTo(...point(e));
+          const p = point(e);
+          if (last.current) ink.current += Math.hypot(p[0] - last.current[0], p[1] - last.current[1]);
+          last.current = p;
+          ctx.lineTo(...p);
           ctx.stroke();
         }}
         onPointerUp={finish}
         onPointerCancel={finish}
-        style={locked ? { pointerEvents: "none", opacity: 0.35 } : undefined}
+        // Locked stays light in dark mode too (a faded white pad turns mid-grey on a dark page).
+        style={locked ? { pointerEvents: "none", background: "#EEF1F4" } : undefined}
         aria-disabled={!!locked}
       />
       {locked && <p className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-base font-semibold text-[#3D4A5A]">{locked}</p>}
       </div>
       <div className="mt-1 flex items-center justify-between text-sm">
-        <span className={value ? "font-semibold text-ok-text" : "text-muted"}>
-          {value ? `Signed ${new Date(value.signedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : hint}
+        <span role={tooShort ? "alert" : undefined} className={value ? "font-semibold text-ok-text" : tooShort ? "font-semibold text-warn-text" : "text-muted"}>
+          {value ? `Signed ${new Date(value.signedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : tooShort ? tooShortText : hint}
         </span>
-        {value && <button type="button" onClick={clear} className="min-h-11 px-2 font-semibold text-brand-text underline underline-offset-2">Clear</button>}
+        {(value || tooShort) && <button type="button" onClick={clear} className="min-h-11 px-2 font-semibold text-brand-text underline underline-offset-2">Clear</button>}
       </div>
     </div>
   );

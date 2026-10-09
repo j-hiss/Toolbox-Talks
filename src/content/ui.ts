@@ -12,6 +12,8 @@ type Strings = {
   signHere: string;     // under the pad
   signedBy: string;     // "By signing, I confirm I attended this talk."
   tapFirst: string;     // over the pad until the statement is tapped
+  tooShort: string;     // under the pad when the ink is just a dot or a tap
+  forTalk: string;      // on each person's signing screen, before the talk title
 };
 
 const en: Strings = {
@@ -24,6 +26,8 @@ const en: Strings = {
   signHere: "Sign here with your finger",
   signedBy: "By signing, I confirm I attended this talk.",
   tapFirst: "Tap the box above first",
+  tooShort: "Sign your name. A dot or a tap doesn't count.",
+  forTalk: "Signing for",
 };
 
 const es: Strings = {
@@ -36,6 +40,8 @@ const es: Strings = {
   signHere: "Firme aquí con el dedo",
   signedBy: "Al firmar, confirmo que asistí a esta charla.",
   tapFirst: "Primero toque la casilla de arriba",
+  tooShort: "Firme con su nombre. Un punto o un toque no cuenta.",
+  forTalk: "Firma para",
 };
 
 export function crewText(lang: LanguageId): Strings {

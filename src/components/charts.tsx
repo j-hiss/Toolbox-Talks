@@ -11,7 +11,7 @@ import { pct, score } from "@/core/compliance";
 export type TrendPoint = { key: string; label: string; score: number | null; onTime: number | null };
 
 const SERIES = [
-  { id: "score", name: "Compliance", color: "var(--series-1)" },
+  { id: "score", name: "Sign-in rate", color: "var(--series-1)" },
   { id: "onTime", name: "On time", color: "var(--series-2)" },
 ] as const;
 
@@ -75,7 +75,7 @@ export function TrendChart({ points }: { points: TrendPoint[] }) {
           viewBox={`0 0 ${W} ${H}`}
           className="block max-w-full touch-none select-none"
           role="img"
-          aria-label={`Weekly compliance trend, ${points.length} weeks. Latest: ${pct(points.at(-1)?.score ?? null)} compliance, ${pct(points.at(-1)?.onTime ?? null)} on time.`}
+          aria-label={`Weekly sign-in trend, ${points.length} weeks. Latest: ${pct(points.at(-1)?.score ?? null)} sign-in rate, ${pct(points.at(-1)?.onTime ?? null)} on time.`}
           tabIndex={0}
           onPointerMove={(e) => pick(e.clientX)}
           onPointerDown={(e) => pick(e.clientX)}

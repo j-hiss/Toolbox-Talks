@@ -171,3 +171,10 @@ export function toUpload(record: RecordPayload, attendees: AttendeeRow[]) {
   const storedAttendees = attendees.map(({ signature, ...a }, i) => ({ ...a, signature_path: put(`sig-${i}`, signature) }));
   return { files, record: stored, attendees: storedAttendees };
 }
+
+/**
+ * A signature needs some real ink: total stroke length on the pad, in screen pixels. A tap or a dot doesn't count
+ * as signing. 60 px is about a short initial.
+ */
+export const MIN_INK_PX = 60;
+export const enoughInk = (strokeLengthPx: number) => strokeLengthPx >= MIN_INK_PX;

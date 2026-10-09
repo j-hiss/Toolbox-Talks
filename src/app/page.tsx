@@ -117,8 +117,6 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
-      {isAdmin && st && <GettingStarted st={st} />}
-
       {week && talk && text ? (
         <section className="mt-5">
           <div className="overflow-hidden rounded-2xl bg-surface">
@@ -137,14 +135,17 @@ function Home({ m }: { m: Membership }) {
               <div className="mt-4 flex flex-col gap-2">
                 <Button onClick={() => start(week.talkId)}>Start this talk</Button>
                 {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
-                <Button variant="soft" onClick={() => start(null)}>Make up a missed week</Button>
+                {/* Only when someone owes a past talk (or the status hasn't loaded, offline). */}
+                {(!st || st.owed > 0) && <Button variant="soft" onClick={() => start(null)}>Make up a missed talk</Button>}
               </div>
             </div>
           </div>
           {st && <WeekStatusCard st={st} isAdmin={isAdmin} onMakeup={() => start(null)} />}
+          {isAdmin && st && <GettingStarted st={st} />}
         </section>
       ) : (
-        <div className="mt-6">
+        <div className="mt-6 flex flex-col gap-3">
+          {isAdmin && st && <GettingStarted st={st} />}
           <Notice>
             Your 52-week plan starts the week of {parseDay(co.program_start).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}.
           </Notice>

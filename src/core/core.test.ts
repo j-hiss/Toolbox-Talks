@@ -3,7 +3,7 @@ import { TALKS } from "@/content/talks";
 import { climateFor } from "./climate";
 import { buildPlan, cycleStart, thisWeek } from "./plan";
 import { talksFor } from "./talks";
-import { countStatuses, resolveStatus } from "./attendance";
+import { countStatuses, resolveStatus, signedSummary } from "./attendance";
 import { isoDay, mondayOf, parseDay } from "./weeks";
 import { INDUSTRIES } from "./industries";
 
@@ -131,6 +131,10 @@ describe("attendance", () => {
   it("counts flags honestly", () => {
     const c = countStatuses([{ status: "signed" }, { status: "not_signed" }, { status: "absent" }, { status: "signed" }]);
     expect(c).toEqual({ signed: 2, not_signed: 1, absent: 1, flagged: 2, total: 4 });
+  });
+  it("says signed out of the people there, with absent people separate", () => {
+    expect(signedSummary({ signed: 2, not_signed: 1, absent: 1 })).toBe("2 of 3 here signed · 1 absent");
+    expect(signedSummary({ signed: 4, not_signed: 0, absent: 0 })).toBe("4 of 4 here signed");
   });
   it("rejects an unknown status instead of counting it as signed", () => {
     // @ts-expect-error deliberately invalid

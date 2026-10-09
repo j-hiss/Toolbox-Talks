@@ -32,15 +32,20 @@ import { SafetyLog } from "@/components/SafetyLog";
 import { BrandEditor } from "@/components/BrandEditor";
 
 const TABS = [
-  { id: "people", label: "People" },
-  { id: "teams", label: "Teams" },
-  { id: "jobsites", label: "Jobsites" },
-  { id: "talks", label: "Talks" },
-  { id: "plan", label: "Plan" },
-  { id: "safety", label: "Safety log" },
-  { id: "roles", label: "Roles" },
-  { id: "company", label: "Company" },
-  { id: "brand", label: "Brand" },
+  { id: "people", label: "People", group: "people" },
+  { id: "teams", label: "Teams", group: "people" },
+  { id: "jobsites", label: "Jobsites", group: "people" },
+  { id: "roles", label: "Roles", group: "people" },
+  { id: "talks", label: "Talks", group: "program" },
+  { id: "plan", label: "Plan", group: "program" },
+  { id: "safety", label: "Safety log", group: "program" },
+  { id: "company", label: "Company", group: "program" },
+  { id: "brand", label: "Brand", group: "program" },
+] as const;
+// Two short labelled rows instead of one wrapped block of nine chips.
+const TAB_GROUPS = [
+  { id: "people", label: "People and places" },
+  { id: "program", label: "Program" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
@@ -98,17 +103,22 @@ function Admin({ m }: { m: Membership }) {
       <Eyebrow>Admin · {m.company.name}</Eyebrow>
       <Title>Company setup</Title>
 
-      <div role="tablist" className="mt-4 flex flex-wrap gap-1.5">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-            className={`min-h-10 rounded-full border px-3.5 font-display text-base font-semibold ${tab === t.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}
-          >
-            {t.label}
-          </button>
+      <div role="tablist" aria-label="Admin sections" className="mt-4 flex flex-col gap-2">
+        {TAB_GROUPS.map((g) => (
+          <div key={g.id} className="flex flex-wrap items-center gap-1.5">
+            <span className="w-full text-xs font-semibold uppercase tracking-wide text-muted">{g.label}</span>
+            {TABS.filter((t) => t.group === g.id).map((t) => (
+              <button
+                key={t.id}
+                role="tab"
+                aria-selected={tab === t.id}
+                onClick={() => setTab(t.id)}
+                className={`min-h-11 rounded-full border px-3.5 font-display text-base font-semibold ${tab === t.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-fg"}`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         ))}
       </div>
 

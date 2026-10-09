@@ -10,13 +10,13 @@ import type { Issue } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { isOverdue } from "@/components/Issues";
 import type { Membership, TalkRecord } from "@/lib/data/types";
-import { countStatuses, STATUS_LABEL } from "@/core/attendance";
+import { countStatuses, signedSummary, STATUS_LABEL } from "@/core/attendance";
 import { TALKS } from "@/content/talks";
 import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { weekNumbers } from "@/core/plan";
 import { RequireCompany } from "@/components/Guard";
-import { Button, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
+import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
 
 export default function RecordPage() {
   return <RequireCompany>{(m) => <RecordView m={m} />}</RequireCompany>;
@@ -46,7 +46,7 @@ function RecordView({ m }: { m: Membership }) {
   }, [m.company.id, id]);
 
   const nav = <NavLink href="/records/">Records</NavLink>;
-  if (error) return <Shell nav={nav}><Notice tone="error">Couldn&apos;t load this record: {error}</Notice></Shell>;
+  if (error) return <Shell nav={nav}><ErrorNotice what="Couldn't load this record." detail={error} onRetry={() => location.reload()} /></Shell>;
   if (!id || rec === null) return <Shell nav={nav}><Notice tone="error">That record wasn&apos;t found in this company.</Notice></Shell>;
   if (rec === undefined) return <Shell nav={nav}><Loading /></Shell>;
 
@@ -93,7 +93,7 @@ function RecordView({ m }: { m: Membership }) {
       </dl>
 
       <div className={`mt-4 flex flex-wrap items-center gap-2 rounded-lg border px-4 py-3 text-sm tabular-nums ${flagged ? "border-warn bg-warn-bg" : "border-ok bg-surface"}`}>
-        <span><b>{c.signed}</b> signed · <b>{c.not_signed}</b> not signed · <b>{c.absent}</b> absent</span>
+        <span><b>{signedSummary(c)}</b> · {rec.presenter_signature ? "presenter signed" : "presenter not signed"}</span>
         <span className="ml-auto"><FlagChip n={flagged} /></span>
       </div>
 

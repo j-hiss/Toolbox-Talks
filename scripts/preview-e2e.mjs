@@ -47,7 +47,9 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await p.click("text=Done reading"); await p.waitForTimeout(400);
   await p.selectOption("#presenter", { index: 1 }); await p.selectOption("#team", { label: "Crew 1" }); await p.waitForTimeout(200);
   await p.click("text=Collect signatures"); await p.waitForTimeout(400); await shot("sign-presenter");
-  log("sign 1:", await p.locator("h1").textContent(), "| next disabled:", await p.locator("button:has-text('Next')").isDisabled());
+  log("sign 1:", await p.locator("h1").textContent(), "| next disabled:", await p.locator("main button:has-text('next')").first().isDisabled());
+  { const bb = await p.locator("canvas").boundingBox(); await p.mouse.click(bb.x + 100, bb.y + 100); await p.waitForTimeout(200); }
+  log("dot rejected:", await p.locator("text=A dot or a tap doesn't count").count() > 0, "| still disabled:", await p.locator("main button:has-text('Sign to continue')").isDisabled());
   await draw(); log("next after draw:", await p.locator("button:has-text('Next')").textContent());
   await p.click("button:has-text('Next')"); await p.waitForTimeout(300);
   log("sign 2:", await p.locator("h1").textContent());
@@ -66,6 +68,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("review:", await p.locator("h1").textContent(), "|", (await p.locator("main ul li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
   await p.click("button:has-text('Save')"); await p.waitForTimeout(1200);
   log("saved:", await p.locator("h1").textContent(), "|", await p.locator("[role=alert]").allInnerTexts()); await shot("after-save");
+  log("absent toast gone after save:", await p.locator("text=marked absent").count() === 0, "| another crew:", await p.locator("button:has-text('Give it to another crew')").count());
   await p.click("nav[aria-label=Main] >> text=Home"); await p.waitForTimeout(900); await shot("home-after");
   log("week card:", (await p.locator("section:has-text('Signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " "));
   log("last setup:", await p.locator("text=Set up like last time").textContent().catch(() => "none"));
@@ -83,7 +86,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.selectOption("main select", { label: "Example Jobsite" }).catch(() => {}); await q.waitForTimeout(500);
   log("2 home weather:", (await q.locator("section[aria-label=\"Jobsite weather\"]").innerText().catch(() => "none")).replace(/\s+/g, " ")); await q.locator("section[aria-label=\"Jobsite weather\"]").screenshot({ path: `${OUT}/e-weather.png` }).catch(() => {});
   log("2 home week card:", (await q.locator("section:has-text('Signed this week')").last().innerText()).replace(/\s+/g, " "));
-  await q.click("text=Give a makeup"); await q.waitForTimeout(600);
+  await q.click("text=Make up a talk"); await q.waitForTimeout(600);
   await q.locator("[role=radio]").nth(0).click(); await q.click("button:has-text('Off that week')"); await q.click("text=Continue to the talk"); await q.waitForTimeout(400);
   log("2 read heat:", (await q.locator("main p.border-warn").first().innerText().catch(() => "none")).replace(/\s+/g, " "), "| reminder lines:", await q.locator("main p.border-l-4.border-warn").count());
   await q.screenshot({ path: `${OUT}/e-read-heat.png` });
@@ -251,14 +254,16 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.screenshot({ path: `${OUT}/e-sincelast.png`, fullPage: false });
   await r.locator("label:has-text('Reviewed with the crew') input").first().check(); await r.waitForTimeout(300);
   log("7 after check-off:", await r.locator("button:has-text('Done reading')").isEnabled());
-  await r.click("text=Discard this talk"); await r.waitForTimeout(600);
+  await r.click("text=Discard this talk"); await r.waitForTimeout(200);
+  log("7 discard asks first:", await r.locator("button:has-text('Tap again')").innerText().catch(() => "no confirm"));
+  await r.click("button:has-text('Tap again')"); await r.waitForTimeout(600);
   await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Safety log')"); await r.waitForTimeout(600);
   const card2 = r.locator("main li:has-text('Weekly scaffold check')").first();
   await card2.locator("button[aria-expanded]").click(); await r.waitForTimeout(400);
   log("7 approved summary is read-only:", await card2.locator('textarea[aria-label="Crew summary"]').count() === 0);
   await card2.locator('input[aria-label="Finding"]').fill("Replace cracked planks on level 2");
   await card2.locator("button:has-text('Add to issues')").click(); await r.waitForTimeout(700);
-  await card2.locator('input[aria-label="Why withdraw"]').fill("Logged for the e2e check");
+  await card2.locator('input[id^="why-"]').fill("Logged for the e2e check");
   await card2.locator("button:has-text('Withdraw')").click(); await card2.locator("button:has-text('Tap again')").click(); await r.waitForTimeout(800);
   log("7 withdrawn:", (await r.locator("main li:has-text('Weekly scaffold check')").first().innerText()).includes("Withdrawn"));
   const issues = await r.evaluate(() => JSON.parse(localStorage.getItem("tt-preview-db")).issues.filter((i) => i.event_id).map((i) => i.description));

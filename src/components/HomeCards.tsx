@@ -49,7 +49,8 @@ export function useHomeStatus(co: Company, input: Omit<PlanInput, "today">, vers
           people: people.filter((p) => !p.deactivatedAt).length,
           records: records.length,
           week: teamGrid({ ...c, weeks: now ? [now] : [] }),
-          thisWeek: { signed: now ? now.tally.on_time : 0, expected: now ? now.tally.expected : 0 },
+          // Same count as the crew chips below: everyone on staff who has this week's talk signed.
+          thisWeek: { signed: now ? now.tally.on_time + now.tally.made_up : 0, expected: now ? now.tally.expected : 0 },
           periodWeeks: now?.weeks ?? 1,
           owed: needsMakeup(c, limit, today).length,
           expiringSoon: needsMakeup(c, limit, today).filter((o) => o.daysLeft <= 7).length,
@@ -74,7 +75,7 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
   return (
     <section className="mt-3 rounded-2xl bg-surface p-4">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="text-sm text-muted">Signed this {st.periodWeeks > 1 ? "talk period" : "week"}</p>
+        <p className="text-sm text-muted">On staff who signed this {st.periodWeeks > 1 ? "talk period" : "week"}</p>
         <p className="tabular-nums text-muted"><b className="font-display text-3xl font-medium tracking-tight text-fg">{st.thisWeek.signed}</b>/{st.thisWeek.expected}</p>
       </div>
       {crews.length > 0 && (
@@ -84,7 +85,7 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
             return (
               <li key={c.name} className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-sm tabular-nums ${done ? "border-transparent bg-ok-bg text-ok-text" : "border-line"}`}>
                 {done ? <span aria-hidden>✓</span> : null}
-                <b>{c.name}</b> <span className={done ? "" : "text-muted"}>{c.t!.on_time}/{c.t!.expected}</span>
+                <b>{c.name}</b> <span className={done ? "" : "text-muted"}>{c.t!.on_time + c.t!.made_up}/{c.t!.expected}</span>
                 <span className="sr-only">{done ? "done" : "not done"}</span>
               </li>
             );
@@ -93,9 +94,9 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
       )}
       {st.owed > 0 && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-sm">
-          <span><b>{st.owed}</b> {st.periodWeeks > 1 ? (st.owed === 1 ? "missed talk needs" : "missed talks need") : st.owed === 1 ? "person-week needs" : "person-weeks need"} a makeup{st.expiringSoon ? <b className="text-warn-text"> · {st.expiringSoon} run out within 7 days</b> : null}</span>
+          <span><b>{st.owed}</b> {st.periodWeeks > 1 ? (st.owed === 1 ? "missed talk needs" : "missed talks need") : st.owed === 1 ? "missed sign-in needs" : "missed sign-ins need"} a makeup{st.expiringSoon ? <b className="text-warn-text"> · {st.expiringSoon} run out within 7 days</b> : null}</span>
           <span className="flex gap-3">
-            <button className="min-h-11 font-semibold text-brand-text underline underline-offset-2" onClick={onMakeup}>Give a makeup</button>
+            <button className="min-h-11 font-semibold text-brand-text underline underline-offset-2" onClick={onMakeup}>Make up a talk</button>
             {isAdmin && <Link href="/reports/" className="flex min-h-11 items-center font-semibold text-brand-text underline underline-offset-2">See who</Link>}
           </span>
         </div>
@@ -120,21 +121,19 @@ export function GettingStarted({ st }: { st: Status }) {
   ];
   const left = steps.filter((x) => !x.done).length;
   if (left === 0) return null;
+  // Below the week card, so Start stays near the top. Finished steps fold into the count.
   return (
-    <section className="mt-4 rounded-2xl bg-surface p-4 ring-2 ring-brand">
-      <p className="font-display text-sm font-semibold text-muted">Getting started · {steps.length - left} of {steps.length}</p>
+    <section className="mt-3 rounded-2xl bg-surface p-4 ring-2 ring-brand">
+      <p className="font-display text-sm font-semibold text-muted">Getting started · {steps.length - left} of {steps.length} done</p>
       <ol className="mt-2 flex flex-col">
-        {steps.map((x, i) => (
+        {steps.map((x, i) => (x.done ? null : (
           <li key={x.label}>
             <Link href={x.href} className="flex min-h-11 items-center gap-3 py-1">
-              <span aria-hidden className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${x.done ? "bg-ok text-ok-ink" : "border-2 border-line"}`}>
-                {x.done ? "✓" : i + 1}
-              </span>
-              <span className={x.done ? "text-muted line-through" : "font-semibold"}>{x.label}</span>
-              <span className="sr-only">{x.done ? "(done)" : ""}</span>
+              <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-line text-sm font-semibold">{i + 1}</span>
+              <span className="font-semibold">{x.label}</span>
             </Link>
           </li>
-        ))}
+        )))}
       </ol>
     </section>
   );

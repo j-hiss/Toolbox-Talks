@@ -11,8 +11,9 @@ import { pending, onOutboxChange } from "@/lib/outbox";
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" };
 
 export function Button({ variant = "primary", size = "md", className = "", ...rest }: BtnProps) {
-  const base = "font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-fg";
-  const sizes = size === "sm" ? "min-h-10 rounded-md px-3.5 py-2 text-sm" : "min-h-14 w-full rounded-lg px-4 py-3.5 text-[17px]";
+  // Disabled buttons stay readable outdoors: a plain outline with dark text, not a faded color.
+  const base = "font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:border disabled:border-dashed disabled:border-muted disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:brightness-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-fg";
+  const sizes = size === "sm" ? "min-h-11 rounded-md px-3.5 py-2 text-sm" : "min-h-14 w-full rounded-lg px-4 py-3.5 text-[17px]";
   const variants = {
     primary: "bg-action text-action-ink shadow-sm hover:brightness-110",
     soft: "bg-brand-soft text-brand-text hover:brightness-95",
@@ -74,9 +75,39 @@ export function GroupHeading({ children, aside }: { children: React.ReactNode; a
   );
 }
 
-export function Notice({ tone = "info", children }: { tone?: "info" | "error" | "ok"; children: React.ReactNode }) {
-  const tones = { info: "bg-brand-soft", error: "bg-warn-bg text-fg", ok: "bg-ok-bg" }[tone];
-  return <div role={tone === "error" ? "alert" : "status"} className={`rounded-lg px-4 py-3 text-sm ${tones}`}>{children}</div>;
+export function Notice({ tone = "info", children }: { tone?: "info" | "error" | "ok" | "caution"; children: React.ReactNode }) {
+  const tones = { info: "bg-brand-soft", error: "bg-warn-bg text-fg", ok: "bg-ok-bg", caution: "border-l-4 border-caution bg-caution-bg text-fg" }[tone];
+  return (
+    <div role={tone === "error" ? "alert" : "status"} className={`flex gap-2 rounded-lg px-4 py-3 text-sm ${tones}`}>
+      {tone === "caution" && <span aria-hidden className="font-bold">!</span>}
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
+  );
+}
+
+/** A file picker that looks like a button (the browser's "Choose File / No file chosen" is hard to tap and read). */
+export function FileButton({ label, accept, disabled, chosen, onFile }: { label: string; accept: string; disabled?: boolean; chosen?: string | null; onFile: (f: File | null) => void }) {
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      <label className={`flex min-h-11 cursor-pointer items-center rounded-md border border-line bg-surface px-3.5 text-sm font-semibold focus-within:outline-3 focus-within:outline-fg ${disabled ? "cursor-not-allowed border-dashed border-muted text-muted" : ""}`}>
+        {label}
+        <input type="file" accept={accept} disabled={disabled} className="sr-only" onChange={(e) => { onFile(e.target.files?.[0] ?? null); e.target.value = ""; }} />
+      </label>
+      {chosen && <span className="min-w-0 truncate text-sm text-muted">{chosen}</span>}
+    </span>
+  );
+}
+
+/** A plain-words error with a Try again button; the technical detail stays behind a disclosure. */
+export function ErrorNotice({ what, detail, onRetry }: { what: string; detail: string; onRetry: () => void }) {
+  return (
+    <Notice tone="error">
+      <p className="font-semibold">{what}</p>
+      <p className="mt-1">Check your signal and try again.</p>
+      <Button size="sm" variant="ghost" className="mt-2" onClick={onRetry}>Try again</Button>
+      <details className="mt-2 text-xs text-muted"><summary className="cursor-pointer">Details</summary>{detail}</details>
+    </Notice>
+  );
 }
 
 /** The app mark: a check in a brand-colored rounded square. */
@@ -94,16 +125,21 @@ export function Mark({ size = 30 }: { size?: number }) {
  * The page frame: header (logo, offline/upload status, page links) and, on the main screens, the bottom tab bar.
  * Focused flows (giving a talk, sign-in, setup) pass tabs={false}.
  */
-export function Shell({ children, nav, tabs = true }: { children: React.ReactNode; nav?: React.ReactNode; tabs?: boolean }) {
+export function Shell({ children, nav, tabs = true, lockHeader = false }: { children: React.ReactNode; nav?: React.ReactNode; tabs?: boolean; lockHeader?: boolean }) {
   const s = useSession();
   const name = s.current?.company.name ?? "Toolbox Talks";
   return (
-    <div className={`mx-auto max-w-xl px-4 ${tabs ? "pb-32" : "pb-10"}`}>
+    <div className={`mx-auto max-w-xl px-4 ${tabs ? "pb-36" : "pb-10"}`}>
       <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 bg-bg/90 px-5 py-3 backdrop-blur">
-        <Link href="/" className="flex min-w-0 items-center gap-2.5">
-          <Mark />
-          <span className="truncate text-base font-semibold">{name}</span>
-        </Link>
+        {lockHeader ? (
+          // Signing: the logo isn't a way out while a crew member holds the phone.
+          <span className="flex min-w-0 items-center gap-2.5"><Mark /><span className="truncate text-base font-semibold">{name}</span></span>
+        ) : (
+          <Link href="/" className="flex min-w-0 items-center gap-2.5">
+            <Mark />
+            <span className="truncate text-base font-semibold">{name}</span>
+          </Link>
+        )}
         <div className="flex items-center gap-1.5">
           <ConnectionPill />
           {nav && <nav className="flex gap-1.5">{nav}</nav>}
@@ -138,7 +174,7 @@ function ConnectionPill() {
 const ICONS: Record<string, React.ReactNode> = {
   home: <path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
   talk: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h5" /></>,
-  records: <><path d="M4 6h16M4 12h16M4 18h10" /></>,
+  records: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4h6v3H9zM9 14l2 2 4-4" /></>,
   reports: <><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></>,
   admin: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></>,
 };
@@ -164,10 +200,10 @@ function TabBar() {
               <Link
                 href={t.href}
                 aria-current={on ? "page" : undefined}
-                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl pt-1.5 pb-1 text-[11px] ${on ? "bg-brand-soft font-semibold text-brand-text" : "text-muted"}`}
+                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl pt-1.5 pb-1 text-xs ${on ? "bg-brand-soft font-semibold text-brand-text" : "text-muted"}`}
               >
                 <span className="flex h-7 items-center justify-center">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     {ICONS[t.icon]}
                   </svg>
                 </span>
@@ -183,7 +219,7 @@ function TabBar() {
 
 export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="rounded-md bg-surface px-3 py-1.5 text-sm font-semibold text-brand-text ring-1 ring-line">
+    <Link href={href} className="flex min-h-11 items-center rounded-md bg-surface px-3 py-1.5 text-sm font-semibold text-brand-text ring-1 ring-line">
       {children}
     </Link>
   );

@@ -33,6 +33,12 @@ export function Toaster() {
   useEffect(() => {
     if (lastPath.current !== path) { lastPath.current = path; dismissToast(); }
   }, [path]);
+  // Admin tabs change the #hash, not the path: a message from one tab never carries into the next.
+  useEffect(() => {
+    const clear = () => dismissToast();
+    window.addEventListener("hashchange", clear);
+    return () => window.removeEventListener("hashchange", clear);
+  }, []);
   useEffect(() => {
     if (!t) return;
     const timer = setTimeout(() => { if (current?.id === t.id) dismissToast(); }, t.action ? 6000 : 2600);
@@ -48,7 +54,7 @@ export function Toaster() {
         >
           <span>{t.text}</span>
           {t.action && (
-            <button className="ml-auto rounded px-2 py-1 font-semibold underline underline-offset-2" onClick={() => { t.action!.run(); dismissToast(); }}>
+            <button className="-my-2 ml-auto min-h-11 min-w-11 rounded px-2 font-semibold underline underline-offset-2" aria-label={`${t.action.label}: ${t.text}`} onClick={() => { t.action!.run(); dismissToast(); }}>
               {t.action.label}
             </button>
           )}

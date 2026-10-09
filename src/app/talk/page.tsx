@@ -14,7 +14,7 @@ import { parseDay, periodLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
 import { LANGUAGES, type LanguageId } from "@/core/languages";
 import { buildAttendees, recordPayload, unsignedPresent, type RosterEntry, type Signature } from "@/core/record";
-import { countStatuses } from "@/core/attendance";
+import { countStatuses, signedSummary } from "@/core/attendance";
 import { listJobsites, listPeople, listRoles, listTeams } from "@/lib/data/company";
 import { saveTalkRecord, signedForWeek } from "@/lib/data/records";
 import { usePlan } from "@/lib/usePlan";
@@ -24,7 +24,7 @@ import { alertWorthy, HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/content/heat";
 import { addDays, isoDay } from "@/core/weeks";
 import { readWalkinCompanies, rememberWalkinCompany, writeLastSetup } from "@/lib/lastSetup";
-import { buzz, toast } from "@/components/toast";
+import { buzz, dismissToast, toast } from "@/components/toast";
 import type { Company, Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { sinceLastSettings, sinceLastSnapshot } from "@/core/safetylog";
 import { loadSinceLast } from "@/lib/sinceLast";
@@ -36,14 +36,14 @@ import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
 import { RequireCompany } from "@/components/Guard";
 import { SignaturePad } from "@/components/SignaturePad";
 import { readChosenJobsite } from "@/components/JobsitePicker";
-import { Button, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ConfirmButton, ErrorNotice, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
 
 export default function TalkPage() {
   return <RequireCompany>{(m) => <Talk m={m} />}</RequireCompany>;
 }
 
 type Org = { people: Person[]; teams: Team[]; roles: Role[]; jobsites: Jobsite[] };
-type Done = { title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean; makeupLabel: string | null; issues: number };
+type Done = { talkId: string; jobsiteId: string; title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean; makeupLabel: string | null; issues: number };
 
 function Talk({ m }: { m: Membership }) {
   const co = m.company;
@@ -52,14 +52,20 @@ function Talk({ m }: { m: Membership }) {
   const [org, setOrg] = useState<Org | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Done | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let live = true;
     Promise.all([listPeople(co.id), listTeams(co.id), listRoles(co.id), listJobsites(co.id)])
-      .then(([people, teams, roles, jobsites]) => live && setOrg({ people, teams, roles, jobsites }))
+      .then(([people, teams, roles, jobsites]) => { if (live) { setError(null); setOrg({ people, teams, roles, jobsites }); } })
       .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
     return () => { live = false; };
-  }, [co.id]);
+  }, [co.id, attempt]);
+
+  // A message (like "marked absent · Undo") belongs to the step it was shown on. Moving on, or saving, clears it,
+  // so an old Undo can never write a talk back after it was saved.
+  const step = draft?.step;
+  useEffect(() => { dismissToast(); }, [step, done]);
 
   const { week, input } = usePlan(co);
   const openMakeups = useOpenMakeups(co, input);
@@ -76,8 +82,14 @@ function Talk({ m }: { m: Membership }) {
   const signedIds = signed && signed.key === creditKey ? signed.ids : null;
 
   const nav = <NavLink href="/">Home</NavLink>;
-  if (done) return <Shell nav={nav}><Saved done={done} /></Shell>;
-  if (error) return <Shell nav={nav}><Notice tone="error">Couldn&apos;t load your crew: {error}</Notice></Shell>;
+  if (done) {
+    return (
+      <Shell nav={nav}>
+        <Saved done={done} onAnother={() => { const d = newDraft(co.id, done.talkId, done.jobsiteId); writeDraft({ ...d, teamId: "" }); setDone(null); }} />
+      </Shell>
+    );
+  }
+  if (error) return <Shell nav={nav}><ErrorNotice what="Couldn't load your crew." detail={error} onRetry={() => { setError(null); setAttempt((a) => a + 1); }} /></Shell>;
   if (!draft) {
     return (
       <Shell nav={nav}>
@@ -85,7 +97,10 @@ function Talk({ m }: { m: Membership }) {
         <Title>No talk in progress</Title>
         <div className="mt-5 flex flex-col gap-3">
           {week && <Button onClick={() => newDraft(co.id, week.talkId, readChosenJobsite(co.id) ?? "")}>Start this week&apos;s talk</Button>}
-          <Button variant="ghost" size="sm" onClick={() => newDraft(co.id, null, readChosenJobsite(co.id) ?? "")}>Make up a missed week</Button>
+          {/* Only when someone owes a past talk (or we can't tell, offline): never a button into a dead end. */}
+          {(openMakeups === null || [...openMakeups.values()].some((p) => p.length > 0)) && (
+            <Button variant="ghost" size="sm" onClick={() => newDraft(co.id, null, readChosenJobsite(co.id) ?? "")}>Make up a missed talk</Button>
+          )}
         </div>
       </Shell>
     );
@@ -93,17 +108,21 @@ function Talk({ m }: { m: Membership }) {
   if (!org) return <Shell nav={nav} tabs={false}><Loading /></Shell>;
 
   const update = (patch: Partial<TalkDraft>) => writeDraft({ ...draft, ...patch });
+  // Discarding throws away everything collected, signatures included, so it takes a second tap.
+  const nSigs = Object.keys(draft.signatures).length + (draft.presenterSignature ? 1 : 0);
   const cancel = (
-    <button
-      className="text-sm font-semibold text-muted underline"
-      onClick={() => { stopSpeaking(); clearDraft(co.id); router.replace("/"); }}
-    >
-      Discard this talk
-    </button>
+    <ConfirmButton
+      label="Discard this talk"
+      confirmLabel={nSigs ? `Tap again to delete ${nSigs} ${nSigs === 1 ? "signature" : "signatures"}` : "Tap again to discard"}
+      onConfirm={() => { stopSpeaking(); dismissToast(); clearDraft(co.id); router.replace("/"); }}
+    />
   );
 
+  // While the phone is going hand to hand for signatures, leaving takes a second tap (the talk stays saved here).
+  const signing = draft.step === "sign";
+  const exit = <ConfirmButton label="Exit" confirmLabel="Tap again to leave" onConfirm={() => { stopSpeaking(); router.push("/"); }} />;
   return (
-    <Shell nav={nav} tabs={false}>
+    <Shell nav={signing ? exit : nav} tabs={false} lockHeader={signing}>
       {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} open={openMakeups} />}
       {draft.step === "read" && draft.talkId && <Read co={co} draft={draft} update={update} org={org} />}
       {draft.step === "crew" && <Crew org={org} draft={draft} update={update} signedIds={signedIds} />}
@@ -114,7 +133,7 @@ function Talk({ m }: { m: Membership }) {
           draft={draft}
           update={update}
           week={week ? { number: week.n, start: week.key, scheduledTalkId: week.talkId, weeks: week.weeks } : null}
-          onSaved={(d) => { clearDraft(co.id); setDone(d); }}
+          onSaved={(d) => { dismissToast(); clearDraft(co.id); setDone(d); }}
         />
       )}
       <div className="mt-10 border-t border-line pt-4 text-center">{cancel}</div>
@@ -247,7 +266,11 @@ function MakeupPick({ weeks, draft, update, open }: {
 function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; org: Org }) {
   const talk = TALKS.find((t) => t.id === draft.talkId)!;
   const { text } = talkText(talk, draft.lang);
+  // Only languages this talk can be read in; the rest are one "coming" line, not a row of greyed chips.
+  const langs = LANGUAGES.filter((l) => l.ready && !!talk.content[l.id]);
   const ui = crewText(draft.lang);
+  // The presenter's own controls stay in the app's language; only the talk and what the crew signs follow theirs.
+  const pui = crewText("en");
   const [line, setLine] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   // Bigger text for reading in sun glare; remembered on this phone.
@@ -324,12 +347,12 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
   const playing = line !== null;
   const toggle = () => {
     if (playing) { stopRef.current?.(); setLine(null); setStatus(null); return; }
-    if (!speechAvailable()) { setStatus(ui.noVoice); return; }
-    setStatus(ui.reading);
+    if (!speechAvailable()) { setStatus(pui.noVoice); return; }
+    setStatus(pui.reading);
     stopRef.current = speakLines(lines, voice, {
       onLine: (i) => { setLine(i); document.getElementById(`line-${i}`)?.scrollIntoView({ block: "center", behavior: "smooth" }); },
       onDone: () => { setLine(null); setStatus(null); },
-      onError: () => { setLine(null); setStatus(ui.noVoice); },
+      onError: () => { setLine(null); setStatus(pui.noVoice); },
     });
   };
   const hl = (i: number) => (line === i ? "rounded bg-caution-bg shadow-[0_0_0_4px_var(--caution-bg)]" : "");
@@ -339,25 +362,25 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
       <Steps n={1} label="Read to the crew" />
       <MakeupBanner draft={draft} />
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="Language">
-        {LANGUAGES.map((l) => (
+        {langs.map((l) => (
           <button
             key={l.id}
-            disabled={!l.ready || !talk.content[l.id]}
             aria-pressed={draft.lang === l.id}
             onClick={() => { stopRef.current?.(); setLine(null); update({ lang: l.id as LanguageId }); }}
-            className={`rounded-full border px-3 py-1.5 text-sm font-semibold disabled:opacity-40 ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
           >
-            {l.label}{!l.ready && <small className="ml-1 font-normal">soon</small>}
+            {l.label}
           </button>
         ))}
+        {LANGUAGES.some((l) => !l.ready) && <span className="self-center text-sm text-muted">More languages coming</span>}
       </div>
       <div className="mt-2 flex items-center gap-1.5" role="group" aria-label="Text size">
         <span className="mr-1 text-sm text-muted">Text size</span>
-        <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-sm font-semibold disabled:opacity-40" disabled={size === 0} onClick={() => setSize(size - 1)} aria-label="Smaller text">A−</button>
-        <button className="min-h-10 min-w-10 rounded-md border border-line bg-surface text-lg font-semibold disabled:opacity-40" disabled={size === 3} onClick={() => setSize(size + 1)} aria-label="Bigger text">A+</button>
+        <button className="min-h-11 min-w-11 rounded-md border border-line bg-surface text-sm font-semibold disabled:opacity-40" disabled={size === 0} onClick={() => setSize(size - 1)} aria-label="Smaller text">A−</button>
+        <button className="min-h-11 min-w-11 rounded-md border border-line bg-surface text-lg font-semibold disabled:opacity-40" disabled={size === 3} onClick={() => setSize(size + 1)} aria-label="Bigger text">A+</button>
       </div>
       {draft.lang !== "en" && (talk.translationStatus[draft.lang] !== "reviewed" || (hot && !heatReminderReviewed[draft.lang])) && (
-        <p className="mt-2 text-xs text-muted">This translation hasn&apos;t been reviewed by a native speaker yet.</p>
+        <div className="mt-2"><Notice tone="caution">This translation hasn&apos;t been reviewed by a native speaker yet. Check anything that sounds wrong against the English.</Notice></div>
       )}
 
       {draft.heat && alertWorthy(draft.heat.level as HeatLevel) && (
@@ -368,7 +391,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
       )}
       {heatMsg && !draft.heat && <p className="mt-2 text-xs text-muted">Heat check unavailable: {heatMsg}</p>}
       {since?.status === "unavailable" && (
-        <p className="mt-2 text-xs text-muted">Couldn&apos;t load the safety log for &ldquo;Since last talk&rdquo; (no signal?). The talk saves without it, marked as not loaded.</p>
+        <div className="mt-2"><Notice tone="caution">Couldn&apos;t load the safety log for &ldquo;Since last talk&rdquo; (no signal?). The talk saves without it, marked as not loaded.</Notice></div>
       )}
 
       <div className="mt-3">
@@ -432,7 +455,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
 
       {/* Always in reach while reading: play/stop and done. */}
       <div className="sticky bottom-0 -mx-4 mt-5 flex gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
-        <Button size="sm" onClick={toggle} className="shrink-0 bg-fg text-bg" aria-label={playing ? ui.stop : ui.play}>{playing ? `■ ${ui.stop}` : `▶ ${ui.play}`}</Button>
+        <Button size="sm" onClick={toggle} className="shrink-0 bg-fg text-bg" aria-label={playing ? pui.stop : pui.play}>{playing ? `■ ${pui.stop}` : `▶ ${pui.play}`}</Button>
         <Button className="!py-3" disabled={unchecked > 0} onClick={() => {
           stopRef.current?.();
           update({ step: "crew", siteNotes: draft.siteNotes.trim(), heat: draft.heat ? { ...draft.heat, reminder_read: hot } : null });
@@ -529,10 +552,14 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
             <option value="">{org.jobsites.length ? "Choose a jobsite or the office" : "No places set up"}</option>
             {org.jobsites.map((j) => <option key={j.id} value={j.id}>{j.name}{j.kind === "office" ? " (office or shop)" : ""}</option>)}
           </select>
+          {org.jobsites.length === 0 && (
+            <Link href="/admin/#jobsites" className="flex min-h-11 items-center text-sm font-semibold text-brand-text underline underline-offset-2">Add a jobsite or your office in Admin</Link>
+          )}
         </Field>
       </div>
 
       <GroupHeading aside={roster.length ? `${here} here · ${absent} absent` : undefined}>Roster</GroupHeading>
+      {roster.length > 0 && <p className="mt-1 px-1 text-sm text-muted">Uncheck anyone who isn&apos;t here. They&apos;re recorded as absent.</p>}
       {roster.length === 0 ? (
         <p className="mt-3 text-sm text-muted">{draft.teamId === "needs" ? "Everyone has this week covered. Add walk-ins below if needed." : draft.teamId ? "No one on this team yet. Add walk-ins below, or add people in Admin." : "Choose a team to load its roster."}</p>
       ) : (
@@ -581,7 +608,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
           <datalist id="walkin-companies">{knownCos.map((c) => <option key={c} value={c} />)}</datalist>
         </div>
       </form>
-      <p className="mt-2 text-xs text-muted">Unchecked people are recorded as absent.{draft.gps ? " Location captured." : ""}</p>
+      {draft.gps && <p className="mt-2 text-sm text-muted">Location captured.</p>}
 
       {msg && <div className="mt-4"><Notice tone="error">{msg}</Notice></div>}
       <div className="sticky bottom-0 -mx-4 mt-5 flex flex-col gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
@@ -689,6 +716,7 @@ function Sign({
       const uploaded = !pending(m.company.id).some((i) => i.record.client_id === draft.clientId);
       buzz(30);
       onSaved({
+        talkId: talk.id, jobsiteId: draft.jobsiteId,
         title: text.title, uploaded, counts: countStatuses(attendees), presenterSigned: !!draft.presenterSignature,
         makeupLabel: draft.makeup ? `Makeup for Week ${draft.makeup.weekNumber}` : null,
         issues: issues.length,
@@ -707,19 +735,24 @@ function Sign({
         <Steps n={3} label="Check and save" />
         <MakeupBanner draft={draft} />
         <Title>Ready to save?</Title>
-        <p className="mt-2 tabular-nums"><b>{signedCount}</b> of {presentRoster.length} signed{absent.length ? ` · ${absent.length} absent` : ""}</p>
+        <p className="mt-2 tabular-nums">
+          {signedSummary({ signed: signedCount, not_signed: presentRoster.length - signedCount, absent: absent.length })}
+          {" · "}{draft.presenterSignature ? "presenter signed" : "presenter not signed"}
+        </p>
         <ul className="mt-4 flex flex-col gap-2">
           {turns.map((t, i) => {
             const sig = sigOf(t);
             return (
               <li key={t.key}>
-                <button onClick={() => go(i)} className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left ${sig ? "border-line bg-surface" : "border-warn bg-warn-bg"}`}>
+                <button onClick={() => go(i)} className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left ${sig ? "border-ok bg-ok-bg" : "border-warn bg-warn-bg"}`}>
+                  {/* Signed rows turn green with a check, so the presenter sees at a glance who's left. */}
+                  <span aria-hidden className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${sig ? "bg-ok text-white" : "border-2 border-warn"}`}>{sig ? "✓" : ""}</span>
                   <span className="min-w-0 flex-1"><b className="block">{t.name}</b><small className="text-muted">{t.sub}</small></span>
                   {sig ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={sig.image} alt={`Signature of ${t.name}`} className="h-10 w-24 rounded bg-white object-contain" />
                   ) : (
-                    <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Sign now</span>
+                    <span className="flex min-h-11 items-center rounded-md border-2 border-brand bg-surface px-3 text-sm font-semibold text-brand-text">Sign now</span>
                   )}
                 </button>
               </li>
@@ -728,7 +761,7 @@ function Sign({
           {absent.map((r) => (
             <li key={r.key} className="flex items-center gap-3 rounded-lg border border-warn bg-warn-bg p-3">
               <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.role}</small></span>
-              <button className="min-h-11 px-2 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => update({ present: { ...draft.present, [r.key]: true } })}>Is here</button>
+              <button className="min-h-11 rounded-md border-2 border-brand bg-surface px-3 text-sm font-semibold text-brand-text" onClick={() => update({ present: { ...draft.present, [r.key]: true } })}>Mark here</button>
               <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Absent</span>
             </li>
           ))}
@@ -768,11 +801,12 @@ function Sign({
       update({ signatures });
     }
   };
+  const talkTitle = (() => { const tk = TALKS.find((x) => x.id === draft.talkId); return tk ? talkText(tk, draft.lang).text.title : ""; })();
   const nextName = (() => { const n = nextOpen(idx); return n < turns.length ? turns[n].name : null; })();
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <p className="font-display text-sm font-semibold text-muted tabular-nums">Signing {idx + 1} of {turns.length}</p>
+        <p className="font-display text-sm font-semibold text-muted tabular-nums">Step 3 of 3 · Signing {idx + 1} of {turns.length}</p>
         <button className="min-h-11 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => go(turns.length)}>Review all</button>
       </div>
       <div className="mt-2 flex gap-1" aria-hidden>
@@ -784,6 +818,8 @@ function Sign({
       <p className="mt-5 text-sm text-muted">{t.presenter ? "Presenter signs first" : "Pass the phone to"}</p>
       <h1 className="font-display text-5xl font-semibold leading-none text-balance tracking-tight">{t.name}</h1>
       <p className="mt-1 text-muted">{t.sub}</p>
+      {/* Each person sees what they're signing for, in their language. */}
+      <p className="mt-2 text-sm">{ui.forTalk}: <b>{talkTitle}</b> · {new Date().toLocaleDateString(draft.lang, { month: "short", day: "numeric" })}</p>
       {!t.presenter && (
         // The signing statement: a deliberate tap before the pad takes ink, saved with the record (src/content/ui.ts).
         <button
@@ -809,30 +845,43 @@ function Sign({
         </button>
       )}
       <div className="mt-3">
-        <SignaturePad key={t.key} tall label={t.name} value={sig} onChange={setSig} hint={ui.signHere}
+        <SignaturePad key={t.key} tall label={t.name} value={sig} onChange={setSig} hint={ui.signHere} tooShortText={ui.tooShort}
           locked={!t.presenter && !confirmedAt ? ui.tapFirst : null} />
       </div>
 
       <div className="sticky bottom-0 -mx-4 mt-5 flex flex-col gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
         <Button onClick={() => go(nextOpen(idx))} disabled={!sig}>
-          {nextName ? `Next: ${nextName}` : "Done signing"}
+          {!sig ? `Sign to continue${nextName ? ` · next: ${nextName}` : ""}` : nextName ? `Next: ${nextName}` : "Done signing"}
         </Button>
-        <div className="flex gap-2">
-          {idx > 0 && <Button size="sm" variant="ghost" className="flex-1" onClick={() => go(idx - 1)}>Back</Button>}
-          {!t.presenter && (
-            <Button size="sm" variant="ghost" className="flex-1" onClick={() => {
-              const present = { ...draft.present, [t.key]: false };
-              const signatures = { ...draft.signatures };
-              delete signatures[t.key];
-              update({ present, signatures });
-              toast(`${t.name} marked absent`, { action: { label: "Undo", run: () => update({ present: { ...present, [t.key]: true } }) } });
-              // the list shrinks by one, so the same index now points at the next person
-              setIdx((i) => Math.min(i, turns.length - 1));
-            }}>Isn&apos;t here</Button>
-          )}
-          {!sig && <Button size="sm" variant="ghost" className="flex-1" onClick={() => go(nextOpen(idx))}>Skip</Button>}
+        {/* Same layout for everyone: "Isn't here" is its own full-width button, with Back and Skip set apart below
+            it, so a gloved slip can't record the wrong status. */}
+        {!t.presenter && (
+          <Button variant="ghost" onClick={() => {
+            const present = { ...draft.present, [t.key]: false };
+            const signatures = { ...draft.signatures };
+            delete signatures[t.key];
+            update({ present, signatures });
+            const clientId = draft.clientId;
+            toast(`${t.name} marked absent`, {
+              action: {
+                label: "Undo",
+                // Only while this same talk is still in progress on the phone; never brings a saved talk back.
+                run: () => {
+                  const cur = readDraft(m.company.id);
+                  if (cur && cur.clientId === clientId) writeDraft({ ...cur, present: { ...cur.present, [t.key]: true } });
+                },
+              },
+            });
+            // the list shrinks by one, so the same index now points at the next person
+            setIdx((i) => Math.min(i, turns.length - 1));
+          }}>Isn&apos;t here</Button>
+        )}
+        <div className="mt-2 flex items-center justify-between gap-6">
+          {idx > 0
+            ? <Button size="sm" variant="ghost" onClick={() => go(idx - 1)}>Back</Button>
+            : <Button size="sm" variant="ghost" onClick={() => update({ step: "crew" })}>Back to who&apos;s here</Button>}
+          {!sig && <Button size="sm" variant="ghost" onClick={() => go(nextOpen(idx))}>Skip for now</Button>}
         </div>
-        {idx === 0 && <Button size="sm" variant="ghost" onClick={() => update({ step: "crew" })}>Back to who&apos;s here</Button>}
       </div>
     </>
   );
@@ -884,7 +933,7 @@ function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; upda
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-function Saved({ done }: { done: Done }) {
+function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
   const c = done.counts;
   return (
     <>
@@ -899,7 +948,7 @@ function Saved({ done }: { done: Done }) {
       </div>
       {done.issues > 0 && <p className="mt-3 text-sm"><b>{done.issues}</b> {done.issues === 1 ? "issue" : "issues"} logged for follow-up. <Link href="/records/#issues" className="font-semibold text-brand-text underline underline-offset-2">Track issues</Link></p>}
       <p className="mt-4 tabular-nums">
-        <b>{c.signed}</b> signed · <b>{c.not_signed}</b> not signed · <b>{c.absent}</b> absent
+        {signedSummary(c)} · {done.presenterSigned ? "presenter signed" : "presenter not signed"}
         {(c.flagged > 0 || !done.presenterSigned) && (
           <span className="ml-2 rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">
             {c.flagged + (done.presenterSigned ? 0 : 1)} flagged
@@ -907,8 +956,10 @@ function Saved({ done }: { done: Done }) {
         )}
       </p>
       <div className="mt-6 flex flex-col gap-2">
-        <Link href="/records/" className="rounded-lg bg-action px-4 py-4 text-center font-display text-xl font-semibold text-action-ink">See records</Link>
-        <Link href="/" className="rounded-lg border border-line px-4 py-3 text-center font-semibold">Home</Link>
+        {/* Several crews a week is normal: the same talk again, with a fresh roster and signatures. */}
+        {!done.makeupLabel && <Button onClick={onAnother}>Give it to another crew</Button>}
+        <Link href="/records/" className="flex min-h-14 items-center justify-center rounded-lg border border-line bg-surface px-4 text-center font-semibold">See records</Link>
+        <Link href="/" className="flex min-h-14 items-center justify-center rounded-lg border border-line px-4 text-center font-semibold">Home</Link>
       </div>
     </>
   );

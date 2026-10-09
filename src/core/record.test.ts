@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAttendees, recordPayload, toUpload, unsignedPresent, type RosterEntry } from "./record";
+import { buildAttendees, enoughInk, recordPayload, toUpload, unsignedPresent, type RosterEntry } from "./record";
 import { countStatuses } from "./attendance";
 
 const roster: RosterEntry[] = [
@@ -118,5 +118,13 @@ describe("the signing statement", () => {
     const up = toUpload(record, buildAttendees(roster.slice(0, 1), { a: true }, { a: sig("2030-01-01T12:00:30Z") }));
     expect(up.record.signing_statement).toEqual(statement);
     expect(up.attendees[0].confirmed_at).toBe("2030-01-01T12:00:30Z");
+  });
+});
+
+describe("signature ink", () => {
+  it("doesn't take a dot or a tap as a signature", () => {
+    expect(enoughInk(0)).toBe(false);
+    expect(enoughInk(12)).toBe(false);
+    expect(enoughInk(140)).toBe(true);
   });
 });

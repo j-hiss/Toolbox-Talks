@@ -17,7 +17,7 @@ import {
   approveSummary, eventFileUrl, listEventFiles, listEvents, logEvent, updateEvent, uploadEventFile, withdrawEvent, type EventFile,
 } from "@/lib/data/safety";
 import { useSession } from "@/lib/session";
-import { Button, ConfirmButton, Field, GroupHeading, Loading, Notice, inputClass } from "@/components/ui";
+import { Button, ConfirmButton, Field, GroupHeading, Loading, Notice, inputClass, FileButton } from "@/components/ui";
 import { toast } from "@/components/toast";
 
 type Props = { company: Company; state: string | undefined; jobsites: Jobsite[]; people: Person[] };
@@ -238,9 +238,10 @@ function NewEventForm({ company, jobsites, roster, onDone }: { company: Company;
           placeholder={kind === "citation" ? "Like: OSHA alleges a missing guardrail on the east roof edge. A guardrail is going up this week; until then, tie off." : "Like: A cracked plank on the north scaffold was found and replaced. Check planks before you step on."} />
       </Field>
       {problems.length > 0 && <Notice tone="error">{problems.join(" ")}</Notice>}
-      <Field id="ev-file" label="Report or photo" hint="optional · PDF or picture, up to 10 MB, admins only">
-        <input id="ev-file" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="text-sm" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-      </Field>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-sm font-semibold">Report or photo <small className="font-normal text-muted">optional · PDF or picture, up to 10 MB, admins only</small></p>
+        <FileButton label="Attach a PDF or photo" accept="application/pdf,image/jpeg,image/png,image/webp" chosen={file?.name ?? null} onFile={setFile} />
+      </div>
       {err && <Notice tone="error">{err}</Notice>}
       <div className="flex gap-2">
         <Button size="sm" type="submit" disabled={busy || !title.trim()}>Save</Button>
@@ -344,8 +345,10 @@ function EventCard({ e, company, roster, people, jobsites, onChange }: {
                 ))}
               </ul>
             )}
-            <input aria-label="Attach a file" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="mt-1 text-sm" disabled={busy}
-              onChange={(ev) => { const f = ev.target.files?.[0]; if (f) void run(() => uploadEventFile(company.id, e.id, f), "File attached")(); }} />
+            <div className="mt-1">
+              <FileButton label="Attach a PDF or photo" accept="application/pdf,image/jpeg,image/png,image/webp" disabled={busy}
+                onFile={(f) => { if (f) void run(() => uploadEventFile(company.id, e.id, f), "File attached")(); }} />
+            </div>
           </div>
 
           <div>
@@ -367,13 +370,14 @@ function EventCard({ e, company, roster, people, jobsites, onChange }: {
             }, "Added to issues")}>Add to issues</Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+          <div className="flex flex-col items-start gap-3 border-t border-line pt-3">
             <Button size="sm" variant="ghost" disabled={busy} onClick={run(() => updateEvent(company.id, e.id, { status: e.status === "open" ? "closed" : "open" }), e.status === "open" ? "Closed" : "Reopened")}>
               {e.status === "open" ? "Mark closed" : "Reopen"}
             </Button>
             {!e.withdrawn_at && (
               <>
-                <input aria-label="Why withdraw" className={`${inputClass} !w-auto flex-1`} placeholder="Why withdraw it from talks?" value={reason} onChange={(ev) => setReason(ev.target.value)} />
+                <label className="w-full text-sm font-semibold" htmlFor={`why-${e.id}`}>Withdraw from future talks <small className="block font-normal text-muted">Stays on file with your reason. Crews won&apos;t hear it again.</small></label>
+                <input id={`why-${e.id}`} className={inputClass} placeholder="Reason" value={reason} onChange={(ev) => setReason(ev.target.value)} />
                 <ConfirmButton label="Withdraw" disabled={busy || !reason.trim()} onConfirm={() => void run(() => withdrawEvent(company.id, e.id, reason), "Withdrawn from talks")()} />
               </>
             )}

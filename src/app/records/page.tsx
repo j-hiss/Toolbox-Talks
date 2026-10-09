@@ -8,10 +8,10 @@ import { weekNumbers } from "@/core/plan";
 import Link from "next/link";
 import { listRecords } from "@/lib/data/records";
 import type { Membership, TalkRecordSummary } from "@/lib/data/types";
-import { countStatuses } from "@/core/attendance";
+import { countStatuses, signedSummary } from "@/core/attendance";
 import { useOutbox } from "@/lib/useOutbox";
 import { RequireCompany } from "@/components/Guard";
-import { Button, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, Shell, Title, inputClass } from "@/components/ui";
 
 export default function RecordsPage() {
   return <RequireCompany>{(m) => <Records m={m} />}</RequireCompany>;
@@ -90,7 +90,7 @@ function Records({ m }: { m: Membership }) {
 
       <GroupHeading aside={rows ? `${rows.length}` : undefined}>Saved</GroupHeading>
       {error ? (
-        <div className="mt-3"><Notice tone="error">Couldn&apos;t load records: {error}</Notice></div>
+        <div className="mt-3"><ErrorNotice what="Couldn't load records." detail={error} onRetry={() => location.reload()} /></div>
       ) : !rows ? (
         <Loading />
       ) : rows.length === 0 ? (
@@ -134,7 +134,7 @@ function Records({ m }: { m: Membership }) {
                             </small>
                           </span>
                           <span className="flex shrink-0 flex-col items-end gap-1 text-sm tabular-nums">
-                            <span>{c.signed}/{c.total} signed</span>
+                            <span>{signedSummary(c)}</span>
                             <FlagChip n={c.flagged + (r.presenter_signed ? 0 : 1)} />
                           </span>
                         </Link>

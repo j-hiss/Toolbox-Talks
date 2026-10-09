@@ -25,7 +25,7 @@ import { readChosenJobsite } from "@/components/JobsitePicker";
 import { useRouter } from "next/navigation";
 import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
-import { Button, Eyebrow, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ErrorNotice, Eyebrow, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
 
 export default function ReportsPage() {
   return <RequireCompany admin>{(m) => <Reports m={m} />}</RequireCompany>;
@@ -91,7 +91,7 @@ function Reports({ m }: { m: Membership }) {
     return buildCompliance({ people, records: data.records, weeks: keys, makeupWeeks: co.makeup_weeks ?? 4, today });
   }, [data, team, today, co.makeup_weeks, keys]);
 
-  if (error) return <Shell><Notice tone="error">Couldn&apos;t load reports: {error}</Notice></Shell>;
+  if (error) return <Shell><ErrorNotice what="Couldn't load reports." detail={error} onRetry={() => location.reload()} /></Shell>;
   if (parseDay(co.program_start) > today) {
     return <Shell><Title>Reports</Title><div className="mt-4"><Notice>Your plan starts the week of {short(parseDay(co.program_start))}. Reports fill in from then.</Notice></div></Shell>;
   }
@@ -142,7 +142,7 @@ function Reports({ m }: { m: Membership }) {
     }
     const csv = rows.map((r) => r.map(q).join(",")).join("\r\n");
     try {
-      const res = await saveFile(`${multi ? "Talk" : "Weekly"} compliance ${data.from} to ${isoDay(today)}.csv`, new Blob([csv], { type: "text/csv" }));
+      const res = await saveFile(`${multi ? "Talk" : "Weekly"} sign-ins ${data.from} to ${isoDay(today)}.csv`, new Blob([csv], { type: "text/csv" }));
       if (res === "canceled") setCsvMsg("Canceled.");
     } catch (e) { setCsvMsg(e instanceof Error ? e.message : String(e)); }
   };
@@ -150,7 +150,7 @@ function Reports({ m }: { m: Membership }) {
   return (
     <Shell>
       <Eyebrow>Reports · {co.name}</Eyebrow>
-      <Title>{multi ? "Talk compliance" : "Weekly compliance"}</Title>
+      <Title>{multi ? "Talk sign-ins" : "Weekly sign-ins"}</Title>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Date range">
@@ -173,13 +173,17 @@ function Reports({ m }: { m: Membership }) {
       <section className="mt-5 rounded-xl bg-surface p-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="font-display text-sm font-semibold text-muted">Compliance score</p>
+            <p className="font-display text-sm font-semibold text-muted">Sign-in rate</p>
             <p className="font-display text-6xl font-semibold leading-none tabular-nums tracking-tight">{pct(score(t))}</p>
           </div>
-          <p className="text-sm tabular-nums">
-            <b>{pct(onTimeRate(t))}</b> on time<br />
-            <span className="text-muted">{t.on_time + t.made_up} of {t.expected} people-weeks signed</span>
-          </p>
+          {t.expected === 0 ? (
+            <p className="max-w-[16rem] text-sm text-muted">Scores start once your first full week is over.</p>
+          ) : (
+            <p className="text-sm tabular-nums">
+              <b>{pct(onTimeRate(t))}</b> on time<br />
+              <span className="text-muted">{t.on_time + t.made_up} of {t.expected} weekly sign-ins done</span>
+            </p>
+          )}
         </div>
         {change && (
           <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5 text-sm tabular-nums">
@@ -207,7 +211,7 @@ function Reports({ m }: { m: Membership }) {
         )}
         <div className={`rounded-lg border p-3 text-sm tabular-nums ${t.open ? "border-brand bg-surface" : "border-line bg-surface"}`}>
           <p className="font-display text-xs font-semibold text-muted">Can still be made up</p>
-          <p className="mt-1"><b className="text-2xl">{t.open}</b> people-weeks{t.missed ? <> · <b className="text-warn-text">{t.missed}</b> missed for good</> : null}</p>
+          <p className="mt-1"><b className="text-2xl">{t.open}</b> missed sign-ins{t.missed ? <> · <b className="text-warn-text">{t.missed}</b> missed for good</> : null}</p>
           {t.open > 0 && <Link href="/" className="text-sm font-semibold text-brand-text underline underline-offset-2">Make up from Home</Link>}
         </div>
       </div>
