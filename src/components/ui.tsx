@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
 import { canAdmin, canPresent, canReport, isStaff } from "@/lib/data/types";
 import { pending, onOutboxChange } from "@/lib/outbox";
+import { BRAND } from "@/content/brand";
 
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" };
 
@@ -118,12 +119,13 @@ export function ErrorNotice({ what, detail, onRetry }: { what: string; detail: s
   );
 }
 
-/** The app mark: a check in a brand-colored rounded square. */
+/** The app mark (PLACEHOLDER until the real logo): a keel under a level line, in the brand color. See src/content/brand.ts. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
     <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[8px] bg-brand text-brand-ink" style={{ width: size, height: size }}>
-      <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M5 12.5l4.5 4.5L19 7.5" />
+      <svg width={size * 0.64} height={size * 0.64} viewBox="0 0 24 24" fill="currentColor">
+        <rect x="3" y="6" width="18" height="2.6" rx="1.3" />
+        <path d="M6.5 10.5h11l-4 8.2a1.7 1.7 0 0 1-3 0z" />
       </svg>
     </span>
   );
@@ -135,7 +137,7 @@ export function Mark({ size = 30 }: { size?: number }) {
  */
 export function Shell({ children, nav, tabs = true, lockHeader = false }: { children: React.ReactNode; nav?: React.ReactNode; tabs?: boolean; lockHeader?: boolean }) {
   const s = useSession();
-  const name = s.current?.company.name ?? "Toolbox Talks";
+  const name = s.current?.company.name ?? BRAND.name;
   return (
     <div className={`mx-auto max-w-xl px-4 ${tabs ? "pb-28" : "pb-10"}`}>
       <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-line/60 bg-bg/80 px-5 py-3 backdrop-blur-xl backdrop-saturate-[1.8]">

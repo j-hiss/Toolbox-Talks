@@ -7,10 +7,11 @@ import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { BRAND } from "@/content/brand";
 
 export const metadata: Metadata = {
-  title: "Toolbox Talks",
-  description: "Weekly safety talks, signed and on record.",
+  title: BRAND.name,
+  description: BRAND.tagline,
 };
 
 export const viewport: Viewport = {

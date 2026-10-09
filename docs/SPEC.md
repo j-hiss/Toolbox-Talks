@@ -445,3 +445,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Safety profile:** the training element adds "Training cards entered by the company, as of today: N current,
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 
+## Product name (placeholder, 2026-10-09)
+- Working name **Keel** with a placeholder mark (a keel under a level line), set in one place:
+  `src/content/brand.ts` (plus `appName` in `capacitor.config.ts`). "Toolbox Talks" is already another App Store
+  app and reads as construction-only. Shortlist and design directions: the Look and Name Board artifact. Final name
+  waits on Joe's pick and a trademark search; the real logo and app icon come from a human designer.
+

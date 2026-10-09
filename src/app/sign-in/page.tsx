@@ -2,12 +2,13 @@
 
 // Sign in by emailed 6-digit code. No passwords, and no links to tap, so it works the same in a browser and inside
 // the iPhone/Android apps. Crew members never sign in; they sign on the presenter's phone.
+import { BRAND } from "@/content/brand";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/lib/session";
 import { NotConfigured } from "@/components/Guard";
-import { Button, Eyebrow, Field, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, Eyebrow, Field, Mark, Notice, Shell, Title, inputClass } from "@/components/ui";
 
 export default function SignIn() {
   const s = useSession();
@@ -50,6 +51,7 @@ export default function SignIn() {
 
   return (
     <Shell tabs={false}>
+      <div className="mb-6 flex items-center gap-2.5"><Mark size={36} /><span className="text-[22px] font-bold tracking-[-0.02em]">{BRAND.name}</span></div>
       <Eyebrow>Sign in</Eyebrow>
       <Title>{step === "email" ? "Get a sign-in code" : "Enter your code"}</Title>
 

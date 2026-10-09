@@ -63,6 +63,7 @@ point the row at the real file and keep the prototype line as its origin.
 |---|---|---|
 | `TALKS` | `src/content/talks.ts` | The talk library, English + Spanish (draft). See the TALKS row under Content for counts |
 | `CERT_TYPES` · `certTypeName` | `src/content/certTypes.ts` | Training card types; rule notes only where checked (reuses `REPEAT_NOTES`) |
+| `BRAND` | `src/content/brand.ts` | **The** product name and tagline (placeholder "Keel"); `Mark` in `src/components/ui.tsx` is the placeholder logo. Rename here only |
 | `STARTER_TITLES` · `missingStarterTitles` | `src/content/jobTitles.ts` | Starter job titles per industry (which give talks); added when a company is created and offered again in Admin → Job titles |
 
 ## Data and access (Supabase)
