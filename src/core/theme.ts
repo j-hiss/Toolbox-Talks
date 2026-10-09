@@ -1,9 +1,10 @@
 // A company's colors. Pure logic: which colors can be set, the default look, readable text on each color,
 // and plain-language warnings when a choice makes something hard to read or easy to confuse.
 //
-// The default ("Signal") follows the safety colors used on signs and tags (ANSI Z535 in the US, ISO 3864
-// worldwide): blue for notice, orange for act-now, green for safe/done, yellow for caution, red for danger.
-// Every color can be changed per company; the warnings say when a change hurts readability or meaning.
+// The default ("Ledger") reads like a record book, not a sign: deep ink-blue, cool paper, muted status colors, so it
+// fits any workplace (hospital, kitchen, jobsite, shop floor). "Signal" keeps the safety-sign colors (ANSI Z535 in
+// the US, ISO 3864 worldwide) as a preset. Every color can be changed per company; the warnings say when a change
+// hurts readability or meaning.
 
 export const THEME_ROLES = [
   { id: "brand", label: "Brand", hint: "Header, week card, links, selected tab" },
@@ -19,24 +20,29 @@ export const THEME_ROLES = [
 export type ThemeRole = (typeof THEME_ROLES)[number]["id"];
 export type Theme = Record<ThemeRole, string>;
 
-/** The default look (C4 · Signal). */
+/** The default look ("Ledger"). */
 export const DEFAULT_THEME: Theme = {
-  brand: "#0B4EA2",
-  action: "#C8410C",
-  done: "#00843D",
-  caution: "#F5B700",
-  danger: "#C8102E", // ANSI safety red
-  bg: "#EEF1F5",
+  brand: "#1E3A5F",
+  action: "#1E3A5F",
+  done: "#2C7A51",
+  caution: "#C58B14",
+  danger: "#B42318",
+  bg: "#F3F4F2",
   surface: "#FFFFFF",
-  text: "#14202E",
+  text: "#18212C",
+};
+
+/** The safety-sign colors (the look before 2026-10-09). */
+const SIGNAL: Theme = {
+  brand: "#0B4EA2", action: "#C8410C", done: "#00843D", caution: "#F5B700", danger: "#C8102E", bg: "#EEF1F5", surface: "#FFFFFF", text: "#14202E",
 };
 
 /** Starting points in Admin → Brand. Each passes every check in themeWarnings. */
 export const THEME_PRESETS: { id: string; name: string; theme: Theme }[] = [
-  { id: "signal", name: "Signal", theme: DEFAULT_THEME },
-  { id: "harbor", name: "Harbor", theme: { ...DEFAULT_THEME, brand: "#0F6A6E", action: "#D2492F", done: "#1E8A5A", danger: "#9F1239", bg: "#EDF1F1", text: "#15232A" } },
-  { id: "cobalt", name: "Cobalt", theme: { ...DEFAULT_THEME, brand: "#2F4FE0", action: "#2F4FE0", bg: "#F1F2F6", text: "#181B2A" } },
-  { id: "graphite", name: "Graphite", theme: { ...DEFAULT_THEME, brand: "#1F2933", action: "#C8410C", bg: "#F2F2F0", text: "#1F2933" } },
+  { id: "ledger", name: "Ledger", theme: DEFAULT_THEME },
+  { id: "signal", name: "Signal", theme: SIGNAL },
+  { id: "harbor", name: "Harbor", theme: { ...SIGNAL, brand: "#0F6A6E", action: "#D2492F", done: "#1E8A5A", danger: "#9F1239", bg: "#EDF1F1", text: "#15232A" } },
+  { id: "graphite", name: "Graphite", theme: { ...DEFAULT_THEME, brand: "#2B2F36", action: "#2B2F36", bg: "#F2F2F0", text: "#1F2329" } },
 ];
 
 const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
@@ -121,7 +127,7 @@ export function derived(t: Theme) {
     dangerInk: inkOn(t.danger),
     doneBg: mix(t.done, t.surface, 0.13),
     doneText: mix(t.done, t.text, 0.75),
-    cautionBg: mix(t.caution, t.surface, 0.2),
+    cautionBg: mix(t.caution, t.surface, 0.13),
     cautionText: mix(t.caution, t.text, 0.35),
     dangerBg: mix(t.danger, t.surface, 0.11),
   };

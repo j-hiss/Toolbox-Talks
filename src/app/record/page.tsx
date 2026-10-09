@@ -114,7 +114,7 @@ function RecordView({ m }: { m: Membership }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={a.signature} alt={`Signature of ${a.name}`} className="h-12 w-32 rounded bg-white object-contain" />
             ) : (
-              <span className={`rounded px-2 py-0.5 font-display text-xs font-semibold ${STATUS_CHIP[a.status]}`}>{STATUS_LABEL[a.status]}</span>
+              <span className={`rounded px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[a.status]}`}>{STATUS_LABEL[a.status]}</span>
             )}
           </li>
         ))}
@@ -127,7 +127,7 @@ function RecordView({ m }: { m: Membership }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={rec.presenter_signature} alt={`Signature of ${rec.presenter_name}`} className="h-12 w-32 rounded bg-white object-contain" />
         ) : (
-          <span className={`rounded px-2 py-0.5 font-display text-xs font-semibold ${STATUS_CHIP.not_signed}`}>Not signed</span>
+          <span className={`rounded px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP.not_signed}`}>Not signed</span>
         )}
       </div>
 

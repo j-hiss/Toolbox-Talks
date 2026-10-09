@@ -1,31 +1,33 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. The look is "Signal": the safety colors on signs and tags (ANSI Z535 / ISO 3864).
+ * Design tokens. The default look is "Ledger": a record book rather than a safety sign, so it sits as well in a
+ * hospital or a restaurant as on a jobsite or a shop floor. Cool paper, deep ink-blue, muted status colors that stay
+ * readable outdoors, a serif for titles. "Signal" (the ANSI Z535 sign colors) is still a preset in Admin → Brand.
  * A company can change any of the eight inputs (--t-*) from Admin → Brand; src/core/theme.ts sets them and
  * checks readability. Everything else is mixed from them here, so dark mode only swaps background, cards and text.
  */
 :root {
-  --brand: var(--t-brand, #0b4ea2);
+  --brand: var(--t-brand, #1e3a5f);
   --brand-ink: var(--t-brand-ink, #ffffff);
-  --action: var(--t-action, #c8410c);
+  --action: var(--t-action, #1e3a5f);
   --action-ink: var(--t-action-ink, #ffffff);
-  --ok: var(--t-done, #00843d);
+  --ok: var(--t-done, #2c7a51);
   --ok-ink: var(--t-done-ink, #ffffff);
-  --caution: var(--t-caution, #f5b700);
-  --warn: var(--t-danger, #c8102e);
+  --caution: var(--t-caution, #c58b14);
+  --warn: var(--t-danger, #b42318);
   --warn-ink: var(--t-danger-ink, #ffffff);
-  --bg: var(--t-bg, #eef1f5);
+  --bg: var(--t-bg, #f3f4f2);
   --surface: var(--t-surface, #ffffff);
-  --fg: var(--t-text, #14202e);
+  --fg: var(--t-text, #18212c);
 
   --muted: color-mix(in srgb, var(--fg) 68%, var(--surface));
-  --line: color-mix(in srgb, var(--fg) 13%, var(--surface));
+  --line: color-mix(in srgb, var(--fg) 11%, var(--surface));
   --brand-soft: color-mix(in srgb, var(--brand) 11%, var(--surface));
   --brand-text: var(--brand);
   --ok-bg: color-mix(in srgb, var(--ok) 13%, var(--surface));
   --ok-text: color-mix(in srgb, var(--ok) 75%, var(--fg));
-  --caution-bg: color-mix(in srgb, var(--caution) 20%, var(--surface));
+  --caution-bg: color-mix(in srgb, var(--caution) 13%, var(--surface));
   --caution-text: color-mix(in srgb, var(--caution) 35%, var(--fg));
   --warn-bg: color-mix(in srgb, var(--warn) 11%, var(--surface));
   --warn-text: var(--warn);
@@ -42,12 +44,18 @@
 /* Dark: own background, cards and text; the company's colors stay, lightened where they're used as text. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0e131a;
-    --surface: #18202a;
-    --fg: #e8edf3;
-    --brand-text: color-mix(in srgb, var(--brand) 55%, #ffffff);
+    --bg: #0f1419;
+    --surface: #181f27;
+    --fg: #e6eaee;
+    /* Deep brand and button colors would sink into a dark background: lift them toward white and put dark text on
+       them. Works for any company color, since half-white always takes dark text. */
+    --brand: color-mix(in srgb, var(--t-brand, #1e3a5f) 48%, #ffffff);
+    --brand-ink: #0f1419;
+    --action: color-mix(in srgb, var(--t-action, #1e3a5f) 48%, #ffffff);
+    --action-ink: #0f1419;
+    --brand-text: var(--brand);
     --warn-text: color-mix(in srgb, var(--warn) 60%, #ffffff);
-    --brand-soft: color-mix(in srgb, var(--brand) 26%, var(--surface));
+    --brand-soft: color-mix(in srgb, var(--brand) 16%, var(--surface));
     --ok-bg: color-mix(in srgb, var(--ok) 22%, var(--surface));
     --caution-bg: color-mix(in srgb, var(--caution) 18%, var(--surface));
     --warn-bg: color-mix(in srgb, var(--warn) 22%, var(--surface));
@@ -78,14 +86,14 @@
   --color-warn-ink: var(--warn-ink);
   --color-warn-bg: var(--warn-bg);
   --color-warn-text: var(--warn-text);
-  --font-display: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
-  --font-sans: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
-  /* Softer corners across the app: chips 8px, inputs 12px, buttons and cards 16px, big cards 24px. */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.5rem;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
+  /* Restrained corners: chips 6px, inputs and buttons 10px, cards 12-14px, sheets 18px. */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
 }
 
 html,
@@ -93,6 +101,9 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "tnum" 0;
 }
 
 /* Keep content clear of the phone's notch and home bar inside the iPhone/Android apps. */

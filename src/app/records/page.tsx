@@ -60,7 +60,7 @@ function Records({ m }: { m: Membership }) {
       <div className="mt-4 flex gap-1.5" role="tablist">
         {(["talks", "issues"] as const).map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => { window.location.hash = v === "issues" ? "issues" : ""; }}
-            className={`min-h-10 flex-1 rounded-full border px-3.5 font-display text-base font-semibold ${view === v ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
+            className={`min-h-10 flex-1 rounded-md border px-3.5 text-base font-semibold ${view === v ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
             {v === "talks" ? "Talks" : "Issues"}
           </button>
         ))}
@@ -117,7 +117,7 @@ function Records({ m }: { m: Membership }) {
             const len = first.period_weeks ?? 1;
             return (
               <section key={k} className="mt-5">
-                <h3 className="sticky top-[3.6rem] z-10 -mx-4 bg-bg/95 px-4 py-1.5 font-display text-sm font-semibold text-muted backdrop-blur">
+                <h3 className="sticky top-[3.6rem] z-10 -mx-4 bg-bg/95 px-4 py-1.5 text-sm font-semibold text-muted backdrop-blur">
                   {wk ? `${weekNumbers({ n: wk, weeks: len })} · ` : ""}{periodLabel(monday, len)} <span className="font-sans font-normal normal-case tracking-normal">· {list.length} talk{list.length === 1 ? "" : "s"}</span>
                 </h3>
                 <ul className="mt-1 flex flex-col gap-2">

@@ -105,7 +105,7 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
               <li key={r.line} className={`px-3 py-2 ${r.action === "skip" ? "bg-warn-bg" : ""}`}>
                 <div className="flex items-baseline justify-between gap-2">
                   <b className="truncate">{r.name || "(no name)"}</b>
-                  <span className={`shrink-0 font-display text-xs font-semibold ${r.action === "skip" ? "text-warn-text" : r.action === "update" ? "text-muted" : "text-ok-text"}`}>
+                  <span className={`shrink-0 text-xs font-semibold ${r.action === "skip" ? "text-warn-text" : r.action === "update" ? "text-muted" : "text-ok-text"}`}>
                     {r.action === "add" ? "Add" : r.action === "update" ? "Update" : "Skip"} · row {r.line}
                   </span>
                 </div>

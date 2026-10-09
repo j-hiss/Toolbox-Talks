@@ -157,7 +157,7 @@ function Steps({ n, label }: { n: 1 | 2 | 3; label: string }) {
       <div className="flex gap-1.5" aria-hidden>
         {[1, 2, 3].map((i) => <span key={i} className={`h-1.5 flex-1 rounded ${i <= n ? "bg-brand" : "bg-line"}`} />)}
       </div>
-      <p className="mt-3 font-display text-sm font-semibold text-muted">Step {n} of 3 · {label}</p>
+      <p className="mt-3 text-sm font-semibold text-muted">Step {n} of 3 · {label}</p>
     </div>
   );
 }
@@ -236,7 +236,7 @@ function MakeupPick({ weeks, draft, update, open }: {
             key={r}
             aria-pressed={draft.makeupPick === r}
             onClick={() => { setMsg(null); update({ makeupPick: r }); }}
-            className={`min-h-11 rounded-full border px-3.5 text-sm font-semibold ${draft.makeupPick === r ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-md border px-3.5 text-sm font-semibold ${draft.makeupPick === r ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
           >
             {r}
           </button>
@@ -361,7 +361,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
             key={l.id}
             aria-pressed={draft.lang === l.id}
             onClick={() => { stopRef.current?.(); setLine(null); update({ lang: l.id as LanguageId }); }}
-            className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-md border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
           >
             {l.label}
           </button>
@@ -567,7 +567,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
                 <label className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 ${isHere ? "border-line bg-surface" : "border-warn bg-warn-bg"}`}>
                   <input type="checkbox" className="h-6 w-6 accent-[var(--brand)]" checked={isHere} onChange={(e) => update({ present: { ...draft.present, [r.key]: e.target.checked } })} />
                   <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.personId ? [r.role, r.teamName].filter(Boolean).join(" · ") : ["Walk-in", r.company].filter(Boolean).join(" · ")}</small></span>
-                  {!isHere && <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Absent</span>}
+                  {!isHere && <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">Absent</span>}
                 </label>
               </li>
             );
@@ -765,7 +765,7 @@ function Sign({
             <li key={r.key} className="flex items-center gap-3 rounded-lg border border-warn bg-warn-bg p-3">
               <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.role}</small></span>
               <button className="min-h-11 rounded-md border-2 border-brand bg-surface px-3 text-sm font-semibold text-brand-text" onClick={() => update({ present: { ...draft.present, [r.key]: true } })}>Mark here</button>
-              <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">Absent</span>
+              <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">Absent</span>
             </li>
           ))}
         </ul>
@@ -820,7 +820,7 @@ function Sign({
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <p className="font-display text-sm font-semibold text-muted tabular-nums">Step 3 of 3 · Signing {idx + 1} of {turns.length}</p>
+        <p className="text-sm font-semibold text-muted tabular-nums">Step 3 of 3 · Signing {idx + 1} of {turns.length}</p>
         <button className="min-h-11 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => go(turns.length)}>Review all</button>
       </div>
       <div className="mt-2 flex gap-1" aria-hidden>
@@ -993,7 +993,7 @@ function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
       <p className="mt-4 tabular-nums">
         {signedSummary(c)} · {done.presenterSigned ? "presenter signed" : "presenter not signed"}
         {(c.flagged > 0 || !done.presenterSigned) && (
-          <span className="ml-2 rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">
+          <span className="ml-2 rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">
             {c.flagged + (done.presenterSigned ? 0 : 1)} flagged
           </span>
         )}

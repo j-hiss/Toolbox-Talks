@@ -78,7 +78,7 @@ export function SafetyLog({ company, state, jobsites, people }: Props) {
       <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Show">
         {[{ id: "all" as const, name: "All" }, ...EVENT_KINDS].map((k) => (
           <button key={k.id} aria-pressed={filter === k.id} onClick={() => setFilter(k.id)}
-            className={`min-h-9 rounded-full border px-3 text-sm font-semibold ${filter === k.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
+            className={`min-h-9 rounded-md border px-3 text-sm font-semibold ${filter === k.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
             {k.name}
           </button>
         ))}

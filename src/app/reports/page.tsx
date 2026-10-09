@@ -213,8 +213,8 @@ function Reports({ m }: { m: Membership }) {
       <section className="mt-5 rounded-xl bg-surface p-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="font-display text-sm font-semibold text-muted">Sign-in rate</p>
-            <p className="font-display text-6xl font-semibold leading-none tabular-nums tracking-tight">{pct(score(t))}</p>
+            <p className="text-sm font-semibold text-muted">Sign-in rate</p>
+            <p className="text-6xl font-semibold leading-none tabular-nums tracking-tight">{pct(score(t))}</p>
           </div>
           {t.expected === 0 ? (
             <p className="max-w-[16rem] text-sm text-muted">Scores start once your first full week is over.</p>
@@ -245,12 +245,12 @@ function Reports({ m }: { m: Membership }) {
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {current && (
           <div className="rounded-xl bg-surface p-3 text-sm tabular-nums">
-            <p className="font-display text-xs font-semibold text-muted">{current.weeks > 1 ? "This talk period so far" : "This week so far"}</p>
+            <p className="text-xs font-semibold text-muted">{current.weeks > 1 ? "This talk period so far" : "This week so far"}</p>
             <p className="mt-1"><b className="text-2xl">{current.tally.on_time}</b> of {current.tally.expected} signed</p>
           </div>
         )}
         <div className={`rounded-lg border p-3 text-sm tabular-nums ${t.open ? "border-brand bg-surface" : "border-line bg-surface"}`}>
-          <p className="font-display text-xs font-semibold text-muted">Can still be made up</p>
+          <p className="text-xs font-semibold text-muted">Can still be made up</p>
           <p className="mt-1"><b className="text-2xl">{t.open}</b> missed sign-ins{t.missed ? <> · <b className="text-warn-text">{t.missed}</b> missed for good</> : null}</p>
           {t.open > 0 && <Link href="/" className="text-sm font-semibold text-brand-text underline underline-offset-2">Make up from Home</Link>}
         </div>
@@ -412,7 +412,7 @@ function Reports({ m }: { m: Membership }) {
       </ul>
       <div className="mt-3 hidden overflow-x-auto rounded-xl bg-surface sm:block">
         <table className="w-full text-sm tabular-nums">
-          <thead className="text-left font-display text-xs text-muted">
+          <thead className="text-left text-xs text-muted">
             <tr><th className="p-2">Name</th><th className="p-2 text-right">On time</th><th className="p-2 text-right">Made up</th><th className="p-2 text-right">Open</th><th className="p-2 text-right">Missed</th><th className="p-2 text-right">Score</th></tr>
           </thead>
           <tbody>
@@ -444,7 +444,7 @@ function Reports({ m }: { m: Membership }) {
             <li key={`${r.id}-${i}`}>
               <Link href={`/record/#${r.id}`} className="flex items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2 text-sm">
                 <span className="min-w-0"><b>{a.name}</b> <small className="text-muted">{short(r.heldAt)} · {r.title}{r.teamName ? ` · ${r.teamName}` : ""}</small></span>
-                <span className="rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">{STATUS_LABEL[a.status]}</span>
+                <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">{STATUS_LABEL[a.status]}</span>
               </Link>
             </li>
           ))}
@@ -511,7 +511,7 @@ function Fold({ title, aside, children }: { title: string; aside?: string; child
   return (
     <details className="group mt-6 rounded-xl border border-line px-3 pb-1">
       <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        <h2 className="font-display text-base font-semibold">{title}</h2>
+        <h2 className="text-base font-semibold">{title}</h2>
         <span className="flex items-center gap-2 text-sm font-semibold text-muted">
           {aside}
           <span aria-hidden className="transition group-open:rotate-180">▾</span>

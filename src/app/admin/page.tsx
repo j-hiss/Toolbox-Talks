@@ -116,14 +116,14 @@ function Admin({ m }: { m: Membership }) {
       <div role="tablist" aria-label="Admin sections" className="mt-4 flex flex-col gap-2">
         {TAB_GROUPS.map((g) => (
           <div key={g.id} className="flex flex-wrap items-center gap-1.5">
-            <span className="w-full text-xs font-semibold uppercase tracking-wide text-muted">{g.label}</span>
+            <span className="w-full text-sm font-medium text-muted">{g.label}</span>
             {TABS.filter((t) => t.group === g.id).map((t) => (
               <button
                 key={t.id}
                 role="tab"
                 aria-selected={tab === t.id}
                 onClick={() => setTab(t.id)}
-                className={`min-h-11 rounded-full border px-3.5 font-display text-base font-semibold ${tab === t.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-fg"}`}
+                className={`min-h-11 rounded-md border px-3.5 text-[15px] font-semibold ${tab === t.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-fg"}`}
               >
                 {t.label}
               </button>
@@ -563,7 +563,7 @@ function KindToggle({ value, onChange }: { value: Jobsite["kind"]; onChange: (k:
       type="button"
       aria-pressed={value === k}
       onClick={() => value !== k && onChange(k)}
-      className={`rounded-full border px-3 py-1 text-sm font-semibold ${value === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
+      className={`rounded-md border px-3 py-1 text-sm font-semibold ${value === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
     >
       {label}
     </button>
@@ -648,8 +648,8 @@ function PlanTab({ m }: { m: Membership }) {
                 <b>{weekNumbers(w)} · {periodLabel(w.monday, w.weeks)}</b>
                 <span className="flex gap-1.5">
                   {isNow && <span className="rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{w.weeks > 1 ? "Now" : "This week"}</span>}
-                  {locked && <span className="rounded bg-fg px-2 py-0.5 font-display text-xs font-semibold text-bg">Given · locked</span>}
-                  {!locked && w.changed && <span className="rounded border border-line px-2 py-0.5 font-display text-xs font-semibold">Swapped</span>}
+                  {locked && <span className="rounded bg-fg px-2 py-0.5 text-xs font-semibold text-bg">Given · locked</span>}
+                  {!locked && w.changed && <span className="rounded border border-line px-2 py-0.5 text-xs font-semibold">Swapped</span>}
                 </span>
               </div>
               {locked ? (

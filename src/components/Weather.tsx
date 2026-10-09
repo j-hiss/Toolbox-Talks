@@ -184,7 +184,7 @@ function Hero({ c, ctx, busy, old, onRefresh, onOpen, tall }: { c: ConditionsChe
           </button>
         </div>
         <div>
-          <p className={`font-display font-medium leading-none tracking-tight tabular-nums ${tall ? "text-[84px]" : "text-[64px]"}`}>{head.tempF != null ? `${head.tempF}°` : "–"}</p>
+          <p className={`font-medium leading-none tracking-tight tabular-nums ${tall ? "text-[84px]" : "text-[64px]"}`}>{head.tempF != null ? `${head.tempF}°` : "–"}</p>
           <p className="mt-1 text-[15px] font-medium">{head.label || SKY_WORDS[head.sky]}</p>
           <p className="text-sm opacity-85">
             {head.highF != null && head.lowF != null ? `${c.day === "tomorrow" ? "Work day" : "Rest of the work day"}: high ${head.highF}°, low ${head.lowF}°` : ""}
@@ -259,7 +259,7 @@ function Stat({ label, value, note, hot }: { label: string; value: string; note:
   return (
     <div className="border-r border-line px-3 py-2.5 last:border-r-0">
       <dt className="text-xs text-muted">{label}</dt>
-      <dd className={`font-display text-xl font-medium tracking-tight tabular-nums ${hot ? "text-caution-text" : ""}`}>{value}</dd>
+      <dd className={`text-xl font-medium tracking-tight tabular-nums ${hot ? "text-caution-text" : ""}`}>{value}</dd>
       <dd className="truncate text-xs text-muted">{note}</dd>
     </div>
   );
@@ -311,19 +311,19 @@ function WeatherFull({ c, ctx, point, setting, busy, onRefresh, onClose }: { c: 
           <HourStrip hours={c.hours} sun={ctx.sun} firstIsNow={c.day === "today"} />
         </div>
 
-        <h2 className="mt-6 mb-2 px-1 font-display text-base font-semibold">Radar</h2>
+        <h2 className="mt-6 mb-2 px-1 text-base font-semibold">Radar</h2>
         <div className="overflow-hidden rounded-2xl bg-surface pt-3">
           <RadarMap latitude={point.latitude} longitude={point.longitude} height={340} areas={ctx.areas} />
         </div>
 
-        <h2 className="mt-6 mb-2 px-1 font-display text-base font-semibold">The work day</h2>
+        <h2 className="mt-6 mb-2 px-1 text-base font-semibold">The work day</h2>
         <div className="overflow-hidden rounded-2xl bg-surface">
           <Stats c={c} />
           {ctx.sun && (
             <div className="grid grid-cols-3 border-t border-line text-sm">
-              <div className="border-r border-line px-3 py-2.5"><p className="text-xs text-muted">Sunrise</p><p className="font-display text-xl font-medium tabular-nums">{clock(ctx.sun.sunrise)}</p></div>
-              <div className="border-r border-line px-3 py-2.5"><p className="text-xs text-muted">Sunset</p><p className="font-display text-xl font-medium tabular-nums">{clock(ctx.sun.sunset)}</p></div>
-              <div className="px-3 py-2.5"><p className="text-xs text-muted">Daylight</p><p className="font-display text-xl font-medium tabular-nums">{daylight != null ? `${Math.floor(daylight / 60)}h ${daylight % 60}m` : "–"}</p></div>
+              <div className="border-r border-line px-3 py-2.5"><p className="text-xs text-muted">Sunrise</p><p className="text-xl font-medium tabular-nums">{clock(ctx.sun.sunrise)}</p></div>
+              <div className="border-r border-line px-3 py-2.5"><p className="text-xs text-muted">Sunset</p><p className="text-xl font-medium tabular-nums">{clock(ctx.sun.sunset)}</p></div>
+              <div className="px-3 py-2.5"><p className="text-xs text-muted">Daylight</p><p className="text-xl font-medium tabular-nums">{daylight != null ? `${Math.floor(daylight / 60)}h ${daylight % 60}m` : "–"}</p></div>
             </div>
           )}
           <div className="pt-3"><Notes c={c} setting={setting} /></div>

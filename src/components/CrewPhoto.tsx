@@ -39,7 +39,7 @@ export function CrewPhoto({ draft, update, kind = "photo" }: { draft: TalkDraft;
   return (
     <section className="mt-6">
       <div className="flex items-baseline justify-between gap-3 px-1">
-        <h2 className="font-display text-base font-semibold">{k.heading}</h2>
+        <h2 className="text-base font-semibold">{k.heading}</h2>
         <span className="text-sm text-muted">Optional</span>
       </div>
       <input ref={input} type="file" accept="image/*" capture="environment" className="sr-only" aria-label={k.label} onChange={(e) => take(e.target.files?.[0])} />

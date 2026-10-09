@@ -34,7 +34,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
     <>
       <div className="mb-3">
         <div className="flex gap-1.5" aria-hidden>{[1, 2, 3].map((i) => <span key={i} className={`h-1.5 flex-1 rounded ${i <= 1 ? "bg-brand" : "bg-line"}`} />)}</div>
-        <p className="mt-3 font-display text-sm font-semibold text-muted">Step 1 of 3 · Plan the day</p>
+        <p className="mt-3 text-sm font-semibold text-muted">Step 1 of 3 · Plan the day</p>
       </div>
       <Eyebrow>Daily pre-task plan{site ? ` · ${site.name}` : ""}</Eyebrow>
       <Title>Plan today with the team</Title>
@@ -80,7 +80,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
         <p className="mt-1 text-sm text-muted">Starting points. Edit the control to fit today&apos;s job.</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {HAZARD_SUGGESTIONS.filter((s) => !plan.hazards.some((h) => h.hazard === s.hazard)).map((s) => (
-            <button key={s.hazard} className="min-h-11 rounded-full border border-line px-3 text-sm" onClick={() => set({ hazards: [...plan.hazards, { ...s }] })}>+ {s.hazard}</button>
+            <button key={s.hazard} className="min-h-11 rounded-md border border-line px-3 text-sm" onClick={() => set({ hazards: [...plan.hazards, { ...s }] })}>+ {s.hazard}</button>
           ))}
         </div>
       </details>
@@ -99,7 +99,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {PPE_CHOICES.map((p) => (
           <button key={p} aria-pressed={plan.ppe.includes(p)} onClick={() => set({ ppe: toggle(plan.ppe, p) })}
-            className={`min-h-11 rounded-full border px-3 text-sm font-semibold ${plan.ppe.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
+            className={`min-h-11 rounded-md border px-3 text-sm font-semibold ${plan.ppe.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
         ))}
       </div>
 
@@ -107,7 +107,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {PERMIT_CHOICES.map((p) => (
           <button key={p} aria-pressed={plan.permits.includes(p)} onClick={() => set({ permits: toggle(plan.permits, p) })}
-            className={`min-h-11 rounded-full border px-3 text-sm font-semibold ${plan.permits.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
+            className={`min-h-11 rounded-md border px-3 text-sm font-semibold ${plan.permits.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
         ))}
       </div>
 
@@ -127,9 +127,9 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
                   <p>{x.reminder} <span className="text-muted">({x.cite})</span></p>
                   <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={`${x.name} today`}>
                     <button role="radio" aria-checked={a.answer === "done"} onClick={() => setEq(x.id, { ...a, answer: "done" })}
-                      className={`min-h-11 rounded-full border px-3 font-semibold ${a.answer === "done" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Checked</button>
+                      className={`min-h-11 rounded-md border px-3 font-semibold ${a.answer === "done" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Checked</button>
                     <button role="radio" aria-checked={a.answer === "na"} onClick={() => setEq(x.id, { ...a, answer: "na", by: "" })}
-                      className={`min-h-11 rounded-full border px-3 font-semibold ${a.answer === "na" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Not used today</button>
+                      className={`min-h-11 rounded-md border px-3 font-semibold ${a.answer === "na" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Not used today</button>
                   </div>
                   {a.answer === "done" && (
                     <input aria-label={`Who checked the ${x.name.toLowerCase()}`} placeholder="Checked by (name)" maxLength={120} className={inputClass} value={a.by} onChange={(e) => setEq(x.id, { ...a, by: e.target.value })} />
@@ -158,7 +158,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Language for the signing statement">
         {LANGUAGES.filter((l) => l.ready).map((l) => (
           <button key={l.id} aria-pressed={draft.lang === l.id} onClick={() => update({ lang: l.id as LanguageId })}
-            className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{l.label}</button>
+            className={`min-h-11 rounded-md border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{l.label}</button>
         ))}
       </div>
 

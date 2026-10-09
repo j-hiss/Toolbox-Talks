@@ -40,7 +40,7 @@ export function EmployeeHome({ m }: { m: Membership }) {
   return (
     <Shell>
       {s.memberships.length > 1 && (
-        <select aria-label="Company" className="rounded-full border border-line bg-surface px-3 py-1 text-sm font-semibold" value={co.id} onChange={(e) => s.setCurrent(e.target.value)}>
+        <select aria-label="Company" className="rounded-md border border-line bg-surface px-3 py-1 text-sm font-semibold" value={co.id} onChange={(e) => s.setCurrent(e.target.value)}>
           {s.memberships.map((x) => <option key={x.company.id} value={x.company.id}>{x.company.name}</option>)}
         </select>
       )}
@@ -63,7 +63,7 @@ export function EmployeeHome({ m }: { m: Membership }) {
                   <b className="block">{t.title}</b>
                   <small className="text-muted">{day(t.held_at)}{t.jobsite_name ? ` · ${t.jobsite_name}` : ""}</small>
                 </span>
-                <span className={`shrink-0 rounded px-2 py-0.5 font-display text-xs font-semibold ${STATUS[t.status].tone}`}>{STATUS[t.status].label}</span>
+                <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-semibold ${STATUS[t.status].tone}`}>{STATUS[t.status].label}</span>
               </li>
             ))}
           </ul>

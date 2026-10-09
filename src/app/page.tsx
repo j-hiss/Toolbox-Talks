@@ -80,15 +80,15 @@ function Home({ m }: { m: Membership }) {
         {s.memberships.length > 1 ? (
           <select
             aria-label="Company"
-            className="rounded-full border border-line bg-surface px-3 py-1 font-semibold"
+            className="rounded-md border border-line bg-surface px-3 py-1 font-semibold"
             value={co.id}
             onChange={(e) => s.setCurrent(e.target.value)}
           >
             {s.memberships.map((x) => <option key={x.company.id} value={x.company.id}>{x.company.name}</option>)}
           </select>
         ) : null}
-        <span className="rounded-full border border-line px-3 py-1 text-muted">{industry}</span>
-        <span className="rounded-full border border-line px-3 py-1 text-muted">{climate.state ? climate.label : "No ZIP set"}</span>
+        <span className="rounded-md border border-line px-3 py-1 text-muted">{industry}</span>
+        <span className="rounded-md border border-line px-3 py-1 text-muted">{climate.state ? climate.label : "No ZIP set"}</span>
       </div>
 
       {outbox.items.length > 0 && (
@@ -123,15 +123,19 @@ function Home({ m }: { m: Membership }) {
 
       {week && talk && text ? (
         <section className="mt-5">
-          <div className="overflow-hidden rounded-2xl bg-surface">
-            <div className="bg-brand px-5 pt-5 pb-4 text-brand-ink">
-              <p className="text-sm opacity-80">{weekNumbers(week)} of 52 · {periodLabel(week.monday, week.weeks)}</p>
-              <h1 className="mt-1.5 font-display text-[30px] font-semibold leading-[1.08] tracking-tight text-balance">{text.title}</h1>
-              <div className="mt-4 flex gap-0.5" aria-hidden>
-                <span className="h-1.5 rounded-full bg-current opacity-60" style={{ flex: week.n - 1 }} />
-                <span className="h-1.5 rounded-full bg-action" style={{ flex: week.weeks }} />
-                <span className="h-1.5 rounded-full bg-current opacity-20" style={{ flex: 52 - (week.n - 1) - week.weeks }} />
+          <div className="overflow-hidden rounded-xl border border-line bg-surface">
+            {/* The week as an entry in the year's record: where we are in the 52, then the talk's title. */}
+            <div className="border-b border-line px-5 pt-5 pb-4">
+              <p className="flex items-baseline justify-between gap-3 text-sm text-muted">
+                <span className="font-semibold text-brand-text">{weekNumbers(week)} <span className="font-normal text-muted">of 52</span></span>
+                <span className="tabular-nums">{periodLabel(week.monday, week.weeks)}</span>
+              </p>
+              <div className="mt-3 flex h-[3px] gap-px overflow-hidden rounded-full" aria-hidden>
+                <span className="bg-brand/45" style={{ flex: week.n - 1 }} />
+                <span className="bg-brand" style={{ flex: week.weeks }} />
+                <span className="bg-line" style={{ flex: 52 - (week.n - 1) - week.weeks }} />
               </div>
+              <h1 className="mt-4 font-display text-[31px] font-semibold leading-[1.12] tracking-[-0.015em] text-balance">{text.title}</h1>
             </div>
             <div className="px-5 pt-4 pb-5">
               <p className="leading-relaxed">{text.hook}</p>

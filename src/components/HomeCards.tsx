@@ -76,14 +76,14 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
     <section className="mt-3 rounded-2xl bg-surface p-4">
       <div className="flex items-baseline justify-between gap-2">
         <p className="text-sm text-muted">On staff who signed this {st.periodWeeks > 1 ? "talk period" : "week"}</p>
-        <p className="tabular-nums text-muted"><b className="font-display text-3xl font-medium tracking-tight text-fg">{st.thisWeek.signed}</b>/{st.thisWeek.expected}</p>
+        <p className="tabular-nums text-muted"><b className="text-3xl font-semibold tracking-[-0.02em] text-fg">{st.thisWeek.signed}</b>/{st.thisWeek.expected}</p>
       </div>
       {crews.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-1.5">
           {crews.map((c) => {
             const done = c.t!.on_time + c.t!.made_up >= c.t!.expected;
             return (
-              <li key={c.name} className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-sm tabular-nums ${done ? "border-transparent bg-ok-bg text-ok-text" : "border-line"}`}>
+              <li key={c.name} className={`flex items-center gap-1 rounded-md border px-2.5 py-1 text-sm tabular-nums ${done ? "border-transparent bg-ok-bg text-ok-text" : "border-line"}`}>
                 {done ? <span aria-hidden>✓</span> : null}
                 <b>{c.name}</b> <span className={done ? "" : "text-muted"}>{c.t!.on_time + c.t!.made_up}/{c.t!.expected}</span>
                 <span className="sr-only">{done ? "done" : "not done"}</span>
@@ -124,7 +124,7 @@ export function GettingStarted({ st }: { st: Status }) {
   // Below the week card, so Start stays near the top. Finished steps fold into the count.
   return (
     <section className="mt-3 rounded-2xl bg-surface p-4 ring-2 ring-brand">
-      <p className="font-display text-sm font-semibold text-muted">Getting started · {steps.length - left} of {steps.length} done</p>
+      <p className="text-sm font-semibold text-muted">Getting started · {steps.length - left} of {steps.length} done</p>
       <ol className="mt-2 flex flex-col">
         {steps.map((x, i) => (x.done ? null : (
           <li key={x.label}>

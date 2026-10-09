@@ -129,7 +129,7 @@ function Profile({ m }: { m: Membership }) {
           <GroupHeading>Month by month</GroupHeading>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm tabular-nums">
-              <thead><tr className="text-left text-xs uppercase text-muted"><th className="py-1 pr-2">Month</th><th className="pr-2">Weeks held</th><th className="pr-2">Talks</th><th className="pr-2">Sign-in</th><th>On time</th></tr></thead>
+              <thead><tr className="text-left text-xs font-medium text-muted"><th className="py-1 pr-2">Month</th><th className="pr-2">Weeks held</th><th className="pr-2">Talks</th><th className="pr-2">Sign-in</th><th>On time</th></tr></thead>
               <tbody>
                 {p.months.map((r) => (
                   <tr key={r.month} className="border-t border-line">
@@ -167,8 +167,8 @@ function Profile({ m }: { m: Membership }) {
 function Fig({ label, value, note, warn }: { label: string; value: string; note: string; warn?: boolean }) {
   return (
     <div className="rounded-lg border border-line bg-surface p-3">
-      <dt className="text-xs font-semibold uppercase text-muted">{label}</dt>
-      <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">{value}</dd>
+      <dt className="text-[13px] font-medium text-muted">{label}</dt>
+      <dd className="mt-1 text-2xl font-semibold tracking-[-0.01em] tabular-nums">{value}</dd>
       {note && <dd className={`text-xs ${warn ? "font-semibold text-warn" : "text-muted"}`}>{note}</dd>}
     </div>
   );

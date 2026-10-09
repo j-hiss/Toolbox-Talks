@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
-// Fonts are bundled with the app (no Google Fonts request) so it works on a jobsite with no signal.
-import "@fontsource/schibsted-grotesk/400.css";
-import "@fontsource/schibsted-grotesk/500.css";
-import "@fontsource/schibsted-grotesk/600.css";
-import "@fontsource/schibsted-grotesk/700.css";
+// Fonts are bundled with the app (no Google Fonts request) so it works with no signal. Public Sans for the interface
+// (plain, very legible, covers Vietnamese); Source Serif 4 for titles, the record-book voice of the app.
+import "@fontsource/public-sans/400.css";
+import "@fontsource/public-sans/500.css";
+import "@fontsource/public-sans/600.css";
+import "@fontsource/public-sans/700.css";
+import "@fontsource/source-serif-4/500.css";
+import "@fontsource/source-serif-4/600.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 
