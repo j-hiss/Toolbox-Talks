@@ -1,22 +1,20 @@
 /* The real app's styles and fonts, plus what an embedded preview needs. */
-@import "@fontsource/public-sans/400.css";
-@import "@fontsource/public-sans/500.css";
-@import "@fontsource/public-sans/600.css";
-@import "@fontsource/public-sans/700.css";
-@import "@fontsource/source-serif-4/500.css";
-@import "@fontsource/source-serif-4/600.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 @import "../src/app/globals.css";
 @source "../src";
 @source "./";
 
 /* The viewer can force light or dark; mirror the app's dark tokens (globals.css) for that case. */
 :root[data-theme="dark"] {
-  --bg: #0f1419;
-  --surface: #181f27;
-  --fg: #e6eaee;
-  --brand: color-mix(in srgb, var(--t-brand, #1e3a5f) 48%, #ffffff);
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --fg: #f5f5f7;
+  --brand: color-mix(in srgb, var(--t-brand, #0071e3) 65%, #ffffff);
   --brand-ink: #0f1419;
-  --action: color-mix(in srgb, var(--t-action, #1e3a5f) 48%, #ffffff);
+  --action: color-mix(in srgb, var(--t-action, #0071e3) 65%, #ffffff);
   --action-ink: #0f1419;
   --brand-text: var(--brand);
   --warn-text: color-mix(in srgb, var(--warn) 60%, #ffffff);
@@ -28,12 +26,12 @@
 }
 @media (prefers-color-scheme: dark) {
   :root[data-theme="light"] {
-    --bg: var(--t-bg, #f3f4f2);
+    --bg: var(--t-bg, #f5f5f7);
     --surface: var(--t-surface, #ffffff);
-    --fg: var(--t-text, #18212c);
-    --brand: var(--t-brand, #1e3a5f);
+    --fg: var(--t-text, #1d1d1f);
+    --brand: var(--t-brand, #0071e3);
     --brand-ink: var(--t-brand-ink, #ffffff);
-    --action: var(--t-action, #1e3a5f);
+    --action: var(--t-action, #0071e3);
     --action-ink: var(--t-action-ink, #ffffff);
     --brand-text: var(--brand);
     --warn-text: var(--warn);

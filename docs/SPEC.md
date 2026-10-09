@@ -143,16 +143,18 @@ customer #1, not a special case.
   - Accepts `.xlsx` and `.csv`.
 
 ## Look and company colors (built)
-- **Default look, "Ledger" (2026-10-09, Joe: "professional and high class", industry-neutral):** a record book, not
-  a safety sign, so it fits a hospital, a restaurant, a jobsite or a metal shop. Cool paper background, deep ink-blue
-  for the brand and main buttons, muted green only for done/signed, ochre only for caution, oxblood red only for
-  missed/not signed. Titles in Source Serif 4; everything else in Public Sans (both bundled, work offline; Public Sans
-  covers Vietnamese). Hairline borders, restrained corners, sentence case, no all-caps labels. Numbers stay in the
-  sans for clarity. Dark mode lifts the brand and button colors and puts dark text on them.
+- **Default look, "Clarity" (2026-10-09, Joe: "take a page out of Apple's branding"):** modeled on the patterns
+  measured on apple.com (light grey page #F5F5F7, near-black text #1D1D1F, white cards with an 18px radius and a soft
+  2px 4px 12px shadow, one blue accent #0071E3, pill buttons, a translucent blurred header and tab bar, bold tight
+  headlines). No Apple names, logos, images or fonts are copied: the interface uses the phone's own system font (San
+  Francisco on iPhone and Mac) and bundled Inter elsewhere (works offline, covers Vietnamese). Status colors are the
+  familiar phone ones, darkened to read outdoors: green done, orange caution, red missed. Segmented controls are a grey
+  track with the chosen segment raised in white. Dark mode: black page, #1C1C1E cards, brand and buttons lifted with
+  dark text on them. Industry-neutral: hospital, kitchen, jobsite, shop floor.
 - **Admin → Brand:** an admin can change any of the eight colors (brand, buttons, done, caution, missed, background,
-  cards, text) with a color picker or an exact hex code, or start from a preset (Ledger, Signal, Harbor, Graphite). Signal keeps the old safety-sign colors (ANSI Z535 / ISO 3864).
+  cards, text) with a color picker or an exact hex code, or start from a preset (Clarity, Ledger, Signal, Harbor, Graphite). Signal keeps the old safety-sign colors (ANSI Z535 / ISO 3864).
   The whole app changes live while trying colors; nothing is saved until "Save colors"; leaving the tab puts the
-  saved colors back. "Back to default" returns to Ledger.
+  saved colors back. "Back to default" returns to Clarity.
 - **Checks, not blocks:** plain-language warnings when a choice makes text hard to read (WCAG contrast) or makes
   two meanings look alike (done vs missed, buttons vs missed). They warn; the admin can still save.
 - Saved per company (`companies.theme`, only the changed colors), seen by everyone in that company, remembered on

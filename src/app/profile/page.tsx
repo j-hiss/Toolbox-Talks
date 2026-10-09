@@ -24,7 +24,7 @@ import type { Membership } from "@/lib/data/types";
 import { usePlan } from "@/lib/usePlan";
 import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
-import { Button, ErrorNotice, Eyebrow, Field, FileButton, GroupHeading, Loading, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ErrorNotice, Eyebrow, Field, FileButton, GroupHeading, Loading, Notice, Shell, Title, inputClass, segmentClass, segmentedClass } from "@/components/ui";
 
 export default function ProfilePage() {
   return <RequireCompany admin>{(m) => <Profile m={m} />}</RequireCompany>;
@@ -92,10 +92,10 @@ function Profile({ m }: { m: Membership }) {
       <p className="mt-1 text-sm text-muted">Your safety program, counted from your own signed records. It stays private to your company until you download it and send it to your agent or carrier.</p>
       <p className="mt-2"><Link href="/reports/" className="text-sm font-semibold underline">← Back to reports</Link></p>
 
-      <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-lg border border-line" role="group" aria-label="Profile range">
+      <div className={`mt-4 grid-cols-3 ${segmentedClass}`} role="group" aria-label="Profile range">
         {([["year", "Last 12 months"], ["month", "Last month"], ["custom", "Pick dates"]] as const).map(([id, label]) => (
           <button key={id} aria-pressed={range === id} onClick={() => setRange(id)}
-            className={`min-h-11 px-2 text-sm font-semibold ${range === id ? "bg-brand text-brand-ink" : "bg-surface"}`}>{label}</button>
+            className={segmentClass(range === id)}>{label}</button>
         ))}
       </div>
       {range === "custom" && (
@@ -149,7 +149,7 @@ function Profile({ m }: { m: Membership }) {
       <p className="mt-1 text-sm text-muted">Where your records show each part of a safety program. Your insurer decides whether a program earns a premium credit.</p>
       <ul className="mt-3 flex flex-col gap-2">
         {p.elements.map((e) => (
-          <li key={e.id} className="rounded-lg border border-line bg-surface p-3 text-sm">
+          <li key={e.id} className="rounded-lg bg-surface shadow-card p-3 text-sm">
             <div className="flex items-start justify-between gap-2"><b>{e.name}</b><span className={`shrink-0 text-xs font-semibold ${STATUS_TONE[e.status]}`}>{STATUS[e.status]}</span></div>
             <p className="mt-1 text-muted">{e.evidence}</p>
             {e.id === "policy" && e.status === "outside" && <p className="mt-1 text-xs">Attach your written program below to show it here.</p>}
@@ -166,7 +166,7 @@ function Profile({ m }: { m: Membership }) {
 
 function Fig({ label, value, note, warn }: { label: string; value: string; note: string; warn?: boolean }) {
   return (
-    <div className="rounded-lg border border-line bg-surface p-3">
+    <div className="rounded-lg bg-surface shadow-card p-3">
       <dt className="text-[13px] font-medium text-muted">{label}</dt>
       <dd className="mt-1 text-2xl font-semibold tracking-[-0.01em] tabular-nums">{value}</dd>
       {note && <dd className={`text-xs ${warn ? "font-semibold text-warn" : "text-muted"}`}>{note}</dd>}

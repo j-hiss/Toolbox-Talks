@@ -44,7 +44,7 @@ export function CadencePicker({ companyId, industry, state, input, cadences, rel
       : run(() => saveCadence(companyId, startWeek, pick), `${nameOf(pick)} starts the week of ${weekLabel(parseDay(startWeek))}.`);
 
   return (
-    <section aria-label="How often" className="rounded-lg border border-line bg-surface p-3">
+    <section aria-label="How often" className="rounded-lg bg-surface shadow-card p-3">
       <h2 className="font-display text-lg font-semibold">How often</h2>
       <p className="text-sm text-muted">
         Now: {nameOf(now).toLowerCase()}.

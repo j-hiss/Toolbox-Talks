@@ -26,7 +26,7 @@ import { readChosenJobsite } from "@/components/JobsitePicker";
 import { useRouter } from "next/navigation";
 import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
-import { Button, ErrorNotice, Eyebrow, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ErrorNotice, Eyebrow, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass, segmentClass, segmentedClass } from "@/components/ui";
 
 export default function ReportsPage() {
   return <RequireCompany need="report">{(m) => <Reports m={m} />}</RequireCompany>;
@@ -153,17 +153,17 @@ function Reports({ m }: { m: Membership }) {
       <Eyebrow>Reports · {co.name}</Eyebrow>
       <Title>{multi ? "Talk sign-ins" : "Weekly sign-ins"}</Title>
       {canAdmin(m.access) && (
-        <Link href="/profile/" className="mt-3 flex min-h-11 items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+        <Link href="/profile/" className="mt-3 flex min-h-11 items-center justify-between gap-2 rounded-lg bg-surface shadow-card px-3 py-2 text-sm">
           <span><b className="block">Safety profile &amp; renewal packet</b><small className="text-muted">Show your carrier what your teams do to stay safe</small></span>
           <span aria-hidden>→</span>
         </Link>
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <div className="grid w-full grid-cols-4 overflow-hidden rounded-lg border border-line sm:w-auto" role="group" aria-label="Date range">
+        <div className={`grid-cols-4 w-full sm:w-auto ${segmentedClass}`} role="group" aria-label="Date range">
           {RANGES.map((r) => (
             <button key={r.id} aria-pressed={range === r.id} onClick={() => setRange(r.id)}
-              className={`min-h-11 px-2 text-sm font-semibold ${range === r.id ? "bg-brand text-brand-ink" : "bg-surface"}`}>
+              className={segmentClass(range === r.id)}>
               {r.label}
             </button>
           ))}
@@ -210,7 +210,7 @@ function Reports({ m }: { m: Membership }) {
       )}
 
       {/* Score ------------------------------------------------------------------------------------------------------- */}
-      <section className="mt-5 rounded-xl bg-surface p-4">
+      <section className="mt-5 rounded-xl bg-surface shadow-card p-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-muted">Sign-in rate</p>
@@ -244,7 +244,7 @@ function Reports({ m }: { m: Membership }) {
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {current && (
-          <div className="rounded-xl bg-surface p-3 text-sm tabular-nums">
+          <div className="rounded-xl bg-surface shadow-card p-3 text-sm tabular-nums">
             <p className="text-xs font-semibold text-muted">{current.weeks > 1 ? "This talk period so far" : "This week so far"}</p>
             <p className="mt-1"><b className="text-2xl">{current.tally.on_time}</b> of {current.tally.expected} signed</p>
           </div>
@@ -268,7 +268,7 @@ function Reports({ m }: { m: Membership }) {
               ? "One finished week so far. The lines fill in as more weeks finish."
               : "Each finished week. The shaded gap between the lines is makeups: people who signed late."}
           </p>
-          <div className="mt-3 rounded-xl bg-surface p-3"><TrendChart points={points} /></div>
+          <div className="mt-3 rounded-xl bg-surface shadow-card p-3"><TrendChart points={points} /></div>
         </>
       )}
       </Fold>
@@ -287,7 +287,7 @@ function Reports({ m }: { m: Membership }) {
           <p className="mt-1 text-sm text-muted">
             Missed sign-ins closed by a makeup, by reason.{made.avgDaysLate !== null ? ` On average ${made.avgDaysLate} day${made.avgDaysLate === 1 ? "" : "s"} after the week ended.` : ""}
           </p>
-          <div className="mt-3 rounded-xl bg-surface p-3">
+          <div className="mt-3 rounded-xl bg-surface shadow-card p-3">
             <HBars items={made.reasons.map((r) => ({ label: r.reason, n: r.n }))} unit={(n) => String(n)} />
           </div>
         </Fold>
@@ -305,9 +305,9 @@ function Reports({ m }: { m: Membership }) {
         return (
           <Fold title="Issues the team raised" aside={open.length ? `${open.length} open` : undefined}>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
-              <div className="rounded-xl bg-surface p-2"><b className="block text-2xl">{raised.length}</b><small className="text-muted">raised in range</small></div>
+              <div className="rounded-xl bg-surface shadow-card p-2"><b className="block text-2xl">{raised.length}</b><small className="text-muted">raised in range</small></div>
               <div className={`rounded-lg border p-2 ${late ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}><b className="block text-2xl">{open.length}</b><small className="text-muted">open{late ? ` · ${late} overdue` : ""}</small></div>
-              <div className="rounded-xl bg-surface p-2"><b className="block text-2xl">{avg ?? "–"}</b><small className="text-muted">avg days to fix</small></div>
+              <div className="rounded-xl bg-surface shadow-card p-2"><b className="block text-2xl">{avg ?? "–"}</b><small className="text-muted">avg days to fix</small></div>
             </div>
             <Link href="/records/#issues" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-text underline underline-offset-2">See all issues</Link>
           </Fold>
@@ -323,7 +323,7 @@ function Reports({ m }: { m: Membership }) {
           const expanded = openWeek === w.key;
           const by = (s: WeekState) => w.people.filter((p) => p.state === s);
           return (
-            <li key={w.key} className="rounded-xl bg-surface">
+            <li key={w.key} className="rounded-xl bg-surface shadow-card">
               <button className="w-full p-3 text-left" aria-expanded={expanded} onClick={() => setOpenWeek(expanded ? null : w.key)}>
                 <span className="flex items-start justify-between gap-3">
                   <span className="min-w-0">
@@ -383,7 +383,7 @@ function Reports({ m }: { m: Membership }) {
             <p className="mt-1 text-sm text-muted">Days with a daily plan recorded, by team. Separate from the weekly talk and the sign-in rate. The app doesn&apos;t know which days were worked, so this is a count, not a rate.</p>
             {tally.length === 0 ? <p className="mt-2 text-sm text-muted">No daily plans in this range.</p> : (
               <ul className="mt-2 flex flex-col gap-1.5 text-sm tabular-nums">
-                {tally.map((t) => <li key={t.crew} className="flex justify-between rounded-xl bg-surface px-3 py-2"><b>{t.crew}</b><span>{t.days} {t.days === 1 ? "day" : "days"}</span></li>)}
+                {tally.map((t) => <li key={t.crew} className="flex justify-between rounded-xl bg-surface shadow-card px-3 py-2"><b>{t.crew}</b><span>{t.days} {t.days === 1 ? "day" : "days"}</span></li>)}
               </ul>
             )}
           </Fold>
@@ -399,7 +399,7 @@ function Reports({ m }: { m: Membership }) {
       {/* Phones: one card per person. Wider screens: the table. */}
       <ul className="mt-3 flex flex-col gap-2 sm:hidden">
         {people.length === 0 ? <li className="text-sm text-muted">No one to show.</li> : people.map(({ person, tally }) => (
-          <li key={person.id} className={`rounded-xl p-3 text-sm tabular-nums ${tally.open + tally.missed ? "bg-warn-bg" : "bg-surface"}`}>
+          <li key={person.id} className={`rounded-xl p-3 text-sm tabular-nums ${tally.open + tally.missed ? "bg-warn-bg" : "bg-surface shadow-card"}`}>
             <div className="flex items-baseline justify-between gap-3">
               <span className="min-w-0"><b>{person.name}</b>{person.deactivatedAt && <small className="ml-1 text-muted">inactive</small>}<small className="block text-muted">{teamName(person.teamId)}</small></span>
               <b className="text-xl">{pct(score(tally))}</b>
@@ -410,7 +410,7 @@ function Reports({ m }: { m: Membership }) {
           </li>
         ))}
       </ul>
-      <div className="mt-3 hidden overflow-x-auto rounded-xl bg-surface sm:block">
+      <div className="mt-3 hidden overflow-x-auto rounded-xl bg-surface shadow-card sm:block">
         <table className="w-full text-sm tabular-nums">
           <thead className="text-left text-xs text-muted">
             <tr><th className="p-2">Name</th><th className="p-2 text-right">On time</th><th className="p-2 text-right">Made up</th><th className="p-2 text-right">Open</th><th className="p-2 text-right">Missed</th><th className="p-2 text-right">Score</th></tr>
@@ -442,7 +442,7 @@ function Reports({ m }: { m: Membership }) {
         <ul className="mt-3 flex flex-col gap-1.5">
           {flags.slice(0, 20).map(({ r, a }, i) => (
             <li key={`${r.id}-${i}`}>
-              <Link href={`/record/#${r.id}`} className="flex items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2 text-sm">
+              <Link href={`/record/#${r.id}`} className="flex items-center justify-between gap-2 rounded-xl bg-surface shadow-card px-3 py-2 text-sm">
                 <span className="min-w-0"><b>{a.name}</b> <small className="text-muted">{short(r.heldAt)} · {r.title}{r.teamName ? ` · ${r.teamName}` : ""}</small></span>
                 <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">{STATUS_LABEL[a.status]}</span>
               </Link>

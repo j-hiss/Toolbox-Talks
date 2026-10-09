@@ -78,7 +78,7 @@ export function SafetyLog({ company, state, jobsites, people }: Props) {
       <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Show">
         {[{ id: "all" as const, name: "All" }, ...EVENT_KINDS].map((k) => (
           <button key={k.id} aria-pressed={filter === k.id} onClick={() => setFilter(k.id)}
-            className={`min-h-9 rounded-md border px-3 text-sm font-semibold ${filter === k.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
+            className={`min-h-9 rounded-full border px-3 text-sm font-semibold ${filter === k.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
             {k.name}
           </button>
         ))}
@@ -118,7 +118,7 @@ function SinceLastSettingsCard({ company, state }: { company: Company; state: st
   };
   const toggleKind = (k: EventKind) => setCfg((c) => ({ ...c, kinds: c.kinds.includes(k) ? c.kinds.filter((x) => x !== k) : [...c.kinds, k] }));
   return (
-    <section aria-label="Since last talk" className="rounded-lg border border-line bg-surface p-3">
+    <section aria-label="Since last talk" className="rounded-lg bg-surface shadow-card p-3">
       <h2 className="font-display text-lg font-semibold">Read at talks: &ldquo;Since last talk&rdquo;</h2>
       <p className="text-sm text-muted">Adds approved team summaries to each talk. The presenter reads each one and checks it off.</p>
       {hint && <p className="mt-2 text-sm"><b>Your state:</b> {hint}</p>}

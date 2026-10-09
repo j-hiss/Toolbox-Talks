@@ -73,7 +73,7 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
     .filter((c) => c.t && c.t.expected > 0)
     .sort((a, b) => (a.name === "No team" ? 1 : b.name === "No team" ? -1 : a.name.localeCompare(b.name)));
   return (
-    <section className="mt-3 rounded-2xl bg-surface p-4">
+    <section className="mt-3 rounded-2xl bg-surface shadow-card p-4">
       <div className="flex items-baseline justify-between gap-2">
         <p className="text-sm text-muted">On staff who signed this {st.periodWeeks > 1 ? "talk period" : "week"}</p>
         <p className="tabular-nums text-muted"><b className="text-3xl font-semibold tracking-[-0.02em] text-fg">{st.thisWeek.signed}</b>/{st.thisWeek.expected}</p>
@@ -123,7 +123,7 @@ export function GettingStarted({ st }: { st: Status }) {
   if (left === 0) return null;
   // Below the week card, so Start stays near the top. Finished steps fold into the count.
   return (
-    <section className="mt-3 rounded-2xl bg-surface p-4 ring-2 ring-brand">
+    <section className="mt-3 rounded-2xl bg-surface shadow-card p-4 ring-2 ring-brand">
       <p className="text-sm font-semibold text-muted">Getting started · {steps.length - left} of {steps.length} done</p>
       <ol className="mt-2 flex flex-col">
         {steps.map((x, i) => (x.done ? null : (

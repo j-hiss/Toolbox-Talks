@@ -58,7 +58,7 @@ describe("theme", () => {
   });
 
   it("warns when buttons look like an alarm", () => {
-    expect(themeWarnings({ ...DEFAULT_THEME, action: "#BE1E2D" }).some((x) => x.roles.includes("action") && x.roles.includes("danger"))).toBe(true);
+    expect(themeWarnings({ ...DEFAULT_THEME, action: "#D2101E" }).some((x) => x.roles.includes("action") && x.roles.includes("danger"))).toBe(true);
   });
 
   it("sets a variable for every color plus readable inks", () => {

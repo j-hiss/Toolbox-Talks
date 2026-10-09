@@ -88,7 +88,7 @@ export function WeatherCard({ site, setting = "outdoor" }: { site: Jobsite | nul
     <>
       <SkyIconDefs />
       <section
-        className={`mt-3 overflow-hidden rounded-2xl bg-surface ${ctx.heads?.level === "alert" ? "wx-ring-alert" : ctx.heads?.level === "caution" ? "wx-ring-caution" : ""}`}
+        className={`mt-3 overflow-hidden rounded-2xl bg-surface shadow-card ${ctx.heads?.level === "alert" ? "wx-ring-alert" : ctx.heads?.level === "caution" ? "wx-ring-caution" : ""}`}
         aria-label="Jobsite weather"
       >
         <Hero c={c} ctx={ctx} busy={busy} old={ctx.old} onRefresh={refresh} onOpen={() => setFull(true)} />
@@ -304,7 +304,7 @@ function WeatherFull({ c, ctx, point, setting, busy, onRefresh, onClose }: { c: 
         <p className="truncate text-sm font-semibold">{c.place || "Jobsite weather"}</p>
       </div>
       <div className={`mx-auto max-w-xl px-4 ${ctx.heads?.level === "alert" ? "" : ""}`}>
-        <div className={`overflow-hidden rounded-2xl bg-surface ${ctx.heads?.level === "alert" ? "wx-ring-alert" : ctx.heads?.level === "caution" ? "wx-ring-caution" : ""}`}>
+        <div className={`overflow-hidden rounded-2xl bg-surface shadow-card ${ctx.heads?.level === "alert" ? "wx-ring-alert" : ctx.heads?.level === "caution" ? "wx-ring-caution" : ""}`}>
           <Hero c={c} ctx={ctx} busy={busy} old={ctx.old} onRefresh={onRefresh} tall />
           <AlertBanners c={c} detail />
           <Summary text={ctx.summary} />
@@ -312,12 +312,12 @@ function WeatherFull({ c, ctx, point, setting, busy, onRefresh, onClose }: { c: 
         </div>
 
         <h2 className="mt-6 mb-2 px-1 text-base font-semibold">Radar</h2>
-        <div className="overflow-hidden rounded-2xl bg-surface pt-3">
+        <div className="overflow-hidden rounded-2xl bg-surface shadow-card pt-3">
           <RadarMap latitude={point.latitude} longitude={point.longitude} height={340} areas={ctx.areas} />
         </div>
 
         <h2 className="mt-6 mb-2 px-1 text-base font-semibold">The work day</h2>
-        <div className="overflow-hidden rounded-2xl bg-surface">
+        <div className="overflow-hidden rounded-2xl bg-surface shadow-card">
           <Stats c={c} />
           {ctx.sun && (
             <div className="grid grid-cols-3 border-t border-line text-sm">

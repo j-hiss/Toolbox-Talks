@@ -51,7 +51,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <GroupHeading aside={plan.tasks.length ? `${plan.tasks.length}` : undefined}>Today&apos;s tasks</GroupHeading>
       <ul className="mt-2 flex flex-col gap-1.5">
         {plan.tasks.map((t, i) => (
-          <li key={`${t}-${i}`} className="flex items-center gap-2 rounded-xl bg-surface px-3 py-2">
+          <li key={`${t}-${i}`} className="flex items-center gap-2 rounded-xl bg-surface shadow-card px-3 py-2">
             <span className="min-w-0 flex-1 break-words">{t}</span>
             <button className="min-h-11 px-2 text-sm font-semibold text-brand-text underline underline-offset-2" aria-label={`Remove task: ${t}`} onClick={() => set({ tasks: plan.tasks.filter((_, j) => j !== i) })}>Remove</button>
           </li>
@@ -65,7 +65,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <GroupHeading aside={plan.hazards.length ? `${plan.hazards.length}` : undefined}>Hazards and controls</GroupHeading>
       <ul className="mt-2 flex flex-col gap-1.5">
         {plan.hazards.map((h, i) => (
-          <li key={`${h.hazard}-${i}`} className="rounded-xl bg-surface p-3">
+          <li key={`${h.hazard}-${i}`} className="rounded-xl bg-surface shadow-card p-3">
             <div className="flex items-start justify-between gap-2">
               <b className="min-w-0 break-words">{h.hazard}</b>
               <button className="min-h-11 px-2 text-sm font-semibold text-brand-text underline underline-offset-2" aria-label={`Remove hazard: ${h.hazard}`} onClick={() => set({ hazards: plan.hazards.filter((_, j) => j !== i) })}>Remove</button>
@@ -75,7 +75,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
           </li>
         ))}
       </ul>
-      <details className="mt-2 rounded-xl bg-surface p-3">
+      <details className="mt-2 rounded-xl bg-surface shadow-card p-3">
         <summary className="min-h-11 cursor-pointer content-center text-sm font-semibold text-brand-text">Pick from common hazards</summary>
         <p className="mt-1 text-sm text-muted">Starting points. Edit the control to fit today&apos;s job.</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -99,7 +99,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {PPE_CHOICES.map((p) => (
           <button key={p} aria-pressed={plan.ppe.includes(p)} onClick={() => set({ ppe: toggle(plan.ppe, p) })}
-            className={`min-h-11 rounded-md border px-3 text-sm font-semibold ${plan.ppe.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
+            className={`min-h-11 rounded-full border px-3 text-sm font-semibold ${plan.ppe.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
         ))}
       </div>
 
@@ -107,7 +107,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {PERMIT_CHOICES.map((p) => (
           <button key={p} aria-pressed={plan.permits.includes(p)} onClick={() => set({ permits: toggle(plan.permits, p) })}
-            className={`min-h-11 rounded-md border px-3 text-sm font-semibold ${plan.permits.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
+            className={`min-h-11 rounded-full border px-3 text-sm font-semibold ${plan.permits.includes(p) ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{p}</button>
         ))}
       </div>
 
@@ -117,7 +117,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
         {EQUIPMENT_PROMPTS.map((x) => {
           const a = eq(x.id);
           return (
-            <li key={x.id} className="rounded-xl bg-surface p-3">
+            <li key={x.id} className="rounded-xl bg-surface shadow-card p-3">
               <label className="flex min-h-11 items-center gap-3">
                 <input type="checkbox" className="size-5 accent-[var(--brand)]" checked={!!a} onChange={(e) => setEq(x.id, e.target.checked ? { id: x.id, answer: "done", by: "" } : null)} />
                 <b>{x.name}</b>
@@ -127,9 +127,9 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
                   <p>{x.reminder} <span className="text-muted">({x.cite})</span></p>
                   <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={`${x.name} today`}>
                     <button role="radio" aria-checked={a.answer === "done"} onClick={() => setEq(x.id, { ...a, answer: "done" })}
-                      className={`min-h-11 rounded-md border px-3 font-semibold ${a.answer === "done" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Checked</button>
+                      className={`min-h-11 rounded-full border px-3 font-semibold ${a.answer === "done" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Checked</button>
                     <button role="radio" aria-checked={a.answer === "na"} onClick={() => setEq(x.id, { ...a, answer: "na", by: "" })}
-                      className={`min-h-11 rounded-md border px-3 font-semibold ${a.answer === "na" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Not used today</button>
+                      className={`min-h-11 rounded-full border px-3 font-semibold ${a.answer === "na" ? "border-brand bg-brand text-brand-ink" : "border-line"}`}>Not used today</button>
                   </div>
                   {a.answer === "done" && (
                     <input aria-label={`Who checked the ${x.name.toLowerCase()}`} placeholder="Checked by (name)" maxLength={120} className={inputClass} value={a.by} onChange={(e) => setEq(x.id, { ...a, by: e.target.value })} />
@@ -158,7 +158,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Language for the signing statement">
         {LANGUAGES.filter((l) => l.ready).map((l) => (
           <button key={l.id} aria-pressed={draft.lang === l.id} onClick={() => update({ lang: l.id as LanguageId })}
-            className={`min-h-11 rounded-md border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{l.label}</button>
+            className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>{l.label}</button>
         ))}
       </div>
 

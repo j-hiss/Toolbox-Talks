@@ -100,7 +100,7 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
               {plan.newRoles.length > 0 && <>New job titles: <b>{plan.newRoles.join(", ")}</b> (they sign only; turn on &quot;Gives talks&quot; in Job titles if they present).</>}
             </Notice>
           )}
-          <ul className="flex max-h-[45vh] flex-col divide-y divide-line overflow-y-auto rounded-xl bg-surface text-sm">
+          <ul className="flex max-h-[45vh] flex-col divide-y divide-line overflow-y-auto rounded-xl bg-surface shadow-card text-sm">
             {plan.rows.map((r) => (
               <li key={r.line} className={`px-3 py-2 ${r.action === "skip" ? "bg-warn-bg" : ""}`}>
                 <div className="flex items-baseline justify-between gap-2">

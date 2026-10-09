@@ -63,7 +63,7 @@ export function AppAccess({ companyId, myAccess, myUserId, people }: { companyId
           const me = mb.user_id === myUserId;
           const person = people.find((p) => p.user_id === mb.user_id);
           return (
-            <li key={mb.user_id} className="rounded-lg border border-line bg-surface p-3 text-sm">
+            <li key={mb.user_id} className="rounded-lg bg-surface shadow-card p-3 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="min-w-0">
                   <b className="block truncate">{mb.email || "Account"}{me ? " (you)" : ""}</b>

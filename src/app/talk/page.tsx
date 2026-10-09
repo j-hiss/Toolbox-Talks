@@ -236,7 +236,7 @@ function MakeupPick({ weeks, draft, update, open }: {
             key={r}
             aria-pressed={draft.makeupPick === r}
             onClick={() => { setMsg(null); update({ makeupPick: r }); }}
-            className={`min-h-11 rounded-md border px-3.5 text-sm font-semibold ${draft.makeupPick === r ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-full border px-3.5 text-sm font-semibold ${draft.makeupPick === r ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
           >
             {r}
           </button>
@@ -361,7 +361,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
             key={l.id}
             aria-pressed={draft.lang === l.id}
             onClick={() => { stopRef.current?.(); setLine(null); update({ lang: l.id as LanguageId }); }}
-            className={`min-h-11 rounded-md border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${draft.lang === l.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
           >
             {l.label}
           </button>
@@ -412,7 +412,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
       <h1 id="line-0" className={`mt-4 font-display text-4xl font-semibold leading-none text-balance tracking-tight ${hl(0)}`}>{text.title}</h1>
       {status && <p className="mt-2 text-sm text-muted" aria-live="polite">{status}</p>}
 
-      <div className={`mt-4 rounded-xl bg-surface p-4 ${textSize}`}>
+      <div className={`mt-4 rounded-xl bg-surface shadow-card p-4 ${textSize}`}>
         {lines.slice(1).map((l, j) => {
           const i = j + 1;
           if (l.kind === "hook") return <p key={i} id={`line-${i}`} className={`font-semibold ${hl(i)}`}>{l.text}</p>;
@@ -465,7 +465,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
 function MakeupBanner({ draft }: { draft: TalkDraft }) {
   if (!draft.makeup) return null;
   return (
-    <p className="mb-3 rounded-xl bg-surface px-3 py-2 text-sm">
+    <p className="mb-3 rounded-xl bg-surface shadow-card px-3 py-2 text-sm">
       <b>Makeup for {weekNumbers({ n: draft.makeup.weekNumber, weeks: draft.makeup.weeks ?? 1 })}</b> ({periodLabel(parseDay(draft.makeup.weekStart), draft.makeup.weeks ?? 1)}) · {makeupReasonText(draft.makeupPick, draft.makeupNote)}
     </p>
   );
@@ -575,7 +575,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
         </ul>
       )}
       <form
-        className="mt-3 rounded-xl bg-surface p-3"
+        className="mt-3 rounded-xl bg-surface shadow-card p-3"
         onSubmit={(e) => {
           e.preventDefault();
           const n = walkin.trim();
@@ -916,7 +916,7 @@ function LateArrival({ onAdd }: { onAdd: (name: string, company: string) => void
   }
   return (
     <form
-      className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-3"
+      className="mt-3 flex flex-col gap-2 rounded-xl bg-surface shadow-card p-3"
       onSubmit={(e) => { e.preventDefault(); const n = name.trim(); if (!n) return; onAdd(n, company.trim()); setName(""); setCompany(""); setOpen(false); }}
     >
       <label className="text-sm font-semibold" htmlFor="late-name">Late arrival</label>
@@ -943,7 +943,7 @@ function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; upda
       <p className="mt-2 text-sm text-muted">Hazards or problems to fix, like a damaged ladder or missing guardrail. Each one gets an owner and a fix-by date.</p>
       <ul className="mt-3 flex flex-col gap-2">
         {draft.issues.map((x, i) => (
-          <li key={x.clientId} className="rounded-xl bg-surface p-3">
+          <li key={x.clientId} className="rounded-xl bg-surface shadow-card p-3">
             <div className="flex items-start justify-between gap-2">
               <b className="min-w-0 break-words">{x.description}</b>
               <button className="min-h-11 px-2 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => set(draft.issues.filter((_, j) => j !== i))} aria-label={`Remove: ${x.description}`}>Remove</button>
@@ -1001,7 +1001,7 @@ function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
       <div className="mt-6 flex flex-col gap-2">
         {/* Several crews a week is normal: the same talk again, with a fresh roster and signatures. */}
         {!done.makeupLabel && <Button onClick={onAnother}>Give it to another team</Button>}
-        <Link href="/records/" className="flex min-h-14 items-center justify-center rounded-lg border border-line bg-surface px-4 text-center font-semibold">See records</Link>
+        <Link href="/records/" className="flex min-h-14 items-center justify-center rounded-lg bg-surface shadow-card px-4 text-center font-semibold">See records</Link>
         <Link href="/" className="flex min-h-14 items-center justify-center rounded-lg border border-line px-4 text-center font-semibold">Home</Link>
       </div>
     </>

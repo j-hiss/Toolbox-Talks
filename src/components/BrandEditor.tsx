@@ -110,7 +110,7 @@ function ColorRow({ id, label, hint, value, warn, onChange }: { id: ThemeRole; l
     if (v) onChange(v); else setText(value);
   };
   return (
-    <li className="flex items-center gap-3 rounded-xl bg-surface p-2.5 pr-3">
+    <li className="flex items-center gap-3 rounded-xl bg-surface shadow-card p-2.5 pr-3">
       <label className="relative h-11 w-11 shrink-0 cursor-pointer overflow-hidden rounded-[12px] ring-1 ring-line" style={{ background: value }}>
         <span className="sr-only">{label} color</span>
         <input type="color" value={value.toLowerCase()} onChange={(e) => onChange(normalizeHex(e.target.value) ?? value)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
@@ -138,7 +138,7 @@ function ColorRow({ id, label, hint, value, warn, onChange }: { id: ThemeRole; l
 function Sample() {
   return (
     <div aria-label="Sample" className="overflow-hidden rounded-2xl bg-bg p-3 ring-1 ring-line">
-      <div className="overflow-hidden rounded-xl bg-surface">
+      <div className="overflow-hidden rounded-xl bg-surface shadow-card">
         <div className="flex items-center gap-2.5 bg-brand px-4 py-3 text-brand-ink">
           <Mark size={24} />
           <span className="text-sm opacity-80">Week 9 · Ladder setup and use</span>

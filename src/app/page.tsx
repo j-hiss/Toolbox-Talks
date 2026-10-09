@@ -123,7 +123,7 @@ function Home({ m }: { m: Membership }) {
 
       {week && talk && text ? (
         <section className="mt-5">
-          <div className="overflow-hidden rounded-xl border border-line bg-surface">
+          <div className="overflow-hidden rounded-xl bg-surface shadow-card">
             {/* The week as an entry in the year's record: where we are in the 52, then the talk's title. */}
             <div className="border-b border-line px-5 pt-5 pb-4">
               <p className="flex items-baseline justify-between gap-3 text-sm text-muted">
@@ -135,7 +135,7 @@ function Home({ m }: { m: Membership }) {
                 <span className="bg-brand" style={{ flex: week.weeks }} />
                 <span className="bg-line" style={{ flex: 52 - (week.n - 1) - week.weeks }} />
               </div>
-              <h1 className="mt-4 font-display text-[31px] font-semibold leading-[1.12] tracking-[-0.015em] text-balance">{text.title}</h1>
+              <h1 className="mt-4 font-display text-[30px] font-bold leading-[1.1] tracking-[-0.025em] text-balance">{text.title}</h1>
             </div>
             <div className="px-5 pt-4 pb-5">
               <p className="leading-relaxed">{text.hook}</p>
@@ -170,7 +170,7 @@ function Home({ m }: { m: Membership }) {
           <GroupHeading>Coming up</GroupHeading>
           <ul className="mt-3 flex flex-col gap-2">
             {upcoming.map(({ w, t }) => (
-              <li key={w.key} className="flex items-center justify-between gap-3 rounded-xl bg-surface px-4 py-3">
+              <li key={w.key} className="flex items-center justify-between gap-3 rounded-xl bg-surface shadow-card px-4 py-3">
                 <span className="min-w-0">
                   <b className="block">{t.content.en.title}</b>
                   <small className="text-muted">{weekNumbers(w)} · {periodLabel(w.monday, w.weeks)}</small>

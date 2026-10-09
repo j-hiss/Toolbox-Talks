@@ -55,7 +55,7 @@ export function IssuesList({ companyId }: { companyId: string }) {
       <div className="mt-3 flex items-center gap-1.5" role="group" aria-label="Show">
         {(["open", "fixed"] as const).map((k) => (
           <button key={k} aria-pressed={show === k} onClick={() => setShow(k)}
-            className={`min-h-10 rounded-md border px-3.5 text-sm font-semibold ${show === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>
+            className={`min-h-10 rounded-full border px-3.5 text-sm font-semibold ${show === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>
             {k === "open" ? `Open (${open.length})` : `Fixed (${fixed.length})`}
           </button>
         ))}

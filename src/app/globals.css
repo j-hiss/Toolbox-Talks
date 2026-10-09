@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. The default look is "Ledger": a record book rather than a safety sign, so it sits as well in a
- * hospital or a restaurant as on a jobsite or a shop floor. Cool paper, deep ink-blue, muted status colors that stay
- * readable outdoors, a serif for titles. "Signal" (the ANSI Z535 sign colors) is still a preset in Admin → Brand.
+ * Design tokens. The default look is "Clarity": calm, bright and plain, in the manner of a premium consumer app
+ * (light grey page, white cards with a soft shadow, one blue accent, pill buttons, the phone's own font), so it sits
+ * as well in a hospital or a restaurant as on a jobsite or a shop floor. Status colors are the familiar phone ones,
+ * darkened enough to read outdoors. "Ledger" and "Signal" (the ANSI Z535 sign colors) are presets in Admin → Brand.
  * A company can change any of the eight inputs (--t-*) from Admin → Brand; src/core/theme.ts sets them and
- * checks readability. Everything else is mixed from them here, so dark mode only swaps background, cards and text.
+ * checks readability. Everything else is mixed from them here.
  */
 :root {
-  --brand: var(--t-brand, #1e3a5f);
+  --brand: var(--t-brand, #0071e3);
   --brand-ink: var(--t-brand-ink, #ffffff);
-  --action: var(--t-action, #1e3a5f);
+  --action: var(--t-action, #0071e3);
   --action-ink: var(--t-action-ink, #ffffff);
-  --ok: var(--t-done, #2c7a51);
+  --ok: var(--t-done, #248a3d);
   --ok-ink: var(--t-done-ink, #ffffff);
-  --caution: var(--t-caution, #c58b14);
-  --warn: var(--t-danger, #b42318);
+  --caution: var(--t-caution, #c96f00);
+  --warn: var(--t-danger, #d70015);
   --warn-ink: var(--t-danger-ink, #ffffff);
-  --bg: var(--t-bg, #f3f4f2);
+  --bg: var(--t-bg, #f5f5f7);
   --surface: var(--t-surface, #ffffff);
-  --fg: var(--t-text, #18212c);
+  --fg: var(--t-text, #1d1d1f);
 
-  --muted: color-mix(in srgb, var(--fg) 68%, var(--surface));
-  --line: color-mix(in srgb, var(--fg) 11%, var(--surface));
+  --muted: color-mix(in srgb, var(--fg) 64%, var(--surface));
+  --line: color-mix(in srgb, var(--fg) 12%, var(--surface));
   --brand-soft: color-mix(in srgb, var(--brand) 11%, var(--surface));
   --brand-text: var(--brand);
   --ok-bg: color-mix(in srgb, var(--ok) 13%, var(--surface));
@@ -44,14 +45,14 @@
 /* Dark: own background, cards and text; the company's colors stay, lightened where they're used as text. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1419;
-    --surface: #181f27;
-    --fg: #e6eaee;
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --fg: #f5f5f7;
     /* Deep brand and button colors would sink into a dark background: lift them toward white and put dark text on
-       them. Works for any company color, since half-white always takes dark text. */
-    --brand: color-mix(in srgb, var(--t-brand, #1e3a5f) 48%, #ffffff);
+       them. Works for any company color: a third white is enough for dark text to read. */
+    --brand: color-mix(in srgb, var(--t-brand, #0071e3) 65%, #ffffff);
     --brand-ink: #0f1419;
-    --action: color-mix(in srgb, var(--t-action, #1e3a5f) 48%, #ffffff);
+    --action: color-mix(in srgb, var(--t-action, #0071e3) 65%, #ffffff);
     --action-ink: #0f1419;
     --brand-text: var(--brand);
     --warn-text: color-mix(in srgb, var(--warn) 60%, #ffffff);
@@ -86,14 +87,16 @@
   --color-warn-ink: var(--warn-ink);
   --color-warn-bg: var(--warn-bg);
   --color-warn-text: var(--warn-text);
-  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
-  /* Restrained corners: chips 6px, inputs and buttons 10px, cards 12-14px, sheets 18px. */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 0.875rem;
-  --radius-2xl: 1.125rem;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  /* Generous corners: chips 8px, inputs 12px, cards 18px, sheets 22px; buttons are pills (rounded-full). */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.375rem;
+  /* One soft shadow for cards, so they lift off the grey page without borders. */
+  --shadow-card: 2px 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 html,
@@ -103,7 +106,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "tnum" 0;
+  letter-spacing: -0.011em;
 }
 
 /* Keep content clear of the phone's notch and home bar inside the iPhone/Android apps. */

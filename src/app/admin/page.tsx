@@ -123,7 +123,7 @@ function Admin({ m }: { m: Membership }) {
                 role="tab"
                 aria-selected={tab === t.id}
                 onClick={() => setTab(t.id)}
-                className={`min-h-11 rounded-md border px-3.5 text-[15px] font-semibold ${tab === t.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-fg"}`}
+                className={`min-h-11 rounded-full border px-3.5 text-[15px] font-semibold ${tab === t.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-fg"}`}
               >
                 {t.label}
               </button>
@@ -260,7 +260,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
       ) : groups.map((g) => (
         <section key={g.id || "none"}>
           <GroupHeading aside={`${g.people.length}`}>{g.name}</GroupHeading>
-          <ul className="mt-2 divide-y divide-line overflow-hidden rounded-xl bg-surface">
+          <ul className="mt-2 divide-y divide-line overflow-hidden rounded-xl bg-surface shadow-card">
             {g.people.map((p) => (
               <li key={p.id}>
                 <button className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg" onClick={() => setEditing(p)}>
@@ -321,7 +321,7 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
           {teams.map((t) => {
             const members = people.filter((p) => p.team_id === t.id);
             return (
-              <li key={t.id} className="flex flex-col gap-2 rounded-xl bg-surface p-3">
+              <li key={t.id} className="flex flex-col gap-2 rounded-xl bg-surface shadow-card p-3">
                 <input
                   aria-label="Team name"
                   defaultValue={t.name}
@@ -374,7 +374,7 @@ function RolesTab({ company, people, roles, act }: { company: Membership["compan
         {sorted.map((r) => {
           const used = people.filter((p) => p.role_id === r.id).length;
           return (
-            <li key={r.id} className="flex items-center gap-2 rounded-lg border border-line bg-surface py-1.5 pl-3 pr-1 text-sm">
+            <li key={r.id} className="flex items-center gap-2 rounded-lg bg-surface shadow-card py-1.5 pl-3 pr-1 text-sm">
               <span className="min-w-0 flex-1"><b>{r.name}</b>{used > 0 && <span className="text-muted tabular-nums"> · {used}</span>}</span>
               <label className="flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold">
                 <input type="checkbox" className="h-5 w-5" checked={r.presents} aria-label={`${r.name} gives talks`}
@@ -480,7 +480,7 @@ function JobsitesTab({ companyId, company, jobsites, act }: { companyId: string;
           {jobsites.map((j) => {
             const hasGps = j.latitude != null && j.longitude != null;
             return (
-              <li key={j.id} className="flex flex-col gap-2 rounded-xl bg-surface p-3">
+              <li key={j.id} className="flex flex-col gap-2 rounded-xl bg-surface shadow-card p-3">
                 <input
                   aria-label="Jobsite name"
                   defaultValue={j.name}
@@ -563,7 +563,7 @@ function KindToggle({ value, onChange }: { value: Jobsite["kind"]; onChange: (k:
       type="button"
       aria-pressed={value === k}
       onClick={() => value !== k && onChange(k)}
-      className={`rounded-md border px-3 py-1 text-sm font-semibold ${value === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
+      className={`rounded-full border px-3 py-1 text-sm font-semibold ${value === k ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}
     >
       {label}
     </button>
@@ -677,7 +677,7 @@ function PlanTab({ m }: { m: Membership }) {
 function DailyToggle({ companyId, on, refresh }: { companyId: string; on: boolean; refresh: () => Promise<void> | void }) {
   const [value, setValue] = useState(on);
   return (
-    <section className="mt-6 rounded-lg border border-line bg-surface p-3">
+    <section className="mt-6 rounded-lg bg-surface shadow-card p-3">
       <label className="flex min-h-11 items-start justify-between gap-3">
         <span>
           <b className="block">Daily pre-task plans</b>

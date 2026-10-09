@@ -1,10 +1,10 @@
 // A company's colors. Pure logic: which colors can be set, the default look, readable text on each color,
 // and plain-language warnings when a choice makes something hard to read or easy to confuse.
 //
-// The default ("Ledger") reads like a record book, not a sign: deep ink-blue, cool paper, muted status colors, so it
-// fits any workplace (hospital, kitchen, jobsite, shop floor). "Signal" keeps the safety-sign colors (ANSI Z535 in
-// the US, ISO 3864 worldwide) as a preset. Every color can be changed per company; the warnings say when a change
-// hurts readability or meaning.
+// The default ("Clarity") is calm and bright, like a premium consumer app: one blue accent, grey page, white cards,
+// the familiar phone status colors darkened to read outdoors. It fits any workplace. "Ledger" (deep ink-blue) and
+// "Signal" (the safety-sign colors, ANSI Z535 / ISO 3864) are presets. Every color can be changed per company; the
+// warnings say when a change hurts readability or meaning.
 
 export const THEME_ROLES = [
   { id: "brand", label: "Brand", hint: "Header, week card, links, selected tab" },
@@ -20,16 +20,21 @@ export const THEME_ROLES = [
 export type ThemeRole = (typeof THEME_ROLES)[number]["id"];
 export type Theme = Record<ThemeRole, string>;
 
-/** The default look ("Ledger"). */
+/** The default look ("Clarity"). */
 export const DEFAULT_THEME: Theme = {
-  brand: "#1E3A5F",
-  action: "#1E3A5F",
-  done: "#2C7A51",
-  caution: "#C58B14",
-  danger: "#B42318",
-  bg: "#F3F4F2",
+  brand: "#0071E3",
+  action: "#0071E3",
+  done: "#248A3D",
+  caution: "#C96F00",
+  danger: "#D70015",
+  bg: "#F5F5F7",
   surface: "#FFFFFF",
-  text: "#18212C",
+  text: "#1D1D1F",
+};
+
+/** Deep ink-blue on cool paper (the default for one day, 2026-10-09). */
+const LEDGER: Theme = {
+  brand: "#1E3A5F", action: "#1E3A5F", done: "#2C7A51", caution: "#C58B14", danger: "#B42318", bg: "#F3F4F2", surface: "#FFFFFF", text: "#18212C",
 };
 
 /** The safety-sign colors (the look before 2026-10-09). */
@@ -39,10 +44,11 @@ const SIGNAL: Theme = {
 
 /** Starting points in Admin → Brand. Each passes every check in themeWarnings. */
 export const THEME_PRESETS: { id: string; name: string; theme: Theme }[] = [
-  { id: "ledger", name: "Ledger", theme: DEFAULT_THEME },
+  { id: "clarity", name: "Clarity", theme: DEFAULT_THEME },
+  { id: "ledger", name: "Ledger", theme: LEDGER },
   { id: "signal", name: "Signal", theme: SIGNAL },
   { id: "harbor", name: "Harbor", theme: { ...SIGNAL, brand: "#0F6A6E", action: "#D2492F", done: "#1E8A5A", danger: "#9F1239", bg: "#EDF1F1", text: "#15232A" } },
-  { id: "graphite", name: "Graphite", theme: { ...DEFAULT_THEME, brand: "#2B2F36", action: "#2B2F36", bg: "#F2F2F0", text: "#1F2329" } },
+  { id: "graphite", name: "Graphite", theme: { ...DEFAULT_THEME, brand: "#1D1D1F", action: "#1D1D1F" } },
 ];
 
 const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;

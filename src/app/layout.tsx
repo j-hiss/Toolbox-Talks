@@ -1,12 +1,10 @@
 import type { Metadata, Viewport } from "next";
-// Fonts are bundled with the app (no Google Fonts request) so it works with no signal. Public Sans for the interface
-// (plain, very legible, covers Vietnamese); Source Serif 4 for titles, the record-book voice of the app.
-import "@fontsource/public-sans/400.css";
-import "@fontsource/public-sans/500.css";
-import "@fontsource/public-sans/600.css";
-import "@fontsource/public-sans/700.css";
-import "@fontsource/source-serif-4/500.css";
-import "@fontsource/source-serif-4/600.css";
+// The interface font is the phone's own: San Francisco on iPhone and Mac (the system font, not bundled), and Inter,
+// bundled so it works with no signal, everywhere else (Android, Windows). Inter is the closest open match.
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 

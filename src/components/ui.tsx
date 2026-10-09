@@ -13,11 +13,12 @@ type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "pri
 export function Button({ variant = "primary", size = "md", className = "", ...rest }: BtnProps) {
   // Disabled buttons stay readable outdoors: a plain outline with dark text, not a faded color.
   const base = "font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:border disabled:border-dashed disabled:border-muted disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:brightness-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-fg";
-  const sizes = size === "sm" ? "min-h-11 rounded-md px-3.5 py-2 text-sm" : "min-h-14 w-full rounded-md px-4 py-3.5 text-[17px] tracking-[-0.005em]";
+  // Pill buttons, like a premium consumer app: one filled blue for the main action, a tinted fill for the second one.
+  const sizes = size === "sm" ? "min-h-11 rounded-full px-4 py-2 text-[15px]" : "min-h-[54px] w-full rounded-full px-5 py-3.5 text-[17px] tracking-[-0.02em]";
   const variants = {
-    primary: "bg-action text-action-ink hover:brightness-115",
-    soft: "border border-brand/25 bg-brand-soft text-brand-text hover:border-brand/45",
-    ghost: "border border-line bg-surface text-fg hover:border-muted",
+    primary: "bg-action text-action-ink hover:brightness-110",
+    soft: "bg-brand-soft text-brand-text hover:brightness-[0.97]",
+    ghost: "bg-fg/[0.06] text-fg hover:bg-fg/[0.1]",
     danger: "border border-warn bg-surface text-warn-text",
   }[variant];
   return <button className={`${base} ${sizes} ${variants} ${className}`} {...rest} />;
@@ -56,20 +57,25 @@ export function Field({ label, hint, id, children }: { label: string; hint?: str
 }
 
 export const inputClass =
-  "w-full min-w-0 rounded-md border border-line bg-surface px-3.5 py-3 text-base text-fg placeholder:text-muted focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/12";
+  "w-full min-w-0 rounded-md border border-line bg-surface px-3.5 py-3 text-[17px] text-fg placeholder:text-muted focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15";
+
+/** A segmented control (range pickers, how-often): a grey track with the chosen segment raised in white. */
+export const segmentedClass = "grid gap-1 rounded-[14px] bg-fg/[0.06] p-1";
+export const segmentClass = (on: boolean) =>
+  `min-h-10 rounded-[10px] px-2 text-[14px] font-semibold transition ${on ? "bg-surface text-fg shadow-[0_1px_3px_rgba(0,0,0,0.14)]" : "text-muted hover:text-fg"}`;
 
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return <p className="text-sm font-medium text-muted">{children}</p>;
 }
 
 export function Title({ children }: { children: React.ReactNode }) {
-  return <h1 className="mt-0.5 font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.015em] text-balance">{children}</h1>;
+  return <h1 className="mt-0.5 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.025em] text-balance">{children}</h1>;
 }
 
 export function GroupHeading({ children, aside }: { children: React.ReactNode; aside?: React.ReactNode }) {
   return (
-    <div className="mt-9 flex items-baseline justify-between gap-3 border-b border-line pb-2">
-      <h2 className="font-display text-[19px] font-semibold tracking-[-0.01em]">{children}</h2>
+    <div className="mt-9 flex items-baseline justify-between gap-3 px-1">
+      <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em]">{children}</h2>
       {aside && <span className="text-sm font-medium tabular-nums text-muted">{aside}</span>}
     </div>
   );
@@ -77,9 +83,10 @@ export function GroupHeading({ children, aside }: { children: React.ReactNode; a
 
 export function Notice({ tone = "info", children }: { tone?: "info" | "error" | "ok" | "caution"; children: React.ReactNode }) {
   // A colored rule on the left says the kind of message; the fill stays light so text reads the same everywhere.
-  const tones = { info: "border-brand bg-brand-soft", error: "border-warn bg-warn-bg text-fg", ok: "border-ok bg-ok-bg", caution: "border-caution bg-caution-bg text-fg" }[tone];
+  // A soft tinted panel; the tint says the kind of message.
+  const tones = { info: "bg-brand-soft", error: "bg-warn-bg text-fg", ok: "bg-ok-bg", caution: "bg-caution-bg text-fg" }[tone];
   return (
-    <div role={tone === "error" ? "alert" : "status"} className={`flex gap-2 rounded-md border-l-[3px] px-4 py-3 text-sm leading-relaxed ${tones}`}>
+    <div role={tone === "error" ? "alert" : "status"} className={`flex gap-2 rounded-lg px-4 py-3 text-[15px] leading-relaxed ${tones}`}>
       {tone === "caution" && <span aria-hidden className="font-bold">!</span>}
       <div className="min-w-0 flex-1">{children}</div>
     </div>
@@ -114,7 +121,7 @@ export function ErrorNotice({ what, detail, onRetry }: { what: string; detail: s
 /** The app mark: a check in a brand-colored rounded square. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
-    <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[7px] bg-brand text-brand-ink" style={{ width: size, height: size }}>
+    <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[8px] bg-brand text-brand-ink" style={{ width: size, height: size }}>
       <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M5 12.5l4.5 4.5L19 7.5" />
       </svg>
@@ -131,7 +138,7 @@ export function Shell({ children, nav, tabs = true, lockHeader = false }: { chil
   const name = s.current?.company.name ?? "Toolbox Talks";
   return (
     <div className={`mx-auto max-w-xl px-4 ${tabs ? "pb-28" : "pb-10"}`}>
-      <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-line bg-bg/92 px-5 py-3 backdrop-blur">
+      <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-line/60 bg-bg/80 px-5 py-3 backdrop-blur-xl backdrop-saturate-[1.8]">
         {lockHeader ? (
           // Signing: the logo isn't a way out while a crew member holds the phone.
           <span className="flex min-w-0 items-center gap-2.5"><Mark size={28} /><span className="truncate text-[15px] font-semibold tracking-[-0.005em]">{name}</span></span>
@@ -195,9 +202,8 @@ function TabBar() {
   if (tabs.length < 2) return null; // an employee account has only Home
   const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href) || (href === "/records/" && path.startsWith("/record/")));
   return (
-    // Anchored to the bottom edge with a hairline, like the navigation of a well-made native app; the selected tab
-    // carries a short brand rule above its icon.
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/96 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur">
+    // A translucent bar on the bottom edge, like a phone's own tab bar; the selected tab is in the brand color.
+    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t border-line/60 bg-surface/80 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl backdrop-saturate-[1.8]">
       <ul className="mx-auto flex max-w-xl px-2">
         {tabs.map((t) => {
           const on = active(t.href);
@@ -206,9 +212,8 @@ function TabBar() {
               <Link
                 href={t.href}
                 aria-current={on ? "page" : undefined}
-                className={`relative flex min-h-16 flex-col items-center justify-center gap-0.5 pt-1.5 pb-1.5 text-[12px] ${on ? "font-semibold text-brand-text" : "text-muted"}`}
+                className={`flex min-h-16 flex-col items-center justify-center gap-0.5 pt-1.5 pb-1.5 text-[11px] font-medium tracking-normal ${on ? "text-brand-text" : "text-muted"}`}
               >
-                {on && <span aria-hidden className="absolute top-0 h-[3px] w-8 rounded-b bg-brand" />}
                 <span className="flex h-7 items-center justify-center">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={on ? 2 : 1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     {ICONS[t.icon]}
@@ -226,7 +231,7 @@ function TabBar() {
 
 export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="flex min-h-11 items-center rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-semibold text-brand-text">
+    <Link href={href} className="flex min-h-11 items-center rounded-full bg-fg/[0.06] px-4 py-1.5 text-[15px] font-medium text-brand-text">
       {children}
     </Link>
   );

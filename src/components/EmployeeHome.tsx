@@ -58,7 +58,7 @@ export function EmployeeHome({ m }: { m: Membership }) {
           <GroupHeading>History</GroupHeading>
           <ul className="mt-3 flex flex-col gap-2">
             {talks.map((t) => (
-              <li key={t.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface px-4 py-3">
+              <li key={t.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface shadow-card px-4 py-3">
                 <span className="min-w-0">
                   <b className="block">{t.title}</b>
                   <small className="text-muted">{day(t.held_at)}{t.jobsite_name ? ` · ${t.jobsite_name}` : ""}</small>
@@ -77,7 +77,7 @@ export function EmployeeHome({ m }: { m: Membership }) {
             {cards.map((c) => {
               const st = certState(c, new Date());
               return (
-                <li key={c.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface px-4 py-3">
+                <li key={c.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface shadow-card px-4 py-3">
                   <span className="min-w-0"><b className="block">{certTypeName(c.cert_type, c.custom_name)}</b>
                     <small className="text-muted">{c.expires_on ? `Expires ${day(`${c.expires_on}T12:00:00`)}` : "No expiry on the card"}</small></span>
                   <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-semibold ${CERT_CHIP[st].tone}`}>{CERT_CHIP[st].label}</span>

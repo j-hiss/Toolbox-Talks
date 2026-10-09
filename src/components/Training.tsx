@@ -58,7 +58,7 @@ export function Training({ companyId, people, roles }: { companyId: string; peop
           const rows = personTraining(p.id, p.role_id, certs, reqs, today);
           return (
             <li key={p.id}>
-              <button className="w-full rounded-lg border border-line bg-surface p-3 text-left text-sm" onClick={() => setOpen(p)} aria-label={`Training for ${p.full_name}`}>
+              <button className="w-full rounded-lg bg-surface shadow-card p-3 text-left text-sm" onClick={() => setOpen(p)} aria-label={`Training for ${p.full_name}`}>
                 <span className="flex items-baseline justify-between gap-2"><b>{p.full_name}</b><small className="text-muted">{titleOf(p, roles)}</small></span>
                 <span className="mt-1.5 flex flex-wrap gap-1.5">
                   {rows.length === 0 ? <small className="text-muted">No cards on file</small> : rows.map((r) => (
@@ -152,7 +152,7 @@ function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, re
           <GroupHeading aside={`${history.length}`}>On file</GroupHeading>
           <ul className="mt-3 flex flex-col gap-2">
             {history.map((c) => (
-              <li key={c.id} className={`rounded-lg border border-line p-3 text-sm ${c.withdrawn_at ? "opacity-60" : "bg-surface"}`}>
+              <li key={c.id} className={`rounded-lg p-3 text-sm ${c.withdrawn_at ? "opacity-60" : "bg-surface shadow-card"}`}>
                 <b>{certTypeName(c.cert_type, c.custom_name)}</b>
                 <p className="text-muted">{[c.issued_on && `Issued ${day(c.issued_on)}`, c.expires_on ? `expires ${day(c.expires_on)}` : "no expiry", c.note].filter(Boolean).join(" · ")}</p>
                 {c.withdrawn_at && <p className="text-muted">Withdrawn: {c.withdrawn_reason}</p>}

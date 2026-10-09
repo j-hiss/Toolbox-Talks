@@ -154,7 +154,7 @@ function RecordView({ m }: { m: Membership }) {
             {rec.content.since_last.status === "unavailable" && <p className="text-muted">The safety log couldn&apos;t be loaded when this talk was given.</p>}
             {rec.content.since_last.status !== "unavailable" && rec.content.since_last.items.length === 0 && <p className="text-muted">No new inspections, citations, incidents or near misses logged.</p>}
             {rec.content.since_last.items.map((it) => (
-              <div key={it.event_id} className="rounded-xl bg-surface px-3 py-2">
+              <div key={it.event_id} className="rounded-xl bg-surface shadow-card px-3 py-2">
                 <small className="block font-semibold text-muted">{it.heading}</small>
                 <p>{it.text}</p>
                 <small className="text-muted">Reviewed with the team {new Date(it.reviewed_with_crew_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</small>
@@ -170,12 +170,12 @@ function RecordView({ m }: { m: Membership }) {
           <div className="mt-3 flex flex-col gap-2 text-sm">
             {rec.site_notes && <p className="rounded-r border-l-4 border-fg bg-surface px-3 py-2"><b>Today on this site:</b> {rec.site_notes}</p>}
             {rec.heat && (
-              <p className="rounded-xl bg-surface px-3 py-2">
+              <p className="rounded-xl bg-surface shadow-card px-3 py-2">
                 <b>Heat index up to {rec.heat.max_heat_index_f}°F</b> ({HEAT_LABEL[rec.heat.level as HeatLevel] ?? rec.heat.level}){rec.heat.reminder_read ? " · heat reminder read with this talk" : ""}
               </p>
             )}
             {issues.length > 0 && (
-              <div className="rounded-xl bg-surface px-3 py-2">
+              <div className="rounded-xl bg-surface shadow-card px-3 py-2">
                 <b>Raised by the team ({issues.length})</b>
                 <ul className="mt-1 flex flex-col gap-1">
                   {issues.map((i) => (
@@ -194,7 +194,7 @@ function RecordView({ m }: { m: Membership }) {
       )}
 
       <GroupHeading>What was covered</GroupHeading>
-      <div className="mt-3 rounded-xl bg-surface p-4 text-sm">
+      <div className="mt-3 rounded-xl bg-surface shadow-card p-4 text-sm">
         <p className="font-semibold">{rec.content.hook}</p>
         {rec.content.sections.map((s) => (
           <div key={s.heading} className="mt-3">

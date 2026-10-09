@@ -60,7 +60,7 @@ function Records({ m }: { m: Membership }) {
       <div className="mt-4 flex gap-1.5" role="tablist">
         {(["talks", "issues"] as const).map((v) => (
           <button key={v} role="tab" aria-selected={view === v} onClick={() => { window.location.hash = v === "issues" ? "issues" : ""; }}
-            className={`min-h-10 flex-1 rounded-md border px-3.5 text-base font-semibold ${view === v ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
+            className={`min-h-10 flex-1 rounded-full border px-3.5 text-base font-semibold ${view === v ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
             {v === "talks" ? "Talks" : "Issues"}
           </button>
         ))}
@@ -125,7 +125,7 @@ function Records({ m }: { m: Membership }) {
                     const c = countStatuses(r.statuses.map((status) => ({ status })));
                     return (
                       <li key={r.id}>
-                        <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-xl bg-surface p-3 hover:ring-2 hover:ring-brand">
+                        <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-xl bg-surface shadow-card p-3 hover:ring-2 hover:ring-brand">
                           <span className="min-w-0">
                             <b className="block">{r.title}{r.kind === "daily" && <span className="ml-2 rounded bg-brand-soft px-1.5 py-0.5 align-middle text-xs font-semibold text-brand-text">Daily plan</span>}</b>
                             {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}

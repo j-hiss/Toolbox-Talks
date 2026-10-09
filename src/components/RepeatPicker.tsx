@@ -8,7 +8,7 @@ import { REPEAT_CHOICES, isSeasonal, nextListWeek, repeatsFor, talksInPlan, type
 import { REPEAT_NOTES, repeatNoteText } from "@/content/repeats";
 import { isoDay, parseDay, weekLabel } from "@/core/weeks";
 import { removeRepeat, saveRepeat } from "@/lib/data/plan";
-import { Button, Notice, inputClass } from "@/components/ui";
+import { Button, Notice, inputClass, segmentClass, segmentedClass } from "@/components/ui";
 
 type Props = { companyId: string; input: Omit<PlanInput, "today">; repeats: RepeatSetting[]; reload: () => void };
 
@@ -35,7 +35,7 @@ export function RepeatPicker({ companyId, input, repeats, reload }: Props) {
   const everyName = (weeks: number) => REPEAT_CHOICES.find((c) => c.weeks === weeks)?.name.toLowerCase() ?? `every ${weeks} weeks`;
 
   return (
-    <section aria-label="Repeat talks" className="mt-4 rounded-lg border border-line bg-surface p-3">
+    <section aria-label="Repeat talks" className="mt-4 rounded-lg bg-surface shadow-card p-3">
       <h2 className="font-display text-lg font-semibold">Repeat talks</h2>
       <p className="text-sm text-muted">Bring a talk back on a schedule, on top of the rotation. Changes start the week of {weekLabel(parseDay(start))}.</p>
 
@@ -72,10 +72,10 @@ export function RepeatPicker({ companyId, input, repeats, reload }: Props) {
           <option value="">Choose a talk to repeat</option>
           {(talks.length ? talks : allTalks).map((t) => <option key={t.id} value={t.id}>{t.content.en.title}{REPEAT_NOTES[t.id] ? " · has a yearly rule" : ""}</option>)}
         </select>
-        <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-line" role="radiogroup" aria-label="How often">
+        <div className={`grid-cols-3 ${segmentedClass}`} role="radiogroup" aria-label="How often">
           {REPEAT_CHOICES.map((c) => (
             <button key={c.months} role="radio" aria-checked={every === c.months} onClick={() => setEvery(c.months)}
-              className={`min-h-11 px-2 text-sm font-semibold ${every === c.months ? "bg-brand text-brand-ink" : "bg-surface"}`}>{c.name}</button>
+              className={segmentClass(every === c.months)}>{c.name}</button>
           ))}
         </div>
         {note && <Notice tone="caution">{repeatNoteText(note)}</Notice>}

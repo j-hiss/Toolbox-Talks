@@ -44,7 +44,7 @@ export function CrewPhoto({ draft, update, kind = "photo" }: { draft: TalkDraft;
       </div>
       <input ref={input} type="file" accept="image/*" capture="environment" className="sr-only" aria-label={k.label} onChange={(e) => take(e.target.files?.[0])} />
       {current ? (
-        <div className="mt-2 overflow-hidden rounded-xl bg-surface">
+        <div className="mt-2 overflow-hidden rounded-xl bg-surface shadow-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={current.image} alt={k.alt} className={`max-h-72 w-full ${kind === "sheet" ? "object-contain bg-white" : "object-cover"}`} />
           <div className="flex items-center gap-2 p-3">
@@ -55,7 +55,7 @@ export function CrewPhoto({ draft, update, kind = "photo" }: { draft: TalkDraft;
         </div>
       ) : (
         <button
-          className="mt-2 flex min-h-14 w-full items-center gap-3 rounded-xl bg-surface px-4 text-left ring-1 ring-line"
+          className="mt-2 flex min-h-14 w-full items-center gap-3 rounded-xl bg-surface shadow-card px-4 text-left ring-1 ring-line"
           disabled={busy}
           onClick={() => input.current?.click()}
         >

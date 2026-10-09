@@ -41,10 +41,10 @@ describe("PDF record", () => {
     expect(pdf).toMatch(/\/Subtype \/Image[\s\S]*\/Filter \/DCTDecode/); // the JPEG is embedded
     expect(text(rec())).not.toContain("CREW PHOTO");
   });
-  it("header band is the company's brand color (default Ledger ink-blue when none is set)", () => {
+  it("header band is the company's brand color (default Clarity blue when none is set)", () => {
     // jsPDF writes the fill as "r g b rg" (2 decimals) right before the full-width band "0. <top> <width> -8. re".
     const band = (c: Company) => buildRecordPdf(rec(), c).output().match(/([\d.]+ [\d.]+ [\d.]+) rg\n0\. [\d.]+ [\d.]+ -8\. re/)?.[1];
-    expect(band(co)).toBe("0.12 0.23 0.37"); // #1E3A5F
+    expect(band(co)).toBe("0. 0.44 0.89"); // #0071E3
     expect(band({ ...co, theme: { brand: "#123456" } })).toBe("0.07 0.2 0.34");
   });
   it("every signature line has the full date and time", () => {
