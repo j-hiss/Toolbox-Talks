@@ -8,7 +8,7 @@ import { useSession } from "@/lib/session";
 import { canAdmin, canPresent, canReport, isStaff } from "@/lib/data/types";
 import { pending, onOutboxChange } from "@/lib/outbox";
 import { BRAND } from "@/content/brand";
-import { Wordmark } from "./Logo";
+import { SignatureRule, Wordmark } from "./Logo";
 import { BRAND_COLORS, markSvgInner } from "@/content/logo";
 
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" | "lg" };
@@ -73,8 +73,14 @@ export function Eyebrow({ children }: { children: React.ReactNode }) {
   return <p className="text-sm font-medium text-muted">{children}</p>;
 }
 
+/** A page title, with the signature line under it (the brand's mark, look book 2026-10-09). */
 export function Title({ children }: { children: React.ReactNode }) {
-  return <h1 className="mt-0.5 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.025em] text-balance">{children}</h1>;
+  return (
+    <>
+      <h1 className="mt-0.5 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.025em] text-balance">{children}</h1>
+      <SignatureRule className="mt-2.5" />
+    </>
+  );
 }
 
 export function GroupHeading({ children, aside }: { children: React.ReactNode; aside?: React.ReactNode }) {

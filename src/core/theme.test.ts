@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_THEME, THEME_PRESETS, THEME_ROLES, contrast, darkVersion, derived, inkOn, isDark, mix, normalizeHex, normalizeTheme, themeChanges, themeVars, themeWarnings,
+  DEFAULT_THEME, THEME_PRESETS, THEME_ROLES, contrast, darkVersion, printBrand, derived, inkOn, isDark, mix, normalizeHex, normalizeTheme, themeChanges, themeVars, themeWarnings,
 } from "./theme";
 
 describe("theme", () => {
@@ -83,5 +83,12 @@ describe("theme", () => {
       expect([p.id, contrast(k.actionInk, k.action) >= 3]).toEqual([p.id, true]);
       expect(themeVars(p.theme)["--t-scheme"]).toBe("light");
     }
+  });
+});
+
+describe("printBrand", () => {
+  it("darkens a light brand color until it reads on white paper, and keeps a dark one", () => {
+    expect(contrast(printBrand(DEFAULT_THEME), "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
+    expect(printBrand({ ...DEFAULT_THEME, brand: "#1F4D3A" })).toBe("#1F4D3A");
   });
 });

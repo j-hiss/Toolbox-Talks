@@ -22,16 +22,22 @@ export const THEME_ROLES = [
 export type ThemeRole = (typeof THEME_ROLES)[number]["id"];
 export type Theme = Record<ThemeRole, string>;
 
-/** The default look ("Momentum"): one green accent for brand, buttons and done, on a dark page. */
+/** The default look ("Momentum"): one green accent for brand, buttons and done, on a green-black page that matches
+ *  the brand's charcoal (look book, 2026-10-09). */
 export const DEFAULT_THEME: Theme = {
   brand: "#3DDC97",
   action: "#3DDC97",
   done: "#3DDC97",
   caution: "#FFC24B",
   danger: "#FF6B6B",
-  bg: "#0E1116",
-  surface: "#171C23",
+  bg: "#111613",
+  surface: "#1A211D",
   text: "#F2F4F7",
+};
+
+/** The brand's own light look: deep forest on warm paper, like the logo and the partner material. */
+const PAPER: Theme = {
+  brand: "#1F4D3A", action: "#1F4D3A", done: "#1E7A50", caution: "#A86A00", danger: "#B42318", bg: "#F6F5F0", surface: "#FFFFFF", text: "#1E2422",
 };
 
 /** Calm and bright, one blue accent on a grey page (the default 2026-10-08 to 10-09). */
@@ -57,6 +63,7 @@ const SIGNAL: Theme = {
 /** Starting points in Admin → Brand. Each passes every check in themeWarnings. */
 export const THEME_PRESETS: { id: string; name: string; theme: Theme }[] = [
   { id: "momentum", name: "Momentum", theme: DEFAULT_THEME },
+  { id: "paper", name: "Paper", theme: PAPER },
   { id: "clarity", name: "Clarity", theme: CLARITY },
   { id: "field", name: "Field", theme: FIELD },
   { id: "ledger", name: "Ledger", theme: LEDGER },
@@ -153,13 +160,25 @@ export function derived(t: Theme) {
   };
 }
 
+/**
+ * The brand color as it prints on white paper (the PDF header band and signature-line dots): a light brand color,
+ * like Momentum's bright green, is darkened a step at a time until it reads on white (4.5:1).
+ */
+export function printBrand(t: Theme): string {
+  for (let p = 1; p >= 0; p -= 0.05) {
+    const c = mix(t.brand, "#000000", p);
+    if (contrast(c, WHITE) >= 4.5) return c;
+  }
+  return "#000000";
+}
+
 /** A dark theme: its page is dark enough that phone dark mode should leave it alone. */
 export function isDark(t: Theme): boolean {
   return luminance(t.bg) < 0.2;
 }
 
-const DARK_BG = "#0F1113";
-const DARK_SURFACE = "#1A1D21";
+const DARK_BG = "#101412";
+const DARK_SURFACE = "#191F1C";
 const DARK_TEXT = "#F2F4F7";
 
 /** Mix a color toward white, a step at a time, until it reaches `min` contrast on `on`. */

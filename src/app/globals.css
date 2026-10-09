@@ -18,8 +18,8 @@
   --caution: var(--t-caution, #ffc24b);
   --warn: var(--t-danger, #ff6b6b);
   --warn-ink: var(--t-danger-ink, #0e1116);
-  --bg: var(--t-bg, #0e1116);
-  --surface: var(--t-surface, #171c23);
+  --bg: var(--t-bg, #111613);
+  --surface: var(--t-surface, #1a211d);
   --fg: var(--t-text, #f2f4f7);
   color-scheme: var(--t-scheme, dark);
 
@@ -47,8 +47,8 @@
    src/core/theme.ts (themeVars → --t-dark-*): dark page, cards and text, brand and button lifted until readable. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: var(--t-dark-bg, #0e1116);
-    --surface: var(--t-dark-surface, #171c23);
+    --bg: var(--t-dark-bg, #111613);
+    --surface: var(--t-dark-surface, #1a211d);
     --fg: var(--t-dark-text, #f2f4f7);
     --brand: var(--t-dark-brand, #3ddc97);
     --brand-ink: var(--t-dark-brand-ink, #0e1116);

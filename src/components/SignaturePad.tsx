@@ -102,6 +102,14 @@ export function SignaturePad({ label, value, onChange, tall = false, hint = "Sig
         aria-disabled={!!locked}
       />
       {locked && <p className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-base font-semibold text-[#3D4A5A]">{locked}</p>}
+      {/* The signature line (the product's mark): where to sign, with the dot filling in once signed. Drawn over the
+          pad, never into it, so the saved signature image is only the ink. */}
+      {!locked && (
+        <span aria-hidden className="pointer-events-none absolute inset-x-[7%] bottom-[22%] flex items-center gap-1.5">
+          <span className="h-0.5 flex-1 rounded-full bg-[#B9BEC4]" />
+          <span className={`h-2 w-2 rounded-full ${value ? "bg-ok" : "bg-[#B9BEC4]"}`} />
+        </span>
+      )}
       </div>
       <div className="mt-1 flex items-center justify-between text-sm">
         <span role={tooShort ? "alert" : undefined} className={value ? "font-semibold text-ok-text" : tooShort ? "font-semibold text-warn-text" : "text-muted"}>

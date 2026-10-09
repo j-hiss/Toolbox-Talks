@@ -17,3 +17,13 @@ export function Wordmark({ height = 40, className = "" }: { height?: number; cla
     </svg>
   );
 }
+
+/** The signature line on its own (a bar and a dot), the brand's recurring mark: under page titles. */
+export function SignatureRule({ className = "" }: { className?: string }) {
+  return (
+    <span aria-hidden className={`flex w-12 items-center gap-1 ${className}`}>
+      <span className="h-1 flex-1 rounded-full bg-brand" />
+      <span className="h-1 w-1 rounded-full bg-brand" />
+    </span>
+  );
+}

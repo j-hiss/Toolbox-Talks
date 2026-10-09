@@ -10,7 +10,7 @@ import { parseDay, periodLabel, weekLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
 import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
-import { normalizeTheme, rgb } from "@/core/theme";
+import { normalizeTheme, printBrand, rgb } from "@/core/theme";
 import type { SafetyProfile } from "@/core/profile";
 
 export const PDF_FOOTER = "Documents a safety meeting. Does not by itself certify OSHA compliance.";
@@ -44,10 +44,19 @@ const PAGE = { W: 612, H: 792, M: 48 } as const;
  * content never depends on it), the name, a label on the right, address, phone, email and licenses, and a rule.
  * Returns the y where the content starts.
  */
+/**
+ * A signature line. A signed line ends in a small dot in the company's brand color (the product's "signature line",
+ * look book 2026-10-09); the printed status next to it stays the record of what happened.
+ */
+function sigLine(doc: jsPDF, co: Company, x: number, y: number, signed: boolean) {
+  doc.setDrawColor(120); doc.setLineWidth(0.6); doc.line(x, y, x + 150, y);
+  if (signed) { doc.setFillColor(...rgb(printBrand(normalizeTheme(co.theme)))); doc.circle(x + 155, y, 1.8, "F"); }
+}
+
 function companyHeader(doc: jsPDF, co: Company, label: string, top: number = PAGE.M): number {
   const { W, M } = PAGE, CW = W - 2 * M;
   let y = top;
-  doc.setFillColor(...rgb(normalizeTheme(co.theme).brand)); doc.rect(0, 0, W, 8, "F");
+  doc.setFillColor(...rgb(printBrand(normalizeTheme(co.theme)))); doc.rect(0, 0, W, 8, "F");
   doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text(co.name || "Company name not set", M, y + 4);
   doc.setFontSize(9); doc.setTextColor(GREY); doc.text(label, W - M, y + 4, { align: "right" });
   y += 18; doc.setTextColor(60); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
@@ -249,7 +258,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
     doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...(flag ? RED : GREEN));
     doc.text(STATUS_LABEL[a.status].toUpperCase(), COL.status, y + 22); doc.setTextColor(0);
     image(a.signature, COL.sig, y + 2);
-    doc.setDrawColor(120); doc.line(COL.sig, y + 40, COL.sig + 150, y + 40);
+    sigLine(doc, co, COL.sig, y + 40, a.status === "signed");
     stampCell(a.signed_at, y);
     if (a.confirmed_at) {
       doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(110);
@@ -267,7 +276,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   if (!image(r.presenter_signature, COL.sig, y - 4)) {
     doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...RED); doc.text("NOT SIGNED", COL.sig + 3, y + 22); doc.setTextColor(0);
   }
-  doc.setDrawColor(120); doc.line(COL.sig, y + 36, COL.sig + 150, y + 36);
+  sigLine(doc, co, COL.sig, y + 36, !!r.presenter_signature);
   stampCell(r.presenter_signed_at, y - 4);
 
   // Crew photo and paper sign-in sheet (both optional) --------------------------------------------------------------

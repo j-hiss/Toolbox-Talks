@@ -168,8 +168,14 @@ customer #1, not a special case.
 - **Earlier looks kept as presets:** Clarity (A: the apple.com-inspired light look, #F5F5F7 page, #0071E3 blue, white
   cards), Field (C's colors: charcoal and safety orange), Ledger, Signal (the ANSI Z535 / ISO 3864 safety-sign
   colors), Harbor, Graphite. No Apple names, logos, images or fonts are copied.
+- **Brand pass (2026-10-09, after the look book):** Momentum's page and cards take a green-black tint that matches the
+  brand charcoal (#111613 / #1A211D). The signature line (bar and dot) sits under every page title and on the signing
+  pad (the dot fills in green once signed; it is drawn over the pad, never into the saved signature). New light
+  preset **Paper**: deep forest on warm off-white, the brand's own light look. PDFs print the company's brand color
+  darkened until it reads on white (`printBrand`), and each signed line ends in a small brand-colored dot; the printed
+  status beside it stays the record.
 - **Admin → Brand:** an admin can change any of the eight colors (brand, buttons, done, caution, missed, background,
-  cards, text) with a color picker or an exact hex code, or start from a preset (Momentum, Clarity, Field, Ledger, Signal, Harbor, Graphite).
+  cards, text) with a color picker or an exact hex code, or start from a preset (Momentum, Paper, Clarity, Field, Ledger, Signal, Harbor, Graphite).
   The whole app changes live while trying colors; nothing is saved until "Save colors"; leaving the tab puts the
   saved colors back. "Back to default" returns to Momentum.
 - **Checks, not blocks:** plain-language warnings when a choice makes text hard to read (WCAG contrast) or makes
