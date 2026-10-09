@@ -6,7 +6,10 @@
 import { useEffect, useRef, useState } from "react";
 import { milesAcross, tileXY, tilesFor } from "@/core/maptiles";
 import type { Ring } from "@/core/conditions";
-import { BASEMAP, RADAR, RADAR_SPANS, agoLabel, guessLatest, radarFrames, radarLatest, type RadarSpan } from "@/lib/radar";
+import {
+  BASEMAP, FORECAST, RADAR, RADAR_SPANS, aheadLabel, agoLabel, forecastCovers, forecastFrames, forecastMinute, forecastRun, guessLatest,
+  radarFrames, radarLatest, runName, type RadarSpan,
+} from "@/lib/radar";
 
 const SPAN_KEY = "tt-radar-span";
 function savedSpan(): RadarSpan {
@@ -22,10 +25,20 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
   const [width, setWidth] = useState(358);
   const [z, setZ] = useState(8);
   const [span, setSpan] = useState<RadarSpan>(savedSpan);
-  const frames = radarFrames(span);
+  // "ahead": the next 6 hours from the weather model, shown as its own loop and labelled as a forecast, never mixed
+  // into the observed radar.
+  const [ahead, setAhead] = useState(false);
+  const [run, setRun] = useState<{ init: Date | null; now: Date } | null>(null);
+  const canForecast = forecastCovers(latitude, longitude);
+  const frames = ahead ? forecastFrames() : radarFrames(span);
   const LAST = frames.length - 1;
   const [frame, setFrame] = useState(LAST);
+  const pickAhead = () => {
+    setAhead(true); setFrame(0); setRadarFailed(0); setPlaying(false);
+    forecastRun().then((init) => setRun({ init, now: new Date() }));
+  };
   const pickSpan = (h: RadarSpan) => {
+    setAhead(false);
     setSpan(h); setFrame(radarFrames(h).length - 1); setRadarFailed(0);
     try { localStorage.setItem(SPAN_KEY, String(h)); } catch { /* fine */ }
   };
@@ -46,16 +59,24 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
   // The loop: one frame every half second, then a pause on the latest scan.
   useEffect(() => {
     if (!playing) return;
-    const t = setTimeout(() => setFrame((f) => (f + 1) % frames.length), frame === LAST ? 1600 : 450);
+    const t = setTimeout(() => setFrame((f) => (f + 1) % frames.length), frame === LAST ? 1600 : ahead ? 650 : 450);
     return () => clearTimeout(t);
-  }, [playing, frame, frames.length, LAST]);
+  }, [playing, frame, frames.length, LAST, ahead]);
 
   const tiles = tilesFor(latitude, longitude, z, width, HEIGHT);
   const offline = baseFailed >= tiles.length && tiles.length > 0;
   const minsAgo = frames[Math.min(frame, LAST)];
   const base = scanAt ?? guessLatest();
   const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  const label = scanAt ? clock(new Date(scanAt.getTime() - minsAgo * 60_000)) : agoLabel(minsAgo);
+  const fcInit = run?.init ?? null;
+  const fcTile = (m: number, t: { z: number; x: number; y: number }) => {
+    if (!fcInit || !run) return null;
+    const f = forecastMinute(fcInit, run.now, m);
+    return f === null ? null : FORECAST.tile(f, runName(fcInit), t.z, t.x, t.y);
+  };
+  const label = ahead
+    ? (run ? clock(new Date(run.now.getTime() + minsAgo * 60_000)) : aheadLabel(minsAgo))
+    : scanAt ? clock(new Date(scanAt.getTime() - minsAgo * 60_000)) : agoLabel(minsAgo);
   // Warning areas, placed with the same tile math as the map (pixels from the center).
   const c = tileXY(latitude, longitude, z);
   const toPx = ([lat, lon]: [number, number]) => { const p = tileXY(lat, lon, z); return `${(width / 2 + (p.x - c.x) * 256).toFixed(1)},${(HEIGHT / 2 + (p.y - c.y) * 256).toFixed(1)}`; };
@@ -63,7 +84,7 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
 
   return (
     <div className="px-3 pb-3">
-      <div ref={box} className="relative overflow-hidden rounded-xl bg-[#DCE3EA]" style={{ height: HEIGHT }} aria-label={`Radar map around the jobsite, about ${miles} miles across. ${label}.`} role="img">
+      <div ref={box} className="relative overflow-hidden rounded-xl bg-[#DCE3EA]" style={{ height: HEIGHT }} aria-label={`${ahead ? "Model forecast map" : "Radar map"} around the jobsite, about ${miles} miles across. ${label}.`} role="img">
         {/* Street map */}
         {tiles.map((t) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -73,14 +94,25 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
         ))}
         {/* Radar: every frame is loaded up front and only the current one shows, so the loop never flickers */}
         {frames.map((m, i) => (
-          <div key={`${span}-${m}`} className="pointer-events-none absolute inset-0 transition-opacity duration-150" style={{ opacity: i === frame ? 0.78 : 0 }}>
-            {tiles.map((t) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={`r-${m}-${t.z}-${t.x}-${t.y}`} src={RADAR.tile(m, t.z, t.x, t.y, base)} alt="" width={256} height={256} draggable={false}
-                className="absolute max-w-none select-none" style={{ left: t.left, top: t.top }} onError={() => setRadarFailed((n) => n + 1)} />
-            ))}
+          <div key={`${ahead ? "f" : span}-${m}`} className="pointer-events-none absolute inset-0 transition-opacity duration-150" style={{ opacity: i === frame ? 0.78 : 0 }}>
+            {tiles.map((t) => {
+              const src = ahead ? fcTile(m, t) : RADAR.tile(m, t.z, t.x, t.y, base);
+              return src ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={`r-${m}-${t.z}-${t.x}-${t.y}`} src={src} alt="" width={256} height={256} draggable={false}
+                  className="absolute max-w-none select-none" style={{ left: t.left, top: t.top }} onError={() => setRadarFailed((n) => n + 1)} />
+              ) : null;
+            })}
           </div>
         ))}
+        {ahead && (
+          <div className="pointer-events-none absolute inset-0 rounded-xl border-4 border-dashed border-[#F5B700]" aria-hidden />
+        )}
+        {ahead && (
+          <div className="absolute inset-x-12 top-2 rounded-md bg-[#F5B700] px-2 py-1 text-center text-[11px] font-semibold leading-tight text-[#14202E] shadow">
+            {run && !fcInit ? "Forecast unavailable right now" : "Model forecast, not radar. Storms may form, move or fade differently."}
+          </div>
+        )}
 
         {/* Weather service warning areas */}
         {areas.length > 0 && (
@@ -105,7 +137,7 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
         </div>
 
         {/* Rain scale */}
-        <div className="absolute top-2 left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] text-[#14202E] shadow">
+        <div className={`absolute left-2 rounded-md bg-white/90 px-2 py-1 text-[10px] text-[#14202E] shadow ${ahead ? "top-14" : "top-2"}`}>
           <span className="block h-1.5 w-24 rounded-full" style={{ background: "linear-gradient(90deg,#04E9E7,#019FF4,#02FD02,#008E00,#FDF802,#E5BC00,#FD9500,#FD0000,#D40000,#F800FD)" }} />
           <span className="mt-0.5 flex justify-between"><span>Light</span><span>Heavy</span></span>
           {areas.length > 0 && (
@@ -117,12 +149,17 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
         </div>
 
         {/* How far back */}
-        <div className="absolute bottom-[52px] left-2 flex overflow-hidden rounded-lg bg-white/90 text-[11px] font-semibold text-[#14202E] shadow" role="group" aria-label="How far back the radar goes">
+        <div className="absolute bottom-[52px] left-2 flex overflow-hidden rounded-lg bg-white/90 text-[11px] font-semibold text-[#14202E] shadow" role="group" aria-label="Radar time span">
           {RADAR_SPANS.map((s) => (
-            <button key={s.hours} className={`h-7 px-2.5 ${span === s.hours ? "bg-[#14202E] text-white" : ""}`} onClick={() => pickSpan(s.hours)} aria-pressed={span === s.hours}>
+            <button key={s.hours} className={`h-7 px-2.5 ${!ahead && span === s.hours ? "bg-[#14202E] text-white" : ""}`} onClick={() => pickSpan(s.hours)} aria-pressed={!ahead && span === s.hours}>
               {s.hours}h
             </button>
           ))}
+          {canForecast && (
+            <button className={`h-7 border-l border-black/10 px-2.5 ${ahead ? "bg-[#F5B700] text-[#14202E]" : ""}`} onClick={pickAhead} aria-pressed={ahead}>
+              Next 6h
+            </button>
+          )}
         </div>
 
         {/* Play, timeline */}
@@ -134,12 +171,12 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
           </button>
           <div className="flex flex-1 items-center gap-0.5" role="group" aria-label="Radar time">
             {frames.map((m, i) => (
-              <button key={`${span}-${m}`} className="flex h-8 flex-1 items-center" onClick={() => { setPlaying(false); setFrame(i); }} aria-label={m === 0 ? "Latest radar" : agoLabel(m)}>
-                <span className={`block h-1.5 w-full rounded-full ${i <= frame ? "bg-white" : "bg-white/25"}`} />
+              <button key={`${ahead ? "f" : span}-${m}`} className="flex h-8 flex-1 items-center" onClick={() => { setPlaying(false); setFrame(i); }} aria-label={ahead ? `Forecast, ${aheadLabel(m).toLowerCase()}` : m === 0 ? "Latest radar" : agoLabel(m)}>
+                <span className={`block h-1.5 w-full rounded-full ${i <= frame ? (ahead ? "bg-[#F5B700]" : "bg-white") : "bg-white/25"}`} />
               </button>
             ))}
           </div>
-          <span className="w-[86px] shrink-0 text-right text-xs tabular-nums">{label}{scanAt && minsAgo === 0 ? <span className="block text-[10px] opacity-75">latest scan</span> : null}</span>
+          <span className="w-[86px] shrink-0 text-right text-xs tabular-nums">{label}{ahead ? <span className="block text-[10px] opacity-75">forecast</span> : scanAt && minsAgo === 0 ? <span className="block text-[10px] opacity-75">latest scan</span> : null}</span>
         </div>
 
         {offline && (
@@ -149,7 +186,7 @@ export function RadarMap({ latitude, longitude, height = 230, areas = [] }: { la
         )}
       </div>
       <p className="mt-1.5 text-[11px] text-muted">
-        About {miles} miles across. {RADAR.credit}. Map {BASEMAP.credit}.
+        About {miles} miles across. {ahead ? `${FORECAST.credit}${fcInit ? ` (run from ${clock(fcInit)})` : ""}` : RADAR.credit}. Map {BASEMAP.credit}.
         {!offline && radarFailed >= tiles.length * frames.length && tiles.length > 0 ? " Radar couldn't load just now." : ""}
       </p>
     </div>

@@ -85,6 +85,15 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("text=Preview"); await q.click("text=Add example history"); await q.waitForTimeout(1500);
   await q.selectOption("main select", { label: "Example Jobsite" }).catch(() => {}); await q.waitForTimeout(500);
   log("2 home weather:", (await q.locator("section[aria-label=\"Jobsite weather\"]").innerText().catch(() => "none")).replace(/\s+/g, " ")); await q.locator("section[aria-label=\"Jobsite weather\"]").screenshot({ path: `${OUT}/e-weather.png` }).catch(() => {});
+  // Radar: the 6-hour model forecast is its own loop, labelled as a forecast (run time mocked; no network here).
+  const tilePng = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
+  await q.route("**/tile.openstreetmap.org/**", (route) => route.fulfill({ contentType: "image/png", body: tilePng }));
+  await q.route("**/tile.py/**", (route) => route.fulfill({ contentType: "image/png", body: tilePng }));
+  await q.route("**/hrrr/refd_1080.json", (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ model_init_utc: new Date(Date.now() - 2 * 3600e3).toISOString().slice(0, 13) + ":00:00Z" }) }));
+  await q.click("text=Show radar").catch(() => {}); await q.waitForTimeout(400);
+  await q.click("button:has-text('Next 6h')"); await q.waitForTimeout(800);
+  log("2 forecast banner:", await q.locator("text=Model forecast, not radar").count() > 0, "| tiles:", (await q.locator("img[src*='hrrr::REFD-F']").first().getAttribute("src").catch(() => "none"))?.replace(/\/\d+\/\d+\/\d+\.png$/, ""));
+  await q.locator("section[aria-label=\"Jobsite weather\"]").screenshot({ path: `${OUT}/e-forecast.png` }).catch(() => {});
   log("2 home week card:", (await q.locator("section:has-text('Signed this week')").last().innerText()).replace(/\s+/g, " "));
   await q.click("text=Make up a talk"); await q.waitForTimeout(600);
   await q.locator("[role=radio]").nth(0).click(); await q.click("button:has-text('Off that week')"); await q.click("text=Continue to the talk"); await q.waitForTimeout(400);
