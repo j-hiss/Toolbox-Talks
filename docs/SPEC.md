@@ -474,6 +474,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   Taglines Joe chose: **"Every talk. Every signature. Every time."** (main: app stores, install, sign-in, side menu)
   and **"Safety that stays the course."** (explains the name: website, signs, gear). Still placeholders until the
   trademark search; a designer finishes the artwork from this direction.
+- **Brand color confirmed green (Joe, 2026-10-09)** after comparing safety orange, deep blue, flat gold and metallic
+  gold (design board "D · Color options"). Two shades: #3DDC97 on screens and dark backgrounds, #1E9E66 on paper and
+  white. Gold #FFC24B stays the accent (streaks, caution).
 - Working name **Keel**, set in one place:
   `src/content/brand.ts` (plus `appName` in `capacitor.config.ts`). "Toolbox Talks" is already another App Store
   app and reads as construction-only. Shortlist and design directions: the Look and Name Board artifact. Final name
