@@ -21659,5 +21659,1268 @@ export const TALKS: Talk[] = [
       "en": "source",
       "es": "draft"
     }
+  },
+  {
+    "id": "flammable-transfer",
+    "industries": [
+      "oil",
+      "truck"
+    ],
+    "code": "1910.106(e) / 1910.106(f)(3)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.106(a)(29): safety can definition",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.106(e)(1): scope of the industrial plants rules",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.106(e)(2)(iii), (e)(2)(iv): transfer areas and handling at point of use",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.106(e)(6)(i), (e)(6)(ii): sources of ignition and grounding when dispensing",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.106(e)(9)(i): housekeeping and spills",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.106(f)(3)(iii), (f)(3)(iv)(a)-(d): tank vehicle loading valves, static bonding at bulk plants and its exceptions",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Oil and Gas Extraction: hazards (explosions and fires)",
+        "url": "https://www.osha.gov/oil-and-gas-extraction/hazards",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Transferring Flammable Liquids",
+        "hook": "Pouring, pumping or loading a flammable liquid is when vapor and sparks can meet. One static spark is enough.",
+        "sections": [
+          {
+            "heading": "Vapor travels",
+            "items": [
+              "Flammable vapor can be lit by open flames, smoking, hot surfaces, friction, lightning, and static, electrical or mechanical sparks.",
+              "For liquids with a flashpoint below 100 °F, OSHA's rule for plants and shops says they're used only where there are no open flames or other ignition sources in the path the vapor could travel.",
+              "Keep those containers covered when you're not actually using them."
+            ]
+          },
+          {
+            "heading": "Bond before you pour",
+            "items": [
+              "Those same liquids don't get dispensed into a container unless the nozzle and the container are electrically connected.",
+              "That can be a bond wire from the fill stem to the container while you fill, or a metal floor plate wired to the fill stem that the container sits on.",
+              "Loading a tank truck through an open dome at a bulk plant rack needs a bond wire with a clamp. There are a few exceptions, like products that don't build up static. Clamp it to the cargo tank before you raise the dome cover, and leave it on until filling is done and the domes are closed.",
+              "The valve that controls filling the truck is the self-closing kind you hold open by hand, unless the rack has an automatic shutoff."
+            ]
+          },
+          {
+            "heading": "Right container, right method",
+            "items": [
+              "In plants and shops covered by this rule, liquid moved inside a building goes only through closed piping, from safety cans, with a pump or device that draws through the top, or by gravity through an approved self-closing valve.",
+              "Never push liquid out of a drum or portable tank with air pressure. The rule bans it.",
+              "A safety can is an approved container of 5 gallons or less, with a spring-closing lid and a spout cover."
+            ]
+          },
+          {
+            "heading": "Spills",
+            "items": [
+              "Clean up spills promptly. Where liquid is used outside closed containers, your company has to have a way to get rid of leaks and spills quickly and safely.",
+              "Areas where liquid is moved from one tank or container to another need drainage or another way to control spills, and good ventilation. If yours doesn't, say something."
+            ]
+          }
+        ],
+        "ask": "What flammable liquid are we moving this week, and where is the bond wire or ground we'll use for it?"
+      },
+      "es": {
+        "title": "Trasvase de líquidos inflamables",
+        "hook": "Cuando viertes, bombeas o cargas un líquido inflamable, los vapores y las chispas se pueden juntar. Basta una sola chispa de estática.",
+        "sections": [
+          {
+            "heading": "El vapor se mueve",
+            "items": [
+              "El vapor inflamable se puede encender con llamas abiertas, cigarros, superficies calientes, fricción, rayos y chispas de estática, eléctricas o mecánicas.",
+              "Para los líquidos con punto de inflamación por debajo de 100 °F, la regla de OSHA para plantas y talleres dice que solo se usan donde no haya llamas abiertas ni otras fuentes de ignición en el camino por donde podría viajar el vapor.",
+              "Mantén esos recipientes tapados cuando no los estés usando."
+            ]
+          },
+          {
+            "heading": "Conecta antes de verter",
+            "items": [
+              "Esos mismos líquidos no se despachan a un recipiente a menos que la boquilla y el recipiente estén conectados eléctricamente.",
+              "Puede ser un cable de unión del tubo de llenado al recipiente mientras llenas, o una placa metálica en el piso, conectada al tubo de llenado, sobre la que se para el recipiente.",
+              "Cargar un camión tanque por un domo abierto en el rack de una planta a granel necesita un cable de unión con pinza. Hay algunas excepciones, como productos que no acumulan estática. Engánchalo al tanque de carga antes de levantar la tapa del domo, y déjalo puesto hasta terminar de llenar y cerrar los domos.",
+              "La válvula que controla el llenado del camión es de cierre automático y la sostienes abierta con la mano, a menos que el rack tenga un corte automático."
+            ]
+          },
+          {
+            "heading": "Recipiente correcto, método correcto",
+            "items": [
+              "En plantas y talleres que cubre esta regla, el líquido que se mueve dentro de un edificio va solo por tubería cerrada, desde latas de seguridad, con una bomba o aparato que saca por arriba, o por gravedad a través de una válvula aprobada de cierre automático.",
+              "Nunca saques líquido de un tambor o tanque portátil empujándolo con aire a presión. La regla lo prohíbe.",
+              "Una lata de seguridad es un recipiente aprobado de 5 galones o menos, con tapa de cierre por resorte y tapa en el pico."
+            ]
+          },
+          {
+            "heading": "Derrames",
+            "items": [
+              "Limpia los derrames pronto. Donde el líquido se usa fuera de recipientes cerrados, tu compañía tiene que tener una manera de deshacerse de fugas y derrames rápido y con seguridad.",
+              "Las áreas donde se pasa líquido de un tanque o recipiente a otro necesitan drenaje u otra manera de controlar derrames, y buena ventilación. Si la tuya no la tiene, avisa."
+            ]
+          }
+        ],
+        "ask": "¿Qué líquido inflamable vamos a mover esta semana, y dónde está el cable de unión o la tierra que vamos a usar?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "lpg",
+    "industries": [
+      "oil",
+      "facil"
+    ],
+    "code": "1910.110",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.110(b)(6)(i), (b)(6)(iii), (b)(6)(vi): containers outside buildings, not stacked, clear weeds and dry grass",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.110",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.110(b)(8)(ix), (b)(9)(vii)(b), (b)(14)(i), (b)(14)(viii), (b)(16): no flame leak test, indoor hose, attendant at transfer, open-air filling, training",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.110",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.110(c)(4)(ii), (c)(5)(i)(h), (c)(5)(i)(i), (c)(5)(i)(k): firm foundation, heater flame-out shutoff, exposure, upright indoors",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.110",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.110(c)(5)(v)(b), (c)(5)(vii), (c)(5)(viii): heater spacing from containers; temporary heating not left unattended",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.110",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.110(f)(2), (f)(4)(i), (f)(5), (f)(6)(ii): storage of containers awaiting use or resale",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.110",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Propane and LP-Gas Cylinders",
+        "hook": "Propane cylinders show up everywhere: heaters, torches, forklifts, grills. Each one is a container of fuel gas under pressure, so treat it that way. This is the general industry rule. Construction sites have their own rule.",
+        "sections": [
+          {
+            "heading": "Where cylinders go",
+            "items": [
+              "The rule starts simple: LP-gas containers go outside buildings. There are limited exceptions, like portable use inside when it's really needed, or storage that follows the storage rules.",
+              "Set every cylinder on a firm base, or secure it firmly. Inside, except for small hand-torch cylinders, it stands upright and gets secured when needed.",
+              "Cylinders hooked up for use are never stacked one on top of another.",
+              "Clear weeds and long dry grass for at least 10 feet around any container."
+            ]
+          },
+          {
+            "heading": "Storing cylinders",
+            "items": [
+              "Store them where they won't get too hot, get hit, or get messed with by someone who shouldn't touch them. Outside, keep them in an enclosure or protect them from tampering some other way.",
+              "Inside, never store cylinders near exits or stairways, or anywhere people need to get out safely.",
+              "Valves on stored cylinders stay closed. The valve has to be protected by a cap or collar, or by being built into the cylinder. If yours uses a cap, put it back on.",
+              "In a building the public doesn't visit, the general limit is 300 pounds of LP-gas, unless it's a special room built for it. Empties stored inside count as full."
+            ]
+          },
+          {
+            "heading": "Connecting and leaks",
+            "items": [
+              "Only people trained for it install, remove, run or maintain LP-gas equipment. If you haven't been trained on it, ask first.",
+              "Never test for a leak with a flame. If you smell gas, stop and tell your supervisor.",
+              "Fill fuel cylinders only in the open air, or in a building made for that. Someone stays close to the connection the whole time gas is being transferred.",
+              "Inside, hose from a cylinder is as short as practical and never more than 6 feet. It never runs through walls, floors or ceilings."
+            ]
+          },
+          {
+            "heading": "Heaters and cylinders",
+            "items": [
+              "Portable heaters, including salamanders, need an automatic device that shuts off the gas if the flame goes out.",
+              "When cylinders feed portable heaters inside, like temporary or emergency heat, keep each heater at least 6 feet from any cylinder, unless the heater and cylinder are built as one unit.",
+              "Never aim a blower or radiant heater at a cylinder within 20 feet.",
+              "Temporary emergency heat is never left unattended."
+            ]
+          }
+        ],
+        "ask": "Where do we keep our propane cylinders, and is that spot away from exits, heat, dry grass and anything that could hit them?"
+      },
+      "es": {
+        "title": "Cilindros de propano y gas LP",
+        "hook": "Los cilindros de propano están en todas partes: calentadores, sopletes, montacargas, parrillas. Cada uno es un recipiente de gas combustible bajo presión, así que trátalo como tal. Esta es la regla para la industria general. Las obras de construcción tienen su propia regla.",
+        "sections": [
+          {
+            "heading": "Dónde van los cilindros",
+            "items": [
+              "La regla empieza sencilla: los recipientes de gas LP van fuera de los edificios. Hay pocas excepciones, como el uso portátil adentro cuando de verdad hace falta, o el almacenamiento que sigue las reglas de almacenamiento.",
+              "Pon cada cilindro sobre una base firme, o asegúralo bien. Adentro, menos los cilindros pequeños de soplete de mano, va parado y se asegura cuando haga falta.",
+              "Los cilindros conectados para usarse nunca se apilan uno encima de otro.",
+              "Quita la maleza y el pasto alto y seco en por lo menos 10 pies alrededor de cualquier recipiente."
+            ]
+          },
+          {
+            "heading": "Cómo guardar los cilindros",
+            "items": [
+              "Guárdalos donde no se calienten demasiado, no los golpeen y nadie que no deba los toque. Afuera, mantenlos en un encierro o protégelos de otra forma para que nadie los manipule.",
+              "Adentro, nunca guardes cilindros cerca de salidas o escaleras, ni en ningún lugar por donde la gente tenga que salir con seguridad.",
+              "Las válvulas de los cilindros guardados se quedan cerradas. La válvula tiene que estar protegida con una tapa o un collarín, o porque viene metida dentro del cilindro. Si el tuyo usa tapa, vuélvela a poner.",
+              "En un edificio que el público no visita, el límite general es de 300 libras de gas LP, a menos que sea un cuarto especial hecho para eso. Los cilindros vacíos guardados adentro cuentan como llenos."
+            ]
+          },
+          {
+            "heading": "Conexiones y fugas",
+            "items": [
+              "Solo las personas capacitadas para eso instalan, quitan, operan o dan mantenimiento al equipo de gas LP. Si no te han capacitado, pregunta primero.",
+              "Nunca busques una fuga con una llama. Si hueles gas, para y avísale a tu supervisor.",
+              "Llena los cilindros de combustible solo al aire libre, o en un edificio hecho para eso. Alguien se queda cerca de la conexión todo el tiempo que se está pasando el gas.",
+              "Adentro, la manguera de un cilindro es lo más corta posible y nunca de más de 6 pies. Nunca pasa a través de paredes, pisos o techos."
+            ]
+          },
+          {
+            "heading": "Calentadores y cilindros",
+            "items": [
+              "Los calentadores portátiles, incluidas las salamandras, necesitan un dispositivo automático que corte el gas si se apaga la llama.",
+              "Cuando los cilindros alimentan calentadores portátiles adentro, como calefacción temporal o de emergencia, mantén cada calentador a por lo menos 6 pies de cualquier cilindro, a menos que el calentador y el cilindro vengan hechos como una sola unidad.",
+              "Nunca apuntes un calentador de soplador o radiante hacia un cilindro que esté a menos de 20 pies.",
+              "La calefacción temporal de emergencia nunca se deja sola."
+            ]
+          }
+        ],
+        "ask": "¿Dónde guardamos nuestros cilindros de propano, y está ese lugar lejos de salidas, calor, pasto seco y cualquier cosa que los pueda golpear?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "high-pressure",
+    "industries": [
+      "oil"
+    ],
+    "code": "No OSHA standard; OSHA Oil and Gas eTool (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Oil and Gas eTool: Servicing, Special Services (wireline, cementing, stimulation, swabbing)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/servicing/special-services",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Well Completion, hydraulic fracturing (rig up, testing, pumping, flowback)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/well-completion",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Servicing, General Services (removing the wellhead)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/servicing/general-services",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: General Safety, Equipment Condition",
+        "url": "https://www.osha.gov/etools/oil-and-gas/general-safety/equipment-condition",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas Extraction: Hazards (high-pressure lines and equipment)",
+        "url": "https://www.osha.gov/oil-and-gas-extraction/hazards",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "High-Pressure Lines and Iron",
+        "hook": "A line under pressure looks just like a line that's dead. If a connection fails or trapped pressure lets go, it can hit you before you can move.",
+        "sections": [
+          {
+            "heading": "Right parts, checked every job",
+            "items": [
+              "OSHA has no rule just for high-pressure iron. This talk follows OSHA's oil and gas guidance.",
+              "Every piece has to fit the job's pressure rating and mate up right. Don't slug or force mismatched parts together.",
+              "Watch for mismatched hammer unions. Some, like 602 and 1502, will couple but won't hold past the lower pressure rating. Use go/no-go rings where they could get mixed.",
+              "Inspect lines and parts before and after every job. Worn unions, corrosion or other damage means that piece comes out of service."
+            ]
+          },
+          {
+            "heading": "Rig up and test",
+            "items": [
+              "Secure elevated lines. Anchor or hobble pressurized lines so a pressure surge can't make them whip or bounce.",
+              "Pumps and lines get a pressure test before pumping, with the valves lined up right. The test goes above the job's top pressure but below the failure pressure of the weakest part.",
+              "A check valve goes in as close to the wellhead as possible.",
+              "Hammer union wings, hammers, pump iron and racks are pinch points. Keep your hands clear."
+            ]
+          },
+          {
+            "heading": "While it's under pressure",
+            "items": [
+              "If you're not needed, stand clear of the work zone during testing and pumping.",
+              "Don't walk over, stand near or go up to a pressurized line.",
+              "Equipment operators stay by their controls while pumping."
+            ]
+          },
+          {
+            "heading": "Bleed it off before you break it",
+            "items": [
+              "Before you break a connection or remove a fitting, check for pressure and bleed it off.",
+              "Stand clear of valves and fittings while you bleed off.",
+              "A connection that's unusually tight may mean the pressure isn't gone. Stop and check.",
+              "Trapped pressure can still hurt you at rig down. Follow your procedure to release it safely."
+            ]
+          }
+        ],
+        "ask": "Before we rig up: what's the pressure rating on this job, and who's checking the hammer unions?"
+      },
+      "es": {
+        "title": "Líneas de alta presión y tubería de bombeo",
+        "hook": "Una línea con presión se ve igual que una línea sin presión. Si falla una conexión o se suelta presión atrapada, te puede golpear antes de que te puedas mover.",
+        "sections": [
+          {
+            "heading": "Las piezas correctas, revisadas en cada trabajo",
+            "items": [
+              "OSHA no tiene una regla solo para la tubería de alta presión. Esta charla sigue la guía de OSHA para petróleo y gas.",
+              "Cada pieza tiene que servir para la presión del trabajo y acoplar bien. No metas ni fuerces a golpes piezas que no coinciden.",
+              "Cuidado con las uniones de golpe (hammer unions) que no coinciden. Algunas, como la 602 y la 1502, se acoplan pero no aguantan más de la presión menor. Usa anillos pasa/no pasa (go/no-go) donde se puedan mezclar.",
+              "Revisa las líneas y piezas antes y después de cada trabajo. Si una unión está gastada, tiene corrosión u otro daño, esa pieza se saca de servicio."
+            ]
+          },
+          {
+            "heading": "Armado y prueba",
+            "items": [
+              "Asegura las líneas elevadas. Ancla o amarra las líneas con presión para que un golpe de presión no las haga latiguear ni rebotar.",
+              "Las bombas y líneas llevan una prueba de presión antes de bombear, con las válvulas bien alineadas. La prueba pasa la presión más alta del trabajo pero queda debajo de la presión de falla de la pieza más débil.",
+              "Se pone una válvula de retención (check valve) lo más cerca posible de la cabeza del pozo.",
+              "Las alas de las uniones de golpe, los marros, la tubería de la bomba y los racks son puntos de pellizco. Mantén las manos fuera."
+            ]
+          },
+          {
+            "heading": "Mientras tiene presión",
+            "items": [
+              "Si no te necesitan, quédate fuera de la zona de trabajo durante la prueba y el bombeo.",
+              "No camines sobre una línea con presión, no te pares cerca ni te acerques a ella.",
+              "Los operadores de equipo se quedan en sus controles mientras se bombea."
+            ]
+          },
+          {
+            "heading": "Purga la presión antes de desconectar",
+            "items": [
+              "Antes de romper una conexión o quitar un accesorio, revisa si hay presión y púrgala.",
+              "Quédate lejos de las válvulas y accesorios mientras purgas.",
+              "Una conexión que está demasiado apretada puede significar que todavía hay presión. Para y revisa.",
+              "La presión atrapada todavía te puede lastimar al desarmar. Sigue tu procedimiento para soltarla de forma segura."
+            ]
+          }
+        ],
+        "ask": "Antes de armar: ¿cuál es la presión de este trabajo y quién va a revisar las uniones de golpe?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "material-storage-gi",
+    "industries": [
+      "oil",
+      "wh",
+      "mfg"
+    ],
+    "code": "1910.176",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.176(b): secure storage, stacked and blocked, limited in height",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.176",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.176(a), (c), (e): aisle clearance, housekeeping, clearance signs",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.176",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Materials Handling and Storage (pipe, bar stock, drums, racks, stacking heights, blocking)",
+        "url": "https://obis.osha.gov/Publications/OSHA2236/osha2236.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Drilling Ahead, Handling Tubulars (chock or pin, level racks, work from ends)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/drilling-ahead",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Pipe Racks and Stacked Round Stock",
+        "hook": "Pipe, tubing, bar stock and drums are round, and round things roll. OSHA warns that falling materials and collapsing loads can crush or pin workers, causing injuries or death.",
+        "sections": [
+          {
+            "heading": "The rule",
+            "items": [
+              "OSHA's storage rule for general industry is short: stored material can't create a hazard.",
+              "Bundles and other material stored in tiers have to be stacked, blocked, interlocked and limited in height, so they're stable and won't slide or collapse."
+            ]
+          },
+          {
+            "heading": "Stop the roll",
+            "items": [
+              "OSHA's guidance says to stack and block poles, structural steel, bar stock and other round material so it can't spread or tilt, unless it's in a rack.",
+              "On pipe racks, OSHA's oil and gas guidance says to level the racks and chock or pin the tubulars. Rolling or falling tubulars can strike you.",
+              "Work tubulars from the ends, from ground level.",
+              "Drums on their sides: block the bottom tier so it can't roll, and chock it on both sides so it can't shift either way. Put planks, plywood or pallets between tiers."
+            ]
+          },
+          {
+            "heading": "Racks and height",
+            "items": [
+              "Don't store pipe and bars in racks that face main aisles. Pulling one out can put people walking by at risk.",
+              "Bound material can go on racks. Secure it by stacking, blocking or interlocking so it can't slide, fall or collapse.",
+              "Respect height limits. OSHA suggests painting stripes on walls or posts to show the maximum stack height.",
+              "Blocking and timbers should be big and strong enough to hold the load."
+            ]
+          },
+          {
+            "heading": "Around the stack",
+            "items": [
+              "Where forklifts work, aisles need enough room for safe movement, and they stay clear and in good repair. Use the forklift properly.",
+              "Where there are clearance limits, signs have to warn of them.",
+              "Keep storage areas free of piled-up material that could trip someone or start a fire.",
+              "Using a forklift to load or unload pipe on a truck or trailer? Set the brakes and make sure it can't move. Stand clear of suspended, hoisted or moving loads."
+            ]
+          }
+        ],
+        "ask": "Look at our pipe and round stock right now. Is anything stacked that could roll, and what's holding it in place?"
+      },
+      "es": {
+        "title": "Racks de tubería y material redondo apilado",
+        "hook": "La tubería, los tubos, las barras y los tambores son redondos, y lo redondo rueda. OSHA advierte que los materiales que caen y las cargas que se derrumban pueden aplastar o atrapar a los trabajadores, y causar lesiones o la muerte.",
+        "sections": [
+          {
+            "heading": "La regla",
+            "items": [
+              "La regla de OSHA sobre almacenamiento en la industria general es corta: el material guardado no puede crear un peligro.",
+              "Los paquetes y otros materiales guardados en capas tienen que estar apilados, bloqueados, entrelazados y con altura limitada, para que estén estables y no se resbalen ni se derrumben."
+            ]
+          },
+          {
+            "heading": "Que no ruede",
+            "items": [
+              "La guía de OSHA dice que hay que apilar y bloquear postes, acero estructural, barras y otro material redondo para que no se abra ni se ladee, a menos que esté en un rack.",
+              "En los racks de tubería, la guía de OSHA para petróleo y gas dice que hay que nivelar los racks y calzar o poner pasadores a la tubería. La tubería que rueda o se cae te puede golpear.",
+              "Trabaja la tubería desde los extremos, desde el nivel del suelo.",
+              "Tambores acostados: bloquea la capa de abajo para que no ruede, y cálzala por los dos lados para que no se mueva hacia ningún lado. Pon tablones, triplay o tarimas entre capas."
+            ]
+          },
+          {
+            "heading": "Racks y altura",
+            "items": [
+              "No guardes tubos ni barras en racks que den hacia los pasillos principales. Al sacar uno, puedes poner en peligro a la gente que va pasando.",
+              "El material amarrado puede ir en racks. Asegúralo apilándolo, bloqueándolo o entrelazándolo para que no se resbale, se caiga ni se derrumbe.",
+              "Respeta los límites de altura. OSHA sugiere pintar franjas en paredes o postes para mostrar la altura máxima de la pila.",
+              "Los bloques y los maderos deben ser lo bastante grandes y fuertes para aguantar la carga."
+            ]
+          },
+          {
+            "heading": "Alrededor de la pila",
+            "items": [
+              "Donde trabajan montacargas, los pasillos necesitan espacio suficiente para moverse con seguridad, y se mantienen despejados y en buen estado. Usa el montacargas como se debe.",
+              "Donde hay límites de altura libre, tiene que haber letreros que lo adviertan.",
+              "Mantén las áreas de almacenamiento libres de material amontonado que pueda hacer tropezar a alguien o causar un incendio.",
+              "¿Vas a cargar o descargar tubería de un camión o tráiler con montacargas? Pon los frenos y asegúrate de que no se pueda mover. Mantente lejos de cargas suspendidas, levantadas o en movimiento."
+            ]
+          }
+        ],
+        "ask": "Miren ahorita nuestra tubería y material redondo. ¿Hay algo apilado que pueda rodar, y qué lo está deteniendo?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "customer-yards",
+    "industries": [
+      "truck"
+    ],
+    "code": "OSHA 3944 (guidance) / 1910.178(l)",
+    "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA 3944: Safety Practices Once Tractor Trailer Drivers Arrive at a Destination",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA3944.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Trucking Industry: Loading and Unloading (incl. 1999-10-28 interpretation on host-employer forklift training)",
+        "url": "https://www.osha.gov/trucking-industry/loading-unloading",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1910.178(l)(1)(i): forklift operator training and evaluation",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA TIB 00-07-31: Inspection of Suspension-Type Highway Trailers",
+        "url": "https://www.osha.gov/sites/default/files/publications/tib20000731.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Arriving at a Customer's Yard",
+        "hook": "Safety matters just as much when the truck reaches the customer as it does on the open road. The stop has its own hazards, and some of them can kill you.",
+        "sections": [
+          {
+            "heading": "Know the site",
+            "items": [
+              "Every warehouse, dock and jobsite runs a little differently. Companies should share their operating procedures with the people working there.",
+              "You should know the hazards at a stop that can cause serious or fatal injuries. If you don't know them, ask before you start."
+            ]
+          },
+          {
+            "heading": "Park it right",
+            "items": [
+              "Park on level ground, close to the receiving door or the site.",
+              "Set your brakes and test them. Put wheel chocks between the trailer's tandem wheels.",
+              "Never try to stop a rolling vehicle."
+            ]
+          },
+          {
+            "heading": "Backing in",
+            "items": [
+              "Get Out And Look. That's GOAL. Check both mirrors and know your blind spots.",
+              "Use your flashers, horn and backup alarm. Roll your windows down so you can hear.",
+              "Use a spotter, and back up slowly.",
+              "Stand clear when you open the doors for unloading."
+            ]
+          },
+          {
+            "heading": "Forklifts at the dock",
+            "items": [
+              "Many deaths happen when a worker is crushed by a forklift that tipped over or fell off a loading dock.",
+              "If you'll run a forklift at a customer's site, that company is responsible for making sure you're trained. It can require you to take its training first.",
+              "A damaged trailer may not hold the weight of a forklift. If you know your trailer floor or frame is damaged, say so before they start loading."
+            ]
+          }
+        ],
+        "ask": "Before you back in at your next stop, what's your plan: who's spotting you, and where do your chocks go?"
+      },
+      "es": {
+        "title": "Al llegar al patio de un cliente",
+        "hook": "La seguridad importa igual cuando el camión llega al cliente que en la carretera. La parada tiene sus propios peligros, y algunos te pueden matar.",
+        "sections": [
+          {
+            "heading": "Conoce el lugar",
+            "items": [
+              "Cada almacén, muelle y obra funciona un poco diferente. Las empresas deben compartir sus procedimientos de trabajo con la gente que trabaja ahí.",
+              "Debes conocer los peligros de una parada que pueden causar lesiones graves o la muerte. Si no los conoces, pregunta antes de empezar."
+            ]
+          },
+          {
+            "heading": "Estaciona bien",
+            "items": [
+              "Estaciona en terreno plano, cerca de la puerta de recibo o del lugar.",
+              "Pon los frenos y pruébalos. Coloca calzas entre las ruedas tándem del tráiler.",
+              "Nunca trates de detener un vehículo que se está moviendo solo."
+            ]
+          },
+          {
+            "heading": "Al dar reversa",
+            "items": [
+              "Bájate y mira. En inglés le dicen GOAL: Get Out And Look. Revisa los dos espejos y conoce tus puntos ciegos.",
+              "Usa las intermitentes, el claxon y la alarma de reversa. Baja las ventanas para poder oír.",
+              "Usa un guía, y da reversa despacio.",
+              "Quítate del paso cuando abras las puertas para descargar."
+            ]
+          },
+          {
+            "heading": "Montacargas en el muelle",
+            "items": [
+              "Muchas muertes pasan cuando un trabajador queda aplastado por un montacargas que se volteó o se cayó de un muelle de carga.",
+              "Si vas a manejar un montacargas en el lugar de un cliente, esa empresa es responsable de que estés capacitado. Te puede exigir que tomes su capacitación primero.",
+              "Un tráiler dañado puede no aguantar el peso de un montacargas. Si sabes que el piso o el chasis de tu tráiler está dañado, avísalo antes de que empiecen a cargar."
+            ]
+          }
+        ],
+        "ask": "Antes de dar reversa en tu próxima parada, ¿cuál es tu plan: quién te va a guiar y dónde van tus calzas?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "highway-driving",
+    "industries": [
+      "truck"
+    ],
+    "code": "FMCSA 49 CFR 392.3 / 392.14 / 392.80 / 392.82",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "FMCSA 49 CFR 392.3: ill or fatigued operator",
+        "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-III/subchapter-B/part-392/subpart-A/section-392.3",
+        "kind": "standard"
+      },
+      {
+        "label": "FMCSA 49 CFR 392.14: hazardous conditions; extreme caution",
+        "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-III/subchapter-B/part-392/subpart-B/section-392.14",
+        "kind": "standard"
+      },
+      {
+        "label": "FMCSA 49 CFR 392.80(a)-(d): prohibition against texting",
+        "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-III/subchapter-B/part-392/subpart-H/section-392.80",
+        "kind": "standard"
+      },
+      {
+        "label": "FMCSA 49 CFR 392.82(a)(1)-(2), (b), (c): using a hand-held mobile telephone",
+        "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-III/subchapter-B/part-392/subpart-H/section-392.82",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Trucking Industry: Highway Driving (OSHA vs. DOT authority)",
+        "url": "https://www.osha.gov/trucking-industry/highway-driving",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Behind the Wheel at Work, Vol 7 No 1 (April 2022): work zones",
+        "url": "https://stacks.cdc.gov/view/cdc/117203/cdc_117203_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Behind the Wheel at Work, Vol 1 No 3 (June 2016): fatigue",
+        "url": "https://stacks.cdc.gov/view/cdc/108485/cdc_108485_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH FACE 11KY009: semi truck driver falls asleep while driving, crashes and dies",
+        "url": "https://stacks.cdc.gov/view/cdc/165196",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Highway Driving for Truck Drivers",
+        "hook": "On interstate runs, the road rules for your truck come from DOT's FMCSA, not OSHA. OSHA covers trucking that stays inside one state. Today: phones, space, weather and fatigue.",
+        "sections": [
+          {
+            "heading": "Phone down",
+            "items": [
+              "FMCSA rules ban texting while driving a commercial motor vehicle. They also ban using a hand-held phone.",
+              "Driving includes sitting still in traffic or at a light. Stopped in traffic is still driving.",
+              "Your carrier isn't allowed to require or allow hand-held phone use either. The only exception is reaching police or emergency services."
+            ]
+          },
+          {
+            "heading": "Space and work zones",
+            "items": [
+              "A truck can't slow down or maneuver as easily as a car. Give yourself room.",
+              "Coming up on a work zone, keep a safe following distance so you can stop as traffic slows.",
+              "Avoid work zones when you can, and leave early in case of delays.",
+              "NIOSH reports that a large truck was involved in 30 percent of fatal work zone crashes from 2016 to 2020."
+            ]
+          },
+          {
+            "heading": "Weather",
+            "items": [
+              "When snow, ice, sleet, fog, mist, rain, dust or smoke hurts your visibility or traction, FMCSA requires extreme caution and a slower speed.",
+              "If it gets dangerous enough, stop. Don't start again until you can drive safely."
+            ]
+          },
+          {
+            "heading": "Fatigue",
+            "items": [
+              "FMCSA says you can't drive when fatigue, illness or anything else makes it unsafe to start or keep going. Your carrier can't require or let you, either.",
+              "In one NIOSH-funded case report, a long-haul driver fell asleep around 4:15 in the morning. The truck left the interstate, went down an embankment into trees, and he died.",
+              "Take frequent breaks to break up the long stretches, and work on getting enough good sleep.",
+              "FMCSA's hours-of-service rules, 49 CFR Part 395, also limit your driving time. Know your limits."
+            ]
+          }
+        ],
+        "ask": "If the weather turns or you get drowsy halfway through a run, where's your next safe place to stop?"
+      },
+      "es": {
+        "title": "Manejo en carretera para choferes de camión",
+        "hook": "En viajes entre estados, las reglas de manejo para tu camión vienen de la FMCSA del DOT, no de OSHA. OSHA cubre el transporte que se queda dentro de un solo estado. Hoy: el teléfono, el espacio, el clima y el cansancio.",
+        "sections": [
+          {
+            "heading": "Deja el teléfono",
+            "items": [
+              "Las reglas de la FMCSA prohíben mandar mensajes de texto mientras manejas un vehículo comercial. También prohíben usar el teléfono en la mano.",
+              "Manejar incluye estar detenido en el tráfico o en un semáforo. Parado en el tráfico sigues manejando.",
+              "Tu empresa de transporte tampoco puede exigir ni permitir que uses el teléfono en la mano. La única excepción es comunicarte con la policía o con servicios de emergencia."
+            ]
+          },
+          {
+            "heading": "Espacio y zonas de obra",
+            "items": [
+              "Un camión no puede frenar ni maniobrar tan fácil como un carro. Déjate espacio.",
+              "Al llegar a una zona de obra, mantén una distancia segura con el de adelante para poder parar cuando el tráfico baje la velocidad.",
+              "Evita las zonas de obra cuando puedas, y sal temprano por si hay retrasos.",
+              "NIOSH informa que un camión grande estuvo involucrado en el 30 por ciento de los choques mortales en zonas de obra de 2016 a 2020."
+            ]
+          },
+          {
+            "heading": "El clima",
+            "items": [
+              "Cuando la nieve, el hielo, el aguanieve, la neblina, la llovizna, la lluvia, el polvo o el humo afectan tu visibilidad o la tracción, la FMCSA exige extrema precaución y menos velocidad.",
+              "Si se pone lo bastante peligroso, para. No vuelvas a arrancar hasta que puedas manejar con seguridad."
+            ]
+          },
+          {
+            "heading": "El cansancio",
+            "items": [
+              "La FMCSA dice que no puedes manejar cuando el cansancio, una enfermedad o cualquier otra cosa hace que no sea seguro empezar o seguir. Tu empresa tampoco puede exigírtelo ni permitírtelo.",
+              "En un informe de caso con fondos de NIOSH, un chofer de larga distancia se quedó dormido como a las 4:15 de la mañana. El camión se salió de la autopista, bajó por un terraplén hasta unos árboles, y él murió.",
+              "Toma descansos seguidos para cortar los tramos largos, y procura dormir lo suficiente y bien.",
+              "Las reglas de horas de servicio de la FMCSA, 49 CFR Parte 395, también limitan tu tiempo de manejo. Conoce tus límites."
+            ]
+          }
+        ],
+        "ask": "Si cambia el clima o te da sueño a medio viaje, ¿dónde está tu próximo lugar seguro para parar?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "route-delivery",
+    "industries": [
+      "truck",
+      "food",
+      "retail"
+    ],
+    "code": "No OSHA ergonomics standard; OSHA Beverage Delivery eTool (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Beverage Delivery eTool: Hand Trucks (torso bending, load angle, curbs and stairs, tire maintenance)",
+        "url": "https://www.osha.gov/etools/beverage-delivery/hand-trucks",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Beverage Delivery eTool: overview",
+        "url": "https://www.osha.gov/etools/beverage-delivery",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Beverage Delivery eTool: Delivery Trucks (removing product, torso bending, tall trucks)",
+        "url": "https://www.osha.gov/etools/beverage-delivery/delivery-trucks",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Beverage Delivery eTool: Delivery Process (breaks, confined spaces at customer sites)",
+        "url": "https://www.osha.gov/etools/beverage-delivery/delivery-process",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Preventing Backovers: Solutions (spotters)",
+        "url": "https://www.osha.gov/preventing-backovers/solutions",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA standard interpretation, March 18, 2024: no specific ergonomics standard; General Duty Clause",
+        "url": "https://www.osha.gov/laws-regs/standardinterpretations/2024-03-18",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Route Delivery: Hand Trucks and Stops",
+        "hook": "OSHA's beverage delivery guide says a route driver may lift about 160 to 550 boxes and cases off the truck, one at a time. Your hand truck and how each stop is set up decide how much of that your body takes.",
+        "sections": [
+          {
+            "heading": "Keep the hand truck in shape",
+            "items": [
+              "Low or uneven tires make your arms, back and legs work harder to move the load.",
+              "Keep balloon tires in good repair and properly inflated. OSHA's guide suggests checking the pressure every three months, or more often if needed.",
+              "Hard rubber tires don't have air problems, but they don't roll well on rough ground. There, a four-wheel hand truck used upright as a two-wheeler works better."
+            ]
+          },
+          {
+            "heading": "Load it with less bending",
+            "items": [
+              "Bending over again and again to load the bottom of the hand truck adds up. A raised toe plate, or a spacer that brings the bottom up to about knee height, cuts the bending.",
+              "For big orders, use a four-wheel platform cart or a hand truck that converts to one.",
+              "Keep your back close to upright and your elbows in close. OSHA's guide says the torso generally shouldn't bend more than 6 to 10 degrees from vertical.",
+              "For heavy loads, two-person teams help when you can get them."
+            ]
+          },
+          {
+            "heading": "Curbs, stairs and ramps",
+            "items": [
+              "Pulling a loaded hand truck over curbs and up stairs is a big strain. Use a curb ramp when you can.",
+              "Pushing up a slope, you tend to tip the load lower. That puts more of the weight on you. A fold-down third wheel lets the load hold itself up.",
+              "A short ramp from a side door can save pulling the cart up steps and curbs.",
+              "Deliver only where the hand truck can go. If heavy items like kegs need moving at the stop, use two people or ask the customer for help."
+            ]
+          },
+          {
+            "heading": "At the stop",
+            "items": [
+              "Using a spotter to back in? Agree on hand signals first. If you lose sight of the spotter, stop backing right away.",
+              "Take your breaks. On a self-paced route, OSHA's guide suggests a 15-minute break about every two hours.",
+              "OSHA has no specific ergonomics standard, but ergonomic hazards may still be addressed under the General Duty Clause."
+            ]
+          }
+        ],
+        "ask": "Which stop on your route is hardest on you and the hand truck, and what would fix it: a ramp, a different cart, or a second person?"
+      },
+      "es": {
+        "title": "Entregas en ruta: diablitos y paradas",
+        "hook": "La guía de OSHA para entregas de bebidas dice que un chofer de ruta puede levantar de 160 a 550 cajas del camión, una por una. Tu diablito y cómo está organizada cada parada deciden cuánto de eso aguanta tu cuerpo.",
+        "sections": [
+          {
+            "heading": "Mantén el diablito en buen estado",
+            "items": [
+              "Las llantas bajas o disparejas hacen que tus brazos, espalda y piernas trabajen más para mover la carga.",
+              "Mantén las llantas de aire en buen estado y bien infladas. La guía de OSHA sugiere revisar la presión cada tres meses, o más seguido si hace falta.",
+              "Las llantas de hule sólido no tienen problemas de aire, pero no ruedan bien en terreno disparejo. Ahí funciona mejor un diablito de cuatro ruedas usado de pie como uno de dos ruedas."
+            ]
+          },
+          {
+            "heading": "Cárgalo agachándote menos",
+            "items": [
+              "Agacharte una y otra vez para cargar la parte de abajo del diablito se va sumando. Una placa de base más alta, o un separador que suba el fondo a la altura de la rodilla, reduce lo que te agachas.",
+              "Para pedidos grandes, usa un carrito de plataforma de cuatro ruedas o un diablito que se convierte en uno.",
+              "Mantén la espalda casi derecha y los codos cerca del cuerpo. La guía de OSHA dice que, en general, el torso no debe inclinarse más de 6 a 10 grados.",
+              "Para cargas pesadas, trabajar en pareja ayuda cuando se puede."
+            ]
+          },
+          {
+            "heading": "Banquetas, escaleras y rampas",
+            "items": [
+              "Jalar un diablito cargado sobre banquetas y escaleras arriba es un esfuerzo grande. Usa una rampa para banqueta cuando puedas.",
+              "Al empujar cuesta arriba, tiendes a inclinar más la carga. Eso pone más peso sobre ti. Una tercera rueda plegable deja que la carga se sostenga sola.",
+              "Una rampa corta desde una puerta lateral puede ahorrarte jalar el diablito por escalones y banquetas.",
+              "Entrega solo donde el diablito puede llegar. Si hay que mover cosas pesadas como barriles en la parada, háganlo entre dos o pide ayuda al cliente."
+            ]
+          },
+          {
+            "heading": "En la parada",
+            "items": [
+              "¿Usas un guía para meterte en reversa? Pónganse de acuerdo primero en las señales de mano. Si pierdes de vista al guía, deja de ir en reversa de inmediato.",
+              "Toma tus descansos. En una ruta donde tú pones el ritmo, la guía de OSHA sugiere un descanso de 15 minutos más o menos cada dos horas.",
+              "OSHA no tiene una norma específica de ergonomía, pero los riesgos ergonómicos todavía se pueden atender bajo la Cláusula de Deber General."
+            ]
+          }
+        ],
+        "ask": "¿Qué parada de tu ruta es la más pesada para ti y el diablito, y qué la arreglaría: una rampa, otro carrito o una segunda persona?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "outdoor-electrical",
+    "industries": [
+      "land",
+      "facil"
+    ],
+    "code": "1910.305 / 1910.334 / 1910.304(b)(3)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.334(a)(1)-(a)(5): handling, inspecting cords, grounding, wet and conductive locations, plugging in",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.334",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.334(b)(2): reclosing circuits after a breaker trips",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.334",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.304(b)(3)(i), (b)(3)(ii)(A) and Notes 1-2: GFCI protection for rooftop and temporary receptacles",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.304",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.305(a)(2)(i)-(ii), (g)(1)(i): temporary wiring, holiday lighting 90 days, cords approved for use and location",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.305",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.305(e)(1)-(2), (j)(1)(iii)-(iv), (j)(2)(iv)-(vi): enclosures, switches, fixtures and receptacles in wet or damp locations",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.305",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.303(b)(2): listed or labeled equipment used per its instructions",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.303",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.333(a)(1), (c)(2), (c)(7): deenergize live parts, qualified persons only, nonconductive ladders",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.333",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Electricity Outdoors and in Wet Spots",
+        "hook": "Outside, you work around rain, sprinklers, puddles and wet grass. Your cords, outlets and lights have to be made for that.",
+        "sections": [
+          {
+            "heading": "Cords and tools outside",
+            "items": [
+              "Check extension cords and corded tools before use on any shift. Look for loose parts, bent or missing pins, a damaged jacket, and crushed or pinched spots.",
+              "If it's damaged, it's out of service. Nobody uses it until it's repaired and tested.",
+              "Cords have to be approved for where and how they're used. If you're likely to be in contact with water, the cord and tool must be approved for that. Use labeled gear the way its label says.",
+              "A cord for a grounded tool needs its ground wire. Never cut off the ground pin, and never use an adapter that breaks the ground."
+            ]
+          },
+          {
+            "heading": "GFCI protection",
+            "items": [
+              "For temporary power during repair, maintenance or remodeling work, every 125-volt, 15-, 20- or 30-amp outlet that isn't part of the building's permanent wiring needs GFCI protection. The end of an extension cord used for temporary power counts as an outlet.",
+              "A GFCI cord set plugged into the outlet closest to the power source is an accepted way to do it.",
+              "Permanent 125-volt, 15- and 20-amp outlets on rooftops must have GFCI protection too.",
+              "If a breaker trips, don't keep resetting it. Generally it stays off until someone has checked that it's safe to turn back on."
+            ]
+          },
+          {
+            "heading": "Wet hands, wet plugs",
+            "items": [
+              "Your hands must be dry when you plug in or unplug anything that's live.",
+              "If a plug or connector is wet, like one that's been sitting in water, it can only be handled live with insulating protective gear. Stop and get your supervisor.",
+              "Don't staple cords or hang them in a way that damages the jacket. Never raise or lower a tool by its cord.",
+              "Near exposed live parts, a ladder must have nonconductive side rails."
+            ]
+          },
+          {
+            "heading": "Outdoor outlets, lights and controllers",
+            "items": [
+              "An outlet in a wet spot that runs things nobody watches, like sprinkler controllers, landscape lighting or holiday lights, needs a cover that stays weatherproof with the plug in or out.",
+              "Light fixtures and lampholders in wet or damp spots have to be made for it, so water can't get in. Outdoor boxes, panels and switches in wet spots go in weatherproof enclosures.",
+              "Temporary holiday lighting is allowed for up to 90 days, then it comes down.",
+              "Live parts get shut off before anyone works on or near them, with limited exceptions. Only qualified people work on wiring that hasn't been shut off and locked or tagged out."
+            ]
+          }
+        ],
+        "ask": "Which outdoor outlet, cord or controller on our sites looks wet, cracked or uncovered right now?"
+      },
+      "es": {
+        "title": "Electricidad afuera y en lugares mojados",
+        "hook": "Afuera trabajas cerca de lluvia, aspersores, charcos y pasto mojado. Tus extensiones, contactos y luces tienen que estar hechos para eso.",
+        "sections": [
+          {
+            "heading": "Extensiones y herramientas afuera",
+            "items": [
+              "Revisa las extensiones y las herramientas con cable antes de usarlas en cualquier turno. Busca piezas flojas, patas dobladas o que falten, forro dañado y partes aplastadas o pellizcadas.",
+              "Si está dañada, queda fuera de servicio. Nadie la usa hasta que la reparen y la prueben.",
+              "Las extensiones tienen que estar aprobadas para el lugar y la forma en que se usan. Si es probable que estés en contacto con agua, la extensión y la herramienta tienen que estar aprobadas para eso. Usa el equipo con etiqueta como dice la etiqueta.",
+              "Una extensión para una herramienta con tierra necesita su cable de tierra. Nunca cortes la pata de tierra, y nunca uses un adaptador que corte la tierra."
+            ]
+          },
+          {
+            "heading": "Protección GFCI",
+            "items": [
+              "Para corriente temporal durante trabajos de reparación, mantenimiento o remodelación, todo contacto de 125 voltios y 15, 20 o 30 amperios que no sea parte del cableado permanente del edificio necesita protección GFCI. El extremo de una extensión que se usa para corriente temporal cuenta como contacto.",
+              "Una extensión con GFCI conectada al contacto más cercano a la fuente de corriente es una forma aceptada de hacerlo.",
+              "Los contactos permanentes de 125 voltios, 15 y 20 amperios en las azoteas también tienen que tener protección GFCI.",
+              "Si se bota un breaker, no lo sigas reiniciando. Por lo general se queda apagado hasta que alguien revise que es seguro volver a prenderlo."
+            ]
+          },
+          {
+            "heading": "Manos mojadas, clavijas mojadas",
+            "items": [
+              "Tus manos tienen que estar secas cuando conectas o desconectas cualquier cosa con corriente.",
+              "Si una clavija o un conector está mojado, como uno que ha estado en el agua, solo se puede tocar con corriente usando equipo de protección aislante. Para y busca a tu supervisor.",
+              "No engrapes las extensiones ni las cuelgues de forma que se dañe el forro. Nunca subas ni bajes una herramienta por su cable.",
+              "Cerca de partes con corriente expuestas, la escalera tiene que tener rieles laterales que no conduzcan electricidad."
+            ]
+          },
+          {
+            "heading": "Contactos, luces y controladores afuera",
+            "items": [
+              "Un contacto en un lugar mojado que alimenta cosas que nadie vigila, como controladores de riego, luces de jardín o luces navideñas, necesita una tapa que siga siendo a prueba de intemperie con la clavija puesta o quitada.",
+              "Las lámparas y portalámparas en lugares mojados o húmedos tienen que estar hechos para eso, para que no les entre agua. Las cajas, tableros e interruptores afuera en lugares mojados van en gabinetes a prueba de intemperie.",
+              "Las luces navideñas temporales se permiten hasta por 90 días, y luego se quitan.",
+              "Las partes con corriente se apagan antes de que alguien trabaje en ellas o cerca de ellas, con pocas excepciones. Solo las personas calificadas trabajan en cableado que no se ha apagado y bloqueado o etiquetado."
+            ]
+          }
+        ],
+        "ask": "¿Qué contacto, extensión o controlador afuera en nuestros sitios se ve mojado, roto o sin tapa ahorita?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "stump-grinders",
+    "industries": [
+      "land"
+    ],
+    "code": "No general OSHA stump grinder standard; 1910.269(r) for line-clearance work",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "NIOSH-funded California FACE Report 18CA002: laborer pulled into a stump grinder",
+        "url": "https://stacks.cdc.gov/view/cdc/164926/cdc_164926_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Engineering Controls Database: stump cutter operator presence system (hazards, guards, cutter wheel with clutch engaged)",
+        "url": "https://www.cdc.gov/niosh/engcontrols/ecd/detail190.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Landscaping: hazards and solutions",
+        "url": "https://www.osha.gov/landscaping/hazards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA eTool: line-clearance tree trimming operations (1910.269(r)(2)-(8) equipment rules incl. stump cutters)",
+        "url": "https://www.osha.gov/etools/electric-power/overhead-line-work/line-clearance-tree-trimming-operations",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Stump Grinder Safety",
+        "hook": "A stump grinder's wheel can pull a person in. In a California case that NIOSH helped fund, a rope tied to a running grinder caught the wheel and pulled a worker in headfirst. He died the next day.",
+        "sections": [
+          {
+            "heading": "Before you start",
+            "items": [
+              "There's no general OSHA standard written just for stump grinders. This talk uses NIOSH and OSHA guidance.",
+              "Get trained on the machine you're running. In that California case, neither the owner nor the worker who died had formal stump grinder training.",
+              "Check the area for debris and buried objects before you set up, and make sure the machine sits stable.",
+              "Some grinders can be lowered below ground level. If the job means digging, call for utility locates first."
+            ]
+          },
+          {
+            "heading": "The danger zone",
+            "items": [
+              "Only the operator should be near the machine while it grinds. In that California case, the maker's manual said to keep everyone else at least 75 feet away. Check the manual for your machine.",
+              "Debris gets thrown. Look around for people and property, and use a barrier when you can.",
+              "Wear safety goggles.",
+              "Keep good footing and a clear way out. On a slope, keep the machine and yourself below the stump, and stay off steep slopes."
+            ]
+          },
+          {
+            "heading": "The wheel and the guards",
+            "items": [
+              "Never tie a rope or chain to a running grinder. The eye hook is only for moving the machine when it's off.",
+              "Keep the guards and enclosures in place while it runs. Never modify or alter the grinder.",
+              "Injuries can happen when an operator comes up to the cutter wheel with the clutch still engaged. Moving parts, sharp edges and hot surfaces on these machines can crush fingers or hands, cut them off, burn, or blind.",
+              "Need to clear chips or get near the wheel? Ask your supervisor for the shutdown steps for this machine before you do it."
+            ]
+          },
+          {
+            "heading": "Line-clearance work",
+            "items": [
+              "On line-clearance tree trimming jobs near power lines, OSHA's power line standard has its own equipment rules that cover stump cutters. Ask your supervisor to go over them before that work.",
+              "Not sure if a job counts as line-clearance work? Stop and ask before you start."
+            ]
+          }
+        ],
+        "ask": "Where is our 75-foot line today, and who's keeping people out of it?"
+      },
+      "es": {
+        "title": "Seguridad con la trituradora de tocones",
+        "hook": "La rueda de una trituradora de tocones puede jalar a una persona. En un caso en California que NIOSH ayudó a financiar, una soga amarrada a una trituradora encendida se enredó en la rueda y jaló a un trabajador de cabeza. Murió al día siguiente.",
+        "sections": [
+          {
+            "heading": "Antes de empezar",
+            "items": [
+              "No hay una norma general de OSHA escrita solo para trituradoras de tocones. Esta charla usa las guías de NIOSH y OSHA.",
+              "Recibe entrenamiento en la máquina que vas a operar. En ese caso de California, ni el dueño ni el trabajador que murió tenían entrenamiento formal en trituradoras de tocones.",
+              "Revisa el área por escombros y objetos enterrados antes de instalarte, y asegúrate de que la máquina quede estable.",
+              "Algunas trituradoras se pueden bajar por debajo del nivel del suelo. Si el trabajo implica excavar, pide primero que marquen los servicios públicos."
+            ]
+          },
+          {
+            "heading": "La zona de peligro",
+            "items": [
+              "Solo el operador debe estar cerca de la máquina mientras tritura. En ese caso de California, el manual del fabricante decía mantener a todos los demás a por lo menos 75 pies de distancia. Revisa el manual de tu máquina.",
+              "La máquina lanza escombros. Fíjate si hay personas o propiedades alrededor, y usa una barrera cuando puedas.",
+              "Usa gafas de seguridad.",
+              "Mantén buen apoyo para los pies y una salida libre. En una pendiente, deja la máquina y a ti mismo más abajo que el tocón, y no trabajes en pendientes empinadas."
+            ]
+          },
+          {
+            "heading": "La rueda y las guardas",
+            "items": [
+              "Nunca amarres una soga ni una cadena a una trituradora encendida. El gancho de ojo es solo para mover la máquina cuando está apagada.",
+              "Mantén las guardas y las cubiertas en su lugar mientras funciona. Nunca modifiques ni alteres la trituradora.",
+              "Puede haber lesiones cuando un operador se acerca a la rueda de corte con el embrague todavía enganchado. Las partes en movimiento, los bordes filosos y las superficies calientes de estas máquinas pueden aplastar dedos o manos, amputarlos, quemar o dejar ciego.",
+              "¿Necesitas sacar astillas o acercarte a la rueda? Pídele a tu supervisor los pasos para apagar esta máquina antes de hacerlo."
+            ]
+          },
+          {
+            "heading": "Trabajo de despeje de líneas",
+            "items": [
+              "En trabajos de poda para despejar líneas eléctricas, la norma de OSHA para líneas eléctricas tiene sus propias reglas de equipo que incluyen las trituradoras de tocones. Pídele a tu supervisor que las repase antes de ese trabajo.",
+              "¿No sabes si un trabajo cuenta como despeje de líneas? Detente y pregunta antes de empezar."
+            ]
+          }
+        ],
+        "ask": "¿Dónde está hoy nuestra línea de 75 pies, y quién se encarga de que nadie entre?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "legionella",
+    "industries": [
+      "facil",
+      "health"
+    ],
+    "code": "No OSHA Legionella standard; OSH Act Sec. 5(a)(1) / 1910.134 for respirators",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Legionellosis (Legionnaires' Disease and Pontiac Fever)",
+        "url": "https://www.osha.gov/legionnaires-disease",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Legionellosis: Hazard Recognition",
+        "url": "https://www.osha.gov/legionnaires-disease/hazards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Legionellosis: Control and Prevention",
+        "url": "https://www.osha.gov/legionnaires-disease/control-prevention",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Legionellosis: Standards (no specific standard; General Duty Clause)",
+        "url": "https://www.osha.gov/legionnaires-disease/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "CDC Toolkit: Developing a Legionella Water Management Program (named by OSHA)",
+        "url": "https://www.cdc.gov/control-legionella/php/toolkit/wmp-toolkit.html",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Legionnaires' Disease and Building Water",
+        "hook": "Legionnaires' disease is a serious lung infection you get by breathing in fine mist from contaminated water. OSHA says it has a 10 percent death rate.",
+        "sections": [
+          {
+            "heading": "What it is",
+            "items": [
+              "Legionnaires' disease is a serious, sometimes deadly pneumonia. Pontiac fever is a milder, flu-like illness from the same bacteria.",
+              "It's not contagious. You get it from breathing in mist small enough to inhale, not from another person.",
+              "Most healthy people don't get sick. People over 50, smokers, and people with lung disease or a weak immune system are most at risk."
+            ]
+          },
+          {
+            "heading": "Where it grows",
+            "items": [
+              "Watch cooling towers, hot water systems, hot tubs and spas, humidifiers, misters, and decorative fountains.",
+              "It grows in warm water, between 68 and 122 degrees F. Still water, scale, sediment, and slimy biofilm help it grow.",
+              "Dead legs are pipes that were capped or changed so water doesn't flow. Flush lines often, especially dead legs."
+            ]
+          },
+          {
+            "heading": "Keeping water safe",
+            "items": [
+              "There's no OSHA standard just for Legionella. OSHA can still use the General Duty Clause, which says your company has to keep the workplace free of recognized serious hazards.",
+              "A water management program is how a building keeps Legionella down: good design, upkeep, and routine cleaning and disinfection. CDC has a toolkit for writing one.",
+              "OSHA's guidance: store hot water at 140 degrees F or higher, and deliver it at 122 degrees F or higher to every outlet.",
+              "Clean and disinfect cooling towers at least twice a year. Clean new systems and ones that sat unused for a long time, too."
+            ]
+          },
+          {
+            "heading": "Cleaning a tower",
+            "items": [
+              "For tower cleaning, OSHA's guidance calls for at least the PPE for the chemicals you're using, plus a half-face respirator with an N-100 cartridge.",
+              "Working with biocides? Wear eye protection, gloves, and the protective clothing the chemical maker recommends.",
+              "A respirator has to seal. If a beard or big mustache gets in the way, you may need a different type, like a full-face or powered respirator. Ask your supervisor about your company's respirator program before you wear one.",
+              "OSHA's guidance says that in a known or suspected outbreak, anyone who may be exposed to the mist must wear a respirator."
+            ]
+          }
+        ],
+        "ask": "Which water systems in our building make mist, and when were they last cleaned?"
+      },
+      "es": {
+        "title": "La enfermedad del legionario y el agua del edificio",
+        "hook": "La enfermedad del legionario es una infección grave de los pulmones que te da al respirar una neblina fina de agua contaminada. OSHA dice que tiene una tasa de muerte del 10 por ciento.",
+        "sections": [
+          {
+            "heading": "Qué es",
+            "items": [
+              "La enfermedad del legionario es una neumonía grave que a veces mata. La fiebre de Pontiac es una enfermedad más leve, parecida a la gripe, que viene de la misma bacteria.",
+              "No es contagiosa. Te da al respirar una neblina tan fina que se puede inhalar, no por otra persona.",
+              "La mayoría de las personas sanas no se enferman. Las personas mayores de 50 años, los fumadores y las personas con enfermedad de los pulmones o con las defensas bajas corren más riesgo."
+            ]
+          },
+          {
+            "heading": "Dónde crece",
+            "items": [
+              "Pon atención a las torres de enfriamiento, los sistemas de agua caliente, los jacuzzis y spas, los humidificadores, los nebulizadores y las fuentes decorativas.",
+              "Crece en agua tibia, entre 68 y 122 grados F. El agua estancada, el sarro, el sedimento y la capa babosa de bacterias (biopelícula) la ayudan a crecer.",
+              "Los tramos muertos son tubos que se taparon o se cambiaron para que el agua no corra. Purga las líneas seguido, sobre todo los tramos muertos."
+            ]
+          },
+          {
+            "heading": "Cómo mantener el agua segura",
+            "items": [
+              "No hay una norma de OSHA solo para la Legionella. Aun así, OSHA puede usar la Cláusula de Deber General, que dice que tu compañía tiene que mantener el lugar de trabajo libre de peligros graves reconocidos.",
+              "Un programa de manejo del agua es cómo un edificio mantiene baja la Legionella: buen diseño, mantenimiento, y limpieza y desinfección de rutina. La CDC tiene una guía para escribir uno.",
+              "La guía de OSHA: guarda el agua caliente a 140 grados F o más, y entrégala a 122 grados F o más en cada salida.",
+              "Limpia y desinfecta las torres de enfriamiento por lo menos dos veces al año. Limpia también los sistemas nuevos y los que estuvieron mucho tiempo sin usarse."
+            ]
+          },
+          {
+            "heading": "Limpieza de una torre",
+            "items": [
+              "Para limpiar una torre, la guía de OSHA pide por lo menos el equipo de protección para los químicos que estés usando, más un respirador de media cara con cartucho N-100.",
+              "¿Trabajas con biocidas? Usa protección para los ojos, guantes y la ropa protectora que recomiende el fabricante del químico.",
+              "Un respirador tiene que sellar bien. Si la barba o un bigote grande no lo deja sellar, puede que necesites otro tipo, como uno de cara completa o uno con motor. Pregúntale a tu supervisor sobre el programa de respiradores de tu compañía antes de usar uno.",
+              "La guía de OSHA dice que, si hay un brote conocido o sospechado, todos los que puedan estar expuestos a la neblina tienen que usar respirador."
+            ]
+          }
+        ],
+        "ask": "¿Qué sistemas de agua en nuestro edificio hacen neblina, y cuándo fue la última vez que se limpiaron?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
   }
 ];
