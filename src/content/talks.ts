@@ -9,7 +9,8 @@ export const TALKS: Talk[] = [
   {
     "id": "fall",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.501 / 1926.502",
     "minutes": 6,
@@ -205,7 +206,8 @@ export const TALKS: Talk[] = [
   {
     "id": "ladder",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.1053",
     "minutes": 5,
@@ -1306,7 +1308,8 @@ export const TALKS: Talk[] = [
   {
     "id": "roof-lowslope",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.501(b)(10) / 1926.502(f), (h)",
     "minutes": 5,
@@ -1431,7 +1434,8 @@ export const TALKS: Talk[] = [
   {
     "id": "roof-steep",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.501(b)(11) / 1926.501(b)(13)",
     "minutes": 5,
@@ -1563,9 +1567,111 @@ export const TALKS: Talk[] = [
     }
   },
   {
+    "id": "roof-brackets",
+    "industries": [
+      "roof"
+    ],
+    "code": "1926.452(h) / 1926.451 / 1926.501(b)(13)",
+    "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA 1926.452(h)(1)-(2): roof bracket scaffolds",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.452",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.451(b)(1): platforms fully planked or decked",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.451",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.451(f)(3): inspection by a competent person before each work shift",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.451",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.501(b)(13): residential construction fall protection",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA guidance: Fall Protection in Residential Construction",
+        "url": "https://www.osha.gov/residential-fall-protection/guidance",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Roof Brackets and Roof Jacks",
+        "hook": "Roof brackets hold you and your bundles on a steep roof. They don't stop a fall to the ground. That still takes guardrails, a net, or a harness that's tied off.",
+        "sections": [
+          {
+            "heading": "Set them right",
+            "items": [
+              "Brackets have to fit the pitch of the roof and give you a level platform.",
+              "Nail them in. If nailing isn't practical, tie them with first-grade manila rope at least three-quarters of an inch thick, or something equal to it.",
+              "Plank the platform fully between the brackets."
+            ]
+          },
+          {
+            "heading": "Check them every shift",
+            "items": [
+              "A competent person looks over the brackets and planks for visible damage before each shift.",
+              "Bent brackets, cracked planks, nails pulling out: fix or replace it before anyone steps on it."
+            ]
+          },
+          {
+            "heading": "Brackets are not your fall protection",
+            "items": [
+              "On a roof 6 feet or more above the ground, you still need guardrails, a safety net, or a personal fall arrest system.",
+              "If the company decides those can't be used on this roof, there has to be a written fall protection plan for this job, and you follow it.",
+              "Know which one we're using today before you climb up."
+            ]
+          }
+        ],
+        "ask": "Who checked the brackets and planks this morning, and what's catching us if we slip today?"
+      },
+      "es": {
+        "title": "Soportes de techo (roof brackets y roof jacks)",
+        "hook": "Los soportes de techo te aguantan a ti y a tus paquetes en un techo empinado. No paran una caída al suelo. Para eso todavía hacen falta barandas, una red o un arnés amarrado.",
+        "sections": [
+          {
+            "heading": "Instálalos bien",
+            "items": [
+              "Los soportes tienen que quedar a la medida de la inclinación del techo y darte una plataforma nivelada.",
+              "Clávalos. Si no es práctico clavarlos, amárralos con soga de manila de primera calidad de por lo menos tres cuartos de pulgada de grueso, o algo equivalente.",
+              "Pon tablas en toda la plataforma entre los soportes."
+            ]
+          },
+          {
+            "heading": "Revísalos cada turno",
+            "items": [
+              "Una persona competente revisa los soportes y las tablas para ver si tienen daños visibles antes de cada turno.",
+              "Soportes doblados, tablas rajadas, clavos que se están saliendo: arréglalo o cámbialo antes de que alguien se suba."
+            ]
+          },
+          {
+            "heading": "Los soportes no son tu protección contra caídas",
+            "items": [
+              "En un techo de 6 pies o más sobre el suelo, todavía necesitas barandas, una red de seguridad o un sistema personal de detención de caídas.",
+              "Si la compañía decide que eso no se puede usar en este techo, tiene que haber un plan escrito de protección contra caídas para este trabajo, y tú lo sigues.",
+              "Sepan cuál vamos a usar hoy antes de subir."
+            ]
+          }
+        ],
+        "ask": "¿Quién revisó los soportes y las tablas esta mañana, y qué nos detiene si nos resbalamos hoy?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
     "id": "skylights",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.501(b)(4) / 1926.502(i)",
     "minutes": 5,
@@ -1679,7 +1785,8 @@ export const TALKS: Talk[] = [
   {
     "id": "harness",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.502(d)",
     "minutes": 6,
@@ -1822,7 +1929,8 @@ export const TALKS: Talk[] = [
   {
     "id": "fall-rescue",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.503 / 1926.502(d)(20)",
     "minutes": 5,
@@ -1941,7 +2049,8 @@ export const TALKS: Talk[] = [
   {
     "id": "scaffold",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.451 / 1926.454",
     "minutes": 6,
@@ -2197,7 +2306,8 @@ export const TALKS: Talk[] = [
   {
     "id": "falling-objects",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.501(c) / 1926.502(j) / 1926.100",
     "minutes": 5,
@@ -2319,7 +2429,8 @@ export const TALKS: Talk[] = [
   {
     "id": "debris-chute",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.252 / 1926.25",
     "minutes": 5,
@@ -2584,7 +2695,8 @@ export const TALKS: Talk[] = [
   {
     "id": "electrical-gfci",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.404 / 1926.405 / 1926.416",
     "minutes": 5,
@@ -2725,7 +2837,8 @@ export const TALKS: Talk[] = [
   {
     "id": "power-lines",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.416 / 1926.600(a)(6) / 1926.1408",
     "minutes": 5,
@@ -2844,7 +2957,8 @@ export const TALKS: Talk[] = [
   {
     "id": "nail-gun",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.302(b) / 1926.102",
     "minutes": 5,
@@ -2960,7 +3074,8 @@ export const TALKS: Talk[] = [
   {
     "id": "hot-work",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.352 / 1926.150 / 1926.153",
     "minutes": 5,
@@ -3107,7 +3222,8 @@ export const TALKS: Talk[] = [
   {
     "id": "silica",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.1153",
     "minutes": 5,
@@ -3236,7 +3352,8 @@ export const TALKS: Talk[] = [
   {
     "id": "eye-face",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.102",
     "minutes": 4,
@@ -4068,7 +4185,8 @@ export const TALKS: Talk[] = [
   {
     "id": "hand-tools-con",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.300 / 1926.301 / 1926.302",
     "minutes": 5,
@@ -4470,7 +4588,8 @@ export const TALKS: Talk[] = [
   {
     "id": "asbestos",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.1101",
     "minutes": 6,
@@ -4873,7 +4992,8 @@ export const TALKS: Talk[] = [
   {
     "id": "housekeeping",
     "industries": [
-      "con"
+      "con",
+      "roof"
     ],
     "code": "1926.25 / 1926.252",
     "minutes": 5,
@@ -17409,7 +17529,8 @@ export const TALKS: Talk[] = [
       "land",
       "ag",
       "con",
-      "util"
+      "util",
+      "roof"
     ],
     "code": "No OSHA standard; NIOSH sun exposure guidance",
     "minutes": 5,

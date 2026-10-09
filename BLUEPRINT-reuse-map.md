@@ -21,7 +21,7 @@ point the row at the real file and keep the prototype line as its origin.
 | Component | File | Role |
 |---|---|---|
 | `Talk` · `TalkText` · `TranslationStatus` | `src/core/talks.ts:7` | The one talk shape: id, industries (or `all`), code, minutes, content per language, translation status |
-| `talksFor` · `talkFitsClimate` | `src/core/talks.ts:35` · `:29` | Talks for an industry + location. Storm talk only where hurricanes happen; cold talk hidden with no winter |
+| `talksFor` · `talkFitsClimate` | `src/core/talks.ts:37` · `:31` | Talks for an industry + location, the trade's own and Every-job talks first, then borrowed ones (roofing → construction). Storm talk only where hurricanes happen; cold talk hidden with no winter |
 | `talkText` | `src/core/talks.ts:42` | Talk text in a language, falling back to English |
 | `INDUSTRIES` | `src/core/industries.ts:4` | Construction, manufacturing, agriculture & fertilizer, warehouse & logistics |
 | `LANGUAGES` | `src/core/languages.ts:4` | Supported languages (ready vs coming soon) with voice codes |

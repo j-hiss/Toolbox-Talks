@@ -54,6 +54,13 @@ customer #1, not a special case.
 ## Talk library
 - Rewritten from free federal OSHA material: shorter, plainer, less dry. Each talk is a hook, two or three short
   sections, and one question to ask the crew. About 4–6 minutes read aloud.
+- **Trades that borrow a library get their own talks first (2026-10-09).** Roofing, Electrical, Plumbing & HVAC, Solar and
+  Demolition also get every construction talk, but their 52-week plan now leads with the talks tagged for the trade
+  and the Every-job set, then the rest of construction. Roofing's tag set: fall protection, ladders, low-slope and
+  steep roofs, roof brackets, skylights, harness, rescue, scaffolds, falling objects, debris chutes, GFCIs, power
+  lines, nail guns, torch-down, silica, eye protection, hand tools, asbestos, housekeeping, kettles, hoists, sun.
+  A Florida roofer's first year has no trenching or confined-space weeks. New talk: **Roof Brackets and Roof Jacks**
+  (1926.452(h), 1926.451(b)(1) and (f)(3), residential fall protection guidance; Spanish draft).
 - **Check licensing on every source.** Federal OSHA material is generally public domain. Many "free" talk libraries
   online are copyrighted and can't be repackaged.
 - **Industries (18):** Construction, plus the trades that also get every construction talk (Roofing, Electrical,

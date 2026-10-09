@@ -36,9 +36,14 @@ export function talkFitsClimate(talk: Talk, climate: Climate): boolean {
 /** Every talk available to a company: its industry's talks plus the "Every job" set, filtered by local climate. */
 export function talksFor(talks: Talk[], industry: IndustryId, climate: Climate): Talk[] {
   const tags = industryTags(industry);
-  return talks.filter(
+  const fits = talks.filter(
     (t) => (t.industries.includes("all") || tags.some((i) => t.industries.includes(i))) && talkFitsClimate(t, climate),
   );
+  // A trade that borrows another library (roofing uses construction) gets its own talks and the Every-job set first,
+  // then the borrowed ones, so the 52-week plan leads with what fits the trade. Same order within each group.
+  // A trade that borrows nothing keeps the library order exactly.
+  const own = (t: Talk) => t.industries.includes("all") || t.industries.includes(industry);
+  return [...fits.filter(own), ...fits.filter((t) => !own(t))];
 }
 
 /** The talk text in a language, falling back to English when that language isn't available. */

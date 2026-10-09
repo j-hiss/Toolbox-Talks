@@ -60,3 +60,22 @@ describe("repeat notes", () => {
     }
   });
 });
+
+describe("roofing gets roofing talks first", () => {
+  it("a roofing company's list leads with its own talks and the Every-job set, construction-only talks after", async () => {
+    const { talksFor } = await import("@/core/talks");
+    const list = talksFor(TALKS, "roof", { state: "FL", label: "FL", hurricane: true, cold: "none" } as never);
+    const firstBorrowed = list.findIndex((t) => !t.industries.includes("roof") && !t.industries.includes("all"));
+    const lastOwn = list.map((t) => t.industries.includes("roof") || t.industries.includes("all")).lastIndexOf(true);
+    expect(firstBorrowed).toBeGreaterThan(lastOwn);
+    expect(list.slice(0, 30).some((t) => t.id === "trenching")).toBe(false);
+    for (const id of ["lightning", "roof-brackets", "skylights", "hot-work"]) expect(list.some((t) => t.id === id)).toBe(true);
+  });
+  it("a trade that borrows nothing keeps the library order", async () => {
+    const { talksFor } = await import("@/core/talks");
+    const c = { state: "FL", label: "FL", hurricane: true, cold: "none" } as never;
+    const list = talksFor(TALKS, "mfg", c).map((t) => t.id);
+    const plain = TALKS.filter((t) => t.industries.includes("all") || t.industries.includes("mfg")).map((t) => t.id);
+    expect(list).toEqual(plain.filter((id) => list.includes(id)));
+  });
+});
