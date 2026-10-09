@@ -9,7 +9,7 @@ const local = process.env.CAP_LOCAL === "1";
 
 const config: CapacitorConfig = {
   appId: "com.toolboxtalks.app",
-  appName: "Keel", // PLACEHOLDER name; keep in step with src/content/brand.ts
+  appName: "Salvant", // PLACEHOLDER name; keep in step with src/content/brand.ts
   webDir: "out",
   ...(local ? { server: { androidScheme: "http", cleartext: true } } : {}),
 };

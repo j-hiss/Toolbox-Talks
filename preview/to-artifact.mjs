@@ -11,7 +11,7 @@ const styles = pick(/<style[^>]*>[\s\S]*?<\/style>/g);
 const scripts = pick(/<script[^>]*>[\s\S]*?<\/script>/g);
 if (!scripts) throw new Error("No script found in the Vite build; the preview would be blank.");
 
-const page = `<title>Keel Preview</title>
+const page = `<title>Salvant Preview</title>
 ${styles}
 <div id="root"></div>
 ${scripts}

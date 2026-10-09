@@ -468,17 +468,20 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 
 ## Product name (placeholder, 2026-10-09)
-- **Logo direction D picked (Joe, 2026-10-09; "Keel logo ideas" design board):** the name in heavy, wide lowercase
-  letters (Archivo at width 125, weight 900, drawn as outlines so it needs no font), a level line under it and the
-  keel hanging below, line and keel in the brand green. App icon: a lowercase k over the line and keel on the green.
-  Taglines Joe chose: **"Every talk. Every signature. Every time."** (main: app stores, install, sign-in, side menu)
-  and **"Safety that stays the course."** (explains the name: website, signs, gear). Still placeholders until the
-  trademark search; a designer finishes the artwork from this direction.
-- **Brand color confirmed green (Joe, 2026-10-09)** after comparing safety orange, deep blue, flat gold and metallic
-  gold (design board "D · Color options"). Two shades: #3DDC97 on screens and dark backgrounds, #1E9E66 on paper and
-  white. Gold #FFC24B stays the accent (streaks, caution).
-- Working name **Keel**, set in one place:
-  `src/content/brand.ts` (plus `appName` in `capacitor.config.ts`). "Toolbox Talks" is already another App Store
-  app and reads as construction-only. Shortlist and design directions: the Look and Name Board artifact. Final name
-  waits on Joe's pick and a trademark search; the real logo and app icon come from a human designer.
-
+- **Working name: Salvant** (Joe, 2026-10-09; *salus*, safety, plus vanguard). It replaced **Keel**, which ran into a
+  pending "KEEL" trademark for document and workflow software (Osgood Advisory, class 42, filed May 2026). A first web
+  check found no "Salvant" company, product or trademark; salvant.io, salvant.app, getsalvant.com and
+  salvantsafety.com were open. Watch-out for the clearance attorney: the "Sal-" root is shared with Salus, a
+  competitor. Final name waits on that clearance.
+- **Logos (Joe picked D and B on the "Salvant logo ideas" board):**
+  - **Product mark, D:** bold lowercase "salvant" (Outfit 800) with a rule under it, a bar and a dot. The app, app
+    icon (a lowercase s over the rule on deep forest), website, App Store.
+  - **Company mark, B:** spaced serif SALVANT (Fraunces) between thin rules, with SAFETY PROGRAMS under it. Partner
+    and insurer material, letterhead, the website footer.
+  - Both are drawn as outlines (`src/content/logo.ts`, `logo.json`), so they need no font; files for print and
+    designers in `public/brand/` (`npm run icons` regenerates them and the app icons).
+- **Brand colors:** deep forest #1F4D3A, warm off-white #F6F5F0, charcoal #1E2422; the app keeps its bright green
+  #3DDC97 for buttons and "done" (the app stays warm and simple; the polish is in the logo, website and partner side).
+- **Tagline:** "Every talk. Every signature. Every time." ("Safety that stays the course" went with Keel.)
+- Set in one place: `src/content/brand.ts` (plus `appName` in `capacitor.config.ts`). The real artwork comes from a
+  designer working from these directions.

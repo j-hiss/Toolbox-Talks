@@ -9,7 +9,7 @@ import { canAdmin, canPresent, canReport, isStaff } from "@/lib/data/types";
 import { pending, onOutboxChange } from "@/lib/outbox";
 import { BRAND } from "@/content/brand";
 import { Wordmark } from "./Logo";
-import { markSvgInner } from "@/content/logo";
+import { BRAND_COLORS, markSvgInner } from "@/content/logo";
 
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" | "lg" };
 
@@ -123,12 +123,12 @@ export function ErrorNotice({ what, detail, onRetry }: { what: string; detail: s
   );
 }
 
-/** The app mark (PLACEHOLDER, logo direction D): a lowercase k over a level line and the keel, on the brand color.
- *  See src/components/Logo.tsx and src/content/brand.ts. */
+/** The app mark (PLACEHOLDER, Salvant direction D): a lowercase s over the rule, in the brand's own fixed colors
+ *  (deep forest tile, off-white s, green rule), the same as the app icon. See src/content/logo.ts. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
-    <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[22%] bg-brand text-brand-ink" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox="0 0 64 64" dangerouslySetInnerHTML={{ __html: markSvgInner("currentColor") }} />
+    <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[22%]" style={{ width: size, height: size, background: BRAND_COLORS.forest }}>
+      <svg width={size} height={size} viewBox="0 0 64 64" dangerouslySetInnerHTML={{ __html: markSvgInner(BRAND_COLORS.paper, BRAND_COLORS.green) }} />
     </span>
   );
 }
