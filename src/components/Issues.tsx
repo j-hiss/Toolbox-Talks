@@ -62,7 +62,7 @@ export function IssuesList({ companyId }: { companyId: string }) {
         {overdue > 0 && <span className="ml-auto rounded bg-warn px-2 py-0.5 font-display text-xs font-semibold text-warn-ink">{overdue} overdue</span>}
       </div>
       {list.length === 0 ? (
-        <p className="mt-4 text-sm text-muted">{show === "open" ? "Nothing open. Issues the crew raises at a talk show up here." : "Nothing fixed yet."}</p>
+        <p className="mt-4 text-sm text-muted">{show === "open" ? "Nothing open. Issues the team raises at a talk show up here." : "Nothing fixed yet."}</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {list.map((i) => {
@@ -99,7 +99,7 @@ export function IssuesList({ companyId }: { companyId: string }) {
           >
             <p className="break-words text-lg font-semibold">{editing.description}</p>
             <p className="text-sm text-muted">
-              Raised {short(editing.raised_at)}{editing.raised_by_name ? ` by ${editing.raised_by_name}'s crew` : ""}{editing.jobsite_name ? ` at ${editing.jobsite_name}` : ""}
+              Raised {short(editing.raised_at)}{editing.raised_by_name ? ` by ${editing.raised_by_name}'s team` : ""}{editing.jobsite_name ? ` at ${editing.jobsite_name}` : ""}
               {editing.record_id && <> · <Link className="underline" href={`/record/#${editing.record_id}`}>see the talk</Link></>}
             </p>
             {editing.status === "open" ? (

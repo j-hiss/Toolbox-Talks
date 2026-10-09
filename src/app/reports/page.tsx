@@ -19,7 +19,7 @@ import { reportPeople, reportRecords, listDailyPlans } from "@/lib/data/reports"
 import { listIssues } from "@/lib/data/issues";
 import { isOverdue } from "@/components/Issues";
 import { listTeams } from "@/lib/data/company";
-import type { Issue, Membership, Team } from "@/lib/data/types";
+import { canAdmin, canPresent, type Issue, type Membership, type Team } from "@/lib/data/types";
 import { usePlan } from "@/lib/usePlan";
 import { newMakeupDraft } from "@/lib/draft";
 import { readChosenJobsite } from "@/components/JobsitePicker";
@@ -29,7 +29,7 @@ import { RequireCompany } from "@/components/Guard";
 import { Button, ErrorNotice, Eyebrow, GroupHeading, Loading, MakeupTag, Notice, Shell, Title, inputClass } from "@/components/ui";
 
 export default function ReportsPage() {
-  return <RequireCompany admin>{(m) => <Reports m={m} />}</RequireCompany>;
+  return <RequireCompany need="report">{(m) => <Reports m={m} />}</RequireCompany>;
 }
 
 const RANGES = [
@@ -126,14 +126,14 @@ function Reports({ m }: { m: Membership }) {
   const made = makeupSummary(report, MAKEUP_REASONS);
   const grid = teamGrid(report)
     .map((g) => ({ name: g.teamId ? teamName(g.teamId) || "Former team" : "No team", cells: g.weeks }))
-    .sort((a, b) => (a.name === "No crew" ? 1 : b.name === "No crew" ? -1 : a.name.localeCompare(b.name)));
+    .sort((a, b) => (a.name === "No team" ? 1 : b.name === "No team" ? -1 : a.name.localeCompare(b.name)));
   const gridWeeks = [...report.weeks].reverse().map((w) => ({ key: w.key, label: short(parseDay(w.key)) }));
   const flags = data.records.flatMap((r) => r.attendees.filter((a) => a.status !== "signed").map((a) => ({ r, a }))).reverse();
 
   const exportCsv = async () => {
     setCsvMsg(null);
     const q = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-    const rows = [["Week of", "Week #", "Weeks in period", "Talk", "Person", "Crew", "Status", "Signed on", "Makeup reason", "Record ID"]];
+    const rows = [["Week of", "Week #", "Weeks in period", "Talk", "Person", "Team", "Status", "Signed on", "Makeup reason", "Record ID"]];
     for (const w of [...report.weeks].reverse()) {
       for (const p of w.people) {
         const person = names.get(p.personId)!;
@@ -152,10 +152,12 @@ function Reports({ m }: { m: Membership }) {
     <Shell>
       <Eyebrow>Reports · {co.name}</Eyebrow>
       <Title>{multi ? "Talk sign-ins" : "Weekly sign-ins"}</Title>
-      <Link href="/profile/" className="mt-3 flex min-h-11 items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
-        <span><b className="block">Safety profile &amp; renewal packet</b><small className="text-muted">Show your carrier what your crews do to stay safe</small></span>
-        <span aria-hidden>→</span>
-      </Link>
+      {canAdmin(m.access) && (
+        <Link href="/profile/" className="mt-3 flex min-h-11 items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+          <span><b className="block">Safety profile &amp; renewal packet</b><small className="text-muted">Show your carrier what your teams do to stay safe</small></span>
+          <span aria-hidden>→</span>
+        </Link>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <div className="grid w-full grid-cols-4 overflow-hidden rounded-lg border border-line sm:w-auto" role="group" aria-label="Date range">
@@ -166,13 +168,13 @@ function Reports({ m }: { m: Membership }) {
             </button>
           ))}
         </div>
-        <select aria-label="Crew" className={`${inputClass} w-full sm:w-auto`} value={team} onChange={(e) => setTeam(e.target.value)}>
-          <option value="all">All crews</option>
+        <select aria-label="Team" className={`${inputClass} w-full sm:w-auto`} value={team} onChange={(e) => setTeam(e.target.value)}>
+          <option value="all">All teams</option>
           {data.teams.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-          <option value="none">No crew</option>
+          <option value="none">No team</option>
         </select>
       </div>
-      <p className="mt-2 text-sm text-muted tabular-nums">Week of {short(parseDay(data.from))} to today{team !== "all" ? " · crew as of today" : ""}</p>
+      <p className="mt-2 text-sm text-muted tabular-nums">Week of {short(parseDay(data.from))} to today{team !== "all" ? " · team as of today" : ""}</p>
 
       {/* Who owes a makeup: one card per week, one tap to start it ------------------------------------------------- */}
       <GroupHeading aside={owed.length ? `${owed.length}` : undefined}>Needs a makeup</GroupHeading>
@@ -196,7 +198,7 @@ function Reports({ m }: { m: Membership }) {
                   </span>
                 </div>
                 <p className="mt-2 text-sm"><b>{g.people.length} still need it:</b> {g.people.map((p) => names.get(p)?.name).join(", ")}</p>
-                {pw && (
+                {pw && canPresent(m.access) && (
                   <Button className="mt-2 !py-3" onClick={() => startMakeup(pw, g.people)}>
                     Give this makeup now
                   </Button>
@@ -273,8 +275,8 @@ function Reports({ m }: { m: Membership }) {
 
       {/* Teams ------------------------------------------------------------------------------------------------------- */}
       {team === "all" && grid.length > 0 && (
-        <Fold title="By crew">
-          <p className="mt-1 text-sm text-muted">Score per crew per week (crew as of today). Tap a square for the count.</p>
+        <Fold title="By team">
+          <p className="mt-1 text-sm text-muted">Score per team per week (team as of today). Tap a square for the count.</p>
           <div className="mt-3"><TeamGrid rows={grid} weeks={gridWeeks} currentKey={current?.key ?? isoDay(mondayOf(today))} /></div>
         </Fold>
       )}
@@ -301,7 +303,7 @@ function Reports({ m }: { m: Membership }) {
         const avg = days.length ? Math.round(days.reduce((a, b) => a + b, 0) / days.length) : null;
         if (!raised.length && !open.length) return null;
         return (
-          <Fold title="Issues the crew raised" aside={open.length ? `${open.length} open` : undefined}>
+          <Fold title="Issues the team raised" aside={open.length ? `${open.length} open` : undefined}>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
               <div className="rounded-xl bg-surface p-2"><b className="block text-2xl">{raised.length}</b><small className="text-muted">raised in range</small></div>
               <div className={`rounded-lg border p-2 ${late ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}><b className="block text-2xl">{open.length}</b><small className="text-muted">open{late ? ` · ${late} overdue` : ""}</small></div>
@@ -378,7 +380,7 @@ function Reports({ m }: { m: Membership }) {
         const tally = dailyTally(data.daily, (iso) => isoDay(new Date(iso)));
         return (
           <Fold title="Daily pre-task plans" aside={(() => { const n = new Set(data.daily.map((d) => isoDay(new Date(d.held_at)))).size; return `${n} ${n === 1 ? "day" : "days"}`; })()}>
-            <p className="mt-1 text-sm text-muted">Days with a daily plan recorded, by crew. Separate from the weekly talk and the sign-in rate. The app doesn&apos;t know which days were worked, so this is a count, not a rate.</p>
+            <p className="mt-1 text-sm text-muted">Days with a daily plan recorded, by team. Separate from the weekly talk and the sign-in rate. The app doesn&apos;t know which days were worked, so this is a count, not a rate.</p>
             {tally.length === 0 ? <p className="mt-2 text-sm text-muted">No daily plans in this range.</p> : (
               <ul className="mt-2 flex flex-col gap-1.5 text-sm tabular-nums">
                 {tally.map((t) => <li key={t.crew} className="flex justify-between rounded-xl bg-surface px-3 py-2"><b>{t.crew}</b><span>{t.days} {t.days === 1 ? "day" : "days"}</span></li>)}

@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { myMemberships } from "@/lib/data/company";
+import { acceptInvites } from "@/lib/data/members";
 import type { Membership } from "@/lib/data/types";
 
 type SessionState = {
@@ -53,6 +54,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
+      // Join any company that invited this email (Admin → App access). Never blocks signing in.
+      try { await acceptInvites(); } catch { /* offline or not yet migrated: try again next sign-in */ }
       const ms = await myMemberships(u.id);
       setMemberships(ms);
       setError(null);

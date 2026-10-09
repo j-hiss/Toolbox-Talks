@@ -59,7 +59,7 @@ export function seedExample(): string {
       jobsite_id: site.id, jobsite_name: site.name, team_id: null, team_name: teamName, team_lead_name: lead.name,
       presenter_person_id: lead.id, presenter_name: lead.name, presenter_role: "Foreman", presenter_signature: SIG, presenter_signed_at: held.toISOString(),
       held_at: held.toISOString(), latitude: null, longitude: null, gps_accuracy_m: null,
-      attendees: rows.map(({ p, s }) => ({ person_id: p.id, name: p.name, role: "Crew member", team_name: teamName, status: s, signature: s === "signed" ? SIG : null, signed_at: s === "signed" ? held.toISOString() : null })),
+      attendees: rows.map(({ p, s }) => ({ person_id: p.id, name: p.name, role: "Team member", team_name: teamName, status: s, signature: s === "signed" ? SIG : null, signed_at: s === "signed" ? held.toISOString() : null })),
     });
   };
   const at = (monday: Date, day: number) => { const x = addDays(monday, day); x.setHours(7, 5, 0, 0); return x; };
@@ -93,4 +93,27 @@ export function seedExample(): string {
   issue(4, "Example: guardrail missing at the stair opening", leadB, 5, "Rail installed");
   save();
   return "Example history added.";
+}
+
+/** Preview only: switch the demo account's app role, to see each role's screens on one phone. For "employee" the
+ *  account is linked to a roster person who has talk history (Add example history first), like an accepted invite. */
+export function viewAs(access: "owner" | "admin" | "presenter" | "office" | "employee"): string {
+  const d = db();
+  const user = d.session?.user.id;
+  let current: string | null = null;
+  try { current = localStorage.getItem("tt-current-company"); } catch { /* none */ }
+  const member = d.members.find((m) => m.user_id === user && m.company_id === current) ?? d.members.find((m) => m.user_id === user);
+  if (!member) return "Create a company first.";
+  const people = d.people as { id: string; company_id: string; active?: boolean; user_id?: string | null }[];
+  for (const p of people) if (p.company_id === member.company_id && p.user_id === user) p.user_id = null;
+  if (access === "employee") {
+    const recs = d.records as unknown as { company_id: string; attendees: { person_id: string | null }[] }[];
+    const onTalks = new Set(recs.filter((r) => r.company_id === member.company_id).flatMap((r) => r.attendees.map((a) => a.person_id)));
+    const p = people.find((x) => x.company_id === member.company_id && x.active !== false && onTalks.has(x.id))
+      ?? people.find((x) => x.company_id === member.company_id && x.active !== false);
+    if (p) p.user_id = user;
+  }
+  member.access = access;
+  save();
+  return "ok";
 }

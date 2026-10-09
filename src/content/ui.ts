@@ -17,7 +17,7 @@ type Strings = {
 };
 
 const en: Strings = {
-  ask: "Ask the crew",
+  ask: "Ask the team",
   play: "Read it out loud",
   stop: "Stop reading",
   reading: "Reading out loud…",

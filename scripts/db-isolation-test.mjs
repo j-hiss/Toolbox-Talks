@@ -32,7 +32,7 @@ do $$ begin
   if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
 end $$;
 create schema if not exists auth;
-create table if not exists auth.users (id uuid primary key);
+create table if not exists auth.users (id uuid primary key, email text, email_confirmed_at timestamptz);
 create or replace function auth.uid() returns uuid language sql stable as
   $f$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $f$;
 grant usage on schema auth to anon, authenticated;
@@ -94,7 +94,7 @@ async function main() {
 
     const leakCheck = async () => {
       const people = await as(userA, "select company_id from public.people");
-      return people.rows.every((r) => r.company_id === coA) && people.rows.length === 2;
+      return people.rows.every((r) => r.company_id === coA) && people.rows.length >= 2;
     };
 
     check("A sees only A's people", await leakCheck());
@@ -458,6 +458,12 @@ async function main() {
     const rolesA = await as(userA, "select company_id from public.roles");
     check("New company gets its default roles, and A sees only A's", rolesA.rows.length === 6 && rolesA.rows.every((r) => r.company_id === coA), `${rolesA.rows.length} visible`);
     check("A cannot add a role to B", await fails(() => as(userA, "insert into public.roles (company_id, name) values ($1, 'Intruder')", [coB])));
+    // Job titles (migration 0021): existing titles present by default; only the company's own admins change the switch.
+    check("Default titles present", (await as(userA, "select bool_and(presents) as all_p from public.roles")).rows[0].all_p === true);
+    await as(userA, "insert into public.roles (company_id, name, presents) values ($1, 'Roofer', false)", [coA]);
+    const flipB = await as(userA, "update public.roles set presents = false where company_id = $1 returning id", [coB]);
+    check("A cannot change whether B's titles present", flipB.rows.length === 0, `${flipB.rows.length} changed`);
+    check("A can add a sign-only title", (await as(userA, "select presents from public.roles where company_id = $1 and name = 'Roofer'", [coA])).rows[0]?.presents === false);
     check("A cannot add a person to B", await fails(() => as(userA, "insert into public.people (company_id, full_name) values ($1, 'intruder')", [coB])));
     const upd = await as(userA, "update public.people set full_name = 'renamed' where company_id = $1", [coB]);
     check("A cannot change B's people", upd.rowCount === 0, `${upd.rowCount} rows changed`);
@@ -465,6 +471,43 @@ async function main() {
     check("A cannot make themselves a member of B", await fails(() => as(userA, "insert into public.company_members (company_id, user_id, access) values ($1, $2, 'admin')", [coB, userA])));
     check("A presenter can read A's people", (await as(presenterA, "select id from public.people")).rows.length === 2);
     check("A presenter cannot add people", await fails(() => as(presenterA, "insert into public.people (company_id, full_name) values ($1, 'x')", [coA])));
+    // App roles (migration 0022): office, employee, invites, owners.
+    {
+      const officeA = randomUUID(), empA = randomUUID(), adminA = randomUUID(), unconfirmed = randomUUID(), outsider = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'office@a.example', now()), ($2, 'emp@a.example', now()), ($3, 'admin@a.example', now()), ($4, 'fake@a.example', null), ($5, 'out@b.example', now())",
+        [officeA, empA, adminA, unconfirmed, outsider]);
+      const empPerson = (await as(userA, "insert into public.people (company_id, full_name) values ($1, 'A employee') returning id", [coA])).rows[0].id;
+      // Invites: owner invites admin; admin may invite office/employee but not owners or admins.
+      await as(userA, "insert into public.company_invites (company_id, email, access) values ($1, 'admin@a.example', 'admin')", [coA]);
+      check("Invite joins on sign-in with a proven email", (await as(adminA, "select public.accept_invites() as n")).rows[0].n === 1);
+      check("Admin can't invite an owner", await fails(() => as(adminA, "insert into public.company_invites (company_id, email, access) values ($1, 'x@a.example', 'owner')", [coA])));
+      check("Admin can't invite another admin", await fails(() => as(adminA, "insert into public.company_invites (company_id, email, access) values ($1, 'x@a.example', 'admin')", [coA])));
+      await as(adminA, "insert into public.company_invites (company_id, email, access) values ($1, 'office@a.example', 'office')", [coA]);
+      await as(adminA, "insert into public.company_invites (company_id, email, access, person_id) values ($1, 'emp@a.example', 'employee', $2)", [coA, empPerson]);
+      await as(adminA, "insert into public.company_invites (company_id, email, access) values ($1, 'fake@a.example', 'office')", [coA]);
+      check("A can't invite into B", await fails(() => as(userA, "insert into public.company_invites (company_id, email, access) values ($1, 'x@b.example', 'presenter')", [coB])));
+      check("B sees none of A's invites", (await as(userB, "select id from public.company_invites")).rows.length === 0);
+      await as(officeA, "select public.accept_invites()"); await as(empA, "select public.accept_invites()");
+      check("An unproven email joins nothing", (await as(unconfirmed, "select public.accept_invites() as n")).rows[0].n === 0);
+      check("No invite, no company", (await as(outsider, "select public.accept_invites() as n")).rows[0].n === 0 && (await as(outsider, "select id from public.companies")).rows.length === 0);
+      check("Admin can't demote the owner", (await as(adminA, "update public.company_members set access = 'presenter' where user_id = $1 returning user_id", [userA])).rows.length === 0);
+      check("The last owner can't step down", await fails(() => as(userA, "update public.company_members set access = 'admin' where company_id = $1 and user_id = $2", [coA, userA])));
+      // Office: reads records and people, works issues, can't record a talk.
+      check("Office reads A's people", (await as(officeA, "select id from public.people")).rows.length >= 3);
+      check("Office reads A's records", (await as(officeA, "select id from public.talk_records")).rows.length > 0);
+      check("Office can't record a talk", await fails(() => as(officeA, "select public.save_talk_record($1::jsonb, $2::jsonb)", rec(coA, randomUUID(), []))));
+      check("Office can't change setup", await fails(() => as(officeA, "insert into public.teams (company_id, name) values ($1, 'x')", [coA])));
+      // Employee: their own talk only.
+      const empRec = (await as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", rec(coA, randomUUID(), [{ person_id: empPerson, name: "A employee", status: "absent" }, { name: "Someone else", status: "absent" }]))).rows[0].id;
+      const empRecs = await as(empA, "select id from public.talk_records");
+      check("Employee sees only talks they were on", empRecs.rows.length === 1 && empRecs.rows[0].id === empRec, `${empRecs.rows.length} visible`);
+      check("Employee sees only their own attendance row", (await as(empA, "select name from public.talk_attendees")).rows.map((r) => r.name).join() === "A employee");
+      check("Employee sees only themselves on the roster", (await as(empA, "select id from public.people")).rows.map((r) => r.id).join() === empPerson);
+      check("Employee sees their company's name", (await as(empA, "select name from public.companies")).rows.length === 1);
+      check("Employee sees no issues, teams or jobsites", (await as(empA, "select id from public.talk_issues union all select id from public.teams union all select id from public.jobsites")).rows.length === 0);
+      check("Employee can't record a talk", await fails(() => as(empA, "select public.save_talk_record($1::jsonb, $2::jsonb)", rec(coA, randomUUID(), []))));
+      check("Employee sees only their own membership", (await as(empA, "select user_id from public.company_members")).rows.every((r) => r.user_id === empA));
+    }
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 

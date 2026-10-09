@@ -45,7 +45,7 @@ export async function jobsiteSticker(site: { id: string; name: string; address: 
   doc.setFontSize(12); doc.setTextColor(90);
   center(companyName, y + 14);
   doc.setFontSize(9);
-  center("Crew members don't scan this or sign in. It only opens the app on the presenter's phone.", 740);
+  center("Team members don't scan this or sign in. It only opens the app on the presenter's phone.", 740);
   center(link, 756);
   return doc.output("blob");
 }

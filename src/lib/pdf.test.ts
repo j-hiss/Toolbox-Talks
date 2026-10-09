@@ -37,7 +37,7 @@ describe("PDF record", () => {
     });
     const pdf = text(r);
     expect(pdf).toContain("(Not on roster · Example Electric) Tj");
-    expect(pdf).toContain("CREW PHOTO · TAKEN OCT 6, 2026 11:21 AM UTC");
+    expect(pdf).toContain("TEAM PHOTO · TAKEN OCT 6, 2026 11:21 AM UTC");
     expect(pdf).toMatch(/\/Subtype \/Image[\s\S]*\/Filter \/DCTDecode/); // the JPEG is embedded
     expect(text(rec())).not.toContain("CREW PHOTO");
   });
@@ -97,7 +97,7 @@ describe("PDF extras", () => {
       id: "i1", client_id: "c", record_id: "r1", jobsite_name: "", description: "East ladder cracked", owner_person_id: null, owner_name: "Lee Lead",
       due_date: "2026-10-13", status: "open", raised_by_name: "", raised_at: "2026-10-06T11:00:00Z", fixed_at: null, fixed_note: "",
     }]).output().replace(/\\([()\\])/g, "$1");
-    expect(withIssues).toContain("Raised by the crew (1)");
+    expect(withIssues).toContain("Raised by the team (1)");
     expect(withIssues).toContain("East ladder cracked");
     expect(withIssues).toContain("fix by 2026-10-13");
   });

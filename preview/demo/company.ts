@@ -37,7 +37,7 @@ export async function createCompany(input: NewCompany): Promise<string> {
     phone: input.phone ?? "", email: input.email ?? "", program_start: input.program_start ?? iso, default_jobsite: input.default_jobsite ?? "", makeup_weeks: input.makeup_weeks ?? 4, work_setting: input.work_setting ?? null,
   });
   db().members.push({ company_id: id, user_id: user, access: "owner" });
-  DEFAULT_ROLES.forEach((name) => rows<Role>("roles").push({ id: uid(), company_id: id, name }));
+  DEFAULT_ROLES.forEach((name) => rows<Role>("roles").push({ id: uid(), company_id: id, name, presents: true }));
   save();
   return id;
 }
@@ -48,12 +48,26 @@ export async function updateCompany(id: string, patch: Partial<Omit<Company, "id
 }
 
 export async function listRoles(companyId: string): Promise<Role[]> {
-  await tick(); return rows<Role>("roles").filter((r) => r.company_id === companyId).sort(byName<Role>("name"));
+  await tick(); return rows<Role>("roles").filter((r) => r.company_id === companyId).map((r) => ({ ...r, presents: r.presents ?? true })).sort(byName<Role>("name"));
 }
-export async function addRole(companyId: string, name: string): Promise<void> {
+export async function addRole(companyId: string, name: string, presents = true): Promise<void> {
   await tick(); mustBeAdmin(companyId);
-  if (rows<Role>("roles").some((r) => r.company_id === companyId && r.name === name)) throw new Error("That role already exists.");
-  rows<Role>("roles").push({ id: uid(), company_id: companyId, name }); save();
+  if (rows<Role>("roles").some((r) => r.company_id === companyId && r.name === name)) throw new Error("That job title already exists.");
+  rows<Role>("roles").push({ id: uid(), company_id: companyId, name, presents }); save();
+}
+export async function addRoles(companyId: string, titles: { name: string; presents: boolean }[]): Promise<void> {
+  await tick(); mustBeAdmin(companyId);
+  for (const t of titles) {
+    if (rows<Role>("roles").some((r) => r.company_id === companyId && r.name === t.name)) throw new Error("That job title already exists.");
+    rows<Role>("roles").push({ id: uid(), company_id: companyId, name: t.name, presents: t.presents });
+  }
+  save();
+}
+export async function updateRole(companyId: string, roleId: string, patch: Partial<Pick<Role, "name" | "presents">>): Promise<void> {
+  await tick(); mustBeAdmin(companyId);
+  const r = rows<Role>("roles").find((x) => x.company_id === companyId && x.id === roleId);
+  if (!r) throw new Error("No such job title.");
+  Object.assign(r, patch); save();
 }
 export async function deleteRole(companyId: string, roleId: string): Promise<void> {
   await tick(); mustBeAdmin(companyId);
@@ -119,7 +133,7 @@ export async function deactivateJobsite(companyId: string, id: string): Promise<
 
 // Compile-time check that this demo module offers every function the real one does, with the same signatures.
 const _sameShape = {
-  myMemberships, createCompany, updateCompany, listRoles, addRole, deleteRole, listTeams, addTeam, updateTeam, deleteTeam,
+  myMemberships, createCompany, updateCompany, listRoles, addRole, addRoles, updateRole, deleteRole, listTeams, addTeam, updateTeam, deleteTeam,
   listPeople, listAllPeople, addPerson, updatePerson, deactivatePerson, listJobsites, addJobsite, updateJobsite, deactivateJobsite,
 } satisfies Omit<typeof Real, never>;
 void _sameShape;

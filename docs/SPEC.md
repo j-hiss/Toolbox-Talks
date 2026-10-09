@@ -23,9 +23,20 @@ The value customers pay for is the **signed, searchable record**. The talk conte
 - **Store accounts when publishing:** Apple developer account ($99/year), Google Play developer account (one-time fee).
 
 ## Who uses it
-- **Company admin** (owner, safety manager): sets up the company, people and teams, reads reports, pulls records.
-- **Presenter** (superintendent, supervisor, foreman, team lead): picks the talk, reads or plays it, collects signatures.
-- **Crew member**: listens and signs on the presenter's phone. No account, no app install.
+Two separate things describe a person (decided with Joe, 2026-10-09):
+- **Job title** (Admin → Job titles): their real job, from a starter list for the company's industry (Roofer, Laborer,
+  Foreman, Office...) that the company can add to. Each title is marked **Gives talks** or not; titles that give
+  talks, plus each team's lead, appear in "Presented by". Someone with no title is a **Team member** and signs only.
+- **App role** (Admin → App access), only for people who sign in:
+  - **Owner**: everything, including who is an owner or admin. A company always keeps at least one owner.
+  - **Admin**: setup, people, plan, reports, safety log, safety profile. Can't make or change owners and admins.
+  - **Presenter**: gives talks and daily plans; sees records and the plan.
+  - **Office**: sees reports and records and works the issues list; doesn't give talks or change setup.
+  - **Employee**: sees only their own talk history (linked to their name on the roster). Nothing else of the company.
+- **Team member** (anyone on the roster): listens and signs on the presenter's phone. No account needed.
+- **Joining:** an admin invites an email with an app role (employees also pick their roster name). The person signs
+  in with that email (emailed code, so the address is proven) and is added automatically. The app sends no email.
+- **Words:** one person is a "team member"; a group is a "team" (the old "crew"). Talk text keeps its own wording.
 
 ## Company-neutral, multi-company
 Any company in any of the supported industries can sign up. Each company's data is fully separate. Roman Roofing is

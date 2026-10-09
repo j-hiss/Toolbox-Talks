@@ -11,8 +11,8 @@ export type EventKind = "inspection" | "walkaround" | "citation" | "incident" | 
 
 export const EVENT_KINDS: { id: EventKind; name: string; sub: string }[] = [
   { id: "inspection", name: "Inspection", sub: "Scaffold, trench, crane, ladder, harness, forklift, extinguisher, site" },
-  { id: "walkaround", name: "Walk-around", sub: "A walk of the site, for example a manager and a crew rep together" },
-  { id: "citation", name: "Citation", sub: "From OSHA or a state plan. Read to crews as alleged until final" },
+  { id: "walkaround", name: "Walk-around", sub: "A walk of the site, for example a manager and an employee representative together" },
+  { id: "citation", name: "Citation", sub: "From OSHA or a state plan. Read to teams as alleged until final" },
   { id: "incident", name: "Incident", sub: "Injury, illness, property damage or a spill" },
   { id: "near_miss", name: "Near miss", sub: "Could have hurt someone, didn't" },
 ];
@@ -130,7 +130,7 @@ const BANNED = /\b(complian\w*|compliant|passed|pass(es)? inspection|osha[- ]app
 export function crewSummaryProblems(text: string, rosterNames: string[]): string[] {
   const t = text.trim();
   const out: string[] = [];
-  if (!t) out.push("Write what the crew should hear.");
+  if (!t) out.push("Write what the team should hear.");
   if (t.length > 600) out.push("Keep it under 600 characters; it's read aloud.");
   const banned = t.match(BANNED);
   if (banned) out.push(`Leave out "${banned[0]}". The app never says a company passed or complies.`);
@@ -142,7 +142,7 @@ export function crewSummaryProblems(text: string, rosterNames: string[]): string
     const last = parts.length > 1 ? parts[parts.length - 1] : "";
     if (lower.includes(` ${parts.join(" ")} `) || (last.length >= 3 && lower.includes(` ${last} `))) named.add(full);
   }
-  if (named.size) out.push(`Take out names (${[...named].join(", ")}). Crews hear what happened and the fix, not who.`);
+  if (named.size) out.push(`Take out names (${[...named].join(", ")}). Teams hear what happened and the fix, not who.`);
   return out;
 }
 

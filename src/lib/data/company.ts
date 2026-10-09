@@ -42,12 +42,20 @@ export async function updateCompany(id: string, patch: Partial<Omit<Company, "id
   check(await supabase().from("companies").update(patch).eq("id", id).select("id").single());
 }
 
-// Roles ----------------------------------------------------------------------------------------------------------
+// Job titles (the roles table) -------------------------------------------------------------------------------------
 export async function listRoles(companyId: string): Promise<Role[]> {
-  return check(await supabase().from("roles").select("id, company_id, name").eq("company_id", companyId).order("name"));
+  return check(await supabase().from("roles").select("id, company_id, name, presents").eq("company_id", companyId).order("name"));
 }
-export async function addRole(companyId: string, name: string): Promise<void> {
-  check(await supabase().from("roles").insert({ company_id: companyId, name }));
+export async function addRole(companyId: string, name: string, presents = true): Promise<void> {
+  check(await supabase().from("roles").insert({ company_id: companyId, name, presents }));
+}
+/** Add several titles at once (starter list, import). */
+export async function addRoles(companyId: string, titles: { name: string; presents: boolean }[]): Promise<void> {
+  if (!titles.length) return;
+  check(await supabase().from("roles").insert(titles.map((t) => ({ company_id: companyId, name: t.name, presents: t.presents }))));
+}
+export async function updateRole(companyId: string, roleId: string, patch: Partial<Pick<Role, "name" | "presents">>): Promise<void> {
+  check(await supabase().from("roles").update(patch).eq("company_id", companyId).eq("id", roleId).select("id").single());
 }
 export async function deleteRole(companyId: string, roleId: string): Promise<void> {
   check(await supabase().from("roles").delete().eq("company_id", companyId).eq("id", roleId));
@@ -70,7 +78,7 @@ export async function deleteTeam(companyId: string, teamId: string): Promise<voi
 }
 
 // People ---------------------------------------------------------------------------------------------------------
-const PERSON_COLUMNS = "id, company_id, full_name, role_id, team_id, employee_id, phone, preferred_language, active";
+const PERSON_COLUMNS = "id, company_id, full_name, role_id, team_id, employee_id, phone, preferred_language, active, user_id";
 
 export async function listPeople(companyId: string): Promise<Person[]> {
   return check(

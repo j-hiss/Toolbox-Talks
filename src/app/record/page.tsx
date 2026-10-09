@@ -19,7 +19,7 @@ import { RequireCompany } from "@/components/Guard";
 import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
 
 export default function RecordPage() {
-  return <RequireCompany>{(m) => <RecordView m={m} />}</RequireCompany>;
+  return <RequireCompany need="staff">{(m) => <RecordView m={m} />}</RequireCompany>;
 }
 
 // The record id lives in the URL hash (/record/#<id>) so this works as a static page.
@@ -69,7 +69,7 @@ function RecordView({ m }: { m: Membership }) {
   const details: [string, string][] = [
     ["When", when],
     ["Where", rec.jobsite_name || "Not set"],
-    ["Crew", rec.team_name ? `${rec.team_name}${rec.team_lead_name ? ` (lead: ${rec.team_lead_name})` : ""}` : "Not set"],
+    ["Team", rec.team_name ? `${rec.team_name}${rec.team_lead_name ? ` (lead: ${rec.team_lead_name})` : ""}` : "Not set"],
     ["Presented by", `${rec.presenter_name}${rec.presenter_role ? `, ${rec.presenter_role}` : ""}`],
     ["Language", LANGUAGES.find((l) => l.id === rec.language)?.label ?? rec.language],
   ];
@@ -133,9 +133,9 @@ function RecordView({ m }: { m: Membership }) {
 
       {rec.photo && (
         <>
-          <GroupHeading aside={rec.photo_taken_at ? time(rec.photo_taken_at) : undefined}>Crew photo</GroupHeading>
+          <GroupHeading aside={rec.photo_taken_at ? time(rec.photo_taken_at) : undefined}>Team photo</GroupHeading>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={rec.photo} alt="Crew photo taken at this talk" className="mt-3 max-h-96 w-full rounded-xl object-cover" />
+          <img src={rec.photo} alt="Team photo taken at this talk" className="mt-3 max-h-96 w-full rounded-xl object-cover" />
         </>
       )}
       {rec.sheet && (
@@ -157,7 +157,7 @@ function RecordView({ m }: { m: Membership }) {
               <div key={it.event_id} className="rounded-xl bg-surface px-3 py-2">
                 <small className="block font-semibold text-muted">{it.heading}</small>
                 <p>{it.text}</p>
-                <small className="text-muted">Reviewed with the crew {new Date(it.reviewed_with_crew_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</small>
+                <small className="text-muted">Reviewed with the team {new Date(it.reviewed_with_crew_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}</small>
               </div>
             ))}
           </div>
@@ -176,7 +176,7 @@ function RecordView({ m }: { m: Membership }) {
             )}
             {issues.length > 0 && (
               <div className="rounded-xl bg-surface px-3 py-2">
-                <b>Raised by the crew ({issues.length})</b>
+                <b>Raised by the team ({issues.length})</b>
                 <ul className="mt-1 flex flex-col gap-1">
                   {issues.map((i) => (
                     <li key={i.id}>
@@ -202,7 +202,7 @@ function RecordView({ m }: { m: Membership }) {
             <ul className="mt-1 list-disc pl-5">{s.items.map((it) => <li key={it}>{it}</li>)}</ul>
           </div>
         ))}
-        <p className="mt-3"><b>Crew question:</b> {rec.content.ask}</p>
+        <p className="mt-3"><b>Team question:</b> {rec.content.ask}</p>
       </div>
 
       <p className="mt-6 text-xs text-muted">Records can&apos;t be edited. This documents a safety meeting; it does not by itself certify OSHA compliance.</p>

@@ -15,6 +15,7 @@ import { weekNumbers } from "@/core/plan";
 import { LANGUAGES, type LanguageId } from "@/core/languages";
 import { buildAttendees, recordPayload, unsignedPresent, type RosterEntry, type Signature } from "@/core/record";
 import { countStatuses, signedSummary } from "@/core/attendance";
+import { presentersFrom, titleOf } from "@/core/presenters";
 import { listJobsites, listPeople, listRoles, listTeams } from "@/lib/data/company";
 import { saveTalkRecord, signedForWeek } from "@/lib/data/records";
 import { usePlan } from "@/lib/usePlan";
@@ -42,7 +43,7 @@ import { readChosenJobsite } from "@/components/JobsitePicker";
 import { Button, ConfirmButton, ErrorNotice, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
 
 export default function TalkPage() {
-  return <RequireCompany>{(m) => <Talk m={m} />}</RequireCompany>;
+  return <RequireCompany need="present">{(m) => <Talk m={m} />}</RequireCompany>;
 }
 
 type Org = { people: Person[]; teams: Team[]; roles: Role[]; jobsites: Jobsite[] };
@@ -96,7 +97,7 @@ function Talk({ m }: { m: Membership }) {
       </Shell>
     );
   }
-  if (error) return <Shell nav={nav}><ErrorNotice what="Couldn't load your crew." detail={error} onRetry={() => { setError(null); setAttempt((a) => a + 1); }} /></Shell>;
+  if (error) return <Shell nav={nav}><ErrorNotice what="Couldn't load your team." detail={error} onRetry={() => { setError(null); setAttempt((a) => a + 1); }} /></Shell>;
   if (!draft) {
     return (
       <Shell nav={nav}>
@@ -352,7 +353,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
 
   return (
     <>
-      <Steps n={1} label="Read to the crew" />
+      <Steps n={1} label="Read to the team" />
       <MakeupBanner draft={draft} />
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="Language">
         {langs.map((l) => (
@@ -392,7 +393,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
       <div className="mt-3">
         {editingNotes || notes ? (
           <div className="rounded-lg border border-dashed border-line bg-surface p-3">
-            <label htmlFor="site-notes" className="text-sm font-semibold">Today on this site <small className="font-normal text-muted">read to the crew, saved with the record</small></label>
+            <label htmlFor="site-notes" className="text-sm font-semibold">Today on this site <small className="font-normal text-muted">read to the team, saved with the record</small></label>
             <textarea
               id="site-notes"
               rows={2}
@@ -434,7 +435,7 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
                         if (e.target.checked) checked[id] = new Date().toISOString(); else delete checked[id];
                         update({ sinceLast: { ...since, checked } });
                       }} />
-                    Reviewed with the crew
+                    Reviewed with the team
                   </label>
                 )}
               </div>
@@ -472,8 +473,8 @@ function MakeupBanner({ draft }: { draft: TalkDraft }) {
 
 function rosterFor(org: Org, draft: TalkDraft): RosterEntry[] {
   const roleName = (p: Person) => {
-    if (org.teams.some((t) => t.lead_person_id === p.id)) return "Crew lead";
-    return org.roles.find((r) => r.id === p.role_id)?.name ?? "Crew member";
+    if (org.teams.some((t) => t.lead_person_id === p.id)) return "Team lead";
+    return titleOf(p, org.roles);
   };
   const teamName = (p: Person) => org.teams.find((t) => t.id === p.team_id)?.name ?? "";
   const people =
@@ -494,7 +495,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
   const [walkinCo, setWalkinCo] = useState("");
   const [knownCos] = useState(() => readWalkinCompanies(draft.companyId));
   const [msg, setMsg] = useState<string | null>(null);
-  const presenters = org.people.filter((p) => p.role_id);
+  const presenters = presentersFrom(org.people, org.roles, org.teams);
   const roster = rosterFor(org, draft);
   const here = roster.filter((r) => draft.present[r.key] !== false).length;
   const absent = roster.length - here;
@@ -528,17 +529,17 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
           {presenters.length ? (
             <select id="presenter" className={inputClass} value={draft.presenterId} onChange={(e) => update({ presenterId: e.target.value })}>
               <option value="">Choose who is giving the talk</option>
-              {presenters.map((p) => <option key={p.id} value={p.id}>{p.full_name} · {org.roles.find((r) => r.id === p.role_id)?.name}</option>)}
+              {presenters.map((p) => <option key={p.id} value={p.id}>{p.full_name} · {org.teams.some((t) => t.lead_person_id === p.id) && !org.roles.find((r) => r.id === p.role_id)?.presents ? "Team lead" : titleOf(p, org.roles)}</option>)}
             </select>
           ) : (
             <Notice>No one can give talks yet. In Admin → People, give someone a role like Foreman or Supervisor.</Notice>
           )}
         </Field>
-        <Field label="Crew" id="team">
+        <Field label="Team" id="team">
           <select id="team" className={inputClass} value={draft.teamId} onChange={(e) => setTeam(e.target.value)}>
-            <option value="">Choose a crew</option>
+            <option value="">Choose a team</option>
             {org.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            {org.teams.length > 1 && <option value="all">All crews</option>}
+            {org.teams.length > 1 && <option value="all">All teams</option>}
             {draft.kind !== "daily" && (signedIds || draft.teamId === "needs") && <option value="needs">{needsLabel}</option>}
           </select>
         </Field>
@@ -556,7 +557,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
       <GroupHeading aside={roster.length ? `${here} here · ${absent} absent` : undefined}>Roster</GroupHeading>
       {roster.length > 0 && <p className="mt-1 px-1 text-sm text-muted">Uncheck anyone who isn&apos;t here. They&apos;re recorded as absent.</p>}
       {roster.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">{draft.teamId === "needs" ? "Everyone has this week covered. Add walk-ins below if needed." : draft.teamId ? "No one on this crew yet. Add walk-ins below, or add people in Admin." : "Choose a crew to load its roster."}</p>
+        <p className="mt-3 text-sm text-muted">{draft.teamId === "needs" ? "Everyone has this week covered. Add walk-ins below if needed." : draft.teamId ? "No one on this team yet. Add walk-ins below, or add people in Admin." : "Choose a team to load its roster."}</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {roster.map((r) => {
@@ -634,7 +635,7 @@ function Sign({
 }) {
   const ui = crewText(draft.lang);
   const presenter = org.people.find((p) => p.id === draft.presenterId);
-  const presenterRole = org.roles.find((r) => r.id === presenter?.role_id)?.name ?? "";
+  const presenterRole = org.roles.find((r) => r.id === presenter?.role_id)?.name ?? (presenter && org.teams.some((t) => t.lead_person_id === presenter.id) ? "Team lead" : "");
   const roster = rosterFor(org, draft);
   const presentRoster = roster.filter((r) => draft.present[r.key] !== false);
   const presentMap = Object.fromEntries(roster.map((r) => [r.key, draft.present[r.key] !== false]));
@@ -686,7 +687,7 @@ function Sign({
         week,
         jobsite: jobsite ? { id: jobsite.id, name: jobsite.name } : null,
         team: team ? { id: team.id, name: team.name, leadName: lead?.full_name ?? "" }
-          : draft.teamId === "all" ? { id: "", name: "All crews", leadName: "" }
+          : draft.teamId === "all" ? { id: "", name: "All teams", leadName: "" }
           : draft.teamId === "needs" ? { id: "", name: "Still needed it", leadName: "" }
           : null,
         presenter: { personId: presenter?.id ?? null, name: presenter?.full_name ?? "", role: presenterRole, signature: draft.presenterSignature },
@@ -930,7 +931,7 @@ function LateArrival({ onAdd }: { onAdd: (name: string, company: string) => void
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-/** "Anything the crew raised?" Each item gets an owner (the presenter by default) and a fix-by date (a week out). */
+/** "Anything the team raised?" Each item gets an owner (the presenter by default) and a fix-by date (a week out). */
 function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void }) {
   const [text, setText] = useState("");
   const set = (list: DraftIssue[]) => update({ issues: list });
@@ -938,7 +939,7 @@ function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; upda
   const people = [...org.people].sort((a, b) => a.full_name.localeCompare(b.full_name));
   return (
     <section className="mt-6">
-      <GroupHeading aside={draft.issues.length ? `${draft.issues.length}` : undefined}>Anything the crew raised?</GroupHeading>
+      <GroupHeading aside={draft.issues.length ? `${draft.issues.length}` : undefined}>Anything the team raised?</GroupHeading>
       <p className="mt-2 text-sm text-muted">Hazards or problems to fix, like a damaged ladder or missing guardrail. Each one gets an owner and a fix-by date.</p>
       <ul className="mt-3 flex flex-col gap-2">
         {draft.issues.map((x, i) => (
@@ -967,7 +968,7 @@ function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; upda
           setText("");
         }}
       >
-        <input aria-label="Add something the crew raised" placeholder="Add something the crew raised" maxLength={1000} className={inputClass} value={text} onChange={(e) => setText(e.target.value)} />
+        <input aria-label="Add something the team raised" placeholder="Add something the team raised" maxLength={1000} className={inputClass} value={text} onChange={(e) => setText(e.target.value)} />
         <Button size="sm" type="submit">Add</Button>
       </form>
     </section>
@@ -999,7 +1000,7 @@ function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
       </p>
       <div className="mt-6 flex flex-col gap-2">
         {/* Several crews a week is normal: the same talk again, with a fresh roster and signatures. */}
-        {!done.makeupLabel && <Button onClick={onAnother}>Give it to another crew</Button>}
+        {!done.makeupLabel && <Button onClick={onAnother}>Give it to another team</Button>}
         <Link href="/records/" className="flex min-h-14 items-center justify-center rounded-lg border border-line bg-surface px-4 text-center font-semibold">See records</Link>
         <Link href="/" className="flex min-h-14 items-center justify-center rounded-lg border border-line px-4 text-center font-semibold">Home</Link>
       </div>

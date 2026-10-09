@@ -10,7 +10,8 @@ import { talkText } from "@/core/talks";
 import { INDUSTRIES } from "@/core/industries";
 import Link from "next/link";
 import { useSession } from "@/lib/session";
-import { canAdmin, type Membership } from "@/lib/data/types";
+import { canAdmin, canPresent, canReport, type Membership } from "@/lib/data/types";
+import { EmployeeHome } from "@/components/EmployeeHome";
 import { RequireCompany } from "@/components/Guard";
 import { JobsitePicker, readChosenJobsite } from "@/components/JobsitePicker";
 import { newDailyDraft, newDraft, useDraft } from "@/lib/draft";
@@ -28,7 +29,7 @@ import { useRouter } from "next/navigation";
 import { Button, GroupHeading, Notice, Shell } from "@/components/ui";
 
 export default function HomePage() {
-  return <RequireCompany>{(m) => <Home m={m} />}</RequireCompany>;
+  return <RequireCompany>{(m) => (m.access === "employee" ? <EmployeeHome m={m} /> : <Home m={m} />)}</RequireCompany>;
 }
 
 function Home({ m }: { m: Membership }) {
@@ -49,7 +50,7 @@ function Home({ m }: { m: Membership }) {
   const [site, setSite] = useState<Jobsite | null>(null);
   const isAdmin = canAdmin(m.access);
   const last = readLastSetup(co.id);
-  const lastCrew = last?.teamId === "all" ? "All crews" : st?.teams.find((t) => t.id === last?.teamId)?.name;
+  const lastCrew = last?.teamId === "all" ? "All teams" : st?.teams.find((t) => t.id === last?.teamId)?.name;
   const [remind, setRemind] = useState(() => remindersOn());
   const nextWeek = plan[nextIdx];
   const crewGrid = st?.week.find((g) => g.teamId === (last?.teamId || null))?.weeks[0]?.tally;
@@ -131,18 +132,18 @@ function Home({ m }: { m: Membership }) {
             </div>
             <div className="px-5 pt-4 pb-5">
               <p className="leading-relaxed">{text.hook}</p>
-              <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every crew {week.weeks > 1 ? `through ${periodLabel(week.monday, week.weeks).split(" – ")[1]}` : "this week"}</p>
-              <div className="mt-4 flex flex-col gap-2">
+              <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every team {week.weeks > 1 ? `through ${periodLabel(week.monday, week.weeks).split(" – ")[1]}` : "this week"}</p>
+              {canPresent(m.access) && <div className="mt-4 flex flex-col gap-2">
                 <Button onClick={() => start(week.talkId)}>Start this talk</Button>
                 {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
                 {/* Only when someone owes a past talk (or the status hasn't loaded, offline). */}
                 {(!st || st.owed > 0) && <Button variant="soft" onClick={() => start(null)}>Make up a missed talk</Button>}
                 {/* The daily pre-task plan: its own record, separate from the weekly talk (Admin → Company turns it on). */}
                 {co.daily_enabled && <Button variant="ghost" onClick={() => { newDailyDraft(co.id, readChosenJobsite(co.id) ?? ""); router.push("/talk/"); }}>Start today&apos;s pre-task plan</Button>}
-              </div>
+              </div>}
             </div>
           </div>
-          {st && <WeekStatusCard st={st} isAdmin={isAdmin} onMakeup={() => start(null)} />}
+          {st && <WeekStatusCard st={st} isAdmin={canReport(m.access)} onMakeup={canPresent(m.access) ? () => start(null) : undefined} />}
           {isAdmin && st && <GettingStarted st={st} />}
         </section>
       ) : (
@@ -177,7 +178,7 @@ function Home({ m }: { m: Membership }) {
       <div className="mt-10 border-t border-line pt-4 text-sm">
         {remindersSupported() ? (
           <label className="flex min-h-11 items-center justify-between gap-3">
-            <span><b>Reminders on this phone</b><small className="block text-muted">Monday: this week&apos;s talk · Thursday: if your crew hasn&apos;t had it · makeups running out</small></span>
+            <span><b>Reminders on this phone</b><small className="block text-muted">Monday: this week&apos;s talk · Thursday: if your team hasn&apos;t had it · makeups running out</small></span>
             <input type="checkbox" className="h-6 w-6 accent-[var(--brand)]" checked={remind} onChange={async (e) => setRemind(await setReminders(e.target.checked))} />
           </label>
         ) : (

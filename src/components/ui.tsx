@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
-import { canAdmin } from "@/lib/data/types";
+import { canAdmin, canPresent, canReport, isStaff } from "@/lib/data/types";
 import { pending, onOutboxChange } from "@/lib/outbox";
 
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" };
@@ -182,13 +182,16 @@ const ICONS: Record<string, React.ReactNode> = {
 function TabBar() {
   const s = useSession();
   const path = (usePathname() || "/").replace(/\/?$/, "/");
-  const admin = canAdmin(s.current?.access);
+  const access = s.current?.access;
+  // Tabs follow the app role: employees see only Home (their own history); office has no Talk; setup is for admins.
   const tabs = [
-    { href: "/", label: "Home", icon: "home" },
-    { href: "/talk/", label: "Talk", icon: "talk" },
-    { href: "/records/", label: "Records", icon: "records" },
-    ...(admin ? [{ href: "/reports/", label: "Reports", icon: "reports" }, { href: "/admin/", label: "Admin", icon: "admin" }] : []),
-  ];
+    { href: "/", label: "Home", icon: "home", show: true },
+    { href: "/talk/", label: "Talk", icon: "talk", show: canPresent(access) },
+    { href: "/records/", label: "Records", icon: "records", show: isStaff(access) },
+    { href: "/reports/", label: "Reports", icon: "reports", show: canReport(access) },
+    { href: "/admin/", label: "Admin", icon: "admin", show: canAdmin(access) },
+  ].filter((t) => t.show);
+  if (tabs.length < 2) return null; // an employee account has only Home
   const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href) || (href === "/records/" && path.startsWith("/record/")));
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">

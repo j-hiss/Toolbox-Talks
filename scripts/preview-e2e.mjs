@@ -25,10 +25,10 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await p.goto(PAGE); await p.waitForTimeout(800);
   await p.fill("#co-name", "Demo Roofing"); await p.fill("#co-zip", "33913"); await p.click("text=Create company"); await p.waitForTimeout(900);
   // teams
-  await p.click("[role=tab]:has-text('Crews')"); await p.fill('input[aria-label="New crew name"]', "Crew 1"); await p.click("text=Add crew"); await p.waitForTimeout(400);
+  await p.click("[role=tab]:has-text('Teams')"); await p.fill('input[aria-label="New team name"]', "Crew 1"); await p.click("text=Add team"); await p.waitForTimeout(400);
   await p.click("[role=tab]:has-text('People')"); await p.waitForTimeout(300);
-  const add = async (n, role) => { await p.fill("#np-name", n); await p.selectOption('select[aria-label="Role"]', { label: role }); await p.click("text=Add person"); await p.waitForTimeout(350); };
-  await add("Fred Foreman", "Foreman"); await add("Ana Worker", "Crew member"); await add("Ben Worker", "Crew member"); await add("Cal Worker", "Crew member");
+  const add = async (n, role) => { await p.fill("#np-name", n); await p.selectOption('select[aria-label="Job title"]', { label: role }); await p.click("text=Add person"); await p.waitForTimeout(350); };
+  await add("Fred Foreman", "Foreman"); await add("Ana Worker", "Team member"); await add("Ben Worker", "Team member"); await add("Cal Worker", "Team member");
   log("toast after add:", await p.locator("[role=status]").last().textContent().catch(() => "-"));
   await p.click("text=Done adding"); await p.fill('input[aria-label="Search people"]', "ana"); await p.waitForTimeout(200);
   log("search ana ->", await p.locator("ul li b").allTextContents());
@@ -68,7 +68,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("review:", await p.locator("h1").textContent(), "|", (await p.locator("main ul li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
   await p.click("button:has-text('Save')"); await p.waitForTimeout(1200);
   log("saved:", await p.locator("h1").textContent(), "|", await p.locator("[role=alert]").allInnerTexts()); await shot("after-save");
-  log("absent toast gone after save:", await p.locator("text=marked absent").count() === 0, "| another crew:", await p.locator("button:has-text('Give it to another crew')").count());
+  log("absent toast gone after save:", await p.locator("text=marked absent").count() === 0, "| another crew:", await p.locator("button:has-text('Give it to another team')").count());
   await p.click("nav[aria-label=Main] >> text=Home"); await p.waitForTimeout(900); await shot("home-after");
   log("week card:", (await p.locator("section:has-text('Signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " "));
   log("last setup:", await p.locator("text=Set up like last time").textContent().catch(() => "none"));
@@ -171,11 +171,11 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     const bb = await c.boundingBox(); await r.mouse.move(bb.x + 30, bb.y + 80); await r.mouse.down(); await r.mouse.move(bb.x + 150, bb.y + 40, { steps: 5 }); await r.mouse.move(bb.x + 250, bb.y + 90, { steps: 5 }); await r.mouse.up();
     await r.locator("button:has-text('Next'), button:has-text('Done signing')").first().click(); await r.waitForTimeout(250);
   }
-  await r.fill('input[aria-label="Add something the crew raised"]', "East ladder rail cracked"); await r.click("form button:has-text('Add')"); await r.waitForTimeout(200);
+  await r.fill('input[aria-label="Add something the team raised"]', "East ladder rail cracked"); await r.click("form button:has-text('Add')"); await r.waitForTimeout(200);
   log("3 issue owner:", await r.locator('select[aria-label="Owner"] option:checked').innerText(), "| due:", await r.locator('input[aria-label="Fix by"]').inputValue());
   const JPEG = Buffer.from("/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAADAAQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCOiiivmj7A/9k=", "base64");
-  await r.setInputFiles('input[aria-label="Take a crew photo"]', { name: "crew.jpg", mimeType: "image/jpeg", buffer: JPEG }); await r.waitForTimeout(600);
-  log("3 crew photo on review:", await r.locator('img[alt="Crew photo for this talk"]').count(), "| retake/remove:", await r.locator("button:has-text('Retake'), button:has-text('Remove')").count());
+  await r.setInputFiles('input[aria-label="Take a team photo"]', { name: "crew.jpg", mimeType: "image/jpeg", buffer: JPEG }); await r.waitForTimeout(600);
+  log("3 crew photo on review:", await r.locator('img[alt="Team photo for this talk"]').count(), "| retake/remove:", await r.locator("button:has-text('Retake'), button:has-text('Remove')").count());
   await r.setInputFiles('input[aria-label="Take a photo of the paper sign-in sheet"]', { name: "sheet.jpg", mimeType: "image/jpeg", buffer: JPEG }); await r.waitForTimeout(600);
   log("3 paper sheet on review:", await r.locator('img[alt="Paper sign-in sheet for this talk"]').count());
   await r.click("text=+ Someone arrived late"); await r.fill("#late-name", "Late Larry"); await r.click("button:has-text('Add and sign')"); await r.waitForTimeout(400);
@@ -187,7 +187,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.click("text=See records"); await r.waitForTimeout(700);
   await r.locator("main ul li a").first().click(); await r.waitForTimeout(900);
   log("3 record sheet + late arrival:", await r.locator('img[alt="Paper sign-in sheet for this talk"]').count(), "|", (await r.locator("main").innerText()).split("\n").filter((t) => /Late Larry/.test(t)).join(" ").replace(/\s+/g, " "));
-  log("3 record walk-in + photo:", (await r.locator("main").innerText()).split("\n").filter((t) => /Example Electric/.test(t)).join(" | "), "| photo:", await r.locator('img[alt="Crew photo taken at this talk"]').count());
+  log("3 record walk-in + photo:", (await r.locator("main").innerText()).split("\n").filter((t) => /Example Electric/.test(t)).join(" | "), "| photo:", await r.locator('img[alt="Team photo taken at this talk"]').count());
   await r.screenshot({ path: `${OUT}/e-record-photo.png`, fullPage: true });
   log("3 record on site:", (await r.locator("main").innerText()).split("\n").filter((t) => /site|Heat index|ladder/i.test(t)).join(" | "));
   await r.click("nav[aria-label=Main] >> text=Records"); await r.waitForTimeout(600);
@@ -289,7 +289,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("7 talk section:", (await r.locator("main h3:has-text('Since last talk')").count()) === 1, "|", (await r.locator("main p.text-muted.font-semibold, main p.font-semibold.text-muted").allInnerTexts()).join(" | ").slice(0, 120));
   log("7 done reading blocked:", await r.locator("button:has-text('Check off')").innerText().catch(() => "not blocked"));
   await r.screenshot({ path: `${OUT}/e-sincelast.png`, fullPage: false });
-  await r.locator("label:has-text('Reviewed with the crew') input").first().check(); await r.waitForTimeout(300);
+  await r.locator("label:has-text('Reviewed with the team') input").first().check(); await r.waitForTimeout(300);
   log("7 after check-off:", await r.locator("button:has-text('Done reading')").isEnabled());
   await r.click("text=Discard this talk"); await r.waitForTimeout(200);
   log("7 discard asks first:", await r.locator("button:has-text('Tap again')").innerText().catch(() => "no confirm"));
@@ -297,7 +297,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Safety log')"); await r.waitForTimeout(600);
   const card2 = r.locator("main li:has-text('Weekly scaffold check')").first();
   await card2.locator("button[aria-expanded]").click(); await r.waitForTimeout(400);
-  log("7 approved summary is read-only:", await card2.locator('textarea[aria-label="Crew summary"]').count() === 0);
+  log("7 approved summary is read-only:", await card2.locator('textarea[aria-label="Team summary"]').count() === 0);
   await card2.locator('input[aria-label="Finding"]').fill("Replace cracked planks on level 2");
   await card2.locator("button:has-text('Add to issues')").click(); await r.waitForTimeout(700);
   await card2.locator('input[id^="why-"]').fill("Logged for the e2e check");
@@ -360,6 +360,27 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("text=Download renewal packet"); await q.waitForTimeout(2500);
   log("9 renewal pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
   log("9 no compliance claim:", !/\bcompliant\b/i.test((await q.locator("main").innerText()).replace("doesn't certify compliance", "")));
+  // Scenario 10: job titles, app access, and each app role's view (preview "View as").
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Job titles')"); await q.waitForTimeout(400);
+  log("10 titles:", await q.locator("main ul li").count(), "| Laborer gives talks:", await q.locator('input[aria-label="Laborer gives talks"]').isChecked().catch(() => "missing"),
+    "| Foreman gives talks:", await q.locator('input[aria-label="Foreman gives talks"]').isChecked().catch(() => "missing"), "| starter offer:", await q.locator("text=Starter titles for").count());
+  await q.screenshot({ path: `${OUT}/e-job-titles.png`, fullPage: true });
+  await q.click("[role=tab]:has-text('App access')"); await q.waitForTimeout(500);
+  await q.fill("#inv-email", "office@example.com"); await q.selectOption("#inv-role", "office"); await q.click("button:has-text('Send invite')"); await q.waitForTimeout(500);
+  await q.selectOption("#inv-role", "employee");
+  log("10 invite waiting:", (await q.locator("li:has-text('office@example.com')").innerText().catch(() => "none")).replace(/\s+/g, " "), "| employee needs a roster person:", await q.locator("button:has-text('Send invite')").isDisabled());
+  await q.screenshot({ path: `${OUT}/e-app-access.png`, fullPage: true });
+  const viewAs = async (role) => { await q.click("button[aria-label='Show preview options']").catch(() => {}); await q.selectOption('select[aria-label="View as"]', role); await q.waitForTimeout(1500); };
+  await viewAs("office");
+  log("10 office tabs:", (await q.locator("nav[aria-label=Main] a").allInnerTexts()).join(","), "| start talk shown:", await q.locator("button:has-text('Start this talk')").count());
+  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1000);
+  log("10 office reports:", await q.locator("h1").first().textContent(), "| profile link:", await q.locator("a[href*='profile']").count(), "| makeup buttons:", await q.locator("button:has-text('Give this makeup now')").count());
+  await viewAs("employee");
+  log("10 employee tabs:", (await q.locator("nav[aria-label=Main] a").allInnerTexts()).join(","), "| home:", await q.locator("h1").first().textContent(), "| talks listed:", await q.locator("main ul li").count());
+  await q.screenshot({ path: `${OUT}/e-employee-home.png`, fullPage: true });
+  await viewAs("owner");
+  log("10 back to owner tabs:", (await q.locator("nav[aria-label=Main] a").allInnerTexts()).join(","));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

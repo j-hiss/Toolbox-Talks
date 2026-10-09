@@ -1,13 +1,13 @@
 // Spreadsheet import for people. Pure module: turns rows from a .csv or .xlsx into a checked plan the admin reviews
 // before anything is saved. Re-uploading the same sheet updates people matched by Employee ID instead of adding
-// duplicates. Unknown crews and roles are listed so the admin can confirm creating them.
+// duplicates. Unknown teams and job titles are listed so the admin can confirm creating them.
 import { LANGUAGES, type LanguageId } from "./languages";
 
-export const IMPORT_COLUMNS = ["Name", "Role", "Team", "Employee ID", "Phone", "Preferred language"] as const;
+export const IMPORT_COLUMNS = ["Name", "Job title", "Team", "Employee ID", "Phone", "Preferred language"] as const;
 
 const HEADER_ALIASES: Record<string, (typeof IMPORT_COLUMNS)[number]> = {
   name: "Name", "full name": "Name", employee: "Name", "employee name": "Name", worker: "Name",
-  role: "Role", position: "Role", title: "Role", "job title": "Role",
+  role: "Job title", position: "Job title", title: "Job title", "job title": "Job title",
   team: "Team", crew: "Team", "crew name": "Team", "team name": "Team",
   "employee id": "Employee ID", "employee #": "Employee ID", "employee number": "Employee ID", id: "Employee ID", "emp id": "Employee ID", "badge": "Employee ID",
   phone: "Phone", "phone number": "Phone", mobile: "Phone", cell: "Phone",
@@ -20,7 +20,7 @@ export type Named = { id: string; name: string };
 export type ImportRow = {
   line: number;                 // spreadsheet row number (header = 1)
   name: string;
-  role: string;                 // "" = crew member
+  role: string;                 // job title; "" = no title ("Team member")
   team: string;                 // "" = no team
   employeeId: string;
   phone: string;
@@ -65,7 +65,7 @@ export function planImport(table: unknown[][], existing: ExistingPerson[], teams
   const byEmpId = new Map(existing.filter((p) => p.employee_id).map((p) => [key(p.employee_id!), p]));
   const byName = new Map(existing.filter((p) => p.active).map((p) => [key(p.full_name), p]));
   const teamNames = new Map(teams.map((t) => [key(t.name), t.name]));
-  const roleNames = new Map([["crew member", ""], ...roles.map((r) => [key(r.name), r.name] as [string, string])]);
+  const roleNames = new Map([["team member", ""], ["crew member", ""], ...roles.map((r) => [key(r.name), r.name] as [string, string])]);
   const seenIds = new Set<string>();
   const seenNames = new Set<string>();
   const newTeams = new Map<string, string>();
@@ -77,7 +77,7 @@ export function planImport(table: unknown[][], existing: ExistingPerson[], teams
     const name = at(cells, "Name");
     const employeeId = at(cells, "Employee ID");
     const teamRaw = at(cells, "Team");
-    const roleRaw = at(cells, "Role");
+    const roleRaw = at(cells, "Job title");
     const { lang, known } = languageOf(at(cells, "Preferred language"));
     const problems: string[] = [];
     const notes: string[] = [];
@@ -134,5 +134,5 @@ export function parseCsv(text: string): string[][] {
 
 /** The blank template, with one labelled example row. */
 export function templateCsv(): string {
-  return `${IMPORT_COLUMNS.join(",")}\r\nExample Person (delete this row),Crew member,Crew 1,1001,555-0100,English\r\n`;
+  return `${IMPORT_COLUMNS.join(",")}\r\nExample Person (delete this row),Laborer,Crew 1,1001,555-0100,English\r\n`;
 }

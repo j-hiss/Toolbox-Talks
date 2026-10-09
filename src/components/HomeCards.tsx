@@ -65,13 +65,13 @@ export function useHomeStatus(co: Company, input: Omit<PlanInput, "today">, vers
 }
 
 /** "This week: 7 of 9 signed", one chip per crew, and how many people owe a past week. */
-export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin: boolean; onMakeup: () => void }) {
+export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin: boolean; onMakeup?: () => void }) {
   if (st.thisWeek.expected === 0 && st.owed === 0 && st.openIssues === 0) return null;
-  const name = (id: string | null) => (id ? st.teams.find((t) => t.id === id)?.name ?? "Former crew" : "No crew");
+  const name = (id: string | null) => (id ? st.teams.find((t) => t.id === id)?.name ?? "Former team" : "No team");
   const crews = st.week
     .map((g) => ({ name: name(g.teamId), t: g.weeks[0]?.tally }))
     .filter((c) => c.t && c.t.expected > 0)
-    .sort((a, b) => (a.name === "No crew" ? 1 : b.name === "No crew" ? -1 : a.name.localeCompare(b.name)));
+    .sort((a, b) => (a.name === "No team" ? 1 : b.name === "No team" ? -1 : a.name.localeCompare(b.name)));
   return (
     <section className="mt-3 rounded-2xl bg-surface p-4">
       <div className="flex items-baseline justify-between gap-2">
@@ -96,14 +96,14 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-sm">
           <span><b>{st.owed}</b> {st.periodWeeks > 1 ? (st.owed === 1 ? "missed talk needs" : "missed talks need") : st.owed === 1 ? "missed sign-in needs" : "missed sign-ins need"} a makeup{st.expiringSoon ? <b className="text-warn-text"> · {st.expiringSoon} run out within 7 days</b> : null}</span>
           <span className="flex gap-3">
-            <button className="min-h-11 font-semibold text-brand-text underline underline-offset-2" onClick={onMakeup}>Make up a talk</button>
+            {onMakeup && <button className="min-h-11 font-semibold text-brand-text underline underline-offset-2" onClick={onMakeup}>Make up a talk</button>}
             {isAdmin && <Link href="/reports/" className="flex min-h-11 items-center font-semibold text-brand-text underline underline-offset-2">See who</Link>}
           </span>
         </div>
       )}
       {st.openIssues > 0 && (
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-sm">
-          <span><b>{st.openIssues}</b> open {st.openIssues === 1 ? "issue" : "issues"} the crew raised{st.overdueIssues ? <b className="text-warn-text"> · {st.overdueIssues} overdue</b> : null}</span>
+          <span><b>{st.openIssues}</b> open {st.openIssues === 1 ? "issue" : "issues"} the team raised{st.overdueIssues ? <b className="text-warn-text"> · {st.overdueIssues} overdue</b> : null}</span>
           <Link href="/records/#issues" className="flex min-h-11 items-center font-semibold text-brand-text underline underline-offset-2">See issues</Link>
         </div>
       )}
@@ -115,7 +115,7 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
 export function GettingStarted({ st }: { st: Status }) {
   const steps = [
     { done: st.people > 0, label: "Add your people", href: "/admin/#people" },
-    { done: st.teams.length > 0, label: "Make your crews", href: "/admin/#teams" },
+    { done: st.teams.length > 0, label: "Make your teams", href: "/admin/#teams" },
     { done: st.hasJobsite, label: "Add a jobsite or your office", href: "/admin/#jobsites" },
     { done: st.records > 0, label: "Give your first talk", href: "/talk/" },
   ];

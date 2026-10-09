@@ -5,10 +5,20 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSession } from "@/lib/session";
 import { holdScan } from "@/lib/scan";
-import { canAdmin, type Membership } from "@/lib/data/types";
+import { canAdmin, canPresent, canReport, isStaff, type Access, type Membership } from "@/lib/data/types";
 import { Loading, Notice, Shell } from "./ui";
 
-export function RequireCompany({ admin = false, children }: { admin?: boolean; children: (m: Membership) => React.ReactNode }) {
+// What a screen needs (app roles, migration 0022). `admin` is the older spelling of need="admin".
+type Need = "admin" | "present" | "report" | "staff";
+const ALLOWED: Record<Need, (a: Access) => boolean> = { admin: canAdmin, present: canPresent, report: canReport, staff: isStaff };
+const REFUSED: Record<Need, string> = {
+  admin: "Only owners and admins can change company setup. Ask your safety manager.",
+  present: "Your app access doesn't include giving talks. Ask an admin if you need it.",
+  report: "Reports are for owners, admins and office staff. Ask an admin if you need them.",
+  staff: "This part of the app is for your company's staff. Your own talk history is on Home.",
+};
+
+export function RequireCompany({ admin = false, need, children }: { admin?: boolean; need?: Need; children: (m: Membership) => React.ReactNode }) {
   const s = useSession();
   const router = useRouter();
 
@@ -26,10 +36,11 @@ export function RequireCompany({ admin = false, children }: { admin?: boolean; c
     );
   }
   if (s.status !== "signed-in" || !s.current) return <Shell tabs={false}><Loading /></Shell>;
-  if (admin && !canAdmin(s.current.access)) {
+  const n: Need | undefined = need ?? (admin ? "admin" : undefined);
+  if (n && !ALLOWED[n](s.current.access)) {
     return (
-      <Shell tabs={false}>
-        <Notice tone="error">Only owners and admins can change company setup. Ask your safety manager.</Notice>
+      <Shell>
+        <Notice tone="error">{REFUSED[n]}</Notice>
       </Shell>
     );
   }

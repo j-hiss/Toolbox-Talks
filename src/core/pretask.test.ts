@@ -3,7 +3,7 @@ import { dailyTally, emptyPlan, pretaskContent, pretaskProblems, tidyPlan } from
 
 describe("daily pre-task plan", () => {
   it("needs a task and a hazard with a control before signatures", () => {
-    expect(pretaskProblems(emptyPlan())).toEqual(["Add at least one task the crew is doing today.", "Add at least one hazard and how you'll control it."]);
+    expect(pretaskProblems(emptyPlan())).toEqual(["Add at least one task the team is doing today.", "Add at least one hazard and how you'll control it."]);
     const p = { ...emptyPlan(), tasks: ["Tear off north slope"], hazards: [{ hazard: "Falls", control: " " }] };
     expect(pretaskProblems(p)).toEqual(["Say how you'll control: Falls."]);
     expect(pretaskProblems({ ...p, hazards: [{ hazard: "Falls", control: "Tie off" }] })).toEqual([]);
@@ -29,6 +29,6 @@ describe("daily pre-task plan", () => {
     expect(dailyTally([
       { held_at: "2026-10-05T12:00:00Z", team_name: "Crew 1" }, { held_at: "2026-10-05T15:00:00Z", team_name: "Crew 1" },
       { held_at: "2026-10-06T12:00:00Z", team_name: "Crew 1" }, { held_at: "2026-10-06T12:00:00Z", team_name: "" },
-    ], day)).toEqual([{ crew: "Crew 1", days: 2 }, { crew: "No crew", days: 1 }]);
+    ], day)).toEqual([{ crew: "Crew 1", days: 2 }, { crew: "No team", days: 1 }]);
   });
 });

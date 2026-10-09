@@ -30,7 +30,7 @@ export function planReminders(i: ReminderInput): Reminder[] {
   // Thursday noon of the period's last week: nudge if this phone's crew hasn't had it yet.
   const thu = at(addDays(start, 7 * (weeks - 1) + 3), 12);
   if (!i.crewDone && i.thisWeekTitle && i.today < thu) {
-    out.push({ id: 102, at: thu, title: "Toolbox talk not done yet", body: `${i.crewName ?? "Your crew"} still needs ${weeks > 1 ? "this period's" : "this week's"} talk: ${i.thisWeekTitle}` });
+    out.push({ id: 102, at: thu, title: "Toolbox talk not done yet", body: `${i.crewName ?? "Your team"} still needs ${weeks > 1 ? "this period's" : "this week's"} talk: ${i.thisWeekTitle}` });
   }
   // Next morning 7 AM: makeups about to run out.
   if (i.expiringSoon > 0) {

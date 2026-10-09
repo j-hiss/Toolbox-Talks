@@ -98,14 +98,14 @@ function Profile({ m }: { m: Membership }) {
           <Field label="To" id="pf-to"><input id="pf-to" type="date" className={inputClass} value={custom.to} min={custom.from} max={isoDay(today)} onChange={(e) => e.target.value && setCustom((c) => ({ ...c, to: e.target.value }))} /></Field>
         </div>
       )}
-      <p className="mt-2 text-sm text-muted tabular-nums">{fmtDay(p.from)} to {fmtDay(p.to)} · {crew} on the crew roster</p>
+      <p className="mt-2 text-sm text-muted tabular-nums">{fmtDay(p.from)} to {fmtDay(p.to)} · {crew} team member{crew === 1 ? "" : "s"} on the roster</p>
 
       <Downloads p={p} co={co} florida={florida} crew={crew} />
 
       <GroupHeading>What the records show</GroupHeading>
       <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         <Fig label="Weekly talks held" value={p.periodsEnded ? `${p.periodsWithTalk} of ${p.periodsEnded}` : "–"} note={p.periodsMissed ? `${p.periodsMissed} with no talk` : p.periodsEnded ? "no missed weeks" : "no full weeks yet"} warn={p.periodsMissed > 0} />
-        <Fig label="Crew sign-in rate" value={pct(p.signIn)} note={p.onTime === null ? "" : `${pct(p.onTime)} on time`} />
+        <Fig label="Team sign-in rate" value={pct(p.signIn)} note={p.onTime === null ? "" : `${pct(p.onTime)} on time`} />
         <Fig label="Toolbox talks" value={String(p.talks)} note={`${p.topics} topics${p.makeups ? `, ${p.makeups} makeups` : ""}`} />
         <Fig label="Daily plans" value={String(p.dailyDays)} note="days with a signed plan" />
         <Fig label="Inspections" value={String(p.log.inspections + p.log.walkarounds)} note={`${p.log.walkarounds} walk-arounds`} />

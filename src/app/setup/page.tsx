@@ -4,7 +4,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSession } from "@/lib/session";
-import { createCompany } from "@/lib/data/company";
+import { addRoles, createCompany, listRoles } from "@/lib/data/company";
+import { missingStarterTitles } from "@/content/jobTitles";
 import { CompanyForm, blankCompany } from "@/components/CompanyForm";
 import { NotConfigured } from "@/components/Guard";
 import { Eyebrow, Loading, NavLink, Shell, Title } from "@/components/ui";
@@ -32,6 +33,8 @@ export default function Setup() {
         submitLabel="Create company"
         onSubmit={async (c) => {
           const id = await createCompany(c);
+          // The industry's starter job titles. Not essential: if this fails, Admin → Job titles offers them again.
+          try { await addRoles(id, missingStarterTitles(c.industry, await listRoles(id))); } catch { /* offered later */ }
           await s.refresh();
           s.setCurrent(id);
           router.replace("/admin/#people");

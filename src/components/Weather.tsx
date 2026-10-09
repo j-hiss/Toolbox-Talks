@@ -106,7 +106,7 @@ export function WeatherCard({ site, setting = "outdoor" }: { site: Jobsite | nul
         <Notes c={c} setting={setting} />
         <div className="flex items-center justify-between gap-3 px-4 pb-3">
           <p className="text-xs text-muted">
-            Forecast and alerts from the National Weather Service. Information for the crew; the crew lead decides.
+            Forecast and alerts from the National Weather Service. Information for the team; the team lead decides.
             {c.alertsUnavailable ? " Alerts couldn't be checked just now." : ""}
             {msg && ctx.old ? ` Couldn't update: ${msg}` : ""}
           </p>
@@ -328,7 +328,7 @@ function WeatherFull({ c, ctx, point, setting, busy, onRefresh, onClose }: { c: 
           )}
           <div className="pt-3"><Notes c={c} setting={setting} /></div>
         </div>
-        <p className="mt-3 px-1 text-xs text-muted">Forecast and alerts from the National Weather Service. Information for the crew; the crew lead decides.</p>
+        <p className="mt-3 px-1 text-xs text-muted">Forecast and alerts from the National Weather Service. Information for the team; the team lead decides.</p>
       </div>
     </div>
   );

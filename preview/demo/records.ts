@@ -9,14 +9,15 @@ import { db, save, tick, uid } from "./store";
 type Stored = RecordPayload & { id: string; attendees: AttendeeRow[] };
 const all = () => db().records as unknown as Stored[];
 
+// Like private.can_present(): owners, admins and presenters record talks (office and employees can't).
 function isMember(companyId: string) {
   const user = db().session?.user.id;
-  return db().members.some((m) => m.company_id === companyId && m.user_id === user);
+  return db().members.some((m) => m.company_id === companyId && m.user_id === user && ["owner", "admin", "presenter"].includes(m.access));
 }
 
 export async function saveTalkRecord(record: RecordPayload, attendees: AttendeeRow[], issues: IssuePayload[] = []): Promise<string> {
   await tick();
-  if (!isMember(record.company_id)) throw new Error("Not a member of this company.");
+  if (!isMember(record.company_id)) throw new Error("Only owners, admins and presenters can record talks.");
   const existing = all().find((r) => r.client_id === record.client_id);
   if (existing) return existing.id;
   for (const a of attendees) if ((a.status === "signed") !== !!a.signature) throw new Error("Signed status needs a signature.");

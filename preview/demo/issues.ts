@@ -5,7 +5,8 @@ import { db, save, tick } from "./store";
 
 const rows = () => (db().issues ??= []);
 const strip = ({ company_id: _c, ...i }: Issue & { company_id: string }): Issue => { void _c; return i; };
-const isMember = (companyId: string) => db().members.some((m) => m.company_id === companyId && m.user_id === db().session?.user.id);
+// Staff (everyone but an employee account), like private.is_member() after migration 0022.
+const isMember = (companyId: string) => db().members.some((m) => m.company_id === companyId && m.user_id === db().session?.user.id && m.access !== "employee");
 
 export async function listIssues(companyId: string): Promise<Issue[]> {
   await tick();

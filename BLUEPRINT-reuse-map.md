@@ -44,7 +44,8 @@ point the row at the real file and keep the prototype line as its origin.
 | `weatherNote` · `WEATHER_NOTES_VERSION` · `HEAT_REF` | `src/content/weather-notes.ts` | **The** crew-note wording per work setting, each with its OSHA reference; `conditionNotes(c)` in core picks which notes apply |
 | `sunTimes` · `skyPhase` | `src/core/sun.ts` | **The** sunrise/sunset calculation (NOAA equation, no lookup) and dawn/day/dusk/night phase for the sky |
 | `heatIndexF` · `heatLevel` · `heatForDay` · `alertWorthy` · `HEAT_LABEL` | `src/core/heat.ts` | **The** heat judgment: NWS heat index formula and chart levels; hottest work hour from an NWS hourly forecast |
-| `planImport` · `parseCsv` · `templateCsv` · `IMPORT_COLUMNS` | `src/core/importPeople.ts` | **The** people-import plan: header aliases, add/update/skip with reasons, new crews/roles, matching by Employee ID |
+| `planImport` · `parseCsv` · `templateCsv` · `IMPORT_COLUMNS` | `src/core/importPeople.ts` | **The** people-import plan: header aliases (Role/Position/Title → Job title, Crew → Team), add/update/skip with reasons, new teams/job titles (imported titles sign only), matching by Employee ID |
+| `presentersFrom` · `titleOf` · `NO_TITLE` | `src/core/presenters.ts` | **The** rule for who can give a talk: a job title marked "Gives talks" or a team's lead. "Team member" when no title |
 | `planReminders` | `src/core/reminders.ts` | Which phone reminders should be scheduled now (Monday talk, Thursday nudge, makeups running out) |
 | `THEME_ROLES` · `DEFAULT_THEME` · `THEME_PRESETS` · `normalizeTheme` · `themeChanges` · `themeVars` · `themeWarnings` · `contrast` · `colorDifference` · `inkOn` | `src/core/theme.ts` | **The** company colors: the eight settable colors, the Signal default (ANSI/ISO safety colors), readable text on each color, and plain-language readability/confusion warnings. Any new color decision goes here, not in a screen |
 | `toUpload` · `talkFolder` · `TALK_FILES_BUCKET` | `src/core/record.ts` | **The** split of a saved talk into private files (signatures, crew photo, paper sheet photo) and the record that points at them; fixed paths so retries never duplicate |
@@ -60,6 +61,7 @@ point the row at the real file and keep the prototype line as its origin.
 | Component | File | Role |
 |---|---|---|
 | `TALKS` | `src/content/talks.ts` | The talk library, English + Spanish (draft). See the TALKS row under Content for counts |
+| `STARTER_TITLES` · `missingStarterTitles` | `src/content/jobTitles.ts` | Starter job titles per industry (which give talks); added when a company is created and offered again in Admin → Job titles |
 
 ## Data and access (Supabase)
 
@@ -74,7 +76,9 @@ point the row at the real file and keep the prototype line as its origin.
 | company_cadences · lock trigger · `private.period_weeks` · period-aware plan lock · `talk_records.period_weeks` | `supabase/migrations/20261007000015_cadence.sql` | Cadence changes per start Monday (members read, admins write; a started one can't change); plan swaps allowed until the whole period ends; records keep their period length; `save_talk_record` stores it |
 | company_talk_lists · lock trigger | `supabase/migrations/20261007000014_talk_lists.sql` | Picked talk lists, one per start Monday (members read, admins write); trigger refuses adding, changing or removing a list that has started, so past weeks keep their talks |
 | plan_overrides · lock trigger · makeup columns | `supabase/migrations/20261005000005_weekly_lock_makeups.sql` | Admin week swaps (members read, admins write); trigger refuses a swap once the week is given or over; `talk_records.makeup_for_week` + required `makeup_reason`; `companies.makeup_weeks` |
-| `private.is_member` · `private.is_admin` | same file `:32` · `:37` | The access checks every RLS policy uses. Reuse them for every new company table |
+| `private.is_member` · `private.is_admin` | same file `:32` · `:37` | The access checks every RLS policy uses. Reuse them for every new company table. Since 0022 `is_member` means staff (any member except an employee account) |
+| `private.can_present` · `private.is_owner` · `private.is_employee` · `public.accept_invites` · `company_invites` · `private.keep_an_owner` | `supabase/migrations/20261009000022_app_roles.sql` | App roles: who records talks (owner/admin/presenter), owner-only changes to owners and admins, employees' own-history policies, invites claimed on sign-in, a company never loses its last owner |
+| `roles.presents` | `supabase/migrations/20261009000021_job_titles.sql` | Job titles: whether a title gives talks |
 | talk-files bucket · `private.file_company` · `private.check_talk_file` · path columns | `supabase/migrations/20261005000009_private_talk_files.sql` | Private storage for signatures and crew photos (company folder, add/read only, no replace/delete); `save_talk_record` accepts files by path and checks each is in this talk's folder and uploaded; `talk_attendees.company_name` for walk-ins |
 | `companies.theme` · `private.valid_theme` | `supabase/migrations/20261005000008_company_theme.sql` | A company's changed colors (only known parts, only `#RRGGBB`); admins update their own company under the existing policy |
 | `public.create_company` | `supabase/migrations/20261004000002_default_roles.sql` | The only way to create a company; makes the caller its owner and adds the default presenting roles |
@@ -130,7 +134,12 @@ point the row at the real file and keep the prototype line as its origin.
 | records | `src/app/records/page.tsx` · `src/app/record/page.tsx` | Records list (waiting + saved) and one record (`/record/#id`) |
 | company data functions | `src/lib/data/company.ts` | **The** data access for companies, roles, teams, people. Every call is scoped by `company_id` as well as RLS. People are deactivated (`deactivatePerson`), never deleted |
 | row types · `canAdmin` | `src/lib/data/types.ts` | Supabase row shapes; who can change setup (owner/admin) |
-| `RequireCompany` · `NotConfigured` | `src/components/Guard.tsx` | Gate for every signed-in screen: loading, not configured, signed out → sign-in, no company → setup, admin-only |
+| `RequireCompany` · `NotConfigured` | `src/components/Guard.tsx` | Gate for every signed-in screen: loading, not configured, signed out → sign-in, no company → setup, and `need` = admin / present / report / staff by app role |
+| `canAdmin` · `canPresent` · `canReport` · `isStaff` · `Access` | `src/lib/data/types.ts` | **The** app-role checks the screens use (the database enforces the same rules) |
+| `listMembers` · `setMemberAccess` · `removeMember` · `listInvites` · `inviteMember` · `cancelInvite` · `acceptInvites` · `myTalks` | `src/lib/data/members.ts` (twin `preview/demo/members.ts`) | App access and invites; `acceptInvites` runs on every sign-in (session.tsx); `myTalks` is an employee's own history |
+| `AppAccess` · `APP_ROLES` | `src/components/AppAccess.tsx` | Admin → App access: members, app roles, invites |
+| `EmployeeHome` | `src/components/EmployeeHome.tsx` | Home for an employee account: their own talk history |
+| Job titles tab (`RolesTab`) | `src/app/admin/page.tsx` | Admin → Job titles: Gives talks switch, starter titles for the industry, add/remove |
 | `applyTheme` · `rememberedTheme` · `CompanyColors` | `src/lib/theme.ts` · `src/components/Providers.tsx` | **The** way colors reach the page: sets the `--t-*` variables `globals.css` derives everything from; remembers the last company's colors on the phone |
 | `CrewPhoto` · `shrinkPhoto` · `fitWithin` | `src/components/CrewPhoto.tsx` · `src/lib/photo.ts` | Optional photos on the review screen: `kind="photo"` (crew photo) or `kind="sheet"` (paper sign-in sheet, larger, evidence only); shrinks on the phone before it's kept |
 | `PRETASK_TALK_ID` · `pretaskProblems` · `pretaskContent` · `tidyPlan` · `EQUIPMENT_PROMPTS` · `HAZARD_SUGGESTIONS` · `DAILY_STATEMENT` · `dailyTally` | `src/core/pretask.ts` | **The** daily pre-task plan rules and content; saved as a talk record of kind `daily` (same pipeline), never scored |

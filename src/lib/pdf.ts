@@ -126,8 +126,8 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   const pairs: [string, string][] = [
     ["Date and time", `${held.date}, ${held.time}`],
     ["Where", r.jobsite_name],
-    ["Crew", r.team_name],
-    ["Crew lead", r.team_lead_name],
+    ["Team", r.team_name],
+    ["Team lead", r.team_lead_name],
     ["Presented by", r.presenter_name ? `${r.presenter_name}${r.presenter_role ? `, ${r.presenter_role}` : ""}` : ""],
     ["Language presented", `${lang}${industry ? `  ·  ${industry}` : ""}`],
   ];
@@ -164,7 +164,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
     s.items.forEach((it) => { newPageIf(14); doc.setFont("helvetica", "normal"); doc.text("•", M + 6, y); para(it, false, 18); });
     y += 4;
   });
-  para(`Crew discussion: ${t.ask}`, false); y += 10;
+  para(`Team discussion: ${t.ask}`, false); y += 10;
 
   // Since last talk: safety-log summaries read with this talk, each checked off by the presenter ---------------------
   const sl = r.content.since_last;
@@ -177,7 +177,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
       newPageIf(30);
       para(it.heading, true);
       para(it.text, false, 12);
-      para(`Reviewed with the crew ${new Date(it.reviewed_with_crew_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`, false, 12);
+      para(`Reviewed with the team ${new Date(it.reviewed_with_crew_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`, false, 12);
     });
     y += 8;
   }
@@ -196,7 +196,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   }
   if (issues.length) {
     newPageIf(40);
-    para(`Raised by the crew (${issues.length})`, true);
+    para(`Raised by the team (${issues.length})`, true);
     issues.forEach((i) => {
       newPageIf(28);
       doc.setFont("helvetica", "normal"); doc.text("•", M + 6, y);
@@ -285,7 +285,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
       y += h;
     } catch { /* an unreadable photo never blocks the record */ }
   };
-  if (r.photo) photoBlock(r.photo, "CREW PHOTO", r.photo_taken_at, 300);
+  if (r.photo) photoBlock(r.photo, "TEAM PHOTO", r.photo_taken_at, 300);
   if (r.sheet) photoBlock(r.sheet, "PAPER SIGN-IN SHEET (PHOTO)", r.sheet_taken_at, 560,
     "Kept as evidence. The statuses above come from signatures on the phone; this sheet doesn't change them.");
   footer();
@@ -329,18 +329,18 @@ export function buildProfilePdf(p: SafetyProfile, co: Company, opts: { kind: "re
   // Title and range
   doc.setFont("helvetica", "bold"); doc.setFontSize(20);
   doc.text(opts.kind === "renewal" ? "Safety program summary" : "Monthly program summary", M, y); y += 20;
-  para(`${fmtDay(p.from)} to ${fmtDay(p.to)} · ${s(opts.crew, "person", "people")} on the crew roster`, 10, 70);
-  para(`What ${co.name || "the company"} did to keep its crews safe in this period, counted from its own signed, dated records. Counts and rates only: no worker names, signatures or personal details are included.`, 9.5, 40);
+  para(`${fmtDay(p.from)} to ${fmtDay(p.to)} · ${s(opts.crew, "team member", "team members")} on the roster`, 10, 70);
+  para(`What ${co.name || "the company"} did to keep its teams safe in this period, counted from its own signed, dated records. Counts and rates only: no worker names, signatures or personal details are included.`, 9.5, 40);
   y += 10;
 
   // Key figures: six boxes, 3 across
   const figs: [string, string, string][] = [
     ["Weekly talks held", p.periodsEnded ? `${p.periodsWithTalk} of ${p.periodsEnded}` : "-", p.periodsMissed ? `${s(p.periodsMissed, "week")} with no talk` : p.periodsEnded ? "no missed weeks" : "no full weeks yet"],
-    ["Crew sign-in rate", pctText(p.signIn), p.onTime === null ? "" : `${pctText(p.onTime)} on time, rest made up`],
+    ["Team sign-in rate", pctText(p.signIn), p.onTime === null ? "" : `${pctText(p.onTime)} on time, rest made up`],
     ["Toolbox talks given", String(p.talks), `${s(p.topics, "topic")}${p.makeups ? `, ${s(p.makeups, "makeup")}` : ""}`],
     ["Daily pre-task plans", String(p.dailyDays), "days with a signed plan"],
     ["Inspections logged", String(p.log.inspections + p.log.walkarounds), `${s(p.log.walkarounds, "walk-around")} included`],
-    ["Crew-raised issues fixed", `${p.issues.fixed} of ${p.issues.raised}`, p.issues.medianDaysToFix === null ? "" : `typically ${s(p.issues.medianDaysToFix, "day")} to fix`],
+    ["Team-raised issues fixed", `${p.issues.fixed} of ${p.issues.raised}`, p.issues.medianDaysToFix === null ? "" : `typically ${s(p.issues.medianDaysToFix, "day")} to fix`],
   ];
   const bw = (CW - 2 * 12) / 3, bh = 58;
   figs.forEach(([label, value, note], i) => {
@@ -380,7 +380,7 @@ export function buildProfilePdf(p: SafetyProfile, co: Company, opts: { kind: "re
       y += 15;
     }
     y += 6;
-    para("Sign-in rate: crew on the roster who signed each week's talk, on time or made up later, over weeks that are over. A makeup keeps its real date and counts as late.", 8.5, 90);
+    para("Sign-in rate: team members on the roster who signed each week's talk, on time or made up later, over weeks that are over. A makeup keeps its real date and counts as late.", 8.5, 90);
     y += 6;
   }
 
@@ -391,10 +391,10 @@ export function buildProfilePdf(p: SafetyProfile, co: Company, opts: { kind: "re
   }
 
   // Safety log and issues
-  heading("Safety log and crew-raised issues");
-  const cit = p.log.citations.length ? ` ${s(p.log.citations.length, "citation")} (${p.log.citations.map((c) => c.status.replace("_", " ")).join(", ")}; read to crews as alleged until final).` : " No citations logged.";
+  heading("Safety log and team-raised issues");
+  const cit = p.log.citations.length ? ` ${s(p.log.citations.length, "citation")} (${p.log.citations.map((c) => c.status.replace("_", " ")).join(", ")}; read to teams as alleged until final).` : " No citations logged.";
   para(`${s(p.log.inspections, "inspection")}, ${s(p.log.walkarounds, "walk-around")}, ${s(p.log.incidents, "incident")} and ${s(p.log.nearMisses, "near miss", "near misses")} logged.${cit} ${s(p.log.open, "entry", "entries")} still open.`);
-  para(`${s(p.issues.raised, "issue")} raised by crews at talks or from findings; ${p.issues.fixed} fixed${p.issues.medianDaysToFix === null ? "" : `, typically in ${s(p.issues.medianDaysToFix, "day")}`}. ${s(p.issues.open, "issue")} open now${p.issues.overdue ? `, ${p.issues.overdue} past due` : ""}.`);
+  para(`${s(p.issues.raised, "issue")} raised by teams at talks or from findings; ${p.issues.fixed} fixed${p.issues.medianDaysToFix === null ? "" : `, typically in ${s(p.issues.medianDaysToFix, "day")}`}. ${s(p.issues.open, "issue")} open now${p.issues.overdue ? `, ${p.issues.overdue} past due` : ""}.`);
   y += 8;
 
   // Self-reported

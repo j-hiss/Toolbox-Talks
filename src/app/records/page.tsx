@@ -14,7 +14,7 @@ import { RequireCompany } from "@/components/Guard";
 import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, Shell, Title, inputClass } from "@/components/ui";
 
 export default function RecordsPage() {
-  return <RequireCompany>{(m) => <Records m={m} />}</RequireCompany>;
+  return <RequireCompany need="staff">{(m) => <Records m={m} />}</RequireCompany>;
 }
 
 // Talks or Issues, kept in the URL hash (/records/#issues) so Home can link straight to issues.
@@ -99,8 +99,8 @@ function Records({ m }: { m: Membership }) {
         <>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {teams.length > 1 && (
-              <select aria-label="Crew" className={`${inputClass} w-auto py-2`} value={team} onChange={(e) => setTeam(e.target.value)}>
-                <option value="all">All crews</option>
+              <select aria-label="Team" className={`${inputClass} w-auto py-2`} value={team} onChange={(e) => setTeam(e.target.value)}>
+                <option value="all">All teams</option>
                 {teams.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             )}

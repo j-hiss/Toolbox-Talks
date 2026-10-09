@@ -55,7 +55,7 @@ export default function SignIn() {
 
       {step === "email" ? (
         <form onSubmit={sendCode} className="mt-5 flex flex-col gap-4" noValidate>
-          <p className="text-muted">For owners, safety managers and anyone who gives talks. Crew members don&apos;t need an account.</p>
+          <p className="text-muted">For owners, safety managers and anyone who gives talks. Team members don&apos;t need an account.</p>
           <Field label="Work email" id="email">
             <input id="email" type="email" inputMode="email" autoComplete="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} />
           </Field>

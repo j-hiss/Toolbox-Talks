@@ -6,10 +6,13 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
 import {
-  addJobsite, addPerson, addRole, addTeam, deactivateJobsite, deactivatePerson, deleteRole, deleteTeam, listJobsites,
-  listPeople, listRoles, listTeams, updateCompany, updateJobsite, updatePerson, updateTeam,
+  addJobsite, addPerson, addRole, addRoles, addTeam, deactivateJobsite, deactivatePerson, deleteRole, deleteTeam, listJobsites,
+  listPeople, listRoles, listTeams, updateCompany, updateJobsite, updatePerson, updateRole, updateTeam,
 } from "@/lib/data/company";
 import { companyWorkSetting, WORK_SETTINGS, type WorkSetting } from "@/core/worksetting";
+import { missingStarterTitles } from "@/content/jobTitles";
+import { NO_TITLE } from "@/core/presenters";
+import { INDUSTRIES } from "@/core/industries";
 import type { Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { getLocation, LocationError } from "@/lib/location";
 import { mapsLink } from "@/core/geo";
@@ -33,19 +36,21 @@ import { saveFile } from "@/lib/download";
 import { appWebAddress, jobsiteSticker } from "@/lib/sticker";
 import { SafetyLog } from "@/components/SafetyLog";
 import { BrandEditor } from "@/components/BrandEditor";
+import { AppAccess } from "@/components/AppAccess";
 
 const TABS = [
   { id: "people", label: "People", group: "people" },
-  { id: "teams", label: "Crews", group: "people" },
+  { id: "teams", label: "Teams", group: "people" },
   { id: "jobsites", label: "Jobsites", group: "people" },
-  { id: "roles", label: "Roles", group: "people" },
+  { id: "roles", label: "Job titles", group: "people" },
+  { id: "access", label: "App access", group: "people" },
   { id: "talks", label: "Talks", group: "program" },
   { id: "plan", label: "Plan", group: "program" },
   { id: "safety", label: "Safety log", group: "program" },
   { id: "company", label: "Company", group: "program" },
   { id: "brand", label: "Brand", group: "program" },
 ] as const;
-// Two short labelled rows instead of one wrapped block of nine chips.
+// Two short labelled rows instead of one wrapped block of ten chips.
 const TAB_GROUPS = [
   { id: "people", label: "People and places" },
   { id: "program", label: "Program" },
@@ -162,10 +167,12 @@ function Admin({ m }: { m: Membership }) {
           <TeamsTab companyId={companyId} people={people} teams={teams} act={act} />
         ) : tab === "jobsites" ? (
           <JobsitesTab companyId={companyId} company={m.company} jobsites={jobsites} act={act} />
+        ) : tab === "access" ? (
+          <AppAccess companyId={companyId} myAccess={m.access} myUserId={s.user?.id ?? null} people={people} />
         ) : tab === "safety" ? (
           <SafetyLog company={m.company} state={climateFor(m.company.zip).state} jobsites={jobsites} people={people} />
         ) : (
-          <RolesTab companyId={companyId} people={people} roles={roles} act={act} />
+          <RolesTab company={m.company} people={people} roles={roles} act={act} />
         )}
       </div>
     </Shell>
@@ -183,9 +190,9 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Person | null>(null);
   const [importing, setImporting] = useState(false);
-  const roleOptions = <><option value={CREW}>Crew member</option>{roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</>;
-  const teamOptions = <><option value="">No crew</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</>;
-  const roleName = (p: Person) => roles.find((r) => r.id === p.role_id)?.name ?? "Crew member";
+  const roleOptions = <><option value={CREW}>{NO_TITLE}</option>{roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</>;
+  const teamOptions = <><option value="">No team</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</>;
+  const roleName = (p: Person) => roles.find((r) => r.id === p.role_id)?.name ?? NO_TITLE;
   const isLead = (p: Person) => teams.some((t) => t.lead_person_id === p.id);
   const shown = people.filter((p) => !q.trim() || p.full_name.toLowerCase().includes(q.trim().toLowerCase()));
   const groups = [...teams.map((t) => ({ id: t.id, name: t.name })), { id: "", name: "No team" }]
@@ -231,19 +238,19 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
             <input id="np-name" placeholder="Full name" autoComplete="off" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
           <div className="flex flex-wrap gap-2">
-            <select aria-label="Role" className={`${inputClass} flex-1 basis-36`} value={roleId} onChange={(e) => setRoleId(e.target.value)}>{roleOptions}</select>
-            <select aria-label="Crew" className={`${inputClass} flex-1 basis-36`} value={teamId} onChange={(e) => setTeamId(e.target.value)}>{teamOptions}</select>
+            <select aria-label="Job title" className={`${inputClass} flex-1 basis-36`} value={roleId} onChange={(e) => setRoleId(e.target.value)}>{roleOptions}</select>
+            <select aria-label="Team" className={`${inputClass} flex-1 basis-36`} value={teamId} onChange={(e) => setTeamId(e.target.value)}>{teamOptions}</select>
           </div>
           <div className="flex gap-2">
             <Button size="sm" type="submit">Add person</Button>
             {people.length > 0 && <Button size="sm" variant="ghost" type="button" onClick={() => setAdding(false)}>Done adding</Button>}
           </div>
-          <p className="text-xs text-muted">Crew members sign at talks. Anyone with another role can also give talks.</p>
+          <p className="text-xs text-muted">Team members sign at talks. Anyone with a job title that presents can also give talks.</p>
         </form>
       )}
 
       {people.length === 0 ? (
-        <p className="mt-4 text-sm text-muted">No one yet. Add your crew above.</p>
+        <p className="mt-4 text-sm text-muted">No one yet. Add your team members above.</p>
       ) : shown.length === 0 ? (
         <p className="mt-4 text-sm text-muted">No one matches &quot;{q}&quot;.</p>
       ) : groups.map((g) => (
@@ -255,7 +262,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
                 <button className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg" onClick={() => setEditing(p)}>
                   <span className="min-w-0 flex-1">
                     <b className="block truncate">{p.full_name}</b>
-                    <small className="text-muted">{isLead(p) ? "Crew lead · " : ""}{roleName(p)}</small>
+                    <small className="text-muted">{isLead(p) ? "Team lead · " : ""}{roleName(p)}</small>
                   </span>
                   <span aria-hidden className="text-xl text-muted">›</span>
                 </button>
@@ -281,8 +288,8 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
             }}
           >
             <Field label="Name" id="ep-name"><input id="ep-name" name="name" defaultValue={editing.full_name} className={`${inputClass} font-semibold`} /></Field>
-            <Field label="Role" id="ep-role"><select id="ep-role" name="role" defaultValue={editing.role_id ?? CREW} className={inputClass}>{roleOptions}</select></Field>
-            <Field label="Crew" id="ep-team"><select id="ep-team" name="team" defaultValue={editing.team_id ?? ""} className={inputClass}>{teamOptions}</select></Field>
+            <Field label="Job title" id="ep-role"><select id="ep-role" name="role" defaultValue={editing.role_id ?? CREW} className={inputClass}>{roleOptions}</select></Field>
+            <Field label="Team" id="ep-team"><select id="ep-team" name="team" defaultValue={editing.team_id ?? ""} className={inputClass}>{teamOptions}</select></Field>
             <Button type="submit">Save</Button>
             <Button type="button" size="sm" variant="danger" onClick={() => remove(editing)}>Remove {editing.full_name}</Button>
           </form>
@@ -300,11 +307,11 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
         className="flex gap-2"
         onSubmit={(e) => { e.preventDefault(); const n = name.trim(); if (n) act(async () => { await addTeam(companyId, n); setName(""); })(); }}
       >
-        <input aria-label="New crew name" placeholder="Crew name, like Crew 3" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
-        <Button size="sm" type="submit">Add crew</Button>
+        <input aria-label="New team name" placeholder="Team name, like Crew 3" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+        <Button size="sm" type="submit">Add team</Button>
       </form>
       {teams.length === 0 ? (
-        <p className="mt-4 text-sm text-muted">No crews yet. Add one, then put people on it from the People tab.</p>
+        <p className="mt-4 text-sm text-muted">No teams yet. Add one, then put people on it from the People tab.</p>
       ) : (
         <ul className="mt-4 flex flex-col gap-2">
           {teams.map((t) => {
@@ -312,7 +319,7 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
             return (
               <li key={t.id} className="flex flex-col gap-2 rounded-xl bg-surface p-3">
                 <input
-                  aria-label="Crew name"
+                  aria-label="Team name"
                   defaultValue={t.name}
                   className={`${inputClass} font-semibold`}
                   onBlur={(e) => {
@@ -322,9 +329,9 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
                   }}
                 />
                 <div className="flex flex-wrap items-center gap-2">
-                  <label htmlFor={`lead-${t.id}`} className="text-sm text-muted">Crew lead</label>
+                  <label htmlFor={`lead-${t.id}`} className="text-sm text-muted">Team lead</label>
                   <select id={`lead-${t.id}`} className={`${inputClass} flex-1 basis-40`} value={t.lead_person_id ?? ""} onChange={(e) => act(() => updateTeam(companyId, t.id, { lead_person_id: e.target.value || null }))()}>
-                    <option value="">{members.length ? "No lead set" : "Add people to this crew first"}</option>
+                    <option value="">{members.length ? "No lead set" : "Add people to this team first"}</option>
                     {members.map((p) => <option key={p.id} value={p.id}>{p.full_name}</option>)}
                   </select>
                   <span className="text-sm text-muted tabular-nums">{members.length} {members.length === 1 ? "person" : "people"}</span>
@@ -335,29 +342,46 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
           })}
         </ul>
       )}
-      <p className="mt-4 text-xs text-muted">Removing a crew leaves its people in the company with no crew.</p>
+      <p className="mt-4 text-xs text-muted">Removing a team leaves its people in the company with no team.</p>
     </>
   );
 }
 
-function RolesTab({ companyId, people, roles, act }: { companyId: string; people: Person[]; roles: Role[]; act: Act }) {
+// Job titles (the roles table). Each title either presents (shows in "Presented by") or signs only. Starter titles for
+// the company's industry come from src/content/jobTitles.ts; who presents: src/core/presenters.ts.
+function RolesTab({ company, people, roles, act }: { company: Membership["company"]; people: Person[]; roles: Role[]; act: Act }) {
+  const companyId = company.id;
   const [name, setName] = useState("");
+  const [presents, setPresents] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const missing = missingStarterTitles(company.industry, roles);
+  const industry = INDUSTRIES.find((i) => i.id === company.industry)?.name.toLowerCase() ?? "your industry";
+  const sorted = [...roles].sort((a, b) => Number(b.presents) - Number(a.presents) || a.name.localeCompare(b.name));
   return (
     <>
-      <p className="text-sm text-muted">Anyone with one of these roles appears in the &quot;Presented by&quot; list. &quot;Crew member&quot; is always there and signs only.</p>
-      <ul className="mt-4 flex flex-wrap gap-2">
-        {roles.map((r) => {
+      <p className="text-sm text-muted">Everyone&apos;s job, from Owner to Laborer. Titles marked <b>Gives talks</b> appear in the &quot;Presented by&quot; list, and so does each team&apos;s lead. Someone with no title shows as &quot;{NO_TITLE}&quot; and signs only.</p>
+      {missing.length > 0 && (
+        <div className="mt-3 rounded-lg border border-dashed border-line bg-surface p-3 text-sm">
+          <p><b>Starter titles for {industry}:</b> {missing.map((t) => t.name).join(", ")}.</p>
+          <Button size="sm" className="mt-2" onClick={act(() => addRoles(companyId, missing), `Added ${missing.length} job title${missing.length === 1 ? "" : "s"}`)}>Add {missing.length === 1 ? "it" : `all ${missing.length}`}</Button>
+        </div>
+      )}
+      <ul className="mt-4 flex flex-col gap-1.5">
+        {sorted.map((r) => {
           const used = people.filter((p) => p.role_id === r.id).length;
           return (
-            <li key={r.id} className="inline-flex items-center gap-1 rounded-full border border-line bg-surface py-1 pl-3 pr-1 text-sm font-semibold">
-              {r.name}
-              {used > 0 && <span className="font-normal text-muted tabular-nums">· {used}</span>}
+            <li key={r.id} className="flex items-center gap-2 rounded-lg border border-line bg-surface py-1.5 pl-3 pr-1 text-sm">
+              <span className="min-w-0 flex-1"><b>{r.name}</b>{used > 0 && <span className="text-muted tabular-nums"> · {used}</span>}</span>
+              <label className="flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold">
+                <input type="checkbox" className="h-5 w-5" checked={r.presents} aria-label={`${r.name} gives talks`}
+                  onChange={(e) => act(() => updateRole(companyId, r.id, { presents: e.target.checked }), null)()} />
+                Gives talks
+              </label>
               <button
                 aria-label={`Remove ${r.name}`}
-                className="h-8 w-8 rounded-full text-lg text-muted hover:text-warn-text"
+                className="h-11 w-11 shrink-0 rounded-full text-lg text-muted hover:text-warn-text"
                 onClick={() => {
-                  if (used) { setMsg(`${used} ${used === 1 ? "person has" : "people have"} the ${r.name} role. Change their role first.`); return; }
+                  if (used) { setMsg(`${used} ${used === 1 ? "person has" : "people have"} the ${r.name} title. Change theirs first.`); return; }
                   setMsg(null);
                   act(() => deleteRole(companyId, r.id))();
                 }}
@@ -370,18 +394,21 @@ function RolesTab({ companyId, people, roles, act }: { companyId: string; people
       </ul>
       {msg && <div className="mt-3"><Notice tone="error">{msg}</Notice></div>}
       <form
-        className="mt-4 flex gap-2"
+        className="mt-4 flex flex-col gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           const n = name.trim();
           if (!n) return;
-          if (roles.some((r) => r.name.toLowerCase() === n.toLowerCase()) || n.toLowerCase() === "crew member") { setMsg(`${n} is already a role.`); return; }
+          if (roles.some((r) => r.name.toLowerCase() === n.toLowerCase()) || n.toLowerCase() === NO_TITLE.toLowerCase()) { setMsg(`${n} is already a job title.`); return; }
           setMsg(null);
-          act(async () => { await addRole(companyId, n); setName(""); })();
+          act(async () => { await addRole(companyId, n, presents); setName(""); setPresents(false); })();
         }}
       >
-        <input aria-label="New role" placeholder="Add a role, like Project Manager" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
-        <Button size="sm" type="submit">Add</Button>
+        <div className="flex gap-2">
+          <input aria-label="New job title" placeholder="Add a job title, like Estimator" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+          <Button size="sm" type="submit">Add</Button>
+        </div>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-5 w-5" checked={presents} onChange={(e) => setPresents(e.target.checked)} /> Gives talks</label>
       </form>
     </>
   );
@@ -462,7 +489,7 @@ function JobsitesTab({ companyId, company, jobsites, act }: { companyId: string;
                 />
                 <KindToggle value={j.kind ?? "site"} onChange={(k) => act(() => updateJobsite(companyId, j.id, { kind: k }))()} />
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="text-muted">Where the crew works here (words the weather notes)</span>
+                  <span className="text-muted">Where the team works here (words the weather notes)</span>
                   <select
                     className={inputClass}
                     value={j.work_setting ?? ""}
@@ -602,7 +629,7 @@ function PlanTab({ m }: { m: Membership }) {
         input={input} cadences={cadences} reload={reload} msg={cadenceMsg} setMsg={setCadenceMsg} />
       <RepeatPicker companyId={co.id} input={input} repeats={repeats} reload={reload} />
       <p className="mt-4 text-sm text-muted">
-        Every crew gives the same talk each {unit}, as many times as needed. You can swap a {unit}&apos;s talk until someone
+        Every team gives the same talk each {unit}, as many times as needed. You can swap a {unit}&apos;s talk until someone
         gives it; then it&apos;s locked. Missed talks are made up from Home.
       </p>
       {msg && <div className="mt-3"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
@@ -650,7 +677,7 @@ function DailyToggle({ companyId, on, refresh }: { companyId: string; on: boolea
       <label className="flex min-h-11 items-start justify-between gap-3">
         <span>
           <b className="block">Daily pre-task plans</b>
-          <small className="block text-muted">Crews plan the day before work: tasks, hazards and controls, PPE, equipment reminders, emergency plan, and everyone signs. Kept as their own records. They never count toward the weekly talk.</small>
+          <small className="block text-muted">Teams plan the day before work: tasks, hazards and controls, PPE, equipment reminders, emergency plan, and everyone signs. Kept as their own records. They never count toward the weekly talk.</small>
         </span>
         <input type="checkbox" className="mt-1 size-6 shrink-0 accent-[var(--brand)]" checked={value}
           onChange={async (e) => {

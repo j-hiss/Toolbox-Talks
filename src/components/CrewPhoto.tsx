@@ -10,8 +10,8 @@ import { Button } from "./ui";
 
 const KINDS = {
   photo: {
-    heading: "Crew photo", take: "Take a crew photo", sub: "Shows who was there. Kept private with the record.",
-    alt: "Crew photo for this talk", label: "Take a crew photo",
+    heading: "Team photo", take: "Take a team photo", sub: "Shows who was there. Kept private with the record.",
+    alt: "Team photo for this talk", label: "Take a team photo",
   },
   sheet: {
     heading: "Paper sign-in sheet", take: "Add a photo of a paper sheet",

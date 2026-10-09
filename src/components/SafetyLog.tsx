@@ -30,7 +30,7 @@ const KIND_FIELDS: Record<EventKind, { key: string; label: string; placeholder?:
   ],
   walkaround: [
     { key: "by", label: "Done by (management)" },
-    { key: "rep", label: "Crew representative", placeholder: "The employee the crew picked" },
+    { key: "rep", label: "Employee representative", placeholder: "The employee the team picked" },
   ],
   citation: [
     { key: "agency", label: "Agency", placeholder: "Federal OSHA, or the state plan" },
@@ -70,7 +70,7 @@ export function SafetyLog({ company, state, jobsites, people }: Props) {
         {!adding && <Button size="sm" className="shrink-0" onClick={() => setAdding(true)}>+ Log</Button>}
       </div>
       <p className="mt-1 text-sm text-muted">
-        Inspections, walk-arounds, citations, incidents and near misses. Only the crew summary is ever read to crews,
+        Inspections, walk-arounds, citations, incidents and near misses. Only the team summary is ever read to teams,
         after you approve it. Keep names and medical details in Details.
       </p>
       {adding && <NewEventForm company={company} jobsites={jobsites} roster={roster} onDone={(saved) => { setAdding(false); if (saved) reload(); }} />}
@@ -120,7 +120,7 @@ function SinceLastSettingsCard({ company, state }: { company: Company; state: st
   return (
     <section aria-label="Since last talk" className="rounded-lg border border-line bg-surface p-3">
       <h2 className="font-display text-lg font-semibold">Read at talks: &ldquo;Since last talk&rdquo;</h2>
-      <p className="text-sm text-muted">Adds approved crew summaries to each talk. The presenter reads each one and checks it off.</p>
+      <p className="text-sm text-muted">Adds approved team summaries to each talk. The presenter reads each one and checks it off.</p>
       {hint && <p className="mt-2 text-sm"><b>Your state:</b> {hint}</p>}
       <label className="mt-2 flex min-h-11 items-center gap-2 font-semibold">
         <input type="checkbox" className="size-5 accent-[var(--brand)]" checked={cfg.enabled} onChange={(e) => setCfg({ ...cfg, enabled: e.target.checked })} />
@@ -187,7 +187,7 @@ function NewEventForm({ company, jobsites, roster, onDone }: { company: Company;
         caseStatus: kind === "citation" ? caseStatus : null, crewSummary: summary,
       });
       if (file) await uploadEventFile(company.id, id, file);
-      toast("Logged. Approve the crew summary when it's ready.");
+      toast("Logged. Approve the team summary when it's ready.");
       onDone(true);
     } catch (e2) {
       setErr(e2 instanceof Error ? e2.message : String(e2));
@@ -216,7 +216,7 @@ function NewEventForm({ company, jobsites, roster, onDone }: { company: Company;
         <input id="ev-title" className={inputClass} maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Like: Weekly scaffold check, north elevation" required />
       </Field>
       {kind === "citation" && (
-        <Field id="ev-case" label="Case status" hint="crews hear it as alleged until final">
+        <Field id="ev-case" label="Case status" hint="teams hear it as alleged until final">
           <select id="ev-case" className={inputClass} value={caseStatus} onChange={(e) => setCaseStatus(e.target.value as CaseStatus)}>
             {CASE_STATUSES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -227,13 +227,13 @@ function NewEventForm({ company, jobsites, roster, onDone }: { company: Company;
           <input id={`ev-f-${f.key}`} className={inputClass} placeholder={f.placeholder} value={fields[f.key] ?? ""} onChange={(e) => setFields({ ...fields, [f.key]: e.target.value })} />
         </Field>
       ))}
-      <Field id="ev-details" label="Details" hint="admins only, never read to crews">
+      <Field id="ev-details" label="Details" hint="admins only, never read to teams">
         <textarea id="ev-details" rows={3} maxLength={5000} className={inputClass} value={details} onChange={(e) => setDetails(e.target.value)} />
       </Field>
       {(kind === "incident") && (
-        <Notice>For an injury, keep the person&apos;s name and any medical details here in Details only. Crews hear what happened and the fix, not who.</Notice>
+        <Notice>For an injury, keep the person&apos;s name and any medical details here in Details only. Teams hear what happened and the fix, not who.</Notice>
       )}
-      <Field id="ev-summary" label="Crew summary" hint="what's read at the next talk, after you approve it">
+      <Field id="ev-summary" label="Team summary" hint="what's read at the next talk, after you approve it">
         <textarea id="ev-summary" rows={3} maxLength={600} className={inputClass} value={summary} onChange={(e) => setSummary(e.target.value)}
           placeholder={kind === "citation" ? "Like: OSHA alleges a missing guardrail on the east roof edge. A guardrail is going up this week; until then, tie off." : "Like: A cracked plank on the north scaffold was found and replaced. Check planks before you step on."} />
       </Field>
@@ -305,10 +305,10 @@ function EventCard({ e, company, roster, people, jobsites, onChange }: {
           {e.details && <p className="whitespace-pre-wrap"><b>Details (admins only):</b> {e.details}</p>}
 
           <div>
-            <p className="font-semibold">Crew summary</p>
+            <p className="font-semibold">Team summary</p>
             {draft && !e.withdrawn_at ? (
               <>
-                <textarea aria-label="Crew summary" rows={3} maxLength={600} className={`${inputClass} mt-1`} value={summary} onChange={(ev) => setSummary(ev.target.value)} />
+                <textarea aria-label="Team summary" rows={3} maxLength={600} className={`${inputClass} mt-1`} value={summary} onChange={(ev) => setSummary(ev.target.value)} />
                 {problems.length > 0 && <div className="mt-1"><Notice tone="error">{problems.join(" ")}</Notice></div>}
                 <div className="mt-2 flex flex-wrap gap-2">
                   {summary !== e.crew_summary && <Button size="sm" variant="ghost" disabled={busy} onClick={run(() => updateEvent(company.id, e.id, { crew_summary: summary.trim() }), "Saved")}>Save summary</Button>}
@@ -376,7 +376,7 @@ function EventCard({ e, company, roster, people, jobsites, onChange }: {
             </Button>
             {!e.withdrawn_at && (
               <>
-                <label className="w-full text-sm font-semibold" htmlFor={`why-${e.id}`}>Withdraw from future talks <small className="block font-normal text-muted">Stays on file with your reason. Crews won&apos;t hear it again.</small></label>
+                <label className="w-full text-sm font-semibold" htmlFor={`why-${e.id}`}>Withdraw from future talks <small className="block font-normal text-muted">Stays on file with your reason. Teams won&apos;t hear it again.</small></label>
                 <input id={`why-${e.id}`} className={inputClass} placeholder="Reason" value={reason} onChange={(ev) => setReason(ev.target.value)} />
                 <ConfirmButton label="Withdraw" disabled={busy || !reason.trim()} onConfirm={() => void run(() => withdrawEvent(company.id, e.id, reason), "Withdrawn from talks")()} />
               </>

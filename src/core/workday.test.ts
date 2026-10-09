@@ -72,7 +72,7 @@ describe("people import", () => {
   });
   it("the template parses back to the expected columns, with a labelled example", () => {
     const t = parseCsv(templateCsv());
-    expect(t[0]).toEqual(["Name", "Role", "Team", "Employee ID", "Phone", "Preferred language"]);
+    expect(t[0]).toEqual(["Name", "Job title", "Team", "Employee ID", "Phone", "Preferred language"]);
     expect(t[1][0]).toMatch(/Example/);
   });
 });

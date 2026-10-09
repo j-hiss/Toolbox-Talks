@@ -16,7 +16,7 @@ import ProfilePage from "@/app/profile/page";
 import { usePreviewPath } from "./shims/router";
 import { DEMO_CODE } from "./demo/supabase";
 import { resetDemo } from "./demo/store";
-import { seedExample } from "./demo/example";
+import { seedExample, viewAs } from "./demo/example";
 
 declare const __BUILT_AT__: string;
 
@@ -54,7 +54,13 @@ function Banner() {
       <div className="mx-auto flex max-w-xl flex-wrap items-center gap-x-3 gap-y-1">
         <b className="font-display text-sm">Preview</b>
         <span className="text-muted">Demo data on this phone · signed in automatically (code <b className="text-fg tabular-nums">{DEMO_CODE}</b> if you sign out) · built {__BUILT_AT__}</span>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap gap-2">
+          <select aria-label="View as" className="rounded border border-line bg-surface px-1 py-1 font-semibold" defaultValue=""
+            onChange={(e) => { const msg = viewAs(e.target.value as Parameters<typeof viewAs>[0]); if (msg === "ok") window.location.reload(); else setSeedMsg(msg); }}>
+            <option value="" disabled>View as…</option>
+            <option value="owner">Owner</option><option value="admin">Admin</option><option value="presenter">Presenter</option>
+            <option value="office">Office</option><option value="employee">Employee</option>
+          </select>
           <button
             className="rounded border border-line px-2 py-1 font-semibold"
             onClick={() => { const msg = seedExample(); if (msg === "Example history added.") window.location.reload(); else setSeedMsg(msg); }}

@@ -37,7 +37,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
         <p className="mt-3 font-display text-sm font-semibold text-muted">Step 1 of 3 · Plan the day</p>
       </div>
       <Eyebrow>Daily pre-task plan{site ? ` · ${site.name}` : ""}</Eyebrow>
-      <Title>Plan today with the crew</Title>
+      <Title>Plan today with the team</Title>
       <p className="mt-2 text-sm text-muted">Go over it together, then everyone signs. Separate from the weekly toolbox talk; it doesn&apos;t count toward it.</p>
 
       {hot && draft.heat && (
@@ -112,7 +112,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
       </div>
 
       <GroupHeading>Equipment today</GroupHeading>
-      <p className="mt-1 px-1 text-sm text-muted">Tick what the crew uses. Each shows what the rule asks someone to check. The app records your answer; it doesn&apos;t do the inspection.</p>
+      <p className="mt-1 px-1 text-sm text-muted">Tick what the team uses. Each shows what the rule asks someone to check. The app records your answer; it doesn&apos;t do the inspection.</p>
       <ul className="mt-2 flex flex-col gap-1.5">
         {EQUIPMENT_PROMPTS.map((x) => {
           const a = eq(x.id);
@@ -154,7 +154,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
         </Field>
       </div>
 
-      <GroupHeading>Crew signs in</GroupHeading>
+      <GroupHeading>Team signs in</GroupHeading>
       <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Language for the signing statement">
         {LANGUAGES.filter((l) => l.ready).map((l) => (
           <button key={l.id} aria-pressed={draft.lang === l.id} onClick={() => update({ lang: l.id as LanguageId })}

@@ -4,7 +4,8 @@
 // skipped, and any new crews or roles), then import. Matching rules live in src/core/importPeople.ts.
 import { useState } from "react";
 import { parseCsv, planImport, templateCsv, type ImportPlan } from "@/core/importPeople";
-import { addPerson, addRole, addTeam, listAllPeople, listRoles, listTeams, updatePerson } from "@/lib/data/company";
+import { addPerson, addRoles, addTeam, listAllPeople, listRoles, listTeams, updatePerson } from "@/lib/data/company";
+import { NO_TITLE } from "@/core/presenters";
 import { saveFile } from "@/lib/download";
 import { Button, Notice, Sheet } from "./ui";
 import { toast } from "./toast";
@@ -47,9 +48,9 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
   const run = async () => {
     if (!plan) return;
     try {
-      setBusy("Adding crews and roles…");
+      setBusy("Adding teams and job titles…");
       for (const t of plan.newTeams) await addTeam(companyId, t);
-      for (const r of plan.newRoles) await addRole(companyId, r);
+      await addRoles(companyId, plan.newRoles.map((name) => ({ name, presents: false }))); // new titles sign only until turned on
       const [teams, roles] = await Promise.all([listTeams(companyId), listRoles(companyId)]);
       const teamId = (n: string) => (n ? teams.find((t) => t.name.toLowerCase() === n.toLowerCase())?.id ?? null : null);
       const roleId = (n: string) => (n ? roles.find((r) => r.name.toLowerCase() === n.toLowerCase())?.id ?? null : null);
@@ -77,8 +78,8 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
     <Sheet title="Import people" open={open} onClose={close}>
       {!plan ? (
         <div className="flex flex-col gap-3">
-          <p className="text-sm">Upload your crew list from Excel or a CSV. The first row names the columns: <b>Name</b> (required), Role, Crew (or Team), Employee ID, Phone, Preferred language.</p>
-          <p className="text-sm text-muted">Re-uploading the same list updates people with a matching Employee ID instead of adding them twice. New crews and roles are created for you.</p>
+          <p className="text-sm">Upload your team member list from Excel or a CSV. The first row names the columns: <b>Name</b> (required), Job title, Team (or Crew), Employee ID, Phone, Preferred language.</p>
+          <p className="text-sm text-muted">Re-uploading the same list updates people with a matching Employee ID instead of adding them twice. New teams and job titles are created for you.</p>
           <label className={`flex min-h-14 cursor-pointer items-center justify-center rounded-lg bg-action px-4 font-display text-xl font-semibold text-action-ink ${busy ? "opacity-50" : ""}`}>
             {busy ?? "Choose a file"}
             <input type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="sr-only" disabled={!!busy}
@@ -95,8 +96,8 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
           <p className="tabular-nums"><b>{plan.counts.add}</b> to add · <b>{plan.counts.update}</b> to update · <b className={plan.counts.skip ? "text-warn-text" : ""}>{plan.counts.skip}</b> skipped</p>
           {(plan.newTeams.length > 0 || plan.newRoles.length > 0) && (
             <Notice>
-              {plan.newTeams.length > 0 && <>New crews: <b>{plan.newTeams.join(", ")}</b>. </>}
-              {plan.newRoles.length > 0 && <>New roles that can give talks: <b>{plan.newRoles.join(", ")}</b>.</>}
+              {plan.newTeams.length > 0 && <>New teams: <b>{plan.newTeams.join(", ")}</b>. </>}
+              {plan.newRoles.length > 0 && <>New job titles: <b>{plan.newRoles.join(", ")}</b> (they sign only; turn on &quot;Gives talks&quot; in Job titles if they present).</>}
             </Notice>
           )}
           <ul className="flex max-h-[45vh] flex-col divide-y divide-line overflow-y-auto rounded-xl bg-surface text-sm">
@@ -108,7 +109,7 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
                     {r.action === "add" ? "Add" : r.action === "update" ? "Update" : "Skip"} · row {r.line}
                   </span>
                 </div>
-                <small className="text-muted">{[r.role || "Crew member", r.team || "No crew", r.employeeId && `ID ${r.employeeId}`].filter(Boolean).join(" · ")}</small>
+                <small className="text-muted">{[r.role || NO_TITLE, r.team || "No team", r.employeeId && `ID ${r.employeeId}`].filter(Boolean).join(" · ")}</small>
                 {[...r.problems, ...r.notes].map((n) => <small key={n} className={`block ${r.problems.includes(n) ? "font-semibold text-warn-text" : "text-muted"}`}>{n}</small>)}
               </li>
             ))}

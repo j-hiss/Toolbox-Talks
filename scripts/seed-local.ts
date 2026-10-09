@@ -170,7 +170,7 @@ async function main() {
 
     // 5. Talks, saved like the app saves them: files to private storage, then the record and its issues.
     const person = (key: string) => plan.people.find((p) => p.key === key)!;
-    const roleName = (key: string) => person(key).role ?? "Crew member";
+    const roleName = (key: string) => person(key).role ?? "Team member";
     const fixes: { clientId: string; at: Date; note: string }[] = [];
     let photos = 0, walkins = 0, makeups = 0, issues = 0;
     for (const t of plan.talks) {

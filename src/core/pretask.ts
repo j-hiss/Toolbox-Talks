@@ -72,7 +72,7 @@ const clean = (s: string) => s.replace(/\s+/g, " ").trim();
 /** Why a plan can't go to signatures yet. Empty = ready. */
 export function pretaskProblems(p: PretaskPlan): string[] {
   const out: string[] = [];
-  if (!p.tasks.some((t) => clean(t))) out.push("Add at least one task the crew is doing today.");
+  if (!p.tasks.some((t) => clean(t))) out.push("Add at least one task the team is doing today.");
   if (!p.hazards.some((h) => clean(h.hazard))) out.push("Add at least one hazard and how you'll control it.");
   const noControl = p.hazards.filter((h) => clean(h.hazard) && !clean(h.control)).map((h) => clean(h.hazard));
   if (noControl.length) out.push(`Say how you'll control: ${noControl.join(", ")}.`);
@@ -134,7 +134,7 @@ export const DAILY_STATEMENT = {
 export function dailyTally(records: { held_at: string; team_name: string }[], toDay: (iso: string) => string): { crew: string; days: number }[] {
   const byCrew = new Map<string, Set<string>>();
   for (const r of records) {
-    const crew = r.team_name || "No crew";
+    const crew = r.team_name || "No team";
     if (!byCrew.has(crew)) byCrew.set(crew, new Set());
     byCrew.get(crew)!.add(toDay(r.held_at));
   }

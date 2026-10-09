@@ -61,7 +61,7 @@ export function CompanyForm({ initial, submitLabel, onSubmit }: { initial: Compa
           {INDUSTRIES.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
       </Field>
-      <Field label="Where the crew works" id="co-setting" hint="Words the weather notes. Each jobsite can differ (Admin → Jobsites)">
+      <Field label="Where the team works" id="co-setting" hint="Words the weather notes. Each jobsite can differ (Admin → Jobsites)">
         <select id="co-setting" className={inputClass} value={c.work_setting ?? ""} onChange={(e) => set("work_setting", (e.target.value || null) as WorkSetting | null)}>
           <option value="">Usual for {INDUSTRIES.find((i) => i.id === c.industry)?.name ?? "your industry"}: {WORK_SETTINGS.find((w) => w.id === DEFAULT_BY_INDUSTRY[c.industry])?.name.toLowerCase()}</option>
           {WORK_SETTINGS.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}

@@ -83,7 +83,7 @@ export function BrandEditor({ saved, onSave }: Props) {
           <ul className="mt-1 list-disc pl-5">
             {warnings.map((w) => <li key={w.text}>{w.text}</li>)}
           </ul>
-          <p className="mt-1.5 opacity-80">You can still save. These are about crews reading the screen outdoors.</p>
+          <p className="mt-1.5 opacity-80">You can still save. These are about teams reading the screen outdoors.</p>
         </div>
       ) : (
         <p role="status" className="rounded-xl bg-ok-bg px-4 py-3 text-sm text-ok-text">Every color passes the readability checks.</p>

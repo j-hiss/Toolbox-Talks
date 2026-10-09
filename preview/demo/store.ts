@@ -4,7 +4,8 @@ const KEY = "tt-preview-db";
 export type DemoDb = {
   session: { user: { id: string; email: string } } | null;
   companies: Record<string, unknown>[];
-  members: { company_id: string; user_id: string; access: string }[];
+  members: { company_id: string; user_id: string; access: string; email?: string; created_at?: string }[];
+  invites?: { id: string; company_id: string; email: string; access: import("@/lib/data/types").Access; person_id: string | null; invited_at: string }[];
   roles: Record<string, unknown>[];
   teams: Record<string, unknown>[];
   people: Record<string, unknown>[];

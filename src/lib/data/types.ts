@@ -6,7 +6,8 @@ import type { IndustryId } from "@/core/industries";
 import type { WorkSetting } from "@/core/worksetting";
 import type { LanguageId } from "@/core/languages";
 
-export type Access = "owner" | "admin" | "presenter";
+/** App role: what someone can do in the app (separate from their job title). Migration 0022. */
+export type Access = "owner" | "admin" | "presenter" | "office" | "employee";
 
 export type Company = {
   id: string;
@@ -34,21 +35,30 @@ export type Company = {
 
 export type Membership = { company: Company; access: Access };
 
-export type Role = { id: string; company_id: string; name: string };
+/** A job title (Roofer, Foreman, Office). `presents`: people with it appear in "Presented by". */
+export type Role = { id: string; company_id: string; name: string; presents: boolean };
 export type Team = { id: string; company_id: string; name: string; lead_person_id: string | null };
 export type Person = {
   id: string;
   company_id: string;
   full_name: string;
-  role_id: string | null; // null = crew member
+  role_id: string | null; // job title; null = "Team member" (signs only)
   team_id: string | null;
   employee_id: string | null;
   phone: string | null;
   preferred_language: LanguageId;
   active: boolean;
+  /** The app account that signs in as this person (employee access), if any. */
+  user_id?: string | null;
 };
 
 export const canAdmin = (access: Access | undefined) => access === "owner" || access === "admin";
+/** Runs talks and daily plans. */
+export const canPresent = (access: Access | undefined) => access === "owner" || access === "admin" || access === "presenter";
+/** Sees Reports. */
+export const canReport = (access: Access | undefined) => access === "owner" || access === "admin" || access === "office";
+/** Sees company records and the roster (everyone except an employee account). */
+export const isStaff = (access: Access | undefined) => !!access && access !== "employee";
 
 export type Jobsite = {
   id: string;
