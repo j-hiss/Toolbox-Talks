@@ -1,4 +1,4 @@
-// The product logo (PLACEHOLDER, Salvant direction D, chosen by Joe 2026-10-09): bold lowercase "salvant" with a
+// The product logo (PLACEHOLDER, direction D, chosen by Joe 2026-10-09): bold lowercase "tuvant" with a
 // rule under it. Drawn as outlines (src/content/logo.json), so it looks the same everywhere with no font loading.
 // Letters take the text color; the rule takes the brand color, so it follows the company's theme in the app.
 import { logo } from "@/content/logo";

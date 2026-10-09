@@ -468,20 +468,24 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 
 ## Product name (placeholder, 2026-10-09)
-- **Working name: Salvant** (Joe, 2026-10-09; *salus*, safety, plus vanguard). It replaced **Keel**, which ran into a
-  pending "KEEL" trademark for document and workflow software (Osgood Advisory, class 42, filed May 2026). A first web
-  check found no "Salvant" company, product or trademark; salvant.io, salvant.app, getsalvant.com and
-  salvantsafety.com were open. Watch-out for the clearance attorney: the "Sal-" root is shared with Salus, a
-  competitor. Final name waits on that clearance.
-- **Logos (Joe picked D and B on the "Salvant logo ideas" board):**
-  - **Product mark, D:** bold lowercase "salvant" (Outfit 800) with a rule under it, a bar and a dot. The app, app
-    icon (a lowercase s over the rule on deep forest), website, App Store.
-  - **Company mark, B:** spaced serif SALVANT (Fraunces) between thin rules, with SAFETY PROGRAMS under it. Partner
+- **Working name: Tuvant** (Joe, 2026-10-09; Latin *tueri*, to watch over). Earlier working names: **Keel** (dropped:
+  a pending "KEEL" trademark for document and workflow software, Osgood Advisory, class 42) and **Salvant** (dropped:
+  too close to Salus, a construction safety app for the same crews; SALVUS and SAVANT nearby). A first web check found
+  no "Tuvant" company, product or trademark. Domains open on 2026-10-09: tuvant.io, gettuvant.com, tuvantsafety.com
+  (tuvant.com is taken). Watch-out for the clearance attorney: it sounds like TÜV, the safety-testing and
+  certification group. Final name waits on that clearance.
+- **Logos (Joe picked D and B on the "Salvant logo ideas" board, kept for Tuvant):**
+  - **Product mark, D:** bold lowercase "tuvant" (Archivo 800, the app's title font) with a rule under it, a bar and
+    a dot: the signature line. The app, app icon (a lowercase t with a curved foot over the rule, on deep forest; a
+    straight-footed t read as a cross), website, App Store.
+  - **Company mark, B:** spaced serif TUVANT (Fraunces) between thin rules, with SAFETY PROGRAMS under it. Partner
     and insurer material, letterhead, the website footer.
   - Both are drawn as outlines (`src/content/logo.ts`, `logo.json`), so they need no font; files for print and
     designers in `public/brand/` (`npm run icons` regenerates them and the app icons).
 - **Brand colors:** deep forest #1F4D3A, warm off-white #F6F5F0, charcoal #1E2422; the app keeps its bright green
-  #3DDC97 for buttons and "done" (the app stays warm and simple; the polish is in the logo, website and partner side).
-- **Tagline:** "Every talk. Every signature. Every time." ("Safety that stays the course" went with Keel.)
+  #3DDC97 for buttons and "done", gold #FFC24B for streaks. Look book ("Salvant look book" board, 32 brands in seven
+  industries): dark green is unclaimed in safety, construction, industrial, insurance and workforce; avoid orange,
+  mint as a lead color, purple and red.
+- **Tagline:** "Every talk. Every signature. Every time."
 - Set in one place: `src/content/brand.ts` (plus `appName` in `capacitor.config.ts`). The real artwork comes from a
   designer working from these directions.

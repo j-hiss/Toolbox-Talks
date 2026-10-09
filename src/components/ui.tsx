@@ -123,8 +123,8 @@ export function ErrorNotice({ what, detail, onRetry }: { what: string; detail: s
   );
 }
 
-/** The app mark (PLACEHOLDER, Salvant direction D): a lowercase s over the rule, in the brand's own fixed colors
- *  (deep forest tile, off-white s, green rule), the same as the app icon. See src/content/logo.ts. */
+/** The app mark (PLACEHOLDER, direction D): a lowercase t over the rule, in the brand's own fixed colors
+ *  (deep forest tile, off-white letter, green rule), the same as the app icon. See src/content/logo.ts. */
 export function Mark({ size = 30 }: { size?: number }) {
   return (
     <span aria-hidden className="flex shrink-0 items-center justify-center rounded-[22%]" style={{ width: size, height: size, background: BRAND_COLORS.forest }}>
