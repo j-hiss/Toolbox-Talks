@@ -12,16 +12,22 @@ import "@fontsource/archivo/800.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { BRAND } from "@/content/brand";
+import { DEFAULT_THEME } from "@/core/theme";
 
 export const metadata: Metadata = {
   title: BRAND.name,
   description: BRAND.tagline,
+  applicationName: BRAND.name,
+  // Installable web app (src/app/manifest.ts); iPhone and iPad read the apple-* tags when added to the Home Screen.
+  appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: "black-translucent" },
+  icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: DEFAULT_THEME.bg,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

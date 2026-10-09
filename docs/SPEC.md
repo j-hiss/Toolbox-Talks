@@ -14,7 +14,16 @@ The value customers pay for is the **signed, searchable record**. The talk conte
 ## Platforms
 - **Website, iPhone app and Android app from one codebase.** The web app is built as a static site and wrapped with
   Capacitor for the two app stores. Built and tested together from the start.
-- **Installable from the browser** ("Add to Home Screen") before the store apps exist.
+- **Installable from the browser (built 2026-10-09):** "Add to Home Screen" on iPhone, iPad and Android, "Install" in
+  Chrome or Edge on a computer. Opens full screen with the app icon (`src/app/manifest.ts`, placeholder icons from
+  `scripts/make-icons.mjs`). The website keeps a copy of the current build on the device (`out/sw.js`, written by
+  `scripts/build-sw.mjs` after `next build`), so it opens and moves between screens with no signal; Supabase, map
+  and weather requests always go to the network. Off inside the store apps and in `npm run dev`.
+- **Phone, tablet and office computer (built 2026-10-09):** the same screens, laid out for the size. Phones and
+  tablets held upright: one column with the bottom tab bar (wider on a tablet). 1024px and up (iPad sideways, a
+  laptop or office computer): a side menu with the company name and the same tabs, wider pages, Home in two columns
+  (the week on the left; jobsite, weather and what's coming on the right), makeup cards side by side in Reports.
+  Giving a talk stays one column at tablet width at most, so it reads and signs the same everywhere.
 - **Works without signal.** Talks, audio and signatures save on the phone and upload when the connection returns.
 - **Phones first.** Big tap targets, readable outdoors, works one-handed on a tailgate.
 - **Everything runs locally for free while we build.** Local Supabase on a Mac; no Supabase or Vercel account until
@@ -187,6 +196,7 @@ customer #1, not a special case.
 
 ## App frame (built)
 - **Bottom tab bar:** Home · Talk · Records, plus Reports · Admin for owners and admins. Hidden while giving a talk.
+  On a big screen the same tabs are a side menu instead.
 - **Header pill** when offline or when talks are waiting to upload.
 - **Home** shows this week by crew ("Crew A ✓ 4/4 · Crew B 3/5"), how many person-weeks need a makeup, and for a new
   company a getting-started checklist (people → crews → place → first talk).

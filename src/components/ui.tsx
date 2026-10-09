@@ -134,30 +134,37 @@ export function Mark({ size = 30 }: { size?: number }) {
 }
 
 /**
- * The page frame: header (logo, offline/upload status, page links) and, on the main screens, the bottom tab bar.
- * Focused flows (giving a talk, sign-in, setup) pass tabs={false}.
+ * The page frame: header (logo, offline/upload status, page links) and, on the main screens, the app's navigation.
+ * Phones and tablets in portrait get the bottom tab bar; a big screen (iPad landscape, the office computer, 1024px+)
+ * gets a side menu instead and a wider page. Focused flows (giving a talk, sign-in, setup) pass tabs={false} and stay
+ * one column, sized for a tablet at most. `wide` lets a screen use the full width on a computer (reports, admin).
  */
-export function Shell({ children, nav, tabs = true, lockHeader = false }: { children: React.ReactNode; nav?: React.ReactNode; tabs?: boolean; lockHeader?: boolean }) {
+export function Shell({ children, nav, tabs = true, lockHeader = false, wide = false }: { children: React.ReactNode; nav?: React.ReactNode; tabs?: boolean; lockHeader?: boolean; wide?: boolean }) {
   const s = useSession();
   const name = s.current?.company.name ?? BRAND.name;
+  const side = useTabs().length >= 2 && tabs;
+  const width = !tabs ? "max-w-xl md:max-w-2xl" : wide ? "max-w-xl md:max-w-3xl lg:max-w-6xl" : "max-w-xl md:max-w-3xl lg:max-w-4xl";
   return (
-    <div className={`mx-auto max-w-xl px-4 ${tabs ? "pb-28" : "pb-10"}`}>
-      <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-line/60 bg-bg/80 px-5 py-3 backdrop-blur-xl backdrop-saturate-[1.8]">
-        {lockHeader ? (
-          // Signing: the logo isn't a way out while a crew member holds the phone.
-          <span className="flex min-w-0 items-center gap-2.5"><Mark size={28} /><span className="truncate text-[15px] font-semibold tracking-[-0.005em]">{name}</span></span>
-        ) : (
-          <Link href="/" className="flex min-w-0 items-center gap-2.5">
-            <Mark size={28} />
-            <span className="truncate text-[15px] font-semibold tracking-[-0.005em]">{name}</span>
-          </Link>
-        )}
-        <div className="flex items-center gap-1.5">
-          <ConnectionPill />
-          {nav && <nav className="flex gap-1.5">{nav}</nav>}
-        </div>
-      </header>
-      <main className="page-in pt-6">{children}</main>
+    <div className={side ? "lg:pl-64" : ""}>
+      {side && <SideNav name={name} />}
+      <div className={`mx-auto px-4 md:px-8 ${width} ${tabs ? "pb-28 lg:pb-12" : "pb-10"}`}>
+        <header className={`sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-line/60 bg-bg/80 px-5 py-3 backdrop-blur-xl backdrop-saturate-[1.8] md:-mx-8 md:px-8 ${side ? "lg:justify-end lg:border-transparent" : ""}`}>
+          {lockHeader ? (
+            // Signing: the logo isn't a way out while a crew member holds the phone.
+            <span className="flex min-w-0 items-center gap-2.5"><Mark size={28} /><span className="truncate text-[15px] font-semibold tracking-[-0.005em]">{name}</span></span>
+          ) : (
+            <Link href="/" className={`flex min-w-0 items-center gap-2.5 ${side ? "lg:hidden" : ""}`}>
+              <Mark size={28} />
+              <span className="truncate text-[15px] font-semibold tracking-[-0.005em]">{name}</span>
+            </Link>
+          )}
+          <div className="flex items-center gap-1.5">
+            <ConnectionPill />
+            {nav && <nav className="flex gap-1.5">{nav}</nav>}
+          </div>
+        </header>
+        <main className="page-in pt-6">{children}</main>
+      </div>
       {tabs && <TabBar />}
     </div>
   );
@@ -191,24 +198,68 @@ const ICONS: Record<string, React.ReactNode> = {
   admin: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></>,
 };
 
-function TabBar() {
+/** The main screens this person can open. Tabs follow the app role: employees see only Home (their own history);
+ *  office has no Talk; setup is for admins. One list for the bottom tab bar and the side menu. */
+function useTabs() {
   const s = useSession();
-  const path = (usePathname() || "/").replace(/\/?$/, "/");
   const access = s.current?.access;
-  // Tabs follow the app role: employees see only Home (their own history); office has no Talk; setup is for admins.
-  const tabs = [
+  return [
     { href: "/", label: "Home", icon: "home", show: true },
     { href: "/talk/", label: "Talk", icon: "talk", show: canPresent(access) },
     { href: "/records/", label: "Records", icon: "records", show: isStaff(access) },
     { href: "/reports/", label: "Reports", icon: "reports", show: canReport(access) },
     { href: "/admin/", label: "Admin", icon: "admin", show: canAdmin(access) },
   ].filter((t) => t.show);
+}
+
+function useActive() {
+  const path = (usePathname() || "/").replace(/\/?$/, "/");
+  return (href: string) => (href === "/" ? path === "/" : path.startsWith(href) || (href === "/records/" && path.startsWith("/record/")));
+}
+
+function TabIcon({ icon, on, size = 22 }: { icon: string; on: boolean; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={on ? 2 : 1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      {ICONS[icon]}
+    </svg>
+  );
+}
+
+/** The side menu on a big screen (1024px+): the same tabs, listed down the left edge under the company name. */
+function SideNav({ name }: { name: string }) {
+  const tabs = useTabs();
+  const active = useActive();
+  return (
+    <nav aria-label="Menu" className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line/60 bg-surface/60 px-4 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-6 backdrop-blur-xl lg:flex">
+      <Link href="/" className="flex min-w-0 items-center gap-3 px-2">
+        <Mark size={34} />
+        <span className="min-w-0"><span className="block truncate text-[15px] font-semibold">{name}</span><span className="block text-xs text-muted">{BRAND.name}</span></span>
+      </Link>
+      <ul className="mt-8 flex flex-col gap-1">
+        {tabs.map((t) => {
+          const on = active(t.href);
+          return (
+            <li key={t.href}>
+              <Link href={t.href} aria-current={on ? "page" : undefined}
+                className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold ${on ? "bg-brand-soft text-brand-text" : "text-muted hover:bg-fg/[0.05] hover:text-fg"}`}>
+                <TabIcon icon={t.icon} on={on} size={20} />{t.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
+function TabBar() {
+  const tabs = useTabs();
+  const active = useActive();
   if (tabs.length < 2) return null; // an employee account has only Home
-  const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href) || (href === "/records/" && path.startsWith("/record/")));
   return (
     // A translucent bar on the bottom edge, like a phone's own tab bar; the selected tab is in the brand color.
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t border-line/60 bg-surface/80 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl backdrop-saturate-[1.8]">
-      <ul className="mx-auto flex max-w-xl px-2">
+    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t lg:hidden border-line/60 bg-surface/80 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl backdrop-saturate-[1.8]">
+      <ul className="mx-auto flex max-w-xl px-2 md:max-w-2xl">
         {tabs.map((t) => {
           const on = active(t.href);
           return (
@@ -218,11 +269,7 @@ function TabBar() {
                 aria-current={on ? "page" : undefined}
                 className={`flex min-h-16 flex-col items-center justify-center gap-0.5 pt-1.5 pb-1.5 text-[11px] font-medium tracking-normal ${on ? "text-brand-text" : "text-muted"}`}
               >
-                <span className="flex h-7 items-center justify-center">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={on ? 2 : 1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    {ICONS[t.icon]}
-                  </svg>
-                </span>
+                <span className="flex h-7 items-center justify-center"><TabIcon icon={t.icon} on={on} /></span>
                 {t.label}
               </Link>
             </li>

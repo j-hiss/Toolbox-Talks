@@ -121,6 +121,9 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
+      {/* One column on phones; on a big screen the week sits on the left and the jobsite, weather and what's coming on the right. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
+      <div>
       {week && talk && text && st && <MomentumHero st={st} />}
 
       {week && talk && text ? (
@@ -164,6 +167,8 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
+      </div>
+      <div className="lg:mt-4">
       <JobsitePicker companyId={co.id} isAdmin={isAdmin} onChange={setSite} />
       <WeatherCard key={site?.id ?? "none"} site={site} setting={workSettingFor(co, site)} />
 
@@ -183,6 +188,8 @@ function Home({ m }: { m: Membership }) {
           </ul>
         </section>
       )}
+      </div>
+      </div>
 
       <div className="mt-10 border-t border-line pt-4 text-sm">
         {remindersSupported() ? (

@@ -6,6 +6,7 @@
 //   @/lib/location               -> explains GPS isn't available in the preview
 //   @/lib/download               -> the preview page's own save-file prompt
 //   @/lib/weather                -> an example forecast (the preview can't reach the weather service)
+//   @/lib/offlineApp             -> off (the preview is one page; there's no sw.js beside it)
 // Run: npm run preview:build   (output: preview/dist/preview.html)
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -35,6 +36,7 @@ export default defineConfig({
       { find: /^@\/lib\/weather$/, replacement: here("demo/weather.ts") },
       { find: /^@\/lib\/location$/, replacement: here("demo/location.ts") },
       { find: /^@\/lib\/download$/, replacement: here("demo/download.ts") },
+      { find: /^@\/lib\/offlineApp$/, replacement: here("demo/offlineApp.ts") },
       { find: /^@\//, replacement: here("../src") + "/" },
     ],
   },

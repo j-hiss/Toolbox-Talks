@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
-    "build": "next build",
+    "build": "next build && node scripts/build-sw.mjs",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "TZ=UTC vitest run",
@@ -17,7 +17,8 @@
     "android": "npm run app:sync && cap open android",
     "preview:build": "vite build --config preview/vite.config.ts && node preview/to-artifact.mjs",
     "test:preview": "npm run preview:build && node scripts/preview-e2e.mjs",
-    "seed": "tsx scripts/seed-local.ts"
+    "seed": "tsx scripts/seed-local.ts",
+    "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",

@@ -149,7 +149,7 @@ function Reports({ m }: { m: Membership }) {
   };
 
   return (
-    <Shell>
+    <Shell wide>
       <Eyebrow>Reports · {co.name}</Eyebrow>
       <Title>{multi ? "Talk sign-ins" : "Weekly sign-ins"}</Title>
       {canAdmin(m.access) && (
@@ -181,7 +181,7 @@ function Reports({ m }: { m: Membership }) {
       {owedWeeks.length === 0 ? (
         <p className="mt-3 text-sm text-muted">No one owes a past week right now.</p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="mt-3 grid gap-2 lg:grid-cols-2 xl:grid-cols-3">
           {owedWeeks.map((g) => {
             const pw = plan(g.week);
             const urgent = g.daysLeft <= 7;
