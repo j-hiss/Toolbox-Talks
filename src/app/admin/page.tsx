@@ -145,11 +145,14 @@ function Admin({ m }: { m: Membership }) {
             }}
           />
         ) : tab === "company" ? (
-          <CompanyForm
-            initial={{ ...m.company, makeup_weeks: m.company.makeup_weeks ?? 4 }}
-            submitLabel="Save company info"
-            onSubmit={async (c) => { await updateCompany(companyId, c); await s.refresh(); }}
-          />
+          <>
+            <CompanyForm
+              initial={{ ...m.company, makeup_weeks: m.company.makeup_weeks ?? 4 }}
+              submitLabel="Save company info"
+              onSubmit={async (c) => { await updateCompany(companyId, c); await s.refresh(); }}
+            />
+            <DailyToggle companyId={companyId} on={!!m.company.daily_enabled} refresh={s.refresh} />
+          </>
         ) : !roles || !teams || !people || !jobsites ? (
           <Loading />
         ) : tab === "people" ? (
@@ -637,3 +640,24 @@ function PlanTab({ m }: { m: Membership }) {
   );
 }
 
+/** Admin → Company: daily pre-task plans on or off (src/core/pretask.ts). Separate from the weekly talk. */
+function DailyToggle({ companyId, on, refresh }: { companyId: string; on: boolean; refresh: () => Promise<void> | void }) {
+  const [value, setValue] = useState(on);
+  return (
+    <section className="mt-6 rounded-lg border border-line bg-surface p-3">
+      <label className="flex min-h-11 items-start justify-between gap-3">
+        <span>
+          <b className="block">Daily pre-task plans</b>
+          <small className="block text-muted">Crews plan the day before work: tasks, hazards and controls, PPE, equipment reminders, emergency plan, and everyone signs. Kept as their own records. They never count toward the weekly talk.</small>
+        </span>
+        <input type="checkbox" className="mt-1 size-6 shrink-0 accent-[var(--brand)]" checked={value}
+          onChange={async (e) => {
+            const next = e.target.checked;
+            setValue(next);
+            try { await updateCompany(companyId, { daily_enabled: next }); await refresh(); toast(next ? "Daily pre-task plans are on" : "Daily pre-task plans are off"); }
+            catch (err) { setValue(!next); toast(err instanceof Error ? err.message : String(err), { tone: "error" }); }
+          }} />
+      </label>
+    </section>
+  );
+}

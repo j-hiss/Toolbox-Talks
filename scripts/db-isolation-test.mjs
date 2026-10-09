@@ -192,6 +192,19 @@ async function main() {
     check("A cannot change B's plan", await fails(() => setOverride(userA, coB, laterWk)));
     check("A presenter cannot change the plan", await fails(() => setOverride(presenterA, coA, laterWk)));
     check("A presenter can read the plan", (await as(presenterA, "select week_start from public.plan_overrides")).rows.length === 1);
+    {
+      // Daily pre-task plans: their own kind, no week, never a makeup, and they don't lock the weekly talk.
+      const daily = (extra) => JSON.stringify({ ...JSON.parse(rec(coA, randomUUID(), [])[0]), talk_id: "pretask", record_kind: "daily",
+        pretask: { tasks: ["Tear off"], hazards: [{ hazard: "Falls", control: "Tie off" }] }, ...extra });
+      const id = (await as(userA, "select public.save_talk_record($1::jsonb, '[]'::jsonb) as id", [daily({})])).rows[0].id;
+      const row = (await as(userA, "select record_kind, week_start, pretask->'tasks'->>0 as task from public.talk_records where id = $1", [id])).rows[0];
+      check("A daily plan saves as its own kind with its plan and no week", row?.record_kind === "daily" && row.week_start === null && row.task === "Tear off");
+      check("A daily plan can't claim a week", await fails(() => as(userA, "select public.save_talk_record($1::jsonb, '[]'::jsonb)", [daily({ week_start: nextWk, week_number: 2 })])));
+      check("A daily plan can't be a makeup", await fails(() => as(userA, "select public.save_talk_record($1::jsonb, '[]'::jsonb)", [daily({ makeup_for_week: pastWk, makeup_reason: "x" })])));
+      check("A weekly talk can't carry a daily plan", await fails(() => as(userA, "select public.save_talk_record($1::jsonb, '[]'::jsonb)", [JSON.stringify({ ...JSON.parse(rec(coA, randomUUID(), [])[0]), pretask: { tasks: ["x"] } })])));
+      check("A daily plan doesn't lock the week's talk", (await setOverride(userA, coA, nextWk, "ladders").then(() => true, () => false)));
+      check("B can't see A's daily plan", (await as(userB, "select id from public.talk_records where id = $1", [id])).rows.length === 0);
+    }
     check("A week that's over can't be changed", await fails(() => setOverride(userA, coA, pastWk)));
     check("Plan weeks must start on a Monday", await fails(() => setOverride(userA, coA, tuesday)));
     // Picked talk lists (Admin → Talks): company-scoped, admins only, and only for weeks that haven't started.

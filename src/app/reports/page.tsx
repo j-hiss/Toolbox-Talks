@@ -12,9 +12,10 @@ import { MAKEUP_REASONS, periodKeys, planWeekAt } from "@/core/makeup";
 import { HBars, TeamGrid, TrendChart } from "@/components/charts";
 import { cycleStart, weekNumbers } from "@/core/plan";
 import { STATUS_LABEL } from "@/core/attendance";
+import { dailyTally } from "@/core/pretask";
 import { addDays, isoDay, mondayOf, parseDay, periodLabel } from "@/core/weeks";
 import { TALKS } from "@/content/talks";
-import { reportPeople, reportRecords } from "@/lib/data/reports";
+import { reportPeople, reportRecords, listDailyPlans } from "@/lib/data/reports";
 import { listIssues } from "@/lib/data/issues";
 import { isOverdue } from "@/components/Issues";
 import { listTeams } from "@/lib/data/company";
@@ -57,7 +58,7 @@ function Reports({ m }: { m: Membership }) {
   const [team, setTeam] = useState("all");
   const [onlyGaps, setOnlyGaps] = useState(false);
   const [openWeek, setOpenWeek] = useState<string | null>(null);
-  const [data, setData] = useState<{ people: ReportPerson[]; records: ReportRecord[]; teams: Team[]; from: string; issues: Issue[] } | null>(null);
+  const [data, setData] = useState<{ people: ReportPerson[]; records: ReportRecord[]; teams: Team[]; from: string; issues: Issue[]; daily: { held_at: string; team_name: string }[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [csvMsg, setCsvMsg] = useState<string | null>(null);
   const router = useRouter();
@@ -79,8 +80,8 @@ function Reports({ m }: { m: Membership }) {
 
   useEffect(() => {
     let live = true;
-    Promise.all([reportPeople(co.id), reportRecords(co.id, fetchFrom), listTeams(co.id), listIssues(co.id)])
-      .then(([people, records, teams, issues]) => live && setData({ people, records, teams, from, issues }))
+    Promise.all([reportPeople(co.id), reportRecords(co.id, fetchFrom), listTeams(co.id), listIssues(co.id), listDailyPlans(co.id, from)])
+      .then(([people, records, teams, issues, daily]) => live && setData({ people, records, teams, from, issues, daily }))
       .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
     return () => { live = false; };
   }, [co.id, from, fetchFrom]);
@@ -367,6 +368,21 @@ function Reports({ m }: { m: Membership }) {
       </ul>
 
       </Fold>
+
+      {/* Daily pre-task plans: their own count, never part of the sign-in rate --------------------------------------- */}
+      {(co.daily_enabled || data.daily.length > 0) && (() => {
+        const tally = dailyTally(data.daily, (iso) => isoDay(new Date(iso)));
+        return (
+          <Fold title="Daily pre-task plans" aside={(() => { const n = new Set(data.daily.map((d) => isoDay(new Date(d.held_at)))).size; return `${n} ${n === 1 ? "day" : "days"}`; })()}>
+            <p className="mt-1 text-sm text-muted">Days with a daily plan recorded, by crew. Separate from the weekly talk and the sign-in rate. The app doesn&apos;t know which days were worked, so this is a count, not a rate.</p>
+            {tally.length === 0 ? <p className="mt-2 text-sm text-muted">No daily plans in this range.</p> : (
+              <ul className="mt-2 flex flex-col gap-1.5 text-sm tabular-nums">
+                {tally.map((t) => <li key={t.crew} className="flex justify-between rounded-xl bg-surface px-3 py-2"><b>{t.crew}</b><span>{t.days} {t.days === 1 ? "day" : "days"}</span></li>)}
+              </ul>
+            )}
+          </Fold>
+        );
+      })()}
 
       {/* People ------------------------------------------------------------------------------------------------------ */}
       <Fold title="By person" aside={`${report.people.length}`}>

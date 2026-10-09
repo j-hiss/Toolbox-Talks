@@ -27,9 +27,10 @@ export function stampParts(iso: string): { date: string; time: string } {
   };
 }
 
-export function pdfFileName(r: Pick<TalkRecord, "week_number" | "title" | "held_at" | "makeup_for_week">): string {
+export function pdfFileName(r: Pick<TalkRecord, "week_number" | "title" | "held_at" | "makeup_for_week"> & { kind?: TalkRecord["kind"]; team_name?: string }): string {
   const day = new Date(r.held_at);
   const iso = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+  if (r.kind === "daily") return `Daily Pre-Task Plan - ${r.team_name ? `${r.team_name.replace(/[^\w\s-]/g, "").trim()} - ` : ""}${iso}.pdf`;
   const week = r.week_number ? `Week ${String(r.week_number).padStart(2, "0")} - ` : "";
   const makeup = r.makeup_for_week ? "Makeup - " : "";
   return `${week}${makeup}Toolbox Talk - ${r.title.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim()} - ${iso}.pdf`;
@@ -69,7 +70,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   // A band in the company's brand color (Admin → Brand). Decoration only: the record's content never depends on it.
   doc.setFillColor(...rgb(normalizeTheme(co.theme).brand)); doc.rect(0, 0, W, 8, "F");
   doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text(co.name || "Company name not set", M, y + 4);
-  doc.setFontSize(9); doc.setTextColor(GREY); doc.text("TOOLBOX TALK RECORD", W - M, y + 4, { align: "right" });
+  doc.setFontSize(9); doc.setTextColor(GREY); doc.text(r.kind === "daily" ? "DAILY PRE-TASK PLAN RECORD" : "TOOLBOX TALK RECORD", W - M, y + 4, { align: "right" });
   y += 18; doc.setTextColor(60); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
   const coLines = [co.address, [co.phone, co.email].filter(Boolean).join("  ·  "), (co.licenses || "").split(/\n+/).map((s) => s.trim()).filter(Boolean).join("  ·  ")].filter(Boolean);
   coLines.forEach((l) => doc.splitTextToSize(l, CW).forEach((x: string) => { doc.text(x, M, y); y += 11; }));
@@ -82,7 +83,9 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   const weekNo = r.week_number ? weekNumbers({ n: r.week_number, weeks: len }).toUpperCase() : "";
   const weekOf = len > 1 ? "PERIOD" : "WEEK OF";
   doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(GREY);
-  if (r.makeup_for_week) {
+  if (r.kind === "daily") {
+    doc.text("DAILY PLAN  ·  SEPARATE FROM THE WEEKLY TOOLBOX TALK", M, y); y += 20;
+  } else if (r.makeup_for_week) {
     doc.setTextColor(...RED);
     doc.text(`MAKEUP FOR THE WEEK OF ${weekLabel(parseDay(r.makeup_for_week), "en-US").toUpperCase()}`, M, y); y += 14;
     doc.setTextColor(GREY);

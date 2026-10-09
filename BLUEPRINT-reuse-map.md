@@ -128,6 +128,9 @@ point the row at the real file and keep the prototype line as its origin.
 | `RequireCompany` · `NotConfigured` | `src/components/Guard.tsx` | Gate for every signed-in screen: loading, not configured, signed out → sign-in, no company → setup, admin-only |
 | `applyTheme` · `rememberedTheme` · `CompanyColors` | `src/lib/theme.ts` · `src/components/Providers.tsx` | **The** way colors reach the page: sets the `--t-*` variables `globals.css` derives everything from; remembers the last company's colors on the phone |
 | `CrewPhoto` · `shrinkPhoto` · `fitWithin` | `src/components/CrewPhoto.tsx` · `src/lib/photo.ts` | Optional photos on the review screen: `kind="photo"` (crew photo) or `kind="sheet"` (paper sign-in sheet, larger, evidence only); shrinks on the phone before it's kept |
+| `PRETASK_TALK_ID` · `pretaskProblems` · `pretaskContent` · `tidyPlan` · `EQUIPMENT_PROMPTS` · `HAZARD_SUGGESTIONS` · `DAILY_STATEMENT` · `dailyTally` | `src/core/pretask.ts` | **The** daily pre-task plan rules and content; saved as a talk record of kind `daily` (same pipeline), never scored |
+| `PretaskPlanStep` · `newDailyDraft` · `useHeatCheck` | `src/components/PretaskPlanStep.tsx` · `src/lib/draft.ts` · `src/lib/useHeatCheck.ts` | Step 1 of a daily plan; starting one; the one heat check used by talks and daily plans |
+| `listDailyPlans` | `src/lib/data/reports.ts` | Days with a daily plan (held time, crew) for Reports; never part of the weekly math |
 | `LateArrival` | `src/app/talk/page.tsx` | "+ Someone arrived late" on the review screen: adds a walk-in and jumps to their signing turn |
 | `Fold` | `src/app/reports/page.tsx` | A report section that folds away (closed by default) so Reports stays short on a phone |
 | `readWalkinCompanies` · `rememberWalkinCompany` | `src/lib/lastSetup.ts` | Walk-in companies used on this phone, suggested next time |

@@ -358,3 +358,22 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - Pricing (per company per month vs per crew).
 - Whether RomanOS reads records from this app through an API (later, only if useful; no shared code).
 - Moving the repo from Joe's personal GitHub account to a company organization.
+
+## Daily pre-task plans (built, migration 0018)
+- **What:** a short plan the crew makes together before work, separate from the weekly toolbox talk. GCs commonly
+  require a daily pre-task plan alongside a weekly talk; OSHA's construction safety-program guidance recommends daily
+  planning meetings (OSHA 3886). Off until an admin turns it on (Admin → Company → Daily pre-task plans).
+- **Flow:** Home → "Start today's pre-task plan" → plan the day (tasks; hazards and controls, with suggested starting
+  points to edit; PPE; permits; equipment; meeting point and emergency plan, remembered per jobsite; other work
+  nearby) → who's here → everyone signs a daily statement (versioned, in the language picked, English under it) →
+  saved. Hot days add the heat reminder, saved with the plan.
+- **Equipment reminders** (scaffold, trench, crane, aerial lift, forklift, harness) show what the rule asks someone to
+  check, with the cite (1926.451(f)(3), 1926.651(k)(1), 1926.1412(d)(1), 1926.453(b)(2)(i), 1910.178(q)(7),
+  1926.502(d)(21)). The record keeps the foreman's answer ("checked by ___" or "not used today"). The app never says
+  an inspection happened or that anyone complies.
+- **Records:** saved through the same pipeline as weekly talks (roster, private signature files, offline outbox, PDF,
+  append-only), as `record_kind = 'daily'` with the structured plan in `pretask`. A daily plan has no week, can't be
+  a makeup, never locks or fills the weekly talk, and never counts toward the sign-in rate. Records list tags it
+  "Daily plan"; the PDF says "Daily plan · separate from the weekly toolbox talk".
+- **Reports:** "Daily pre-task plans" shows days with a plan per crew: a count, not a rate, because the app doesn't
+  know which days were worked yet (a "worked today" signal is a later item).

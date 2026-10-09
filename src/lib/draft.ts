@@ -7,13 +7,19 @@ import type { Signature } from "@/core/record";
 import type { LanguageId } from "@/core/languages";
 import { readLastSetup } from "./lastSetup";
 import type { SinceLastDraft } from "./sinceLast";
+import { emptyPlan, PRETASK_TALK_ID, type PretaskPlan } from "@/core/pretask";
+import { readSiteEmergency } from "./lastSetup";
 
 export type TalkDraft = {
   clientId: string;
   companyId: string;
   talkId: string | null;          // null = still choosing which missed week to make up
   lang: LanguageId;
-  step: "makeup" | "read" | "crew" | "sign";
+  step: "makeup" | "read" | "plan" | "crew" | "sign";
+  /** "daily": a daily pre-task plan (plan → who's here → sign), never part of the weekly talk. */
+  kind: "weekly" | "daily";
+  /** The plan being filled in, for a daily pre-task plan. */
+  pretask: PretaskPlan | null;
   /** Set when this talk makes up a missed week. The record still gets today's real date, week and GPS. */
   /** The past talk period being made up: its first Monday, first week number, and length in weeks (1 = weekly). */
   makeup: { weekStart: string; weekNumber: number; weeks?: number } | null;
@@ -66,9 +72,9 @@ export function readDraft(companyId: string): TalkDraft | null {
 
 /** Drafts saved by an earlier version of the app (free talk picking) become a makeup choice or carry on as is. */
 function upgrade(raw: unknown): TalkDraft {
-  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues" | "photo" | "sheet" | "walkins"> & { step: string; walkins?: (string | Walkin)[] };
+  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues" | "photo" | "sheet" | "walkins" | "kind" | "pretask"> & { step: string; walkins?: (string | Walkin)[] };
   const step = (d.step === "pick" ? (d.talkId ? "read" : "makeup") : d.step) as TalkDraft["step"];
-  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], photo: d.photo ?? null, sheet: d.sheet ?? null,
+  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], photo: d.photo ?? null, sheet: d.sheet ?? null, kind: d.kind ?? "weekly", pretask: d.pretask ?? null,
     walkins: (d.walkins ?? []).map((w) => (typeof w === "string" ? { name: w, company: "" } : w)), step };
 }
 
@@ -111,9 +117,20 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
     issues: [],
     photo: null,
     sheet: null,
+    kind: "weekly",
+    pretask: null,
   };
   writeDraft(d);
   return d;
+}
+
+/** Start today's daily pre-task plan: same crew and place as last time, the site's meeting point filled in. */
+export function newDailyDraft(companyId: string, jobsiteId = ""): TalkDraft {
+  const d = newDraft(companyId, PRETASK_TALK_ID, jobsiteId);
+  const site = readSiteEmergency(companyId, d.jobsiteId);
+  const daily: TalkDraft = { ...d, kind: "daily", step: "plan", pretask: { ...emptyPlan(), muster: site?.muster ?? "", emergency: site?.emergency ?? "" } };
+  writeDraft(daily);
+  return daily;
 }
 
 /**

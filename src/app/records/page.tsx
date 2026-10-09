@@ -127,7 +127,7 @@ function Records({ m }: { m: Membership }) {
                       <li key={r.id}>
                         <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-xl bg-surface p-3 hover:ring-2 hover:ring-brand">
                           <span className="min-w-0">
-                            <b className="block">{r.title}</b>
+                            <b className="block">{r.title}{r.kind === "daily" && <span className="ml-2 rounded bg-brand-soft px-1.5 py-0.5 align-middle text-xs font-semibold text-brand-text">Daily plan</span>}</b>
                             {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}
                             <small className="text-muted tabular-nums">
                               {when(r.held_at)}{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}

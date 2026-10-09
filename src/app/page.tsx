@@ -13,7 +13,7 @@ import { useSession } from "@/lib/session";
 import { canAdmin, type Membership } from "@/lib/data/types";
 import { RequireCompany } from "@/components/Guard";
 import { JobsitePicker, readChosenJobsite } from "@/components/JobsitePicker";
-import { newDraft, useDraft } from "@/lib/draft";
+import { newDailyDraft, newDraft, useDraft } from "@/lib/draft";
 import { useOutbox } from "@/lib/useOutbox";
 import { usePlan } from "@/lib/usePlan";
 import { readLastSetup } from "@/lib/lastSetup";
@@ -44,7 +44,7 @@ function Home({ m }: { m: Membership }) {
   const router = useRouter();
   const draft = useDraft(co.id);
   const outbox = useOutbox(co.id);
-  const draftTitle = draft?.talkId ? TALKS.find((t) => t.id === draft.talkId)?.content.en.title : null;
+  const draftTitle = draft?.kind === "daily" ? "Daily pre-task plan" : draft?.talkId ? TALKS.find((t) => t.id === draft.talkId)?.content.en.title : null;
   const st = useHomeStatus(co, input, outbox.items.length);
   const [site, setSite] = useState<Jobsite | null>(null);
   const isAdmin = canAdmin(m.access);
@@ -104,7 +104,7 @@ function Home({ m }: { m: Membership }) {
         <div className="mt-4">
           <Notice>
             <span className="flex flex-wrap items-center justify-between gap-2">
-              <span>Talk in progress{draftTitle ? `: ${draftTitle}` : ""}.</span>
+              <span>{draft.kind === "daily" ? "In progress" : "Talk in progress"}{draftTitle ? `: ${draftTitle}` : ""}.</span>
               <Button size="sm" onClick={() => router.push("/talk/")}>Resume</Button>
             </span>
           </Notice>
@@ -137,6 +137,8 @@ function Home({ m }: { m: Membership }) {
                 {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
                 {/* Only when someone owes a past talk (or the status hasn't loaded, offline). */}
                 {(!st || st.owed > 0) && <Button variant="soft" onClick={() => start(null)}>Make up a missed talk</Button>}
+                {/* The daily pre-task plan: its own record, separate from the weekly talk (Admin → Company turns it on). */}
+                {co.daily_enabled && <Button variant="ghost" onClick={() => { newDailyDraft(co.id, readChosenJobsite(co.id) ?? ""); router.push("/talk/"); }}>Start today&apos;s pre-task plan</Button>}
               </div>
             </div>
           </div>

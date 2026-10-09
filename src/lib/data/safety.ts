@@ -58,7 +58,8 @@ export async function crewBulletins(companyId: string, since: Date): Promise<Bul
 
 /** When the last talk at this jobsite (or anywhere, for null) was held, for "since last talk". */
 export async function lastTalkAt(companyId: string, jobsiteId: string | null): Promise<string | null> {
-  let q = supabase().from("talk_records").select("held_at").eq("company_id", companyId);
+  // "Since last talk" means the last weekly talk there; daily pre-task plans don't read the safety log.
+  let q = supabase().from("talk_records").select("held_at").eq("company_id", companyId).eq("record_kind", "weekly");
   if (jobsiteId) q = q.eq("jobsite_id", jobsiteId);
   const rows = check(await q.order("held_at", { ascending: false }).limit(1)) as { held_at: string }[];
   return rows[0]?.held_at ?? null;

@@ -1,4 +1,5 @@
 // Row shapes as stored in Supabase (snake_case, matching supabase/migrations/).
+import type { PretaskPlan } from "@/core/pretask";
 import type { CaseStatus, EventKind, SinceLastSnapshot, SinceLastWindow } from "@/core/safetylog";
 import type { Theme } from "@/core/theme";
 import type { IndustryId } from "@/core/industries";
@@ -27,6 +28,8 @@ export type Company = {
   since_last_scope?: "jobsite" | "all";
   since_last_kinds?: EventKind[];
   since_last_open_only?: boolean;
+  /** Home offers a daily pre-task plan (src/core/pretask.ts). */
+  daily_enabled?: boolean;
 };
 
 export type Membership = { company: Company; access: Access };
@@ -74,6 +77,8 @@ export type AttendanceRow = {
 /** A saved talk as listed (no signatures). */
 export type TalkRecordSummary = {
   id: string;
+  /** "daily" = a daily pre-task plan (never scored); weekly talks otherwise. */
+  kind?: "weekly" | "daily";
   client_id: string;
   talk_id: string;
   language: string;
@@ -116,6 +121,8 @@ export type TalkRecord = TalkRecordSummary & {
   /** Optional photo of a paper sign-in sheet. Evidence only: statuses come from the phone signatures. */
   sheet?: string | null;
   sheet_taken_at?: string | null;
+  /** The structured plan, for a daily pre-task plan record. */
+  pretask?: PretaskPlan | null;
 };
 
 /** Something the crew raised at a talk. */

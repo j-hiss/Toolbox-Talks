@@ -17,6 +17,13 @@ export async function reportPeople(companyId: string): Promise<ReportPerson[]> {
     .map((p) => ({ id: p.id, name: p.full_name, teamId: p.team_id, createdAt: p.created_at ?? "2000-01-01T00:00:00Z", deactivatedAt: p.deactivated_at ?? null }));
 }
 
+export async function listDailyPlans(companyId: string, fromDay: string): Promise<{ held_at: string; team_name: string }[]> {
+  await tick();
+  return (db().records as unknown as (R & { record_kind?: string })[])
+    .filter((r) => r.company_id === companyId && r.record_kind === "daily" && r.held_at >= fromDay)
+    .sort((a, b) => a.held_at.localeCompare(b.held_at)).map((r) => ({ held_at: r.held_at, team_name: r.team_name }));
+}
+
 export async function reportRecords(companyId: string, fromWeek: string): Promise<ReportRecord[]> {
   await tick();
   return (db().records as unknown as R[])
@@ -29,5 +36,5 @@ export async function reportRecords(companyId: string, fromWeek: string): Promis
     }));
 }
 
-const _sameShape = { reportPeople, reportRecords } satisfies Omit<typeof Real, never>;
+const _sameShape = { reportPeople, reportRecords, listDailyPlans } satisfies Omit<typeof Real, never>;
 void _sameShape;

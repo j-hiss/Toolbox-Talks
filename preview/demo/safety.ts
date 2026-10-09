@@ -90,7 +90,7 @@ export async function crewBulletins(companyId: string, since: Date): Promise<Bul
 export async function lastTalkAt(companyId: string, jobsiteId: string | null): Promise<string | null> {
   await tick();
   const held = db().records
-    .filter((r) => r.company_id === companyId && (!jobsiteId || r.jobsite_id === jobsiteId))
+    .filter((r) => r.company_id === companyId && r.record_kind !== "daily" && (!jobsiteId || r.jobsite_id === jobsiteId))
     .map((r) => String(r.held_at)).sort();
   return held.at(-1) ?? null;
 }

@@ -23,6 +23,13 @@ type Row = {
   talk_attendees: { person_id: string | null; name: string; status: ReportRecord["attendees"][number]["status"] }[];
 };
 
+/** Days with a daily pre-task plan from `fromDay` on (held time and crew only). Never part of the weekly math. */
+export async function listDailyPlans(companyId: string, fromDay: string): Promise<{ held_at: string; team_name: string }[]> {
+  return check(
+    await supabase().from("talk_records").select("held_at, team_name").eq("company_id", companyId).eq("record_kind", "daily").gte("held_at", fromDay).order("held_at"),
+  ) as { held_at: string; team_name: string }[];
+}
+
 /** Records held in, or making up, any week from `fromWeek` on. */
 export async function reportRecords(companyId: string, fromWeek: string): Promise<ReportRecord[]> {
   const rows = check(

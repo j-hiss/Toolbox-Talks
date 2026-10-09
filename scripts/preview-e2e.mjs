@@ -296,6 +296,46 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("7 withdrawn:", (await r.locator("main li:has-text('Weekly scaffold check')").first().innerText()).includes("Withdrawn"));
   const issues = await r.evaluate(() => JSON.parse(localStorage.getItem("tt-preview-db")).issues.filter((i) => i.event_id).map((i) => i.description));
   log("7 finding on issues list:", issues.join(", "));
+  // Scenario 8: daily pre-task plan. Turn it on, plan the day, crew signs, saved as its own record that never counts
+  // toward the weekly talk.
+  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(800);
+  const weekBefore = (await r.locator("section:has-text('signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " ");
+  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Company')"); await r.waitForTimeout(400);
+  await r.locator("label:has-text('Daily pre-task plans') input").check(); await r.waitForTimeout(600);
+  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(800);
+  await r.click("text=Start today's pre-task plan"); await r.waitForTimeout(600);
+  log("8 plan step:", await r.locator("h1").textContent());
+  await r.click("button:has-text(\"Who's here\")"); await r.waitForTimeout(200);
+  log("8 needs a plan first:", (await r.locator("[role=alert]").innerText().catch(() => "none")).replace(/\s+/g, " "));
+  await r.fill('input[aria-label="Add a task"]', "Tear off the north slope"); await r.click("form >> button:has-text('Add')");
+  await r.click("text=Pick from common hazards"); await r.click("button:has-text('+ Falls from an edge')");
+  await r.click("button[aria-pressed]:has-text('Hard hat')");
+  await r.locator("li:has-text('Scaffold') input[type=checkbox]").check(); await r.waitForTimeout(150);
+  log("8 scaffold reminder:", (await r.locator("li:has-text('Scaffold') p").first().innerText()).replace(/\s+/g, " "));
+  await r.fill('input[aria-label="Who checked the scaffold"]', "Sam Lead");
+  await r.fill("#pt-muster", "Front gate");
+  await r.screenshot({ path: `${OUT}/e-daily-plan.png`, fullPage: true });
+  await r.click("button:has-text(\"Who's here\")"); await r.waitForTimeout(400);
+  await r.selectOption("#presenter", { index: 1 }); await r.selectOption("#team", { label: "North Crew" }); await r.waitForTimeout(200);
+  log("8 no 'still needs' option:", (await r.locator("#team option[value=needs]").count()) === 0);
+  await r.click("text=Collect signatures"); await r.waitForTimeout(400);
+  { const c = r.locator("canvas"); const bb = await c.boundingBox(); await r.mouse.move(bb.x + 30, bb.y + 80); await r.mouse.down(); await r.mouse.move(bb.x + 150, bb.y + 40, { steps: 5 }); await r.mouse.move(bb.x + 250, bb.y + 90, { steps: 5 }); await r.mouse.up(); }
+  await r.click("button:has-text('Next')"); await r.waitForTimeout(300);
+  log("8 crew statement:", (await r.locator("[role=checkbox]").innerText()).replace(/\s+/g, " ").slice(0, 80));
+  await r.click("text=Review all"); await r.waitForTimeout(300);
+  await r.click("button:has-text('Save')"); await r.waitForTimeout(1200);
+  log("8 saved:", await r.locator("h1").textContent());
+  await r.click("nav[aria-label=Main] >> text=Home").catch(() => {}); await r.waitForTimeout(800);
+  if (!(await r.locator("nav[aria-label=Main]").count())) { await r.click("text=Home"); await r.waitForTimeout(800); }
+  const weekAfter = (await r.locator("section:has-text('signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " ");
+  log("8 weekly count unchanged:", weekBefore === weekAfter, "|", weekAfter.slice(0, 60));
+  await r.click("nav[aria-label=Main] >> text=Records"); await r.waitForTimeout(700);
+  log("8 records tag:", await r.locator("main li:has-text('Daily plan')").count() > 0);
+  await r.locator("main li:has-text('Daily plan') a").first().click(); await r.waitForTimeout(900);
+  log("8 record:", (await r.locator("main p").first().innerText()).replace(/\s+/g, " "), "|", (await r.locator("main").innerText()).includes("Equipment reminders"));
+  await r.screenshot({ path: `${OUT}/e-daily-record.png`, fullPage: true });
+  await r.click("nav[aria-label=Main] >> text=Reports"); await r.waitForTimeout(1000);
+  log("8 reports daily:", (await r.locator("summary:has-text('Daily pre-task plans')").innerText().catch(() => "none")).replace(/\s+/g, " "));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

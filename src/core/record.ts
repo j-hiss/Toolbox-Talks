@@ -1,5 +1,6 @@
 // Turns a finished talk (who was on the roster, who was there, who signed) into the record that gets saved.
 // Pure module: the one place statuses are decided for a saved talk. Origin: prototype saveSession.
+import type { PretaskPlan } from "./pretask";
 import { resolveStatus, type AttendanceStatus } from "./attendance";
 import type { TalkText } from "./talks";
 import type { LanguageId } from "./languages";
@@ -83,6 +84,8 @@ export type RecordInput = {
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
   /** The statement crew members tapped before signing. */
   signingStatement?: SigningStatement | null;
+  /** A daily pre-task plan instead of a weekly talk (src/core/pretask.ts): no week, never a makeup, never scored. */
+  pretask?: PretaskPlan | null;
 };
 
 /** Something the crew raised at a talk: a hazard or problem to fix, with an owner and a fix-by date. */
@@ -104,10 +107,11 @@ export function recordPayload(r: RecordInput) {
     talk_id: r.talkId,
     language: r.language,
     content: r.content,
-    week_number: r.week?.number ?? null,
-    week_start: r.week?.start ?? null,
-    period_weeks: r.week?.weeks ?? 1,
-    scheduled_talk_id: r.week?.scheduledTalkId ?? null,
+    // A daily plan has no week: it never fills or locks a weekly talk period.
+    week_number: r.pretask ? null : r.week?.number ?? null,
+    week_start: r.pretask ? null : r.week?.start ?? null,
+    period_weeks: r.pretask ? 1 : r.week?.weeks ?? 1,
+    scheduled_talk_id: r.pretask ? null : r.week?.scheduledTalkId ?? null,
     jobsite_id: r.jobsite?.id ?? null,
     jobsite_name: r.jobsite?.name ?? "",
     team_id: r.team?.id ?? null,
@@ -122,8 +126,8 @@ export function recordPayload(r: RecordInput) {
     latitude: r.gps?.latitude ?? null,
     longitude: r.gps?.longitude ?? null,
     gps_accuracy_m: r.gps?.accuracyMeters ?? null,
-    makeup_for_week: r.makeup?.weekStart ?? null,
-    makeup_reason: r.makeup?.reason.trim() || null,
+    makeup_for_week: r.pretask ? null : r.makeup?.weekStart ?? null,
+    makeup_reason: r.pretask ? null : r.makeup?.reason.trim() || null,
     site_notes: (r.siteNotes ?? "").trim(),
     heat: r.heat ?? null,
     signing_statement: r.signingStatement ?? null,
@@ -131,6 +135,8 @@ export function recordPayload(r: RecordInput) {
     photo_taken_at: r.photo?.takenAt ?? null,
     sheet: r.sheet?.image ?? null,
     sheet_taken_at: r.sheet?.takenAt ?? null,
+    record_kind: (r.pretask ? "daily" : "weekly") as "daily" | "weekly",
+    pretask: r.pretask ?? null,
   };
 }
 export type RecordPayload = ReturnType<typeof recordPayload>;

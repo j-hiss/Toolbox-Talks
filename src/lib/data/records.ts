@@ -48,16 +48,17 @@ async function loadImages(paths: string[]): Promise<Map<string, string>> {
   return out;
 }
 
-const SUMMARY = "id, client_id, talk_id, language, content, week_number, week_start, period_weeks, makeup_for_week, makeup_reason, held_at, jobsite_name, team_name, presenter_name, presenter_signed_at, talk_attendees(status)";
+const SUMMARY = "id, record_kind, client_id, talk_id, language, content, week_number, week_start, period_weeks, makeup_for_week, makeup_reason, held_at, jobsite_name, team_name, presenter_name, presenter_signed_at, talk_attendees(status)";
 
-type SummaryRow = Omit<TalkRecordSummary, "title" | "statuses" | "presenter_signed"> & {
+type SummaryRow = Omit<TalkRecordSummary, "title" | "statuses" | "presenter_signed" | "kind"> & {
+  record_kind?: "weekly" | "daily";
   content: { title: string };
   presenter_signed_at: string | null;
   talk_attendees: { status: TalkRecordSummary["statuses"][number] }[];
 };
 
 const toSummary = (r: SummaryRow): TalkRecordSummary => ({
-  id: r.id, client_id: r.client_id, talk_id: r.talk_id, language: r.language, title: (r.content as { en?: { title?: string } })?.en?.title ?? r.content?.title ?? r.talk_id, // English title for the office
+  id: r.id, kind: r.record_kind ?? "weekly", client_id: r.client_id, talk_id: r.talk_id, language: r.language, title: (r.content as { en?: { title?: string } })?.en?.title ?? r.content?.title ?? r.talk_id, // English title for the office
   week_number: r.week_number, week_start: r.week_start, period_weeks: r.period_weeks ?? 1, makeup_for_week: r.makeup_for_week, makeup_reason: r.makeup_reason, held_at: r.held_at, jobsite_name: r.jobsite_name, team_name: r.team_name,
   presenter_name: r.presenter_name, statuses: r.talk_attendees.map((a) => a.status), presenter_signed: !!r.presenter_signed_at, // stamped only when the presenter signed (inline or file)
 });

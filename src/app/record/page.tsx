@@ -77,7 +77,7 @@ function RecordView({ m }: { m: Membership }) {
   return (
     <Shell nav={nav}>
       <Eyebrow>
-        {rec.week_number ? `${rec.makeup_for_week ? "Given in " : ""}${weekNumbers({ n: rec.week_number, weeks: rec.period_weeks ?? 1 })} of 52 · ` : ""}{rec.makeup_for_week ? "Makeup talk" : rec.scheduled_talk_id ? (scheduled ? "Different from the plan" : "Scheduled talk") : "Talk record"}
+        {rec.week_number ? `${rec.makeup_for_week ? "Given in " : ""}${weekNumbers({ n: rec.week_number, weeks: rec.period_weeks ?? 1 })} of 52 · ` : ""}{rec.kind === "daily" ? "Daily pre-task plan · separate from the weekly talk" : rec.makeup_for_week ? "Makeup talk" : rec.scheduled_talk_id ? (scheduled ? "Different from the plan" : "Scheduled talk") : "Talk record"}
       </Eyebrow>
       <Title>{rec.title}</Title>
       {rec.makeup_for_week && <MakeupTag weekStart={rec.makeup_for_week} reason={rec.makeup_reason} />}

@@ -19,7 +19,7 @@ import { listJobsites, listPeople, listRoles, listTeams } from "@/lib/data/compa
 import { saveTalkRecord, signedForWeek } from "@/lib/data/records";
 import { usePlan } from "@/lib/usePlan";
 import { useOpenMakeups, type OpenMakeups } from "@/lib/useOpenMakeups";
-import { checkHeat } from "@/lib/weather";
+import { useHeatCheck } from "@/lib/useHeatCheck";
 import { alertWorthy, HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/content/heat";
 import { addDays, isoDay } from "@/core/weeks";
@@ -28,9 +28,11 @@ import { buzz, dismissToast, toast } from "@/components/toast";
 import type { Company, Jobsite, Membership, Person, Role, Team } from "@/lib/data/types";
 import { sinceLastSettings, sinceLastSnapshot } from "@/core/safetylog";
 import { loadSinceLast } from "@/lib/sinceLast";
-import { clearDraft, newDraft, readDraft, useDraft, writeDraft, type DraftIssue, type TalkDraft } from "@/lib/draft";
+import { clearDraft, newDailyDraft, newDraft, readDraft, useDraft, writeDraft, type DraftIssue, type TalkDraft } from "@/lib/draft";
 import { enqueue, flush, pending } from "@/lib/outbox";
 import { CrewPhoto } from "@/components/CrewPhoto";
+import { PretaskPlanStep } from "@/components/PretaskPlanStep";
+import { DAILY_STATEMENT, DAILY_STATEMENT_VERSION, PRETASK_TALK_ID, pretaskContent, tidyPlan } from "@/core/pretask";
 import { getLocation } from "@/lib/location";
 import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
 import { RequireCompany } from "@/components/Guard";
@@ -43,7 +45,7 @@ export default function TalkPage() {
 }
 
 type Org = { people: Person[]; teams: Team[]; roles: Role[]; jobsites: Jobsite[] };
-type Done = { talkId: string; jobsiteId: string; title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean; makeupLabel: string | null; issues: number };
+type Done = { kind: "weekly" | "daily"; talkId: string; jobsiteId: string; title: string; uploaded: boolean; counts: ReturnType<typeof countStatuses>; presenterSigned: boolean; makeupLabel: string | null; issues: number };
 
 function Talk({ m }: { m: Membership }) {
   const co = m.company;
@@ -85,7 +87,11 @@ function Talk({ m }: { m: Membership }) {
   if (done) {
     return (
       <Shell nav={nav}>
-        <Saved done={done} onAnother={() => { const d = newDraft(co.id, done.talkId, done.jobsiteId); writeDraft({ ...d, teamId: "" }); setDone(null); }} />
+        <Saved done={done} onAnother={() => {
+          // Same talk (or a fresh daily plan) for the next crew, with the roster cleared.
+          const d = done.kind === "daily" ? newDailyDraft(co.id, done.jobsiteId) : newDraft(co.id, done.talkId, done.jobsiteId);
+          writeDraft({ ...d, teamId: "" }); setDone(null);
+        }} />
       </Shell>
     );
   }
@@ -97,6 +103,7 @@ function Talk({ m }: { m: Membership }) {
         <Title>No talk in progress</Title>
         <div className="mt-5 flex flex-col gap-3">
           {week && <Button onClick={() => newDraft(co.id, week.talkId, readChosenJobsite(co.id) ?? "")}>Start this week&apos;s talk</Button>}
+          {co.daily_enabled && <Button variant="soft" onClick={() => newDailyDraft(co.id, readChosenJobsite(co.id) ?? "")}>Start today&apos;s pre-task plan</Button>}
           {/* Only when someone owes a past talk (or we can't tell, offline): never a button into a dead end. */}
           {(openMakeups === null || [...openMakeups.values()].some((p) => p.length > 0)) && (
             <Button variant="ghost" size="sm" onClick={() => newDraft(co.id, null, readChosenJobsite(co.id) ?? "")}>Make up a missed talk</Button>
@@ -125,6 +132,7 @@ function Talk({ m }: { m: Membership }) {
     <Shell nav={signing ? exit : nav} tabs={false} lockHeader={signing}>
       {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} open={openMakeups} />}
       {draft.step === "read" && draft.talkId && <Read co={co} draft={draft} update={update} org={org} />}
+      {draft.step === "plan" && draft.pretask && <PretaskPlanStep draft={draft} update={update} jobsites={org.jobsites} />}
       {draft.step === "crew" && <Crew org={org} draft={draft} update={update} signedIds={signedIds} />}
       {draft.step === "sign" && (
         <Sign
@@ -281,24 +289,8 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
   useEffect(() => () => stopRef.current?.(), []);
   const [editingNotes, setEditingNotes] = useState(false);
 
-  // Heat: check today's forecast for the chosen place (or this phone's GPS). Hot days add the heat reminder to the
-  // talk. Quiet when offline or when the weather service can't be reached.
-  const site = org.jobsites.find((j) => j.id === draft.jobsiteId);
-  const point = site?.latitude != null && site.longitude != null ? { latitude: site.latitude, longitude: site.longitude } : draft.gps;
-  const [heatMsg, setHeatMsg] = useState<string | null>(null);
-  useEffect(() => {
-    if (!point || draft.heat) return;
-    let live = true;
-    checkHeat(point)
-      .then((h) => {
-        const cur = readDraft(draft.companyId); // latest draft, so notes typed meanwhile aren't lost
-        if (!live || !h || !cur) return;
-        writeDraft({ ...cur, heat: { max_heat_index_f: h.maxHeatIndexF, level: h.level, reminder_read: false, checked_at: h.checkedAt, source: h.source, place: h.place } });
-      })
-      .catch((e) => live && setHeatMsg(e instanceof Error ? e.message : String(e)));
-    return () => { live = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [point?.latitude, point?.longitude]);
+  // Heat: hot days add the heat reminder to the talk (src/lib/useHeatCheck.ts).
+  const heatMsg = useHeatCheck(draft, org.jobsites);
   // Since last talk: the safety log's approved crew summaries, when the company reads them at talks. Not for makeups
   // (a makeup covers an earlier talk). Loaded once into the draft, so it stays put offline and as the crew reads.
   const useSinceLast = sinceLastSettings(co).enabled && !draft.makeup;
@@ -544,7 +536,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
             <option value="">Choose a crew</option>
             {org.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             {org.teams.length > 1 && <option value="all">All crews</option>}
-            {(signedIds || draft.teamId === "needs") && <option value="needs">{needsLabel}</option>}
+            {draft.kind !== "daily" && (signedIds || draft.teamId === "needs") && <option value="needs">{needsLabel}</option>}
           </select>
         </Field>
         <Field label="Where" id="jobsite">
@@ -622,7 +614,9 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
         >
           Collect signatures
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => update({ step: "read" })}>Back to the talk</Button>
+        {draft.kind === "daily"
+          ? <Button size="sm" variant="ghost" onClick={() => update({ step: "plan" })}>Back to the plan</Button>
+          : <Button size="sm" variant="ghost" onClick={() => update({ step: "read" })}>Back to the talk</Button>}
       </div>
     </>
   );
@@ -668,8 +662,9 @@ function Sign({
     setSaving(true);
     setError(null);
     try {
-      const talk = TALKS.find((t) => t.id === draft.talkId)!;
-      const { text, lang } = talkText(talk, draft.lang);
+      const daily = draft.kind === "daily" && !!draft.pretask;
+      const talk = daily ? null : TALKS.find((t) => t.id === draft.talkId)!;
+      const { text, lang } = talk ? talkText(talk, draft.lang) : { text: pretaskContent(draft.pretask!), lang: draft.lang };
       const team = org.teams.find((t) => t.id === draft.teamId);
       const lead = team ? org.people.find((p) => p.id === team.lead_person_id) : undefined;
       const jobsite = org.jobsites.find((j) => j.id === draft.jobsiteId);
@@ -677,10 +672,11 @@ function Sign({
       const record = recordPayload({
         companyId: m.company.id,
         clientId: draft.clientId,
-        talkId: talk.id,
+        talkId: talk ? talk.id : PRETASK_TALK_ID,
         language: lang,
         content: {
-          ...(lang === "en" ? text : { ...text, en: talk.content.en }),
+          // A daily plan saves what the crew went over as sections (src/core/pretask.ts); a talk saves its text.
+          ...(lang === "en" || !talk ? text : { ...text, en: talk.content.en }),
           // What was read from the safety log, with when each item was checked off (src/core/safetylog.ts).
           ...(draft.sinceLast ? { since_last: sinceLastSnapshot(draft.sinceLast) } : {}),
         },
@@ -697,7 +693,8 @@ function Sign({
         siteNotes: draft.siteNotes,
         photo: draft.photo,
         sheet: draft.sheet,
-        signingStatement: signingStatement(lang),
+        signingStatement: daily ? dailyStatement(lang) : signingStatement(lang),
+        pretask: daily ? tidyPlan(draft.pretask!) : null,
         heat: draft.heat ? {
           max_heat_index_f: draft.heat.max_heat_index_f, level: draft.heat.level, reminder_read: draft.heat.reminder_read,
           checked_at: draft.heat.checked_at, source: draft.heat.source,
@@ -717,7 +714,8 @@ function Sign({
       const uploaded = !pending(m.company.id).some((i) => i.record.client_id === draft.clientId);
       buzz(30);
       onSaved({
-        talkId: talk.id, jobsiteId: draft.jobsiteId,
+        kind: daily ? "daily" : "weekly",
+        talkId: talk ? talk.id : PRETASK_TALK_ID, jobsiteId: draft.jobsiteId,
         title: text.title, uploaded, counts: countStatuses(attendees), presenterSigned: !!draft.presenterSignature,
         makeupLabel: draft.makeup ? `Makeup for Week ${draft.makeup.weekNumber}` : null,
         issues: issues.length,
@@ -810,7 +808,10 @@ function Sign({
       update({ signatures });
     }
   };
-  const talkTitle = (() => { const tk = TALKS.find((x) => x.id === draft.talkId); return tk ? talkText(tk, draft.lang).text.title : ""; })();
+  const talkTitle = (() => {
+    if (draft.kind === "daily") return draft.lang === "es" ? "Plan de trabajo del día" : "Today's pre-task plan";
+    const tk = TALKS.find((x) => x.id === draft.talkId); return tk ? talkText(tk, draft.lang).text.title : "";
+  })();
   const nextName = (() => { const n = nextOpen(idx); return n < turns.length ? turns[n].name : null; })();
   return (
     <>
@@ -848,8 +849,8 @@ function Sign({
             {confirmedAt && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-10" /></svg>}
           </span>
           <span>
-            <span className="block text-base font-semibold">{ui.signedBy}</span>
-            {draft.lang !== "en" && <span className="block text-sm text-muted">{crewText("en").signedBy}</span>}
+            <span className="block text-base font-semibold">{draft.kind === "daily" ? dailyStatement(draft.lang).text : ui.signedBy}</span>
+            {draft.lang !== "en" && <span className="block text-sm text-muted">{draft.kind === "daily" ? DAILY_STATEMENT.en : crewText("en").signedBy}</span>}
           </span>
         </button>
       )}
@@ -1001,4 +1002,10 @@ function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
       </div>
     </>
   );
+}
+
+/** The daily plan's signing statement in the language read, with English, versioned (src/core/pretask.ts). */
+function dailyStatement(lang: LanguageId) {
+  const text = lang === "es" ? DAILY_STATEMENT.es : DAILY_STATEMENT.en;
+  return { text, en: DAILY_STATEMENT.en, language: lang, version: DAILY_STATEMENT_VERSION };
 }
