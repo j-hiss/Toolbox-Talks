@@ -309,7 +309,9 @@ export const TALKS: Talk[] = [
       "food",
       "auto",
       "facil",
-      "retail"
+      "retail",
+      "oil",
+      "truck"
     ],
     "code": "1910.147",
     "minutes": 6,
@@ -404,7 +406,8 @@ export const TALKS: Talk[] = [
     "industries": [
       "mfg",
       "food",
-      "auto"
+      "auto",
+      "oil"
     ],
     "code": "1910.212",
     "minutes": 4,
@@ -495,7 +498,8 @@ export const TALKS: Talk[] = [
       "retail",
       "oil",
       "util",
-      "land"
+      "land",
+      "truck"
     ],
     "code": "1910.1200 / 1926.59",
     "minutes": 5,
@@ -667,7 +671,8 @@ export const TALKS: Talk[] = [
       "wh",
       "mfg",
       "retail",
-      "truck"
+      "truck",
+      "oil"
     ],
     "code": "1910.178",
     "minutes": 5,
@@ -4204,7 +4209,7 @@ export const TALKS: Talk[] = [
       "auto",
       "health",
       "oil",
-      "ag"
+      "truck"
     ],
     "code": "1910.134 / 1926.103",
     "minutes": 6,
@@ -7006,7 +7011,8 @@ export const TALKS: Talk[] = [
       "retail",
       "food",
       "facil",
-      "health"
+      "health",
+      "truck"
     ],
     "code": "1910.36 / 1910.37 / 1910.176(a)",
     "minutes": 5,
@@ -7474,7 +7480,8 @@ export const TALKS: Talk[] = [
     "industries": [
       "mfg",
       "oil",
-      "facil"
+      "facil",
+      "truck"
     ],
     "code": "1910.146",
     "minutes": 6,
@@ -7624,7 +7631,8 @@ export const TALKS: Talk[] = [
     "id": "welding",
     "industries": [
       "mfg",
-      "auto"
+      "auto",
+      "facil"
     ],
     "code": "1910.252 / 1910.253",
     "minutes": 6,
@@ -8038,7 +8046,8 @@ export const TALKS: Talk[] = [
     "id": "grinders",
     "industries": [
       "mfg",
-      "auto"
+      "auto",
+      "truck"
     ],
     "code": "1910.215 / 1910.243(c)",
     "minutes": 5,
@@ -8170,7 +8179,10 @@ export const TALKS: Talk[] = [
       "mfg",
       "wh",
       "auto",
-      "facil"
+      "facil",
+      "oil",
+      "health",
+      "truck"
     ],
     "code": "1910.133 / 1910.151(c)",
     "minutes": 5,
@@ -8431,7 +8443,9 @@ export const TALKS: Talk[] = [
       "retail",
       "food",
       "health",
-      "auto"
+      "auto",
+      "oil",
+      "truck"
     ],
     "code": "1910.333 / 1910.303(g)(1)",
     "minutes": 5,
@@ -15269,7 +15283,9 @@ export const TALKS: Talk[] = [
       "wh",
       "mfg",
       "health",
-      "food"
+      "food",
+      "land",
+      "truck"
     ],
     "code": "1910.23",
     "minutes": 5,
@@ -15977,6 +15993,5666 @@ export const TALKS: Talk[] = [
           }
         ],
         "ask": "¿Qué tarea en una habitación es la más dura para tu cuerpo, y qué herramienta o truco la hace más fácil?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "roof-edges-gi",
+    "industries": [
+      "facil",
+      "mfg",
+      "wh"
+    ],
+    "code": "1910.28(b)(1), (b)(3), (b)(13) / 1910.29",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.28(b)(1)(i): unprotected sides and edges, 4 feet",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.28",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.28(a)(2)(i): portable ladders excepted",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.28",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.28(b)(3)(i): holes, including skylights",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.28",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.28(b)(13)(i)-(iii): work on low-slope roofs",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.28",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.29(b)(1), (b)(3): guardrail height and strength",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.29",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.29(d): designated areas and warning lines",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.29",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.29(e): covers",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.29",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.21(b): definitions (designated area, low-slope roof, hole)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.21",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA interpretation, June 12, 2020: temporary and infrequent work on roofs",
+        "url": "https://www.osha.gov/laws-regs/standardinterpretations/2020-06-12",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Roof Work and Open Edges",
+        "hook": "A quick filter change on the roof can end in a fall. Under OSHA's general industry rule, fall protection starts at 4 feet, not the 6 feet used in construction.",
+        "sections": [
+          {
+            "heading": "The 4-foot rule",
+            "items": [
+              "If you work next to an open side or edge 4 feet or more above a lower level, your company has to protect you. That means a guardrail, a safety net, or a personal fall protection system.",
+              "That goes for platforms, mezzanines, and roofs. Portable ladders have their own rules.",
+              "A guardrail's top rail sits at 42 inches, give or take 3 inches. It has to hold 200 pounds pushed down or out."
+            ]
+          },
+          {
+            "heading": "Low-slope roofs: 6 feet and 15 feet",
+            "items": [
+              "Closer than 6 feet to the roof edge, you need a guardrail, safety net, travel restraint, or fall arrest system.",
+              "From 6 feet out to 15 feet, you need the same protection. The one exception: a job that is both quick and only once in a while can be done inside a designated area marked off by a warning line.",
+              "At 15 feet or more from the edge, a quick, once-in-a-while job can go without fall protection. But your company must enforce a rule that nobody goes within 15 feet of the edge without it.",
+              "A warning line hangs 34 to 39 inches high and has to be clearly visible from 25 feet away. Stay inside it while you work."
+            ]
+          },
+          {
+            "heading": "Quick and once in a while",
+            "items": [
+              "Quick means the task is brief. Once in a while means only on occasion, when needed, like yearly servicing, changing HVAC filters monthly or quarterly, or answering a breakdown.",
+              "If you're on roofs every day, or several times a day, that is not once in a while. You need fall protection.",
+              "It's on your company to show a job qualifies for the exception. If you're not sure, ask before you go up."
+            ]
+          },
+          {
+            "heading": "Skylights and holes",
+            "items": [
+              "A skylight counts as a hole. If you could fall 4 feet or more through it, it needs a cover, a guardrail, travel restraint, or a fall arrest system.",
+              "A cover has to hold at least twice the heaviest load that could be put on it. It must be secured so it can't get knocked out of place."
+            ]
+          }
+        ],
+        "ask": "What roof jobs do we do here, and which ones need a guardrail, a warning line, or a harness?"
+      },
+      "es": {
+        "title": "Trabajo en techos y bordes abiertos",
+        "hook": "Un cambio rápido de filtro en el techo puede terminar en una caída. Según la regla de OSHA para la industria general, la protección contra caídas empieza a los 4 pies, no a los 6 pies que se usan en la construcción.",
+        "sections": [
+          {
+            "heading": "La regla de los 4 pies",
+            "items": [
+              "Si trabajas junto a un lado o borde abierto a 4 pies o más sobre un nivel más bajo, tu compañía tiene que protegerte. Eso significa una baranda, una red de seguridad o un sistema personal de protección contra caídas.",
+              "Eso aplica a plataformas, entrepisos y techos. Las escaleras portátiles tienen sus propias reglas.",
+              "El riel superior de una baranda va a 42 pulgadas, 3 pulgadas más o menos. Tiene que aguantar 200 libras empujando hacia abajo o hacia afuera."
+            ]
+          },
+          {
+            "heading": "Techos de poca pendiente: 6 pies y 15 pies",
+            "items": [
+              "A menos de 6 pies del borde del techo, necesitas una baranda, una red de seguridad, un sistema de restricción de movimiento o un sistema de detención de caídas.",
+              "De 6 pies hasta 15 pies, necesitas la misma protección. La única excepción: un trabajo que es rápido y que solo se hace de vez en cuando se puede hacer dentro de un área designada, marcada con una línea de advertencia.",
+              "A 15 pies o más del borde, un trabajo rápido y de vez en cuando se puede hacer sin protección contra caídas. Pero tu compañía tiene que hacer cumplir una regla de que nadie se acerque a menos de 15 pies del borde sin protección.",
+              "La línea de advertencia va a una altura de 34 a 39 pulgadas y se tiene que ver claramente desde 25 pies. Quédate dentro de ella mientras trabajas."
+            ]
+          },
+          {
+            "heading": "Rápido y de vez en cuando",
+            "items": [
+              "Rápido quiere decir que la tarea es corta. De vez en cuando quiere decir solo en ocasiones, cuando hace falta, como el servicio anual, cambiar los filtros del aire acondicionado cada mes o cada tres meses, o atender una falla.",
+              "Si subes a techos todos los días, o varias veces al día, eso no es de vez en cuando. Necesitas protección contra caídas.",
+              "Le toca a tu compañía demostrar que un trabajo entra en la excepción. Si no estás seguro, pregunta antes de subir."
+            ]
+          },
+          {
+            "heading": "Tragaluces y huecos",
+            "items": [
+              "Un tragaluz cuenta como un hueco. Si te puedes caer 4 pies o más a través de él, necesita una tapa, una baranda, un sistema de restricción de movimiento o un sistema de detención de caídas.",
+              "La tapa tiene que aguantar por lo menos el doble de la carga más pesada que se le pueda poner. Tiene que estar asegurada para que no se mueva de su lugar."
+            ]
+          }
+        ],
+        "ask": "¿Qué trabajos hacemos en el techo aquí, y cuáles necesitan una baranda, una línea de advertencia o un arnés?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "rope-descent",
+    "industries": [
+      "facil"
+    ],
+    "code": "1910.27(b)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.27(b)(1)(i)-(ii): anchorages, building owner's written information",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.27",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.27(b)(2)(i)-(xiii): use of rope descent systems",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.27",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.21(b): definitions (rope descent system, anchorage)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.21",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Rope Descent and Window Cleaning",
+        "hook": "When you go over the side of a building on a rope, the anchor and your gear are all that hold you. Each piece gets checked before you trust it.",
+        "sections": [
+          {
+            "heading": "The anchors",
+            "items": [
+              "Before anyone uses a rope descent system, the building owner has to tell your company in writing that each anchorage was identified, tested, certified, and maintained.",
+              "Each anchorage must hold at least 5,000 pounds, in any direction, for each person attached.",
+              "That information is based on a yearly inspection by a qualified person, and a certification as needed and at least every 10 years.",
+              "No paperwork, no descent. Your company must have that written information before anyone uses the anchorage, and keep it for the whole job."
+            ]
+          },
+          {
+            "heading": "Your gear",
+            "items": [
+              "The system gets inspected at the start of each shift it will be used. Anything damaged or defective comes out of service right away and gets replaced.",
+              "Besides the descent system, each person uses a separate, independent personal fall arrest system.",
+              "Every part except the seat board has to be rated for at least 5,000 pounds. The seat board must hold 300 pounds.",
+              "Use it the way the manufacturer says and within its limits, or as a qualified person directs. Your company has to train you before you use it."
+            ]
+          },
+          {
+            "heading": "Rigging and ropes",
+            "items": [
+              "Rig it right, including anchorages and tiebacks. Watch tiebacks closely when you use counterweights, cornice hooks, or similar anchors that aren't permanent.",
+              "Pad or protect the rope anywhere it touches a building edge, an anchor, or anything else that could cut or weaken it.",
+              "Keep ropes away from open flames, hot work, and corrosive chemicals.",
+              "Secure your tools, squeegees, and buckets with a tool lanyard or something like it, so nothing falls."
+            ]
+          },
+          {
+            "heading": "Weather, height and rescue",
+            "items": [
+              "No one uses a rope descent system in hazardous weather, like storms or gusty or strong wind.",
+              "These systems aren't used above 300 feet unless your company shows there's no workable other way to reach that height, or the other ways are more dangerous. On descents over 130 feet, you need stabilization at the work spot.",
+              "Your company has to make sure anyone who falls gets rescued promptly. Know the rescue plan before you go over the edge."
+            ]
+          }
+        ],
+        "ask": "Who has seen the building owner's anchorage paperwork for this job, and where is it?"
+      },
+      "es": {
+        "title": "Descenso con cuerda y limpieza de ventanas",
+        "hook": "Cuando bajas por el lado de un edificio colgado de una cuerda, el anclaje y tu equipo son lo único que te sostiene. Cada pieza se revisa antes de confiar en ella.",
+        "sections": [
+          {
+            "heading": "Los anclajes",
+            "items": [
+              "Antes de que alguien use un sistema de descenso con cuerda, el dueño del edificio tiene que informarle a tu compañía por escrito que cada anclaje fue identificado, probado, certificado y mantenido.",
+              "Cada anclaje tiene que aguantar por lo menos 5,000 libras, en cualquier dirección, por cada persona amarrada a él.",
+              "Esa información se basa en una inspección anual hecha por una persona calificada, y en una certificación cuando haga falta y por lo menos cada 10 años.",
+              "Sin papeles, no se baja. Tu compañía tiene que tener esa información por escrito antes de que alguien use el anclaje, y guardarla durante todo el trabajo."
+            ]
+          },
+          {
+            "heading": "Tu equipo",
+            "items": [
+              "El sistema se inspecciona al empezar cada turno en que se va a usar. Cualquier cosa dañada o defectuosa se saca de servicio de inmediato y se reemplaza.",
+              "Además del sistema de descenso, cada persona usa un sistema personal de detención de caídas aparte e independiente.",
+              "Todas las partes, menos el asiento, tienen que tener una capacidad de por lo menos 5,000 libras. El asiento tiene que aguantar 300 libras.",
+              "Úsalo como dice el fabricante y dentro de sus límites, o como indique una persona calificada. Tu compañía tiene que entrenarte antes de que lo uses."
+            ]
+          },
+          {
+            "heading": "Aparejo y cuerdas",
+            "items": [
+              "Ármalo bien, incluyendo los anclajes y los amarres de respaldo. Fíjate bien en los amarres cuando uses contrapesos, ganchos de cornisa u otros anclajes que no son permanentes.",
+              "Protege la cuerda con almohadillas o de otra forma donde toque el borde del edificio, un anclaje o cualquier cosa que la pueda cortar o debilitar.",
+              "Mantén las cuerdas lejos de llamas abiertas, trabajos en caliente y químicos corrosivos.",
+              "Asegura tus herramientas, jaladores de agua y cubetas con una correa para herramientas o algo parecido, para que nada se caiga."
+            ]
+          },
+          {
+            "heading": "Clima, altura y rescate",
+            "items": [
+              "Nadie usa un sistema de descenso con cuerda con mal tiempo peligroso, como tormentas o viento fuerte o con ráfagas.",
+              "Estos sistemas no se usan a más de 300 pies, a menos que tu compañía demuestre que no hay otra forma práctica de llegar a esa altura, o que las otras formas son más peligrosas. En descensos de más de 130 pies, necesitas estabilización en el punto de trabajo.",
+              "Tu compañía tiene que asegurarse de que cualquier persona que se caiga sea rescatada rápido. Conoce el plan de rescate antes de pasar el borde."
+            ]
+          }
+        ],
+        "ask": "¿Quién ha visto los papeles de los anclajes que dio el dueño del edificio para este trabajo, y dónde están?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "scaffolds-gi",
+    "industries": [
+      "facil",
+      "mfg"
+    ],
+    "code": "1910.27(a) / 1926.451",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.27(a): scaffolds in general industry must meet 29 CFR 1926 Subpart L",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.27",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.451(b)(1)-(b)(2): planking and platform width (construction rule, applied through 1910.27(a))",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.451",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.451(c)(2): footing (construction rule, applied through 1910.27(a))",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.451",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.451(e)(1): access (construction rule, applied through 1910.27(a))",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.451",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.451(f)(1), (f)(3)-(f)(5), (f)(7), (f)(12)-(f)(15): use and inspection (construction rule, applied through 1910.27(a))",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.451",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.451(g)(1): fall protection over 10 feet (construction rule, applied through 1910.27(a))",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.451",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Scaffolding: Standards",
+        "url": "https://www.osha.gov/scaffolding/standards",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Scaffolds Outside Construction",
+        "hook": "Painting a lobby or reaching plant equipment from a scaffold isn't a construction job. The scaffold still follows the construction scaffold rules.",
+        "sections": [
+          {
+            "heading": "Which rule applies",
+            "items": [
+              "OSHA's general industry rule says scaffolds used in general industry must meet the construction scaffold rules, called Subpart L.",
+              "A competent person supervises putting a scaffold up, moving it, changing it, and taking it down.",
+              "A competent person also inspects it for visible defects before each shift, and after anything that could affect its strength."
+            ]
+          },
+          {
+            "heading": "Footing and planks",
+            "items": [
+              "It sits on base plates and mud sills or another firm foundation. Never use unstable objects to hold it up.",
+              "The work platform has to be fully planked or decked. In most cases, gaps between planks can't be more than 1 inch.",
+              "Most platforms and walkways have to be at least 18 inches wide.",
+              "Damaged parts get fixed or replaced right away, or the scaffold comes out of service until it's repaired."
+            ]
+          },
+          {
+            "heading": "Using it",
+            "items": [
+              "Don't load it past its maximum intended load or rated capacity, whichever is less. Keep debris off the platform.",
+              "Never stand on boxes or barrels on the platform to get higher. Ladders on a scaffold are off-limits too, except on large area scaffolds set up a specific way.",
+              "Nobody rides a scaffold while it's moved sideways, unless it was designed for that or it's a mobile scaffold following the rules for it.",
+              "No work on it during storms or high winds, unless a competent person decides it's safe and you're protected by fall arrest or wind screens."
+            ]
+          },
+          {
+            "heading": "Getting up and staying on",
+            "items": [
+              "If the platform is more than 2 feet above or below where you get on, use a ladder, stair tower, ramp, or other proper access.",
+              "Never climb the cross braces.",
+              "More than 10 feet up, you need fall protection. The type depends on the scaffold, like a guardrail or a personal fall arrest system."
+            ]
+          }
+        ],
+        "ask": "Who is our competent person for this scaffold, and did they check it this shift?"
+      },
+      "es": {
+        "title": "Andamios fuera de la construcción",
+        "hook": "Pintar un vestíbulo o llegar a un equipo de la planta desde un andamio no es un trabajo de construcción. Aun así, el andamio sigue las reglas de andamios de construcción.",
+        "sections": [
+          {
+            "heading": "Qué regla aplica",
+            "items": [
+              "La regla de OSHA para la industria general dice que los andamios que se usan en la industria general tienen que cumplir las reglas de andamios de construcción, llamadas Subparte L.",
+              "Una persona competente supervisa cuando se arma un andamio, se mueve, se cambia o se desarma.",
+              "Una persona competente también lo inspecciona para ver defectos visibles antes de cada turno, y después de cualquier cosa que pueda afectar su resistencia."
+            ]
+          },
+          {
+            "heading": "Base y tablones",
+            "items": [
+              "Va sobre placas de base y durmientes, u otra base firme. Nunca uses objetos inestables para sostenerlo.",
+              "La plataforma de trabajo tiene que estar completamente cubierta de tablones o piso. En la mayoría de los casos, los espacios entre tablones no pueden ser de más de 1 pulgada.",
+              "La mayoría de las plataformas y pasillos tienen que tener por lo menos 18 pulgadas de ancho.",
+              "Las partes dañadas se arreglan o se reemplazan de inmediato, o el andamio se saca de servicio hasta que se repare."
+            ]
+          },
+          {
+            "heading": "Al usarlo",
+            "items": [
+              "No lo cargues más allá de su carga máxima prevista o su capacidad nominal, la que sea menor. Mantén la plataforma libre de escombros.",
+              "Nunca te pares en cajas o barriles sobre la plataforma para subir más alto. Las escaleras sobre un andamio tampoco se permiten, excepto en andamios de área grande armados de una forma específica.",
+              "Nadie se queda arriba de un andamio mientras se mueve de lado, a menos que esté diseñado para eso o sea un andamio móvil que siga sus reglas.",
+              "No se trabaja en él durante tormentas o vientos fuertes, a menos que una persona competente decida que es seguro y estés protegido con un sistema de detención de caídas o mallas contra el viento."
+            ]
+          },
+          {
+            "heading": "Subir y mantenerse arriba",
+            "items": [
+              "Si la plataforma está a más de 2 pies por arriba o por abajo de donde te subes, usa una escalera, una torre de escaleras, una rampa u otro acceso adecuado.",
+              "Nunca te subas por los tirantes cruzados.",
+              "A más de 10 pies de altura, necesitas protección contra caídas. El tipo depende del andamio, como una baranda o un sistema personal de detención de caídas."
+            ]
+          }
+        ],
+        "ask": "¿Quién es nuestra persona competente para este andamio, y lo revisó en este turno?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "pool-chemicals",
+    "industries": [
+      "facil"
+    ],
+    "code": "1910.1200 / 1910.151(c)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1200(g)(8): safety data sheets readily accessible each shift",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1200(h)(1): training at initial assignment and when a new hazard is introduced",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.132(a): protective equipment provided and used where hazards require it",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.132",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.151(c): quick drenching or flushing facilities for corrosive materials",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.151",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Chemical Reactivity Hazards: Hazard Recognition",
+        "url": "https://www.osha.gov/chemical-reactivity/hazards",
+        "kind": "guidance"
+      },
+      {
+        "label": "CDC guidance: Pool Chemical Safety",
+        "url": "https://www.cdc.gov/healthy-swimming/toolkit/pool-chemical-safety.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "CDC guidance: Pool Chemical Emergencies",
+        "url": "https://www.cdc.gov/healthy-swimming/toolkit/pool-chemical-emergencies.html",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Pool and Spa Chemicals",
+        "hook": "Pool chemicals keep the water safe for swimmers. Handled wrong, they can hurt you, especially when they mix.",
+        "sections": [
+          {
+            "heading": "Never let them mix",
+            "items": [
+              "Pool chemicals can hurt people when they mix with each other or with other substances. OSHA points to an EPA warning that some can react when they get a little wet.",
+              "CDC guidance says to store each pool chemical separately in its own spot, and keep chemicals that don't go together away from each other.",
+              "Keep chemicals in their original labeled containers. If a container's shape, size, or color changes, that can lead to a mix-up.",
+              "One example from CDC: flush water through the chlorine feed tubing before you clean it with acid."
+            ]
+          },
+          {
+            "heading": "Storage",
+            "items": [
+              "CDC says to keep pool chemicals below 95 degrees, dry, out of direct sun, and away from heat and flames.",
+              "No smoking and nothing that could start a fire in the chemical storage area or pump room. Don't let rags or trash pile up there.",
+              "Keep food and drinks away from the chemicals. Keep the storage area and pump room secured to limit who gets in, especially kids."
+            ]
+          },
+          {
+            "heading": "Labels, SDS, and gear",
+            "items": [
+              "Your company has to keep a safety data sheet for each hazardous chemical, and make sure you can get to it every shift.",
+              "Your company has to train you on these chemicals when you start, and again when a new chemical hazard comes in.",
+              "Your company has to provide protective gear where the hazards call for it. Wear the right gear when you handle chemicals or work on the feed system.",
+              "Where your eyes or body could get splashed with a corrosive chemical, your company has to have a place to flush your eyes and body right in the work area."
+            ]
+          },
+          {
+            "heading": "Servicing and spills",
+            "items": [
+              "CDC guidance: before you service the feed or circulation system, turn off both the chlorine and pH feed and the circulation pump. Close the pool to swimmers while the circulation system isn't running.",
+              "Deal with a spill right away by following your emergency plan. Clean it up with separate cleanup materials used only for that.",
+              "At an indoor pool with chemical fumes, CDC says to shut off the HVAC right away if it shares air with the rest of the building."
+            ]
+          }
+        ],
+        "ask": "Where are the safety data sheets for our chlorine and acid, and where is the nearest eyewash?"
+      },
+      "es": {
+        "title": "Químicos para piscinas y jacuzzis",
+        "hook": "Los químicos de la piscina mantienen el agua segura para los que nadan. Si se manejan mal, te pueden lastimar, sobre todo cuando se mezclan.",
+        "sections": [
+          {
+            "heading": "Nunca dejes que se mezclen",
+            "items": [
+              "Los químicos de piscina pueden lastimar a la gente cuando se mezclan entre sí o con otras sustancias. OSHA cita una advertencia de la EPA de que algunos pueden reaccionar cuando se mojan un poco.",
+              "La guía de los CDC dice que guardes cada químico de piscina por separado en su propio lugar, y que mantengas lejos uno del otro los químicos que no se llevan.",
+              "Deja los químicos en sus envases originales con etiqueta. Si cambia la forma, el tamaño o el color de un envase, eso puede causar una confusión.",
+              "Un ejemplo de los CDC: pasa agua por el tubo de alimentación de cloro antes de limpiarlo con ácido."
+            ]
+          },
+          {
+            "heading": "Almacenamiento",
+            "items": [
+              "Los CDC dicen que guardes los químicos de piscina a menos de 95 grados Fahrenheit, secos, fuera del sol directo y lejos del calor y las llamas.",
+              "No se fuma y no puede haber nada que pueda causar un incendio en el área de químicos ni en el cuarto de bombas. No dejes que se junten trapos ni basura ahí.",
+              "Mantén la comida y las bebidas lejos de los químicos. Mantén el área de químicos y el cuarto de bombas asegurados para limitar quién entra, sobre todo niños."
+            ]
+          },
+          {
+            "heading": "Etiquetas, hojas de seguridad y equipo",
+            "items": [
+              "Tu compañía tiene que tener una hoja de datos de seguridad (SDS) para cada químico peligroso, y asegurarse de que puedas verla en cada turno.",
+              "Tu compañía tiene que entrenarte sobre estos químicos cuando empiezas, y otra vez cuando llega un nuevo peligro químico.",
+              "Tu compañía tiene que darte equipo de protección donde los peligros lo requieren. Usa el equipo correcto cuando manejes químicos o trabajes en el sistema de alimentación.",
+              "Donde tus ojos o tu cuerpo puedan recibir una salpicadura de un químico corrosivo, tu compañía tiene que tener un lugar para lavarte los ojos y el cuerpo ahí mismo en el área de trabajo."
+            ]
+          },
+          {
+            "heading": "Servicio y derrames",
+            "items": [
+              "Guía de los CDC: antes de darle servicio al sistema de alimentación o de circulación, apaga tanto la alimentación de cloro y pH como la bomba de circulación. Cierra la piscina a los bañistas mientras el sistema de circulación no esté funcionando.",
+              "Atiende un derrame de inmediato siguiendo tu plan de emergencia. Límpialo con materiales de limpieza aparte que se usen solo para eso.",
+              "En una piscina techada con vapores químicos, los CDC dicen que apagues el aire acondicionado de inmediato si comparte el aire con el resto del edificio."
+            ]
+          }
+        ],
+        "ask": "¿Dónde están las hojas de datos de seguridad de nuestro cloro y nuestro ácido, y dónde está la estación lavaojos más cercana?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "mold",
+    "industries": [
+      "facil",
+      "health"
+    ],
+    "code": "No OSHA mold standard; 1910.134 when respirators are used",
+    "minutes": 6,
+    "sources": [
+      {
+        "label": "OSHA SHIB 03-10-10 (updated 11-08-13): A Brief Guide to Mold in the Workplace",
+        "url": "https://www.osha.gov/publications/shib101003",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Molds: Standards",
+        "url": "https://www.osha.gov/mold/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Molds: Control and Prevention",
+        "url": "https://www.osha.gov/molds/control",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1910.134(a)(2), (c)(1): respiratory protection, applies when respirators are used",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.134",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Mold and Water Damage Cleanup",
+        "hook": "Mold grows where water sits. A fast response, within 24 to 48 hours, can stop it or keep it small.",
+        "sections": [
+          {
+            "heading": "Why it matters",
+            "items": [
+              "In some people, mold can cause allergic reactions, asthma attacks, and eye, skin, nose and throat irritation.",
+              "There's no federal limit for mold in the air. That doesn't mean you ignore it. If respirators are used, OSHA's respirator rules apply.",
+              "Fix the water first. The leak or moisture problem has to be found and fully corrected, and wet spots dried within 48 hours."
+            ]
+          },
+          {
+            "heading": "Small jobs",
+            "items": [
+              "A small, isolated patch of 10 square feet or less can be cleaned by regular maintenance staff, as long as they're trained.",
+              "OSHA's guide recommends an N-95 respirator, gloves that reach mid-forearm, and eye protection. Glasses or goggles with open vent holes are not right for mold work.",
+              "Mist the surface first to keep the dust down. Mist it, don't soak it."
+            ]
+          },
+          {
+            "heading": "Remove it, don't just kill it",
+            "items": [
+              "Scrub hard surfaces with water and detergent, then dry them fast and completely.",
+              "Wet, moldy porous materials may have to be thrown out. Bag them in sealed plastic.",
+              "Dead mold can still cause reactions, so it has to be removed. Bleach is not recommended as a routine step. Never mix bleach with a cleaner that has ammonia."
+            ]
+          },
+          {
+            "heading": "When to call in help",
+            "items": [
+              "For 30 to 100 square feet, an industrial hygienist or similar professional should be consulted before work starts. Over 100 square feet calls for full containment and full-body protection.",
+              "If the water was sewage, or mold may have damaged the building's structure, get a professional.",
+              "Don't run the heating and cooling system if you think it has mold in it. It can spread mold through the building.",
+              "OSHA's guide recommends keeping babies, people just out of surgery, people with weak immune systems, and people with chronic lung disease out of nearby spaces."
+            ]
+          }
+        ],
+        "ask": "Where have we seen leaks or wet spots this week, and has each one been fixed and dried?"
+      },
+      "es": {
+        "title": "Limpieza de moho y daños por agua",
+        "hook": "El moho crece donde se queda el agua. Actuar rápido, dentro de 24 a 48 horas, puede pararlo o mantenerlo pequeño.",
+        "sections": [
+          {
+            "heading": "Por qué importa",
+            "items": [
+              "En algunas personas, el moho puede causar reacciones alérgicas, ataques de asma, e irritación de ojos, piel, nariz y garganta.",
+              "No hay un límite federal para el moho en el aire. Eso no quiere decir que lo ignores. Si se usan respiradores, aplican las reglas de respiradores de OSHA.",
+              "Primero arregla el agua. La gotera o el problema de humedad se tiene que encontrar y corregir por completo, y las partes mojadas se tienen que secar dentro de 48 horas."
+            ]
+          },
+          {
+            "heading": "Trabajos pequeños",
+            "items": [
+              "Una mancha pequeña y aislada de 10 pies cuadrados o menos la puede limpiar el personal de mantenimiento de siempre, siempre y cuando esté entrenado.",
+              "La guía de OSHA recomienda un respirador N-95, guantes que lleguen a la mitad del antebrazo y protección para los ojos. Los lentes o gafas con hoyos de ventilación abiertos no sirven para trabajar con moho.",
+              "Rocía la superficie primero para que no se levante el polvo. Rocíala, no la empapes."
+            ]
+          },
+          {
+            "heading": "Quítalo, no solo lo mates",
+            "items": [
+              "Talla las superficies duras con agua y detergente, y luego sécalas rápido y por completo.",
+              "Los materiales porosos mojados y con moho puede que haya que tirarlos. Mételos en bolsas de plástico selladas.",
+              "El moho muerto todavía puede causar reacciones, así que hay que quitarlo. No se recomienda usar cloro como paso de rutina. Nunca mezcles cloro con un limpiador que tenga amoníaco."
+            ]
+          },
+          {
+            "heading": "Cuándo pedir ayuda",
+            "items": [
+              "Para 30 a 100 pies cuadrados, se debe consultar a un higienista industrial o a un profesional parecido antes de empezar. Más de 100 pies cuadrados requiere aislamiento completo del área y protección de todo el cuerpo.",
+              "Si el agua era de drenaje, o si el moho pudo haber dañado la estructura del edificio, busca a un profesional.",
+              "No prendas el sistema de calefacción y aire acondicionado si crees que tiene moho. Puede regar el moho por todo el edificio.",
+              "La guía de OSHA recomienda que los bebés, las personas recién operadas, las personas con defensas bajas y las personas con enfermedades crónicas de los pulmones se queden fuera de los espacios cercanos."
+            ]
+          }
+        ],
+        "ask": "¿Dónde hemos visto goteras o partes mojadas esta semana, y ya se arregló y se secó cada una?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "aerial-lifts-gi",
+    "industries": [
+      "land",
+      "facil",
+      "util"
+    ],
+    "code": "1910.67(c)(2)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.67(a)(1), (a)(8), (b)(4), (c)(2)(i)-(xii): vehicle-mounted elevating and rotating work platforms",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.67",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.333(c)(3): work near overhead lines (cross-referenced by 1910.67(b)(4))",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.333",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Fact Sheet: Aerial Lifts (2011): pre-start inspection each shift, work zone, combined load, 10 feet from lines",
+        "url": "https://www.osha.gov/sites/default/files/publications/AERIAL-LIFTS-FACTSHEET.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Hazard Bulletin HB-3731: Tree Care Work (aerial lifts kept 10 feet from lines, plus 4 inches per 10 kV over 50 kV)",
+        "url": "https://www.osha.gov/Publications/OSHAHB3731.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA letter of interpretation (May 13, 1999): 1910.67 covers self-propelled boom-supported platforms",
+        "url": "https://www.osha.gov/laws-regs/standardinterpretations/1999-05-13",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Bucket Trucks and Boom Lifts",
+        "hook": "Many workers are hurt or killed on aerial lifts each year. Today we go over how to stay in the basket and clear of power lines.",
+        "sections": [
+          {
+            "heading": "Before you go up",
+            "items": [
+              "Only trained people run an aerial lift. This rule covers vehicle-mounted lifts, like bucket trucks and self-propelled boom lifts.",
+              "Test the lift controls every day before use.",
+              "Do a walk-around before each shift: leaks, tires, brakes, operating and emergency controls, guardrails, insulating parts, and missing or unreadable placards.",
+              "Check the work area too: drop-offs, holes, soft ground, slopes, overhead lines, people nearby, and high wind."
+            ]
+          },
+          {
+            "heading": "Set it up solid",
+            "items": [
+              "Set the brakes. When you use outriggers, put them on pads or a solid surface. On a slope, put in wheel chocks first.",
+              "Never go over the manufacturer's load limits for the boom and basket. Count yourself, your tools, and your materials.",
+              "Don't move the truck with the boom raised in working position and someone in the basket, unless the lift is built for that. Before travel, cradle the boom and stow the outriggers."
+            ]
+          },
+          {
+            "heading": "In the basket",
+            "items": [
+              "Wear a fall arrest or travel restraint system attached to the boom or basket. Never tie off to a nearby pole, structure, or equipment.",
+              "Stand firmly on the basket floor. Don't sit or climb on the edge, and don't use planks or ladders to get higher.",
+              "Take off climbing spurs before you work from a lift.",
+              "The lower controls can override the basket, but nobody uses them without the basket worker's OK, except in an emergency."
+            ]
+          },
+          {
+            "heading": "Power lines",
+            "items": [
+              "Treat all overhead power lines and communication cables as live. Keep the lift at least 10 feet away from lines up to 50,000 volts. Add 4 inches for every 10,000 volts over that.",
+              "For work near overhead lines, OSHA's aerial lift rule sends you to its electrical work rule, 1910.333. Ask your supervisor what distance applies to the lines on this job.",
+              "Never alter the insulated part of a lift in any way that could weaken its insulation."
+            ]
+          }
+        ],
+        "ask": "Where are the overhead lines on today's job, and how close will the boom get to them?"
+      },
+      "es": {
+        "title": "Camiones canasta y elevadores de pluma",
+        "hook": "Muchos trabajadores se lastiman o mueren en elevadores aéreos cada año. Hoy repasamos cómo quedarte dentro de la canasta y lejos de los cables eléctricos.",
+        "sections": [
+          {
+            "heading": "Antes de subir",
+            "items": [
+              "Solo personas entrenadas manejan un elevador aéreo. Esta regla cubre elevadores montados en vehículos, como camiones canasta y elevadores de pluma autopropulsados.",
+              "Prueba los controles del elevador todos los días antes de usarlo.",
+              "Dale la vuelta antes de cada turno y revisa: fugas, llantas, frenos, controles de operación y de emergencia, barandas, partes aislantes y letreros que falten o no se puedan leer.",
+              "Revisa también el área de trabajo: desniveles, hoyos, suelo blando, pendientes, cables aéreos, gente cerca y viento fuerte."
+            ]
+          },
+          {
+            "heading": "Instálalo firme",
+            "items": [
+              "Pon los frenos. Cuando uses estabilizadores, ponlos sobre bases o sobre una superficie sólida. En una pendiente, pon primero calzas en las ruedas.",
+              "Nunca pases los límites de carga del fabricante para la pluma y la canasta. Cuenta tu peso, tus herramientas y tus materiales.",
+              "No muevas el camión con la pluma levantada en posición de trabajo y alguien en la canasta, a menos que el elevador esté hecho para eso. Antes de viajar, acomoda la pluma en su soporte y guarda los estabilizadores."
+            ]
+          },
+          {
+            "heading": "En la canasta",
+            "items": [
+              "Usa un sistema de detención de caídas o de restricción de movimiento enganchado a la pluma o a la canasta. Nunca te amarres a un poste, estructura o equipo cercano.",
+              "Párate firme en el piso de la canasta. No te sientes ni te subas al borde, y no uses tablas ni escaleras para subir más.",
+              "Quítate las espuelas de trepa antes de trabajar desde un elevador.",
+              "Los controles de abajo pueden anular los de la canasta, pero nadie los usa sin el permiso del trabajador en la canasta, excepto en una emergencia."
+            ]
+          },
+          {
+            "heading": "Cables eléctricos",
+            "items": [
+              "Trata todos los cables eléctricos y de comunicación aéreos como si tuvieran corriente. Mantén el elevador al menos a 10 pies de líneas de hasta 50,000 voltios. Suma 4 pulgadas por cada 10,000 voltios por encima de eso.",
+              "Para trabajar cerca de cables aéreos, la regla de OSHA para elevadores aéreos te manda a su regla de trabajo eléctrico, la 1910.333. Pregúntale a tu supervisor qué distancia aplica a los cables de este trabajo.",
+              "Nunca modifiques la parte aislada de un elevador de ninguna forma que pueda debilitar su aislamiento."
+            ]
+          }
+        ],
+        "ask": "¿Dónde están los cables aéreos en el trabajo de hoy, y qué tan cerca va a llegar la pluma?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "tree-climbing",
+    "industries": [
+      "land",
+      "util"
+    ],
+    "code": "OSHA HB-3731 (guidance) / 1910.132 / 1910.140(c)(13)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Hazard Bulletin HB-3731: Tree Care Work: Falls and Falling Object Hazards",
+        "url": "https://www.osha.gov/Publications/OSHAHB3731.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA memo (June 24, 2021): Inspection Guidance for Tree Care and Tree Removal Operations, incl. 1910.140(c)(13) anchorages and the climbing-line anchor check",
+        "url": "https://www.osha.gov/memos/2021-06-30/inspection-guidance-for-tree-care-and-tree-removal-operations",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1910.132(d)(1), (e), (f)(1), (h)(1): PPE hazard assessment, damaged equipment, training, payment",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.132",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.269(a)(1)(i)(E): scope, line-clearance tree trimming",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.269",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Climbing Trees Safely",
+        "hook": "Falls and falling objects cause a high share of deaths in tree care work. Today we go over the checks that keep you tied in.",
+        "sections": [
+          {
+            "heading": "Before you climb",
+            "items": [
+              "A qualified arborist should look over the site and the tree first, including any weak spots in how the tree is built.",
+              "In one OSHA case, a climber was lowering a section of a big hickory when the trunk he was working from snapped in half. He fell about 65 feet and died. A check of the tree first could have shown it couldn't take the load."
+            ]
+          },
+          {
+            "heading": "Check your gear",
+            "items": [
+              "Use only climbing gear the maker approves for tree care work: climbing lines, safety lines, and your fall protection.",
+              "Inspect all of it before work starts. Damaged, defective, or worn gear comes out of service.",
+              "Your company has to look at the job's hazards, give you protective gear that fits at no cost to you, and train you on when and how to use it."
+            ]
+          },
+          {
+            "heading": "Tie in and stay tied in",
+            "items": [
+              "Your anchor point matters. OSHA's fall protection rule says an anchor for tree climbing has to hold at least 5,000 pounds for each person attached, or be part of a complete fall protection system that a qualified person designs, installs, and oversees, with a safety factor of at least two.",
+              "OSHA's 2021 tree care guidance points to this check: when a climbing line is set from the ground, look the anchor point over from the ground first. If it's sound, load it with about twice the climber's weight before anyone climbs. The person doing the check should be qualified.",
+              "OSHA's tree care guidance says climbers train to use a second means of fall protection, like a work-positioning lanyard or a second climbing line, along with the main climbing line.",
+              "Use climbing spurs only with gaffs that fit the tree you're climbing."
+            ]
+          },
+          {
+            "heading": "Up in the tree",
+            "items": [
+              "Carry only the tools you need for the climb. Raise and lower the rest the way you were trained.",
+              "Anyone climbing or working above 12 feet in a tree needs a worker trained in emergency procedures who can see or hear them.",
+              "Power lines are their own danger. Unless you're a trained line-clearance trimmer, keep away from lines, and ask your supervisor what distance applies before you climb. Line-clearance tree trimming falls under a separate federal rule, 1910.269."
+            ]
+          }
+        ],
+        "ask": "Who's checking today's anchor point, and what's your second means of fall protection up there?"
+      },
+      "es": {
+        "title": "Cómo trepar árboles con seguridad",
+        "hook": "Las caídas y los objetos que caen causan una gran parte de las muertes en el trabajo de cuidado de árboles. Hoy repasamos las revisiones que te mantienen amarrado.",
+        "sections": [
+          {
+            "heading": "Antes de trepar",
+            "items": [
+              "Un arborista calificado debe revisar primero el lugar y el árbol, incluyendo cualquier punto débil en cómo está formado el árbol.",
+              "En un caso de OSHA, un trepador estaba bajando una sección de un nogal grande cuando el tronco desde donde trabajaba se partió por la mitad. Cayó unos 65 pies y murió. Una revisión previa del árbol pudo haber mostrado que no aguantaba la carga."
+            ]
+          },
+          {
+            "heading": "Revisa tu equipo",
+            "items": [
+              "Usa solo equipo de trepa que el fabricante aprueba para trabajo en árboles: líneas de trepa, líneas de seguridad y tu protección contra caídas.",
+              "Revísalo todo antes de empezar. El equipo dañado, defectuoso o gastado se saca de servicio.",
+              "Tu compañía tiene que evaluar los peligros del trabajo, darte equipo de protección que te quede bien sin costo para ti, y entrenarte sobre cuándo y cómo usarlo."
+            ]
+          },
+          {
+            "heading": "Amárrate y quédate amarrado",
+            "items": [
+              "Tu punto de anclaje importa. La regla de OSHA sobre protección contra caídas dice que un anclaje para trepar árboles tiene que aguantar por lo menos 5,000 libras por cada persona amarrada, o ser parte de un sistema completo de protección contra caídas que una persona calificada diseña, instala y supervisa, con un factor de seguridad de al menos dos.",
+              "La guía de OSHA de 2021 para el cuidado de árboles señala esta revisión: cuando la línea de trepa se pone desde el suelo, primero revisa el punto de anclaje con la vista desde el suelo. Si está firme, ponle una carga de más o menos el doble del peso del trepador antes de que alguien suba. La persona que hace la revisión debe ser calificada.",
+              "La guía de OSHA para el cuidado de árboles dice que los trepadores se entrenan para usar un segundo medio de protección contra caídas, como una eslinga de posicionamiento o una segunda línea de trepa, junto con la línea de trepa principal.",
+              "Usa espuelas de trepa solo con puntas que sirvan para el árbol que vas a trepar."
+            ]
+          },
+          {
+            "heading": "Arriba en el árbol",
+            "items": [
+              "Lleva solo las herramientas que necesitas para trepar. Sube y baja las demás como te entrenaron.",
+              "Cualquiera que trepe o trabaje a más de 12 pies en un árbol necesita a un trabajador entrenado en procedimientos de emergencia que lo pueda ver u oír.",
+              "Los cables eléctricos son un peligro aparte. Si no eres un podador de líneas eléctricas entrenado, mantente lejos de los cables y pregúntale a tu supervisor qué distancia aplica antes de trepar. La poda para despejar líneas eléctricas tiene su propia regla federal aparte, la 1910.269."
+            ]
+          }
+        ],
+        "ask": "¿Quién va a revisar hoy el punto de anclaje, y cuál es tu segundo medio de protección contra caídas allá arriba?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "limb-rigging",
+    "industries": [
+      "land"
+    ],
+    "code": "OSHA HB-3731 (guidance) / 1910.132",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Hazard Bulletin HB-3731: Tree Care Work: Falls and Falling Object Hazards",
+        "url": "https://www.osha.gov/Publications/OSHAHB3731.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA memo (June 24, 2021): Inspection Guidance for Tree Care and Tree Removal Operations",
+        "url": "https://www.osha.gov/memos/2021-06-30/inspection-guidance-for-tree-care-and-tree-removal-operations",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1910.132(e), (h)(1): damaged equipment, payment",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.132",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Rigging and Lowering Limbs",
+        "hook": "Rigging lets you lower a tree in pieces instead of dropping them. But roping down wood puts big forces on the tree, and the crew below is counting on everything holding.",
+        "sections": [
+          {
+            "heading": "Decide if you need to rig",
+            "items": [
+              "Before work starts, figure out if this tree needs rigging, and if the crew can do it safely. That helps keep sections from falling while you work.",
+              "Have a qualified arborist check the tree. A weak tree may not hold up to the forces of rigging and lowering.",
+              "In one OSHA case, a climber was roping down the second section of a hickory top when the trunk he was working from snapped in half. He and the top fell about 65 feet, and he died."
+            ]
+          },
+          {
+            "heading": "Check the gear",
+            "items": [
+              "Use lines and gear the maker approves for tree care work. Inspect all of it before you start.",
+              "Damaged, defective, or worn gear comes out of service. Don't use it.",
+              "If you work from an aerial lift, it has to be maintained, set up properly, and used the way the maker says.",
+              "Don't use a bucket truck as a crane to lift tree parts unless it was built for that. For heavy limbs, a crane may be used along with the lift."
+            ]
+          },
+          {
+            "heading": "Talk before anything moves",
+            "items": [
+              "Set up a way to talk, by voice or by signal, between the worker up top and the crew below before rigging starts.",
+              "It has to tell the ground crew clearly when to stand clear of the drop zone and when it's safe to come back in."
+            ]
+          },
+          {
+            "heading": "Below the work",
+            "items": [
+              "Mark the drop zone with cones or similar equipment wherever something could fall.",
+              "Your company has to give you protective gear that fits, like a hard hat for falling objects, at no cost, train you to use it, and make sure you use it."
+            ]
+          }
+        ],
+        "ask": "Before the first piece comes down today, what's our call for stand clear, and who gives the all clear?"
+      },
+      "es": {
+        "title": "Aparejar y bajar ramas",
+        "hook": "El aparejo te deja bajar un árbol por partes en vez de dejarlas caer. Pero bajar madera con cuerda pone mucha fuerza sobre el árbol, y la cuadrilla de abajo cuenta con que todo aguante.",
+        "sections": [
+          {
+            "heading": "Decide si hay que aparejar",
+            "items": [
+              "Antes de empezar, determina si este árbol necesita aparejo y si la cuadrilla lo puede hacer con seguridad. Eso ayuda a que no se caigan secciones mientras trabajan.",
+              "Que un arborista calificado revise el árbol. Un árbol débil tal vez no aguante las fuerzas de aparejar y bajar.",
+              "En un caso de OSHA, un trepador estaba bajando con cuerda la segunda sección de la copa de un nogal cuando el tronco desde donde trabajaba se partió por la mitad. Él y la copa cayeron unos 65 pies, y él murió."
+            ]
+          },
+          {
+            "heading": "Revisa el equipo",
+            "items": [
+              "Usa cuerdas y equipo que el fabricante aprueba para trabajo en árboles. Revísalo todo antes de empezar.",
+              "El equipo dañado, defectuoso o gastado se saca de servicio. No lo uses.",
+              "Si trabajas desde un elevador aéreo, tiene que tener mantenimiento, estar bien instalado y usarse como dice el fabricante.",
+              "No uses un camión canasta como grúa para levantar partes del árbol, a menos que esté hecho para eso. Para ramas pesadas, se puede usar una grúa junto con el elevador."
+            ]
+          },
+          {
+            "heading": "Comuníquense antes de que algo se mueva",
+            "items": [
+              "Establezcan una forma de comunicarse, con la voz o con señales, entre el trabajador de arriba y la cuadrilla de abajo antes de empezar a aparejar.",
+              "Tiene que decirle claramente a la cuadrilla de abajo cuándo alejarse de la zona de caída y cuándo es seguro volver a entrar."
+            ]
+          },
+          {
+            "heading": "Debajo del trabajo",
+            "items": [
+              "Marca la zona de caída con conos o equipo parecido dondequiera que algo pueda caer.",
+              "Tu compañía tiene que darte equipo de protección que te quede bien, como un casco contra objetos que caen, sin costo, entrenarte para usarlo y asegurarse de que lo uses."
+            ]
+          }
+        ],
+        "ask": "Antes de que baje la primera pieza hoy, ¿cuál es nuestra llamada para alejarse, y quién da el todo despejado?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "power-tools-gi",
+    "industries": [
+      "land",
+      "facil",
+      "mfg",
+      "auto"
+    ],
+    "code": "1910.242(a) / 1910.243",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.242(a): employer responsible for safe condition of tools, including employee-furnished tools",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.242",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.243(a)(1)(i): portable circular saw guards; lower guard returns automatically",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.243",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.243(a)(2)(i)-(iv): switches and controls",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.243",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.243(a)(3)-(a)(4): belt sander guards; cracked saws removed from service",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.243",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.243(b)(1)-(2): tool retainers; air hose designed for the pressure",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.243",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.243(c)(3), (c)(5)(i): portable grinder guard exposure; spindle speed checked before mounting a wheel",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.243",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.243(e)(1)(iii): power lawnmower shutoff device and intentional restart",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.243",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Landscaping: Hazards and Solutions (blowers, ear protection, blades, tool inspection)",
+        "url": "https://www.osha.gov/landscaping/hazards",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Portable Power Tools",
+        "hook": "Every power tool has a guard and a switch for a reason. Today we check both on the tools you'll use this week.",
+        "sections": [
+          {
+            "heading": "Check it first",
+            "items": [
+              "Look your tools and equipment over before you use them.",
+              "Your company is responsible for the safe condition of every tool used on the job, even one you bring from home. If yours is damaged, speak up.",
+              "A cracked saw comes out of service. Don't use it."
+            ]
+          },
+          {
+            "heading": "Guards stay on",
+            "items": [
+              "A hand-held circular saw has guards above and below the base plate. When you pull the saw out of the cut, the lower guard has to snap back over the blade right away. If it doesn't, don't use the saw. Tell your supervisor.",
+              "On a right-angle grinder, the guard sits between you and the wheel, and it leaves no more than half the wheel open.",
+              "Before you mount a grinding wheel, check that the tool's speed isn't more than the top speed marked on the wheel.",
+              "A belt sander needs a guard at each spot where the belt runs onto a pulley."
+            ]
+          },
+          {
+            "heading": "Know your switch",
+            "items": [
+              "Circular saws and electric chain saws have a switch that cuts the power when you let go. A gas chain saw has a throttle that works the same way.",
+              "Most drills, grinders and sanders can have a lock-on button only if the same finger can turn it off in one motion. Know where off is before you pull the trigger.",
+              "Air tools that could throw their bit need a retainer. The hose and its connections have to be built for the pressure."
+            ]
+          },
+          {
+            "heading": "Blowers, brush cutters and mowers",
+            "items": [
+              "Wear goggles when you use a blower.",
+              "Wear ear protection when you use power equipment.",
+              "Keep clear of spinning mower and brush-cutting blades.",
+              "Walk-behind and riding rotary mowers need a shutoff that stops the engine. Once it's off, restarting it has to take a deliberate move by hand."
+            ]
+          }
+        ],
+        "ask": "Pick up the tool you'll use most today. Show us its guard, and show us how you shut it off fast."
+      },
+      "es": {
+        "title": "Herramientas eléctricas portátiles",
+        "hook": "Cada herramienta eléctrica tiene una guarda y un interruptor por una razón. Hoy revisamos las dos cosas en las herramientas que vas a usar esta semana.",
+        "sections": [
+          {
+            "heading": "Revísala primero",
+            "items": [
+              "Revisa tus herramientas y tu equipo antes de usarlos.",
+              "Tu compañía es responsable de que toda herramienta que se usa en el trabajo esté en buen estado, aunque sea una que traes de tu casa. Si la tuya está dañada, avisa.",
+              "Una sierra rajada se saca de servicio. No la uses."
+            ]
+          },
+          {
+            "heading": "Las guardas se quedan puestas",
+            "items": [
+              "Una sierra circular de mano tiene guardas arriba y abajo de la base. Cuando sacas la sierra del corte, la guarda de abajo tiene que volver a cubrir el disco de inmediato. Si no vuelve, no uses la sierra. Avísale a tu supervisor.",
+              "En una esmeriladora angular, la guarda va entre tú y el disco, y no deja descubierta más de la mitad del disco.",
+              "Antes de montar un disco de esmeril, revisa que la velocidad de la herramienta no sea mayor que la velocidad máxima marcada en el disco.",
+              "Una lijadora de banda necesita una guarda en cada punto donde la banda entra en una polea."
+            ]
+          },
+          {
+            "heading": "Conoce tu interruptor",
+            "items": [
+              "Las sierras circulares y las motosierras eléctricas tienen un interruptor que corta la corriente cuando lo sueltas. Una motosierra de gasolina tiene un acelerador que funciona igual.",
+              "La mayoría de los taladros, esmeriladoras y lijadoras pueden tener botón de bloqueo solo si el mismo dedo los puede apagar en un solo movimiento. Debes saber dónde se apaga antes de apretar el gatillo.",
+              "Las herramientas de aire que pueden disparar la punta necesitan un retenedor. La manguera y sus conexiones tienen que estar hechas para esa presión."
+            ]
+          },
+          {
+            "heading": "Sopladoras, desbrozadoras y cortadoras de césped",
+            "items": [
+              "Usa gafas protectoras cuando uses una sopladora.",
+              "Usa protección para los oídos cuando uses equipo motorizado.",
+              "Mantente lejos de las cuchillas que giran en las cortadoras de césped y desbrozadoras.",
+              "Las cortadoras de césped de empujar y las de asiento con cuchilla rotativa necesitan un apagador que pare el motor. Una vez apagada, volver a prenderla tiene que requerir un movimiento a propósito con la mano."
+            ]
+          }
+        ],
+        "ask": "Agarra la herramienta que más vas a usar hoy. Enséñanos su guarda y enséñanos cómo la apagas rápido."
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "landscape-chemicals",
+    "industries": [
+      "land"
+    ],
+    "code": "1910.1200 / EPA pesticide labeling",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1200(g)(8): employer keeps safety data sheets, readily accessible each shift",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1200(h)(1), (h)(3)(iii): training at initial assignment and when a new chemical hazard is introduced",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1200(b)(5)(i): HazCom labeling does not apply to FIFRA pesticides",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1200 Appendix D: SDS sections 4 (first aid), 6 (accidental release), 8 (exposure controls/PPE)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1200AppD",
+        "kind": "standard"
+      },
+      {
+        "label": "EPA: Introduction to Pesticide Labels (archived EPA page, Jan 19, 2025 snapshot)",
+        "url": "https://19january2025snapshot.epa.gov/pesticide-labels/introduction-pesticide-labels",
+        "kind": "guidance"
+      },
+      {
+        "label": "EPA Label Review Manual, Chapter 7: Precautionary Statements (signal words, user safety statements)",
+        "url": "https://19january2025snapshot.epa.gov/sites/default/files/2018-04/documents/chap-07-mar-2018.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "EPA Label Review Manual, Chapter 10: Worker Protection Labeling (user safety recommendations, contaminated PPE)",
+        "url": "https://www.epa.gov/sites/default/files/2016-02/documents/chap-10-feb-2016.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "EPA: Read the Label First: Protect Your Household (archived EPA brochure; what labels tell you, mixing, containers, drains)",
+        "url": "https://19january2025snapshot.epa.gov/sites/default/files/2016-02/documents/household.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Landscaping: Hazards and Solutions (chemicals and pesticides)",
+        "url": "https://www.osha.gov/landscaping/hazards",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Fertilizers and Pesticides on Landscape Jobs",
+        "hook": "Weed killer, bug killer and fertilizer go out on our jobs every week. Before you open any of it, read the label and know where the safety data sheet is.",
+        "sections": [
+          {
+            "heading": "The label is the law",
+            "items": [
+              "For pesticides, EPA says the label is the law. Using a pesticide in a way its label doesn't allow is against federal law.",
+              "Find the signal word. DANGER means the most toxic, then WARNING, then CAUTION. POISON with a skull and crossbones goes on the most toxic products.",
+              "The label also tells you how to use it, how to store it, first aid, and a phone number to call for help."
+            ]
+          },
+          {
+            "heading": "Safety data sheets",
+            "items": [
+              "Your company has to keep a safety data sheet, or SDS, for each hazardous chemical you use, and you have to be able to get to it during your shift.",
+              "On the SDS, section 4 is first aid, section 6 is what to do about a spill, and section 8 is the protective gear.",
+              "Your company has to train you on the chemicals you work with when you start, and again when a new chemical hazard shows up.",
+              "OSHA's chemical labeling rule doesn't cover pesticide labels. EPA controls those."
+            ]
+          },
+          {
+            "heading": "Gear, mixing and spills",
+            "items": [
+              "Wear the protective gear the label lists. If the label calls for gloves, that's part of following the label.",
+              "Mix only the amount the label says. If you mix it in another container, use all of the mixture.",
+              "Keep products in their original containers. Never put them in a food or drink container, and never pour them down a drain.",
+              "For a spill, go to section 6 of the SDS. It tells you the protective gear to wear and how to contain and clean it up."
+            ]
+          },
+          {
+            "heading": "Washing up",
+            "items": [
+              "Many labels say to wash thoroughly with soap and water after handling. Do it.",
+              "Wash the outside of your gloves before you take them off. If pesticide gets inside your clothes or gear, take them off right away, wash well, and put on clean clothes.",
+              "Wash your protective gear apart from your other laundry."
+            ]
+          }
+        ],
+        "ask": "Grab one product off the truck. What's its signal word, and what gear does the label say to wear?"
+      },
+      "es": {
+        "title": "Fertilizantes y pesticidas en trabajos de jardinería",
+        "hook": "Cada semana usamos matahierbas, insecticidas y fertilizantes en nuestros trabajos. Antes de abrir cualquiera, lee la etiqueta y debes saber dónde está la hoja de datos de seguridad.",
+        "sections": [
+          {
+            "heading": "La etiqueta es la ley",
+            "items": [
+              "Para los pesticidas, la EPA dice que la etiqueta es la ley. Usar un pesticida de una forma que la etiqueta no permite va contra la ley federal.",
+              "Busca la palabra de advertencia. DANGER (peligro) es lo más tóxico, luego WARNING (advertencia), luego CAUTION (precaución). POISON (veneno) con una calavera va en los productos más tóxicos.",
+              "La etiqueta también te dice cómo usarlo, cómo guardarlo, los primeros auxilios y un número de teléfono para pedir ayuda."
+            ]
+          },
+          {
+            "heading": "Hojas de datos de seguridad",
+            "items": [
+              "Tu compañía tiene que tener una hoja de datos de seguridad, o SDS, para cada químico peligroso que usas, y tú tienes que poder verla durante tu turno.",
+              "En la SDS, la sección 4 es primeros auxilios, la sección 6 es qué hacer con un derrame y la sección 8 es el equipo de protección.",
+              "Tu compañía tiene que darte capacitación sobre los químicos con los que trabajas cuando empiezas, y otra vez cuando llega un químico con un peligro nuevo.",
+              "La regla de OSHA sobre etiquetas de químicos no cubre las etiquetas de pesticidas. Esas las controla la EPA."
+            ]
+          },
+          {
+            "heading": "Equipo, mezclas y derrames",
+            "items": [
+              "Usa el equipo de protección que dice la etiqueta. Si la etiqueta pide guantes, eso es parte de seguir la etiqueta.",
+              "Mezcla solo la cantidad que dice la etiqueta. Si lo mezclas en otro recipiente, usa toda la mezcla.",
+              "Guarda los productos en su envase original. Nunca los pongas en un envase de comida o bebida, y nunca los tires por un desagüe.",
+              "Si hay un derrame, ve a la sección 6 de la SDS. Te dice qué equipo de protección usar y cómo contenerlo y limpiarlo."
+            ]
+          },
+          {
+            "heading": "Lavarse",
+            "items": [
+              "Muchas etiquetas dicen que te laves bien con agua y jabón después de usar el producto. Hazlo.",
+              "Lava la parte de afuera de los guantes antes de quitártelos. Si el pesticida se mete en tu ropa o tu equipo, quítatelos de inmediato, lávate bien y ponte ropa limpia.",
+              "Lava tu equipo de protección aparte del resto de tu ropa."
+            ]
+          }
+        ],
+        "ask": "Agarra un producto de la camioneta. ¿Cuál es su palabra de advertencia y qué equipo dice la etiqueta que hay que usar?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "trailers-ramps",
+    "industries": [
+      "land",
+      "ag"
+    ],
+    "code": "No OSHA standard; NIOSH FACE guidance / 49 CFR 393.100 (DOT)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "NIOSH/Washington FACE 09WA04401: orchard laborer struck and run over by dump trailer that came unhitched",
+        "url": "https://stacks.cdc.gov/view/cdc/165044",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH/Oregon FACE 2010-06-1: truck driver crushed between semi-trailer and loading dock (brakes, chocks, pinch points)",
+        "url": "https://www.cdc.gov/niosh/face/pdfs/10or006.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH/Nebraska FACE 95NE009: driver crushed between tractor and trailer",
+        "url": "https://www.cdc.gov/niosh/face/stateface/ne/95ne009.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH/California FACE 97CA011: operator crushed when loader fell off a trailer while unloading",
+        "url": "https://stacks.cdc.gov/view/cdc/168987/cdc_168987_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH/Michigan FACE 07MI073: lineman run over while directing a machine onto a transport trailer (clutch failure, no written loading procedure)",
+        "url": "https://www.cdc.gov/niosh/face/stateface/mi/07mi073.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH/Michigan FACE 02MI040: loader secured by chains on a lowboy broke free and rolled onto cab",
+        "url": "https://stacks.cdc.gov/view/cdc/169181",
+        "kind": "guidance"
+      },
+      {
+        "label": "DOT 49 CFR 393.100(a)-(b): cargo secured on commercial motor vehicles on public roads",
+        "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-III/subchapter-B/part-393",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Trailers, Hitches and Loading Ramps",
+        "hook": "An orchard worker was run over by a loaded trailer that popped off the hitch on a steep road. Investigators found the hitch ball was the wrong size and the safety chains weren't hooked up or working.",
+        "sections": [
+          {
+            "heading": "Hitch it right",
+            "items": [
+              "The hitch ball has to be the right size for the trailer's coupler. Check it before you hook up.",
+              "Connect the safety chains and check every safety part before you tow anything.",
+              "Before you get out of the truck or tractor, set the parking brake. On a slope, chock the wheels.",
+              "Never stand between the trailer and the truck or tractor while either one could move or roll."
+            ]
+          },
+          {
+            "heading": "Loading ramps",
+            "items": [
+              "In one case, a worker was standing on the trailer deck directing a machine up the ramp. He likely tripped and fell onto the trailer tongue. The machine didn't stop when the operator worked the clutch, and it ran over him.",
+              "Investigators found the clutch had rust and pitting inside, and it had never been taken apart for inspection on the maintenance schedule.",
+              "Investigators say employers should look at each job's hazards and set safe steps, including a written procedure for unloading equipment from trailers."
+            ]
+          },
+          {
+            "heading": "If it starts to go",
+            "items": [
+              "An operator was killed when a loader slid off the side of a trailer while he backed it off on a grade. He jumped, landed on a curb, and the loader pinned him.",
+              "In that case, investigators said: on a loader with a rollover bar, stay in the seat with the belt fastened, even if it's tipping.",
+              "Your company shouldn't let anyone run a type of machine until they've shown they can handle it."
+            ]
+          },
+          {
+            "heading": "Tie it down",
+            "items": [
+              "In another case, the chains on a loader broke in a hard stop, and it rolled forward onto the truck cab.",
+              "Use the tie-down points the machine maker marks. Every part of each tie-down, chain, hook and binder, should match in working load limit. Inspect them all.",
+              "DOT's cargo rule says a commercial motor vehicle carrying cargo on public roads has to have the cargo secured so it can't leak, spill, blow or fall off."
+            ]
+          }
+        ],
+        "ask": "Who's hooking up today? Walk us through your check out loud: ball, coupler, chains, brakes and tie-downs."
+      },
+      "es": {
+        "title": "Remolques, enganches y rampas de carga",
+        "hook": "Un trabajador de una huerta murió atropellado por un remolque cargado que se soltó del enganche en un camino empinado. Los investigadores encontraron que la bola del enganche era del tamaño equivocado y que las cadenas de seguridad no estaban conectadas o no servían.",
+        "sections": [
+          {
+            "heading": "Engancha bien",
+            "items": [
+              "La bola del enganche tiene que ser del tamaño correcto para el acoplador del remolque. Revísalo antes de enganchar.",
+              "Conecta las cadenas de seguridad y revisa cada pieza de seguridad antes de remolcar cualquier cosa.",
+              "Antes de bajarte de la camioneta o del tractor, pon el freno de mano. En una pendiente, pon calzas en las llantas.",
+              "Nunca te pares entre el remolque y la camioneta o el tractor si cualquiera de los dos se puede mover o rodar."
+            ]
+          },
+          {
+            "heading": "Rampas de carga",
+            "items": [
+              "En un caso, un trabajador estaba parado en la plataforma del remolque dirigiendo una máquina que subía por la rampa. Parece que se tropezó y se cayó sobre la lanza del remolque. La máquina no se detuvo cuando el operador metió el clutch, y le pasó por encima.",
+              "Los investigadores encontraron que el clutch tenía óxido y picaduras por dentro, y nunca lo habían desarmado para revisarlo en el programa de mantenimiento.",
+              "Los investigadores dicen que los empleadores deben revisar los peligros de cada trabajo y fijar pasos seguros, incluyendo un procedimiento por escrito para bajar equipo de los remolques."
+            ]
+          },
+          {
+            "heading": "Si se empieza a ir",
+            "items": [
+              "Un operador murió cuando un cargador se resbaló por el lado de un remolque mientras lo bajaba en reversa en una pendiente. Saltó, cayó sobre una banqueta y el cargador lo aplastó.",
+              "En ese caso, los investigadores dijeron: en un cargador con barra antivuelco, quédate en el asiento con el cinturón abrochado, aunque se esté volcando.",
+              "Tu compañía no debe dejar que nadie maneje un tipo de máquina hasta que haya demostrado que la sabe manejar."
+            ]
+          },
+          {
+            "heading": "Amárralo bien",
+            "items": [
+              "En otro caso, las cadenas de un cargador se rompieron en un frenazo y el cargador rodó hacia adelante encima de la cabina del camión.",
+              "Usa los puntos de amarre que marca el fabricante de la máquina. Cada parte de cada amarre, la cadena, el gancho y el tensor, debe tener el mismo límite de carga de trabajo. Revísalas todas.",
+              "La regla de carga del DOT dice que un vehículo comercial que lleva carga en vías públicas tiene que llevarla asegurada para que no se derrame, no se vuele y no se caiga."
+            ]
+          }
+        ],
+        "ask": "¿Quién va a enganchar hoy? Dinos en voz alta cómo revisas: la bola, el acoplador, las cadenas, los frenos y los amarres."
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "sun-uv",
+    "industries": [
+      "land",
+      "ag",
+      "con",
+      "util"
+    ],
+    "code": "No OSHA standard; NIOSH sun exposure guidance",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "NIOSH: Sun Exposure at Work (outdoor workers)",
+        "url": "https://www.cdc.gov/niosh/outdoor-workers/about/sun-exposure.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Fast Facts: Protecting Yourself from Sun Exposure (DHHS (NIOSH) Pub. 2010-116)",
+        "url": "https://www.cdc.gov/niosh/publications/numbered/2010-116.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Landscape and Horticultural Services: hazards and solutions (rest in shade)",
+        "url": "https://www.osha.gov/landscaping/hazards",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Sun and UV: Protect Your Skin and Eyes",
+        "hook": "Working outdoors in the sun raises your risk of sunburn and skin cancer. And you get UV even on cloudy days.",
+        "sections": [
+          {
+            "heading": "When the sun hits hardest",
+            "items": [
+              "UV from the sun is usually highest in the summer and between 10 a.m. and 4 p.m.",
+              "Clouds don't stop UV. Snow and light-colored sand bounce it back up at you, so you get it from above and below.",
+              "Some medicines make you burn more easily. That includes certain antibiotics, water pills, and pain relievers like ibuprofen.",
+              "Your company can help by scheduling outdoor work for times with less sun, and by giving you shade or indoor break areas. Take your breaks in the shade when you can."
+            ]
+          },
+          {
+            "heading": "Cover up",
+            "items": [
+              "Wear a wide-brimmed hat.",
+              "Dark clothing with a tight weave blocks more sun than light-colored, loosely woven clothing.",
+              "Wear sunglasses with almost 100% UV protection and side panels. Years of sun on your eyes may cause cataracts and other eye damage."
+            ]
+          },
+          {
+            "heading": "Sunscreen done right",
+            "items": [
+              "Use sunscreen that's at least SPF 30. Put on at least 1 ounce, 20 minutes before you go out.",
+              "Don't miss your ears, scalp, lips, neck, and the backs of your hands.",
+              "Put it on again at least every 2 hours, and every time you sweat heavily. If you also use bug spray, you may need it more often.",
+              "Throw out old sunscreen. It doesn't work as well after 1 to 2 years."
+            ]
+          },
+          {
+            "heading": "Know a sunburn",
+            "items": [
+              "A sunburn usually shows up about 4 hours after you've been in the sun, and gets worse over the next 24 to 36 hours.",
+              "Get medical help if a bad burn covers more than 15% of your body, you're dehydrated, you have a fever over 101°F, or extreme pain lasts more than 48 hours."
+            ]
+          }
+        ],
+        "ask": "Look at what you're wearing right now. What's one thing you'd change to get less sun today?"
+      },
+      "es": {
+        "title": "Sol y rayos UV: protege tu piel y tus ojos",
+        "hook": "Trabajar al aire libre bajo el sol aumenta tu riesgo de quemaduras de sol y de cáncer de piel. Y recibes rayos UV hasta en los días nublados.",
+        "sections": [
+          {
+            "heading": "Cuándo pega más fuerte el sol",
+            "items": [
+              "Los rayos UV del sol por lo general son más fuertes en el verano y entre las 10 de la mañana y las 4 de la tarde.",
+              "Las nubes no paran los rayos UV. La nieve y la arena de color claro los rebotan hacia ti, así que te llegan de arriba y de abajo.",
+              "Algunas medicinas hacen que te quemes más fácil. Eso incluye ciertos antibióticos, las pastillas para orinar (diuréticos) y analgésicos como el ibuprofeno.",
+              "Tu compañía puede ayudar programando el trabajo al aire libre en horas con menos sol, y dándote sombra o áreas de descanso bajo techo. Toma tus descansos en la sombra cuando puedas."
+            ]
+          },
+          {
+            "heading": "Cúbrete",
+            "items": [
+              "Usa un sombrero de ala ancha.",
+              "La ropa oscura de tejido apretado bloquea más sol que la ropa clara de tejido suelto.",
+              "Usa lentes de sol con casi 100% de protección UV y protección a los lados. Años de sol en los ojos pueden causar cataratas y otros daños en la vista."
+            ]
+          },
+          {
+            "heading": "El bloqueador bien puesto",
+            "items": [
+              "Usa bloqueador solar de por lo menos SPF 30. Ponte por lo menos 1 onza, 20 minutos antes de salir.",
+              "No te olvides de las orejas, el cuero cabelludo, los labios, el cuello y el dorso de las manos.",
+              "Vuelve a ponértelo por lo menos cada 2 horas, y cada vez que sudes mucho. Si también usas repelente de insectos, puede que lo necesites más seguido.",
+              "Tira el bloqueador viejo. No funciona tan bien después de 1 o 2 años."
+            ]
+          },
+          {
+            "heading": "Reconoce una quemadura de sol",
+            "items": [
+              "Una quemadura de sol por lo general aparece unas 4 horas después de estar en el sol, y empeora durante las siguientes 24 a 36 horas.",
+              "Busca atención médica si una quemadura fuerte cubre más del 15% de tu cuerpo, si estás deshidratado, si tienes fiebre de más de 101°F, o si el dolor fuerte dura más de 48 horas."
+            ]
+          }
+        ],
+        "ask": "Mira lo que traes puesto ahora mismo. ¿Qué cambiarías para recibir menos sol hoy?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "bites-plants",
+    "industries": [
+      "land",
+      "ag",
+      "util",
+      "oil",
+      "con"
+    ],
+    "code": "No OSHA standard; NIOSH outdoor worker guidance",
+    "minutes": 6,
+    "sources": [
+      {
+        "label": "NIOSH: Venomous Snakes at Work",
+        "url": "https://www.cdc.gov/niosh/outdoor-workers/about/venomous-snakes.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH: Insects and Scorpions at Work",
+        "url": "https://www.cdc.gov/niosh/outdoor-workers/about/insects-and-scorpions.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH: Tick-borne Diseases at Work",
+        "url": "https://www.cdc.gov/niosh/outdoor-workers/about/tick-borne-diseases.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH: Poisonous Plants at Work",
+        "url": "https://www.cdc.gov/niosh/outdoor-workers/about/poisonous-plants.html",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Snakes, Stings, Ticks and Poison Plants",
+        "hook": "Snakes, stinging insects, ticks and poison ivy come with outdoor work. A few habits keep most of them off you.",
+        "sections": [
+          {
+            "heading": "Snakes",
+            "items": [
+              "Don't touch or handle any snake. Not even a dead one.",
+              "Stay out of tall grass and leaf piles when you can, and don't climb on rocks or woodpiles where a snake may hide. Snakes are most active at dawn and dusk and in warm weather.",
+              "Wear boots and long pants. Wear leather gloves when you handle brush and debris.",
+              "If you're bitten, stay calm, tell your supervisor, and get emergency care right away. Don't drive yourself. Take off rings and watches before it swells. No tourniquet, no cutting, no sucking out venom, no ice."
+            ]
+          },
+          {
+            "heading": "Bees, wasps and fire ants",
+            "items": [
+              "Wear light-colored, smooth clothing that covers as much of you as possible. Skip the perfume and cologne.",
+              "If one bee or wasp is flying around you, stay calm and still. Swatting can make it sting. If a bunch of them attack, run. Get indoors or into shade, and don't jump into water.",
+              "Look over the area before you start work. Don't stand on or near ant mounds, and be careful lifting things off the ground.",
+              "If you've ever had a severe allergic reaction to a sting, carry your epinephrine auto-injector and wear a medical ID."
+            ]
+          },
+          {
+            "heading": "Ticks",
+            "items": [
+              "Wear a hat, light-colored long sleeves, and long pants tucked into your boots or socks. Use an EPA-registered insect repellent.",
+              "Permethrin kills ticks on contact. It goes on clothing and gear, not on your skin.",
+              "Check your skin and clothes for ticks every day, including your hair, underarms and groin. Shower as soon as you can.",
+              "Found one? Take it off right away with fine-tipped tweezers. Grab it firmly, as close to your skin as you can, and pull it away with a steady motion. Wash the spot with soap and water. If you get symptoms of a tick-borne disease, see a doctor and say you work outdoors around ticks."
+            ]
+          },
+          {
+            "heading": "Poison ivy, oak and sumac",
+            "items": [
+              "Wear long sleeves, long pants, boots and gloves.",
+              "Never burn plants that may be poison ivy, oak or sumac.",
+              "If you touch one, rinse your skin right away with rubbing alcohol, a poison plant wash or dish soap, and lots of water. Scrub under your nails. Wash those work clothes separately in hot water.",
+              "Call 911 for a severe allergic reaction, like swelling or trouble breathing."
+            ]
+          }
+        ],
+        "ask": "What have you seen on this site so far: snakes, nests, ant mounds, ticks or poison ivy? Where?"
+      },
+      "es": {
+        "title": "Víboras, piquetes, garrapatas y plantas venenosas",
+        "hook": "Las víboras, los insectos que pican, las garrapatas y la hiedra venenosa vienen con el trabajo al aire libre. Unos cuantos hábitos te protegen de la mayoría.",
+        "sections": [
+          {
+            "heading": "Víboras",
+            "items": [
+              "No toques ni agarres ninguna víbora. Ni siquiera una muerta.",
+              "Aléjate del pasto alto y de los montones de hojas cuando puedas, y no te subas a piedras ni a pilas de leña donde se pueda esconder una víbora. Las víboras andan más activas al amanecer, al anochecer y cuando hace calor.",
+              "Usa botas y pantalón largo. Usa guantes de cuero cuando agarres ramas y escombros.",
+              "Si te muerde una, mantén la calma, avísale a tu supervisor y busca atención de emergencia de inmediato. No manejes tú mismo. Quítate los anillos y el reloj antes de que se hinche. Nada de torniquete, nada de cortar, nada de chupar el veneno, nada de hielo."
+            ]
+          },
+          {
+            "heading": "Abejas, avispas y hormigas de fuego",
+            "items": [
+              "Usa ropa de color claro y tela lisa que te cubra lo más posible. No uses perfume ni colonia.",
+              "Si una abeja o avispa anda volando cerca de ti, quédate tranquilo y quieto. Si le das manotazos, te puede picar. Si te atacan muchas, corre. Métete a un lugar cerrado o a la sombra, y no te tires al agua.",
+              "Revisa el área antes de empezar a trabajar. No te pares sobre los hormigueros ni cerca de ellos, y ten cuidado al levantar cosas del suelo.",
+              "Si alguna vez has tenido una reacción alérgica fuerte a un piquete, carga tu autoinyector de epinefrina y usa una identificación médica."
+            ]
+          },
+          {
+            "heading": "Garrapatas",
+            "items": [
+              "Usa sombrero, camisa de manga larga de color claro y pantalón largo metido en las botas o los calcetines. Usa un repelente de insectos registrado por la EPA.",
+              "La permetrina mata las garrapatas al contacto. Se pone en la ropa y el equipo, no en la piel.",
+              "Revisa tu piel y tu ropa todos los días para buscar garrapatas, incluyendo el pelo, las axilas y la ingle. Báñate lo antes posible.",
+              "¿Encontraste una? Quítatela de inmediato con unas pinzas de punta fina. Agárrala firme, lo más cerca de la piel que puedas, y jálala con un movimiento parejo. Lava el lugar con agua y jabón. Si te dan síntomas de una enfermedad transmitida por garrapatas, ve al doctor y dile que trabajas al aire libre donde hay garrapatas."
+            ]
+          },
+          {
+            "heading": "Hiedra, roble y zumaque venenosos",
+            "items": [
+              "Usa manga larga, pantalón largo, botas y guantes.",
+              "Nunca quemes plantas que puedan ser hiedra, roble o zumaque venenosos.",
+              "Si tocas una, enjuágate la piel de inmediato con alcohol de frotar, un jabón especial para plantas venenosas o jabón de trastes, y mucha agua. Tállate debajo de las uñas. Lava esa ropa de trabajo aparte, con agua caliente.",
+              "Llama al 911 si hay una reacción alérgica fuerte, como hinchazón o dificultad para respirar."
+            ]
+          }
+        ],
+        "ask": "¿Qué han visto en este lugar hasta ahora: víboras, nidos, hormigueros, garrapatas o hiedra venenosa? ¿Dónde?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "site-clearing",
+    "industries": [
+      "land",
+      "site"
+    ],
+    "code": "1926.604 / 1926.25",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1926.604(a)(1): irritant and toxic plants, first aid instruction (construction)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.604",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.604(a)(2), (a)(2)(i)-(ii): rollover guards; overhead and rear canopy guards (construction)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.604",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.25(a)-(b): debris kept cleared; combustible scrap removed at regular intervals (construction)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.25",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Landscape and Horticultural Services: hazards and solutions",
+        "url": "https://www.osha.gov/landscaping/hazards",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH: Poisonous Plants at Work",
+        "url": "https://www.cdc.gov/niosh/outdoor-workers/about/poisonous-plants.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH: Venomous Snakes at Work",
+        "url": "https://www.cdc.gov/niosh/outdoor-workers/about/venomous-snakes.html",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Site Clearing and Brush Removal",
+        "hook": "Clearing land means machines on rough ground, brush everywhere, and plants that can hurt you. On construction jobs, OSHA has a rule just for site clearing. Landscaping work outside construction follows OSHA's advice instead.",
+        "sections": [
+          {
+            "heading": "The machines (construction rule)",
+            "items": [
+              "In construction site clearing, every piece of equipment needs a rollover guard.",
+              "If you ride it, it also needs an overhead and rear canopy guard. The top has to be at least 1/8-inch steel plate, or 1/4-inch woven wire mesh with openings no bigger than 1 inch, or equal.",
+              "The opening in the back of the canopy is covered with 1/4-inch woven wire mesh, openings no bigger than 1 inch."
+            ]
+          },
+          {
+            "heading": "Plants",
+            "items": [
+              "On construction site clearing, your company has to protect you from irritant and toxic plants, like poison ivy, and teach you the first aid for them.",
+              "Wear long sleeves, long pants, boots and gloves. Never burn plants that may be poison ivy, oak or sumac.",
+              "If you touch one, rinse your skin right away with rubbing alcohol, a poison plant wash or dish soap, and lots of water."
+            ]
+          },
+          {
+            "heading": "Brush and debris",
+            "items": [
+              "Wear leather gloves when you handle brush and debris. Don't climb on woodpiles; a snake may be hiding there.",
+              "Keep clear of turning brush-cutting blades.",
+              "Keep debris cleared from work areas and walkways. On construction jobs, that's required in and around buildings and structures, and burnable scrap has to be removed at regular intervals."
+            ]
+          },
+          {
+            "heading": "Ground, noise and digging",
+            "items": [
+              "Rough ground trips people. Wear boots with traction soles.",
+              "OSHA's advice for landscaping: operators are trained before they run equipment.",
+              "Wear ear protection around power equipment.",
+              "Pulling stumps or digging? Call for utility locates first."
+            ]
+          }
+        ],
+        "ask": "Before we start: where are the walkways on this site, where does the brush go, and who's running which machine?"
+      },
+      "es": {
+        "title": "Limpieza de terreno y retiro de maleza",
+        "hook": "Limpiar un terreno significa máquinas en suelo disparejo, maleza por todos lados y plantas que te pueden hacer daño. En los trabajos de construcción, OSHA tiene una regla solo para la limpieza de terrenos. El trabajo de jardinería fuera de la construcción sigue los consejos de OSHA.",
+        "sections": [
+          {
+            "heading": "Las máquinas (regla de construcción)",
+            "items": [
+              "En la limpieza de terrenos de construcción, todo el equipo necesita una protección contra volcaduras.",
+              "Si vas montado en él, también necesita una protección de techo y de atrás (canopy). El techo tiene que ser de placa de acero de por lo menos 1/8 de pulgada, o de malla de alambre tejido de 1/4 de pulgada con aberturas de no más de 1 pulgada, o algo equivalente.",
+              "La abertura de atrás de la protección se cubre con malla de alambre tejido de 1/4 de pulgada, con aberturas de no más de 1 pulgada."
+            ]
+          },
+          {
+            "heading": "Plantas",
+            "items": [
+              "En la limpieza de terrenos de construcción, tu compañía tiene que protegerte de las plantas irritantes y tóxicas, como la hiedra venenosa, y enseñarte los primeros auxilios para ellas.",
+              "Usa manga larga, pantalón largo, botas y guantes. Nunca quemes plantas que puedan ser hiedra, roble o zumaque venenosos.",
+              "Si tocas una, enjuágate la piel de inmediato con alcohol de frotar, un jabón especial para plantas venenosas o jabón de trastes, y mucha agua."
+            ]
+          },
+          {
+            "heading": "Maleza y escombros",
+            "items": [
+              "Usa guantes de cuero cuando agarres ramas y escombros. No te subas a las pilas de leña; ahí se puede esconder una víbora.",
+              "Mantente lejos de las cuchillas de las desbrozadoras cuando están girando.",
+              "Mantén los escombros fuera de las áreas de trabajo y los pasillos. En los trabajos de construcción, eso es obligatorio dentro y alrededor de edificios y estructuras, y el material que se puede quemar se tiene que sacar con regularidad."
+            ]
+          },
+          {
+            "heading": "Suelo, ruido y excavación",
+            "items": [
+              "El suelo disparejo hace tropezar a la gente. Usa botas con suela antiderrapante.",
+              "El consejo de OSHA para jardinería: los operadores reciben capacitación antes de manejar el equipo.",
+              "Usa protección para los oídos cerca del equipo con motor.",
+              "¿Vas a sacar tocones o excavar? Primero pide que marquen las líneas de servicios públicos."
+            ]
+          }
+        ],
+        "ask": "Antes de empezar: ¿dónde están los pasillos en este lugar, a dónde va la maleza y quién va a manejar cada máquina?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "repetitive-work",
+    "industries": [
+      "land",
+      "ag"
+    ],
+    "code": "No specific OSHA ergonomics rule (rescinded); OSH Act Sec. 5(a)(1) / NIOSH Simple Solutions (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Ergonomics: Standards and Enforcement FAQs (no ergonomics rule; General Duty Clause)",
+        "url": "https://www.osha.gov/ergonomics/faqs",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Ergonomics: Identify Problems (risk factors, early reporting)",
+        "url": "https://www.osha.gov/ergonomics/identify-problems",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Ergonomics: Solutions to Control Hazards",
+        "url": "https://www.osha.gov/ergonomics/control-hazards",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Simple Solutions: Ergonomics for Farm Workers (DHHS (NIOSH) Pub. 2001-111)",
+        "url": "https://www.cdc.gov/niosh/docs/2001-111/pdfs/2001-111.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Kneeling, Bending and Repetitive Work",
+        "hook": "NIOSH says backaches and pain in the shoulders, arms and hands are the most common problems farm workers report. It often builds up from the same motions, day after day.",
+        "sections": [
+          {
+            "heading": "What wears you down",
+            "items": [
+              "Doing the same motion over and over. Forceful gripping. Lifting, bending, twisting, kneeling and squatting. Staying in one awkward position too long.",
+              "Vibration counts too, in your hands from power tools and through your whole body from riding equipment.",
+              "Kneeling takes at least 25% more energy than sitting, and stooping takes at least 45% more. That's NIOSH's number."
+            ]
+          },
+          {
+            "heading": "The rule",
+            "items": [
+              "Congress canceled OSHA's ergonomics rule. But under the law, your company still has to keep the workplace free of recognized serious hazards, and that includes ergonomic hazards.",
+              "OSHA says the best fix, where possible, is changing the job, the tool or the layout. When that can't be done, rotating tasks and other work practice changes may help. Protective gear alone does only a little against these hazards."
+            ]
+          },
+          {
+            "heading": "Fixes that work",
+            "items": [
+              "Put long handles on tools. If a handle is too thin for your hand, tape or foam can build it up to the right size.",
+              "For low work, a stool or a seated job beats stooping. Set things up so you can get close to the work.",
+              "Use a dolly, cart or pallet truck for anything you carry more than a few feet. Smaller, lighter containers are easier on you.",
+              "Use padding where you press against hard, sharp or vibrating surfaces. Use and maintain power tools properly."
+            ]
+          },
+          {
+            "heading": "Mix it up and speak up",
+            "items": [
+              "Rotate between jobs that use different muscles. Break up high-repetition work with a lighter task so your body can recover.",
+              "Take stretch breaks. If something hurts, stop, and put something cold on the sore spot.",
+              "Report aches early, especially pain that doesn't go away after a night's rest. Early reporting means faster care and less serious injuries."
+            ]
+          }
+        ],
+        "ask": "Which job this week keeps you bent over or doing the same motion the longest? What's one thing we could change?"
+      },
+      "es": {
+        "title": "Trabajo de rodillas, agachado y repetitivo",
+        "hook": "NIOSH dice que el dolor de espalda y el dolor de hombros, brazos y manos son los problemas más comunes que reportan los trabajadores del campo. Muchas veces se va acumulando por hacer los mismos movimientos, día tras día.",
+        "sections": [
+          {
+            "heading": "Lo que te desgasta",
+            "items": [
+              "Hacer el mismo movimiento una y otra vez. Agarrar con mucha fuerza. Levantar, agacharse, torcerse, arrodillarse y ponerse en cuclillas. Quedarse mucho tiempo en una posición incómoda.",
+              "La vibración también cuenta: en las manos por las herramientas eléctricas y en todo el cuerpo por el equipo en el que vas montado.",
+              "Trabajar de rodillas gasta por lo menos 25% más energía que estar sentado, y trabajar agachado gasta por lo menos 45% más. Esa es la cifra de NIOSH."
+            ]
+          },
+          {
+            "heading": "La regla",
+            "items": [
+              "El Congreso canceló la regla de ergonomía de OSHA. Pero según la ley, tu compañía todavía tiene que mantener el lugar de trabajo libre de peligros serios reconocidos, y eso incluye los peligros ergonómicos.",
+              "OSHA dice que la mejor solución, cuando se puede, es cambiar el trabajo, la herramienta o el acomodo. Cuando eso no se puede, rotar tareas y otros cambios en la forma de trabajar pueden ayudar. El equipo de protección por sí solo ayuda muy poco contra estos peligros."
+            ]
+          },
+          {
+            "heading": "Soluciones que funcionan",
+            "items": [
+              "Ponles mangos largos a las herramientas. Si un mango es muy delgado para tu mano, con cinta o espuma lo puedes engrosar al tamaño correcto.",
+              "Para el trabajo bajo, un banquito o un trabajo sentado es mejor que andar agachado. Acomódate para poder acercarte al trabajo.",
+              "Usa una carretilla, un carrito o un patín para todo lo que cargues más de unos cuantos pies. Los recipientes más chicos y livianos son más fáciles para ti.",
+              "Usa acolchado donde te apoyes contra superficies duras, filosas o que vibran. Usa y mantén bien las herramientas eléctricas."
+            ]
+          },
+          {
+            "heading": "Cambia de tarea y avisa",
+            "items": [
+              "Rota entre trabajos que usen músculos diferentes. Intercala el trabajo muy repetitivo con una tarea más ligera para que tu cuerpo se recupere.",
+              "Toma descansos para estirarte. Si algo te duele, para, y ponte algo frío en la parte adolorida.",
+              "Reporta los dolores temprano, sobre todo el dolor que no se quita después de descansar una noche. Reportar temprano significa atención más rápida y lesiones menos graves."
+            ]
+          }
+        ],
+        "ask": "¿Qué trabajo de esta semana te tiene más tiempo agachado o haciendo el mismo movimiento? ¿Qué podríamos cambiar?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "jsa-before-task",
+    "industries": [
+      "all"
+    ],
+    "code": "No OSHA JSA standard; OSHA 3071 / OSHA Recommended Practices (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 3071 Job Hazard Analysis: involving employees, breaking the job into steps, hazard questions, controls, review",
+        "url": "https://www.osha.gov/sites/default/files/publications/osha3071.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Recommended Practices: Hazard Identification and Assessment (action items 1, 2 and 5)",
+        "url": "https://www.osha.gov/safety-management/hazard-identification",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Job Safety Analysis Before the Task",
+        "hook": "A job safety analysis, or JSA, means looking at a job step by step to find the hazards before they hurt someone. OSHA calls it a job hazard analysis.",
+        "sections": [
+          {
+            "heading": "Break the job into steps",
+            "items": [
+              "Nearly every job can be broken into steps. Watch the job being done and list each step as the worker does it.",
+              "Don't make the list so detailed it runs on forever, and don't make the steps so broad they skip the real work.",
+              "Give extra attention to jobs you don't do often, like maintenance, startup and shutdown. Those carry hazards too."
+            ]
+          },
+          {
+            "heading": "Find the hazards in each step",
+            "items": [
+              "For each step, ask: What can go wrong? What would happen? How could it happen? What else could make it worse? How likely is it?",
+              "The crew doing the work should be part of this. You know the job better than anyone, and that knowledge is how hazards get found.",
+              "Think about past injuries and close calls on this job. They're signs that the protections we have may not be enough."
+            ]
+          },
+          {
+            "heading": "Pick the controls",
+            "items": [
+              "The best fix gets rid of the hazard or changes the equipment or setup: guards, enclosures, shields, or exhaust ventilation.",
+              "Next come written procedures, work permits and safe work practices. Personal protective equipment, like respirators, hearing protection and safety glasses, comes after those.",
+              "If you find a hazard that's urgent or easy to fix, fix it now. Don't wait for the JSA to be finished."
+            ]
+          },
+          {
+            "heading": "When things change",
+            "items": [
+              "Go back over the JSA after an injury or illness on that job. After a close call, talk it over with everyone who does the job and go over the right steps.",
+              "Before the job, the equipment or the workflow changes, the crew should get a say, and the change gets checked for new hazards.",
+              "Anytime the JSA is revised, everyone affected gets trained on the changes. Review it from time to time anyway so it stays current."
+            ]
+          }
+        ],
+        "ask": "Pick one step of today's job. What can go wrong in that step, and what's our control for it?"
+      },
+      "es": {
+        "title": "Análisis de seguridad del trabajo antes de la tarea",
+        "hook": "Un análisis de seguridad del trabajo, o JSA, es revisar un trabajo paso por paso para encontrar los peligros antes de que lastimen a alguien. OSHA lo llama análisis de peligros del trabajo.",
+        "sections": [
+          {
+            "heading": "Divide el trabajo en pasos",
+            "items": [
+              "Casi cualquier trabajo se puede dividir en pasos. Observa cómo se hace el trabajo y anota cada paso como lo hace el trabajador.",
+              "No hagas la lista tan detallada que nunca termine, ni los pasos tan generales que se salten el trabajo real.",
+              "Pon más atención a los trabajos que no haces seguido, como el mantenimiento, el arranque y el apagado. Esos también tienen peligros."
+            ]
+          },
+          {
+            "heading": "Encuentra los peligros en cada paso",
+            "items": [
+              "En cada paso, pregunta: ¿Qué puede salir mal? ¿Qué pasaría? ¿Cómo podría pasar? ¿Qué más lo podría empeorar? ¿Qué tan probable es?",
+              "La cuadrilla que hace el trabajo debe participar. Tú conoces el trabajo mejor que nadie, y ese conocimiento es lo que encuentra los peligros.",
+              "Piensa en lesiones y casi accidentes que ya pasaron en este trabajo. Son señales de que las protecciones que tenemos tal vez no son suficientes."
+            ]
+          },
+          {
+            "heading": "Escoge los controles",
+            "items": [
+              "La mejor solución elimina el peligro o cambia el equipo o el arreglo: guardas, cubiertas, protectores o ventilación de extracción.",
+              "Después vienen los procedimientos por escrito, los permisos de trabajo y las prácticas seguras. El equipo de protección personal, como respiradores, protección auditiva y lentes de seguridad, viene después de esos.",
+              "Si encuentras un peligro urgente o fácil de arreglar, arréglalo ya. No esperes a que se termine el JSA."
+            ]
+          },
+          {
+            "heading": "Cuando algo cambia",
+            "items": [
+              "Vuelve a revisar el JSA después de una lesión o enfermedad en ese trabajo. Después de un casi accidente, platícalo con todos los que hacen ese trabajo y repasen los pasos correctos.",
+              "Antes de que cambie el trabajo, el equipo o la forma de trabajar, la cuadrilla debe opinar, y el cambio se revisa para buscar peligros nuevos.",
+              "Cada vez que se cambia el JSA, todos los afectados reciben entrenamiento sobre los cambios. Revísalo de vez en cuando de todos modos para que siga al día."
+            ]
+          }
+        ],
+        "ask": "Escojan un paso del trabajo de hoy. ¿Qué puede salir mal en ese paso, y cuál es nuestro control para eso?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "rig-move",
+    "industries": [
+      "oil"
+    ],
+    "code": "No OSHA rig-move standard; OSHA Oil and Gas eTool (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Oil and Gas eTool: Servicing, Transporting Rig and Rigging Up",
+        "url": "https://www.osha.gov/etools/oil-and-gas/servicing/transport-rig-rigup",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Transportation, Transporting Equipment (route, permits, 10-foot power line clearance, spotter, flagger)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/transportation/transporting-equipment",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Drilling, Rigging Up (rig-down is the reverse)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/rigging-up",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Rig Moves",
+        "hook": "A rig move puts big, heavy equipment on narrow roads, under power lines and close to people on foot. OSHA lists being struck by a moving rig, and getting caught between the rig and the wellhead, among the hazards.",
+        "sections": [
+          {
+            "heading": "Plan the route",
+            "items": [
+              "Check the route ahead of time. Make sure the rig can get through and the road surface is good enough.",
+              "Find the height and width limits along the way, and get the permits needed for roads and bridges, including state permits.",
+              "Make sure the lease road and the pad are ready before you drive on them."
+            ]
+          },
+          {
+            "heading": "Overhead power lines",
+            "items": [
+              "Look for power lines on the route and on location. Signs or markers can point them out to drivers.",
+              "OSHA's guidance says to keep equipment at least 10 feet away from overhead power lines. Higher-voltage lines need more room."
+            ]
+          },
+          {
+            "heading": "Spotters and people clear",
+            "items": [
+              "Use a ground guide when backing the rig. Keep everyone clear of a moving rig.",
+              "Follow your company's procedure for positioning the rig.",
+              "When equipment is loaded, a spotter stands a safe distance away to help line it up. On the road, a flagger can tell drivers about conditions and when they can pass."
+            ]
+          },
+          {
+            "heading": "Raising and lowering the mast",
+            "items": [
+              "Rigging down is basically rigging up in reverse, and the hazards are similar.",
+              "When the mast is being raised or lowered, no one is on the unit except the operator at the controls. Everyone else stands clear.",
+              "Before the mast goes up, uncoil and check all cables, inspect the anchors, and check the derrick for loose tools. Stand to the side of lines and cables.",
+              "The operator checks wind speed and direction to decide if the mast can go up safely."
+            ]
+          }
+        ],
+        "ask": "On this move, where are the power lines, and who is our ground guide?"
+      },
+      "es": {
+        "title": "Mudanzas del equipo de perforación",
+        "hook": "Mover un equipo de perforación pone maquinaria grande y pesada en caminos angostos, debajo de líneas eléctricas y cerca de gente a pie. OSHA menciona entre los peligros que te golpee un equipo en movimiento, o quedar atrapado entre el equipo y el cabezal del pozo.",
+        "sections": [
+          {
+            "heading": "Planea la ruta",
+            "items": [
+              "Revisa la ruta antes. Asegúrate de que el equipo pueda pasar y de que la superficie del camino esté en buenas condiciones.",
+              "Busca los límites de altura y ancho en el camino, y saca los permisos necesarios para caminos y puentes, incluyendo los permisos del estado.",
+              "Asegúrate de que el camino de acceso y la plataforma estén listos antes de manejar sobre ellos."
+            ]
+          },
+          {
+            "heading": "Líneas eléctricas aéreas",
+            "items": [
+              "Busca líneas eléctricas en la ruta y en la locación. Letreros o marcadores las pueden señalar a los choferes.",
+              "La guía de OSHA dice que mantengas el equipo por lo menos a 10 pies de las líneas eléctricas aéreas. Las líneas de más voltaje necesitan más distancia."
+            ]
+          },
+          {
+            "heading": "Guías y gente fuera del camino",
+            "items": [
+              "Usa un guía en el suelo cuando el equipo vaya en reversa. Mantén a todos lejos de un equipo en movimiento.",
+              "Sigue el procedimiento de tu compañía para posicionar el equipo.",
+              "Cuando se carga el equipo, un guía se para a una distancia segura para ayudar a alinearlo. En el camino, un banderero puede avisar a los choferes cómo está el camino y cuándo pueden pasar."
+            ]
+          },
+          {
+            "heading": "Subir y bajar el mástil",
+            "items": [
+              "Desarmar el equipo es básicamente armarlo al revés, y los peligros son parecidos.",
+              "Cuando se sube o se baja el mástil, nadie está en la unidad excepto el operador en los controles. Todos los demás se quedan lejos.",
+              "Antes de subir el mástil, desenrolla y revisa todos los cables, inspecciona las anclas y revisa que no haya herramientas sueltas en la torre. Párate a un lado de las líneas y los cables.",
+              "El operador revisa la velocidad y la dirección del viento para decidir si el mástil se puede subir con seguridad."
+            ]
+          }
+        ],
+        "ask": "En esta mudanza, ¿dónde están las líneas eléctricas, y quién es nuestro guía en el suelo?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "rig-floor-falls",
+    "industries": [
+      "oil"
+    ],
+    "code": "1910.28 / 1910 Subpart D",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.28(b)(1)(i) and (b)(15): protection at 4 feet or more above a lower level",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.28",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.28(c): falling object protection, head protection",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.28",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Oil and Gas Extraction: Standards (1910 covers drilling and servicing except site preparation)",
+        "url": "https://www.osha.gov/oil-and-gas-extraction/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Fatal Facts, Oil Patch No. 4-2012 (OSHA 3617): fall from derrick",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA-FF-3617.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Tripping Out/In (monkeyboard, dropped objects)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/tripping-out-in",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Rigging Up (stairs, ladders, guardrails, unsecured tools)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/rigging-up",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Servicing, General Services (never disconnect PFAS in the derrick)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/servicing/general-services",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Falls from the Derrick and Rig Floor",
+        "hook": "In one OSHA case, a derrickman climbed back to the board after a break without hooking up his fall protection. He lost his balance and fell 90 feet to the rig floor.",
+        "sections": [
+          {
+            "heading": "The rule",
+            "items": [
+              "Drilling and servicing work falls under OSHA's general industry rules. Site prep is the exception.",
+              "Under those rules, your company has to protect you on any open side or edge 4 feet or more above a lower level. That means a guardrail, a safety net, or a personal fall protection system."
+            ]
+          },
+          {
+            "heading": "Up in the derrick",
+            "items": [
+              "Wear a full body harness and stay 100% tied off while you work in the derrick. Never unhook your fall arrest system while you're up there.",
+              "Use the climb assist on the ladder. The derrickman in that case unhooked from the climb assist and never clipped in at the board.",
+              "Know how to use the derrick emergency escape device before you ever need it."
+            ]
+          },
+          {
+            "heading": "Ladders, stairs and guardrails",
+            "items": [
+              "Use only ladders in good repair, with no missing rungs. Stairs with missing or damaged steps get fixed before they go in.",
+              "Guardrails go up before anyone works in an elevated area. Never use a guardrail as an anchor, or to lift or hold a load.",
+              "Wear fall protection while you put guardrails up or take them down."
+            ]
+          },
+          {
+            "heading": "Dropped objects",
+            "items": [
+              "Tie off every tool you use up high. Don't carry tools up the derrick ladder. Raise them with a line.",
+              "Before the derrick goes up, check it for loose tools.",
+              "When people are working overhead, use extra caution below and wear your hard hat.",
+              "Keep slip-resistant surfaces in good shape, and keep the floor clear of mud, ice and debris."
+            ]
+          }
+        ],
+        "ask": "Where do you tie off on the board today, and when did you last inspect your harness and the climb assist?"
+      },
+      "es": {
+        "title": "Caídas desde la torre y el piso del equipo",
+        "hook": "En un caso de OSHA, un encuellador volvió a subir a la plataforma después de un descanso sin engancharse a su protección contra caídas. Perdió el equilibrio y cayó 90 pies al piso del equipo.",
+        "sections": [
+          {
+            "heading": "La regla",
+            "items": [
+              "El trabajo de perforación y de servicio a pozos cae bajo las reglas de OSHA para la industria general. La preparación del sitio es la excepción.",
+              "Bajo esas reglas, tu compañía tiene que protegerte en cualquier lado o borde abierto a 4 pies o más sobre un nivel más bajo. Eso quiere decir una baranda, una red de seguridad o un sistema personal de protección contra caídas."
+            ]
+          },
+          {
+            "heading": "Arriba en la torre",
+            "items": [
+              "Usa un arnés de cuerpo completo y mantente 100% amarrado mientras trabajas en la torre. Nunca te desenganches del sistema de detención de caídas mientras estés allá arriba.",
+              "Usa el asistente de ascenso en la escalera. El encuellador de ese caso se soltó del asistente de ascenso y nunca se enganchó en la plataforma.",
+              "Aprende a usar el dispositivo de escape de emergencia de la torre antes de que lo necesites."
+            ]
+          },
+          {
+            "heading": "Escaleras, gradas y barandas",
+            "items": [
+              "Usa solo escaleras en buen estado, sin peldaños faltantes. Las gradas con escalones faltantes o dañados se reparan antes de instalarlas.",
+              "Las barandas se ponen antes de que alguien trabaje en un área elevada. Nunca uses una baranda como anclaje, ni para levantar o sostener una carga.",
+              "Usa protección contra caídas mientras pones o quitas las barandas."
+            ]
+          },
+          {
+            "heading": "Objetos que caen",
+            "items": [
+              "Amarra cada herramienta que uses en alto. No subas herramientas cargándolas por la escalera de la torre. Súbelas con una cuerda.",
+              "Antes de levantar la torre, revísala para ver si hay herramientas sueltas.",
+              "Cuando haya gente trabajando arriba, ten más cuidado abajo y usa tu casco.",
+              "Mantén en buen estado las superficies antiderrapantes, y mantén el piso libre de lodo, hielo y escombros."
+            ]
+          }
+        ],
+        "ask": "¿Dónde te vas a amarrar hoy en la plataforma, y cuándo fue la última vez que revisaste tu arnés y el asistente de ascenso?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "pipe-handling",
+    "industries": [
+      "oil"
+    ],
+    "code": "OSHA Oil and Gas eTool: Drilling (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Oil and Gas eTool: Drilling Ahead (handling tubulars, catwalk and V-door, starting drilling, adding pipe, mousehole)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/drilling-ahead",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Tripping Out/In (setting slips, latching elevators, maneuvering pipe to racking area)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/tripping-out-in",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Rigging Up (pipe racks and catwalk)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/rigging-up",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Casing Operations (powered equipment for heavy tools, V-door)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/casing-operations",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas Extraction (hazards that can result in fatalities, incl. struck-by/caught-in/caught-between)",
+        "url": "https://www.osha.gov/oil-and-gas-extraction",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Pipe Handling and Pinch Points",
+        "hook": "OSHA lists struck-by, caught-in and caught-between hazards among the dangers that can kill oil and gas workers. Pipe moves from the racks, up the catwalk, through the V-door and into the slips, and every step has a spot that can catch a hand or a foot.",
+        "sections": [
+          {
+            "heading": "Racks and catwalk",
+            "items": [
+              "Level the pipe racks. Chock or pin the tubulars so they can't roll.",
+              "Work tubulars from the ends, from ground level.",
+              "Setting up racks and the catwalk can pinch or crush feet. Keep a safe distance from equipment that's coming together, and use a tag line to guide racks and catwalks into place."
+            ]
+          },
+          {
+            "heading": "Up the V-door",
+            "items": [
+              "Stand clear of suspended, hoisted or moving loads. Watch for pipe and equipment coming up through the V-door.",
+              "Hoist slowly to limit pipe momentum, and use a tail rope to guide it as needed.",
+              "Use a rig floor winch or other powered equipment for heavy casing tools and gear, instead of muscling them by hand."
+            ]
+          },
+          {
+            "heading": "Slips, elevators and chains",
+            "items": [
+              "Slips have three handles. Lift them together with more than one person, and keep your hands placed so they can't get caught between the slips and the rotary table.",
+              "Latch elevators using their handles. An elevator that isn't securely latched can strike you.",
+              "Never step over a jerk chain, and stay clear of the spinning chain while a connection is being made. Use a tail rope on the spinning chain to keep your hands away."
+            ]
+          },
+          {
+            "heading": "Hands and feet",
+            "items": [
+              "Keep your hands off the end of the stump and out of the inside of the pipe.",
+              "Keep your feet and legs out from under the tongs when pipe is being stabbed, and away from the bottom of pipe stands.",
+              "Keep the area around the rotary table clear of mud, ice, snow and debris that can make you slip or trip."
+            ]
+          }
+        ],
+        "ask": "Walk the path the pipe takes today. Where is the one spot your hands or feet could get caught?"
+      },
+      "es": {
+        "title": "Manejo de tubería y puntos de atrapamiento",
+        "hook": "OSHA pone los golpes y el quedar atrapado en algo o entre algo entre los peligros que pueden matar a los trabajadores de petróleo y gas. La tubería va de los racks, sube por la rampa, entra por la puerta en V y llega a las cuñas, y en cada paso hay un punto que te puede atrapar una mano o un pie.",
+        "sections": [
+          {
+            "heading": "Racks y rampa",
+            "items": [
+              "Nivela los racks de tubería. Pon calzas o pasadores a la tubería para que no ruede.",
+              "Trabaja la tubería desde los extremos, desde el nivel del suelo.",
+              "Al armar los racks y la rampa te pueden machucar o aplastar los pies. Mantén una distancia segura del equipo que se está juntando, y usa una cuerda guía para poner en su lugar los racks y la rampa."
+            ]
+          },
+          {
+            "heading": "Por la puerta en V",
+            "items": [
+              "Mantente lejos de cargas colgadas, izadas o en movimiento. Fíjate en la tubería y el equipo que suben por la puerta en V.",
+              "Iza despacio para limitar el impulso de la tubería, y usa una cuerda de cola para guiarla cuando haga falta.",
+              "Usa el malacate del piso del equipo u otro equipo mecánico para las herramientas pesadas de revestimiento, en vez de moverlas a pura fuerza."
+            ]
+          },
+          {
+            "heading": "Cuñas, elevadores y cadenas",
+            "items": [
+              "Las cuñas tienen tres manijas. Levántenlas entre más de una persona, y pon las manos donde no te las puedan atrapar entre las cuñas y la mesa rotaria.",
+              "Engancha los elevadores usando sus manijas. Un elevador que no está bien enganchado te puede golpear.",
+              "Nunca pases por encima de una cadena de jalón, y mantente lejos de la cadena de enrosque mientras se hace una conexión. Usa una cuerda de cola en la cadena de enrosque para mantener las manos lejos."
+            ]
+          },
+          {
+            "heading": "Manos y pies",
+            "items": [
+              "No pongas las manos en la punta del tubo de abajo ni adentro de la tubería.",
+              "Mantén los pies y las piernas fuera de debajo de las llaves cuando se está embocando la tubería, y lejos de la base de las paradas de tubería.",
+              "Mantén el área alrededor de la mesa rotaria libre de lodo, hielo, nieve y escombros que te puedan hacer resbalar o tropezar."
+            ]
+          }
+        ],
+        "ask": "Recorran el camino que va a hacer la tubería hoy. ¿Cuál es el punto donde te podrían atrapar las manos o los pies?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "oil-cranes",
+    "industries": [
+      "oil"
+    ],
+    "code": "1910.180 / 1910.184",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.180(b)(3): only designated personnel operate; (a) definition of designated",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.180",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.180(c)(2): rating chart in the cab; (h)(1)(i): no loading beyond rated load",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.180",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.180(h)(2), (h)(3)(i)(b), (h)(3)(v), (h)(3)(vi), (h)(3)(xvi), (h)(4)(i)-(ii), (j): attaching, moving and holding the load; power lines",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.180",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.184(c)(2)-(4), (c)(7), (c)(9)-(11), (c)(14): sling safe operating practices",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.184",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.184(d): daily sling inspection by a competent person",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.184",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Drilling, Rigging Up (struck by crane or load; tag lines)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/rigging-up",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Drilling Ahead (catwalk and V-door: inspect rope, slings, chains and hooks before each tour)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/drilling/drilling-ahead",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Cranes and Slings on the Well Site",
+        "hook": "During rig-up, OSHA lists being struck by the crane, the load, or a tipping truck as a hazard. A lift goes right when the operator, the rigging and the crew all do their part.",
+        "sections": [
+          {
+            "heading": "Who runs the crane",
+            "items": [
+              "Only people your company has designated can operate the crane. Designated means the employer picked them as qualified. If that's not you, stay off the controls.",
+              "Each crane has a rating chart in the cab where the operator can see it. The crane is never loaded past its rated load.",
+              "The operator never leaves the controls while a load is hanging."
+            ]
+          },
+          {
+            "heading": "Check the rigging",
+            "items": [
+              "Each day before use, a competent person your company picks inspects every sling and its fittings. A damaged or defective sling comes out of service right away.",
+              "Before each tour, look over the wire rope and slings, catline ropes and knots, and chains and hooks. Don't let a rope lie in standing water.",
+              "Every sling needs a legible ID marking. No marking, don't use it. Never load a sling past its rated capacity.",
+              "Never shorten a sling with a knot or a bolt. No kinked legs, pad sharp edges, and no shock loading."
+            ]
+          },
+          {
+            "heading": "Make the lift",
+            "items": [
+              "Never wrap the hoist rope around the load. Attach the load to the hook with slings or other approved devices.",
+              "Make sure the load is secure and balanced before it goes up more than a few inches.",
+              "Keep your hands out from between the sling and the load while the sling is being tightened.",
+              "Use a tag line when the load could spin in a dangerous way. Guide it with the line instead of getting under it."
+            ]
+          },
+          {
+            "heading": "Stay clear",
+            "items": [
+              "Everyone stays clear of a load about to be lifted and any load in the air. Nobody stands or walks under a load on the hook.",
+              "No hoisting, swinging or traveling while anyone is on the load or the hook. The operator avoids carrying loads over people.",
+              "Setting up near overhead power lines? Stop and get the clearance rules from your supervisor before the crane moves in."
+            ]
+          }
+        ],
+        "ask": "Who is designated to run the crane today, and who checked the slings this morning?"
+      },
+      "es": {
+        "title": "Grúas y eslingas en la locación",
+        "hook": "Durante el armado del equipo, OSHA menciona como peligro que te golpee la grúa, la carga o un camión que se vuelca. Un izaje sale bien cuando el operador, el aparejo y el equipo cumplen su parte.",
+        "sections": [
+          {
+            "heading": "Quién opera la grúa",
+            "items": [
+              "Solo las personas que tu compañía ha designado pueden operar la grúa. Designado quiere decir que el empleador las escogió como calificadas. Si no eres tú, no toques los controles.",
+              "Cada grúa tiene una tabla de capacidades en la cabina, donde el operador la puede ver. Nunca se carga la grúa más allá de su carga nominal.",
+              "El operador nunca deja los controles mientras hay una carga colgando."
+            ]
+          },
+          {
+            "heading": "Revisa el aparejo",
+            "items": [
+              "Cada día, antes de usarlas, una persona competente escogida por tu compañía revisa cada eslinga y sus accesorios. Una eslinga dañada o defectuosa se saca de servicio de inmediato.",
+              "Antes de cada turno, revisa el cable de acero y las eslingas, las cuerdas del malacate y sus nudos, y las cadenas y ganchos. No dejes una cuerda tirada en agua estancada.",
+              "Cada eslinga necesita una marca de identificación que se pueda leer. Sin marca, no se usa. Nunca cargues una eslinga más de su capacidad nominal.",
+              "Nunca acortes una eslinga con un nudo o un perno. Nada de ramales torcidos, protege los bordes filosos y nada de cargas de golpe."
+            ]
+          },
+          {
+            "heading": "Haz el izaje",
+            "items": [
+              "Nunca enrolles el cable de izaje alrededor de la carga. Sujeta la carga al gancho con eslingas u otros dispositivos aprobados.",
+              "Asegúrate de que la carga esté bien sujeta y balanceada antes de subirla más de unas pulgadas.",
+              "Mantén las manos fuera del espacio entre la eslinga y la carga mientras se aprieta la eslinga.",
+              "Usa una cuerda guía cuando la carga pueda girar de forma peligrosa. Guíala con la cuerda en vez de meterte debajo."
+            ]
+          },
+          {
+            "heading": "Mantente lejos",
+            "items": [
+              "Todos se mantienen lejos de una carga que se va a levantar y de cualquier carga en el aire. Nadie se para ni pasa debajo de una carga en el gancho.",
+              "No se levanta, no se gira ni se traslada la carga mientras alguien esté sobre la carga o el gancho. El operador evita pasar cargas por encima de la gente.",
+              "¿Se va a armar cerca de líneas eléctricas aéreas? Para y pídele a tu supervisor las reglas de distancia antes de que entre la grúa."
+            ]
+          }
+        ],
+        "ask": "¿Quién está designado hoy para operar la grúa, y quién revisó las eslingas esta mañana?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "lease-roads",
+    "industries": [
+      "oil"
+    ],
+    "code": "OSHA Oil and Gas eTool: Transportation (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Oil and Gas eTool: Transportation",
+        "url": "https://www.osha.gov/etools/oil-and-gas/transportation",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Oil and Gas eTool: Transporting Personnel (trip planning, fatigue, weather, speeding, seat belts, maintenance, night driving, wildlife, loose objects)",
+        "url": "https://www.osha.gov/etools/oil-and-gas/transportation/transporting-personnel",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 2018-126: Oil and Gas Workers: How to Prevent Fatigued Driving at Work",
+        "url": "https://www.cdc.gov/niosh/docs/2018-126/pdfs/2018-126.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Fatal Facts, Oil Patch No. 1-2012 (OSHA 3614): highway vehicle incident",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA-FF-3614.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Lease Roads and Long Drives",
+        "hook": "Highway crashes are the leading cause of death for oil and gas extraction workers. OSHA says roughly 4 of every 10 workers killed in this industry die in a highway vehicle incident.",
+        "sections": [
+          {
+            "heading": "Plan the trip",
+            "items": [
+              "Wells are often far out, down secondary and lease roads. Plan the drive before you leave, the same way you'd plan a job.",
+              "Journey management means cutting the total miles driven and the risks on the road. Fewer trips, fewer vehicles, and trips timed to miss heavy traffic.",
+              "Check the weather forecast and traffic before you go. Know where you can stop to rest or stay along the route."
+            ]
+          },
+          {
+            "heading": "Fatigue after a long hitch",
+            "items": [
+              "Long shifts plus long drives add up to fatigue. Drowsy driving is a major cause of crashes in this industry.",
+              "Know the warning signs: frequent yawning, heavy eyelids, drifting out of your lane, or not remembering the last few miles.",
+              "Aim for 7 to 9 hours of sleep each day in a dark, quiet place. Coffee can't make up for lost sleep, and rolling down the window or turning up the radio won't keep you awake. There is no substitute for sleep.",
+              "Feel it's unsafe to keep driving? Use your stop work authority. If you're tired but have to drive a little longer, pull over somewhere safe, have a coffee and nap 15 to 30 minutes first. If you think a coworker is too tired, speak up."
+            ]
+          },
+          {
+            "heading": "Road and weather",
+            "items": [
+              "Slow down when the weather turns bad or the road gets worse. Driving too fast for conditions, or over the posted limit, greatly raises your risk.",
+              "In one OSHA case, four workers drove home at night on a wet road after a 12-hour shift. The truck took a curve too fast, skidded and rolled. Only one of the four wore a seat belt. The driver and a passenger were thrown out and killed.",
+              "At night, slow down so you don't out-drive your headlights. Stay extra alert where wildlife is likely."
+            ]
+          },
+          {
+            "heading": "Buckle up and pack it right",
+            "items": [
+              "Not wearing a seat belt sharply raises your chance of being hurt or killed in a crash. Everyone buckles up, every seat, every trip.",
+              "Loose gear in the cab becomes a high-speed missile in a crash. Strap heavy items down in the bed or trunk, and keep the cab clear.",
+              "Inspect the vehicle before you drive it, and report anything wrong so it gets fixed."
+            ]
+          }
+        ],
+        "ask": "Who's driving after this shift, how far is it, and what's the plan if they get tired?"
+      },
+      "es": {
+        "title": "Caminos de arrendamiento y viajes largos",
+        "hook": "Los choques en carretera son la causa principal de muerte entre los trabajadores de extracción de petróleo y gas. OSHA dice que aproximadamente 4 de cada 10 trabajadores que mueren en esta industria mueren en un accidente de vehículo en carretera.",
+        "sections": [
+          {
+            "heading": "Planea el viaje",
+            "items": [
+              "Los pozos muchas veces están lejos, por caminos secundarios y caminos de arrendamiento. Planea el viaje antes de salir, igual que planearías un trabajo.",
+              "Manejar el viaje (journey management) quiere decir reducir el total de millas manejadas y los riesgos en el camino. Menos viajes, menos vehículos y viajes a horas que eviten el tráfico pesado.",
+              "Revisa el pronóstico del tiempo y el tráfico antes de salir. Ten claro dónde puedes parar a descansar o quedarte en el camino."
+            ]
+          },
+          {
+            "heading": "El cansancio después de una rotación larga",
+            "items": [
+              "Turnos largos más viajes largos terminan en cansancio. Manejar con sueño es una causa principal de choques en esta industria.",
+              "Conoce las señales: bostezar seguido, párpados pesados, salirte de tu carril o no acordarte de las últimas millas.",
+              "Trata de dormir de 7 a 9 horas cada día en un lugar oscuro y callado. El café no repone el sueño que te falta, y bajar la ventana o subirle al radio no te mantiene despierto. Nada reemplaza el sueño.",
+              "¿Sientes que no es seguro seguir manejando? Usa tu autoridad para parar el trabajo. Si estás cansado pero tienes que manejar un poco más, oríllate en un lugar seguro, tómate un café y duerme de 15 a 30 minutos antes de seguir. Si crees que un compañero está muy cansado, dilo."
+            ]
+          },
+          {
+            "heading": "El camino y el clima",
+            "items": [
+              "Baja la velocidad cuando el clima se pone malo o el camino empeora. Manejar muy rápido para las condiciones, o más rápido que el límite, aumenta mucho tu riesgo.",
+              "En un caso de OSHA, cuatro trabajadores iban de regreso a casa de noche, en un camino mojado, después de un turno de 12 horas. La camioneta tomó una curva muy rápido, patinó y se volcó. Solo uno de los cuatro llevaba el cinturón puesto. El chofer y un pasajero salieron disparados y murieron.",
+              "De noche, baja la velocidad para no manejar más allá de lo que alumbran tus faros. Ponte más alerta donde puede haber animales en el camino."
+            ]
+          },
+          {
+            "heading": "Abróchate y acomoda la carga",
+            "items": [
+              "No usar el cinturón de seguridad aumenta mucho tu riesgo de salir herido o muerto en un choque. Todos se abrochan, en cada asiento, en cada viaje.",
+              "El equipo suelto en la cabina se vuelve un proyectil a alta velocidad en un choque. Amarra las cosas pesadas en la caja o la cajuela, y mantén la cabina despejada.",
+              "Revisa el vehículo antes de manejarlo, y reporta cualquier falla para que la arreglen."
+            ]
+          }
+        ],
+        "ask": "¿Quién va a manejar después de este turno, qué tan lejos es, y cuál es el plan si se cansa?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "hazmat-placards",
+    "industries": [
+      "truck",
+      "oil"
+    ],
+    "code": "1910.1201 / 1910.120(q) / DOT 49 CFR 172.504, 172.602, 177.817",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1201(a)-(b): keeping DOT markings, placards and labels on",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1201",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.120(q)(6) and (q)(6)(i): emergency responder training, first responder awareness level",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.120",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Trucking Industry: Transporting Hazardous Materials (HAZWOPER and drivers, National Response Center)",
+        "url": "https://www.osha.gov/trucking-industry/transporting-hazardous-materials",
+        "kind": "guidance"
+      },
+      {
+        "label": "DOT 49 CFR 172.504(a): placards on each side and each end; 172.602(a), (c): emergency response information",
+        "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-I/subchapter-C/part-172",
+        "kind": "guidance"
+      },
+      {
+        "label": "DOT 49 CFR 177.817(a), (e): shipping papers required and where the driver keeps them",
+        "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-I/subchapter-C/part-177",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Hazmat Loads: Placards, Papers and Leaks",
+        "hook": "On a hazmat load, the placards and papers tell everyone what's inside, including the responders who show up if something goes wrong. Most of these rules come from DOT, the U.S. Department of Transportation. A few come from OSHA.",
+        "sections": [
+          {
+            "heading": "Placards and labels",
+            "items": [
+              "Under DOT rules, a truck, trailer, tank or container that needs placards gets them on each side and each end.",
+              "When your company receives a placarded trailer or container, OSHA says the placards stay on until the hazardous material has been removed enough that no hazard is left.",
+              "Packages keep their DOT labels until they've been cleaned of residue and purged of vapors. So an empty drum keeps its labels until it's been cleaned and purged."
+            ]
+          },
+          {
+            "heading": "Shipping papers",
+            "items": [
+              "DOT says you don't haul a hazmat load without a shipping paper, unless that material is excepted from the paper rule.",
+              "At the wheel, keep it within reach while you're belted in, and either easy to see for someone entering the cab or in the holder on the inside of the driver's door.",
+              "When you leave the cab, put it in the driver's door holder or on the driver's seat. That way authorities can find it after a crash or at an inspection."
+            ]
+          },
+          {
+            "heading": "Emergency response information",
+            "items": [
+              "DOT also requires emergency response information for the load, kept right where the driver can get to it.",
+              "It covers the health hazards, the fire or explosion risk, first precautions, how to handle a fire, how to handle a spill or leak with no fire, and first aid. Know where it is."
+            ]
+          },
+          {
+            "heading": "If something leaks",
+            "items": [
+              "OSHA's emergency response rule doesn't cover a driver just for driving. But if you get actively involved in handling the emergency, you're an emergency responder under that rule, and responders need training before they respond.",
+              "At the basic awareness level, the job is to spot the problem, identify the material if you can, notify the proper people, and take no further action.",
+              "The National Response Center, 800-424-8802, is the one federal contact for reporting oil and hazardous chemical spills. Know who at your company makes that call."
+            ]
+          }
+        ],
+        "ask": "On the load you're hauling today, where are the shipping papers and the emergency response information?"
+      },
+      "es": {
+        "title": "Cargas peligrosas: placas, documentos y fugas",
+        "hook": "En una carga de materiales peligrosos, las placas y los documentos le dicen a todos qué lleva adentro, incluyendo a los rescatistas que llegan si algo sale mal. La mayoría de estas reglas son del DOT, el Departamento de Transporte de EE. UU. Algunas son de OSHA.",
+        "sections": [
+          {
+            "heading": "Placas y etiquetas",
+            "items": [
+              "Según las reglas del DOT, un camión, tráiler, tanque o contenedor que necesita placas las lleva en cada lado y en cada extremo.",
+              "Cuando tu compañía recibe un tráiler o contenedor con placas, OSHA dice que las placas se quedan puestas hasta que el material peligroso se haya sacado lo suficiente para que no quede ningún peligro.",
+              "Los paquetes conservan sus etiquetas del DOT hasta que se limpien de residuos y se purguen los vapores. Así que un tambo vacío conserva sus etiquetas hasta que se limpie y se purgue."
+            ]
+          },
+          {
+            "heading": "Documentos de embarque",
+            "items": [
+              "El DOT dice que no transportas una carga peligrosa sin un documento de embarque, a menos que ese material esté exento de esa regla.",
+              "Al volante, tenlo a tu alcance mientras tienes puesto el cinturón, y que se vea fácil para quien entre a la cabina o que esté en el porta documentos dentro de la puerta del chofer.",
+              "Cuando te bajes de la cabina, ponlo en el porta documentos de la puerta del chofer o en el asiento del chofer. Así las autoridades lo encuentran después de un choque o en una inspección."
+            ]
+          },
+          {
+            "heading": "Información de respuesta a emergencias",
+            "items": [
+              "El DOT también exige información de respuesta a emergencias para la carga, guardada donde el chofer la pueda alcanzar.",
+              "Incluye los peligros para la salud, el riesgo de fuego o explosión, las primeras precauciones, cómo manejar un incendio, cómo manejar un derrame o fuga sin fuego, y primeros auxilios. Sabe dónde está."
+            ]
+          },
+          {
+            "heading": "Si algo se fuga",
+            "items": [
+              "La regla de respuesta a emergencias de OSHA no cubre a un chofer solo por manejar. Pero si participas activamente en atender la emergencia, eres un rescatista bajo esa regla, y los rescatistas necesitan entrenamiento antes de responder.",
+              "En el nivel básico de alerta, el trabajo es reconocer el problema, identificar el material si puedes, avisar a las personas indicadas y no hacer nada más.",
+              "El Centro Nacional de Respuesta, al 800-424-8802, es el único contacto federal para reportar derrames de petróleo y químicos peligrosos. Sabe quién en tu compañía hace esa llamada."
+            ]
+          }
+        ],
+        "ask": "En la carga que llevas hoy, ¿dónde están los documentos de embarque y la información de respuesta a emergencias?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "tank-truck-loading",
+    "industries": [
+      "truck",
+      "oil"
+    ],
+    "code": "1910.106(b)(6) / 1910.106(f)(3)(iii)-(iv) / NIOSH-funded FACE report (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.106(b)(6): sources of ignition, including static sparks",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.106(f)(3)(iii): self-closing fill valves held open by hand; (f)(3)(iv)(a)-(d): bonding when loading through open domes, and exceptions",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.106",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Trucking Industry: Loading and Unloading",
+        "url": "https://www.osha.gov/trucking-industry/loading-unloading",
+        "kind": "guidance"
+      },
+      {
+        "label": "Kentucky FACE Report 14KY021 (NIOSH-funded): tanker driver falls from top of tanker",
+        "url": "https://www.cdc.gov/niosh/face/pdfs/14ky021.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Loading and Unloading Tank Trucks",
+        "hook": "OSHA calls loading or unloading flammable and combustible liquids from tank trucks one of the most hazardous jobs at any plant or storage site. Static, leftover vapors, overfills and the climb to the top all need a plan.",
+        "sections": [
+          {
+            "heading": "Bond before the dome opens",
+            "items": [
+              "A static spark can light fuel vapor. When flammable liquids are loaded through an open dome, the loading rack has a bond wire with a clamp on the end.",
+              "Clamp it to a metal part that's connected to the cargo tank before you raise any dome cover.",
+              "Leave it on until filling is done and every dome cover is closed and secured.",
+              "Some products, and loading through closed top or bottom connections, don't need the bond wire under the rule. Ask your supervisor which products at your rack need it."
+            ]
+          },
+          {
+            "heading": "Watch for leftover vapors",
+            "items": [
+              "If the tank last hauled gasoline or another product that lights easily, its vapors can still be inside, even if today's load doesn't catch fire as easily.",
+              "The rule still calls for bonding in that case.",
+              "Wherever flammable vapors may be present, keep away flames, smoking, hot surfaces and sparks."
+            ]
+          },
+          {
+            "heading": "Don't overfill",
+            "items": [
+              "The valve that finishes filling a tank truck has to be self-closing and held open by hand, unless there's an automatic shutoff for when the tank is full.",
+              "If you're not sure how the valve at your rack works, ask before you load."
+            ]
+          },
+          {
+            "heading": "Falls from the top",
+            "items": [
+              "In one death investigated by a NIOSH-funded state program, a tanker driver climbed on top to vent the compartments and fell almost 10 feet to the concrete below.",
+              "Bottom loading and automatic venting can keep you off the top altogether.",
+              "The investigators say employers who require workers to go on top of tankers must provide adequate fall protection, and should consider rail guard systems on the trucks."
+            ]
+          }
+        ],
+        "ask": "When someone on our crew has to go on top of a tank, what keeps them from falling?"
+      },
+      "es": {
+        "title": "Cargar y descargar camiones tanque",
+        "hook": "OSHA dice que cargar o descargar líquidos inflamables y combustibles de camiones tanque es uno de los trabajos más peligrosos en cualquier planta o sitio de almacenamiento. La estática, los vapores que quedan, los derrames por llenar de más y la subida a la parte de arriba necesitan un plan.",
+        "sections": [
+          {
+            "heading": "Conecta el cable antes de abrir el domo",
+            "items": [
+              "Una chispa de estática puede prender el vapor del combustible. Cuando se cargan líquidos inflamables por un domo abierto, el rack de carga tiene un cable de conexión con una pinza en la punta.",
+              "Engánchala a una parte de metal que esté conectada al tanque antes de levantar cualquier tapa del domo.",
+              "Déjala puesta hasta que termine el llenado y todas las tapas del domo estén cerradas y aseguradas.",
+              "Algunos productos, y la carga por conexiones cerradas de arriba o de abajo, no necesitan el cable según la regla. Pregúntale a tu supervisor qué productos en tu rack lo necesitan."
+            ]
+          },
+          {
+            "heading": "Cuidado con los vapores que quedan",
+            "items": [
+              "Si el tanque llevó antes gasolina u otro producto que prende fácil, sus vapores todavía pueden estar adentro, aunque la carga de hoy no prenda tan fácil.",
+              "La regla de todos modos pide conectar el cable en ese caso.",
+              "Donde pueda haber vapores inflamables, mantén lejos las llamas, el cigarro, las superficies calientes y las chispas."
+            ]
+          },
+          {
+            "heading": "No llenes de más",
+            "items": [
+              "La válvula que termina de llenar un camión tanque tiene que cerrarse sola y mantenerse abierta con la mano, a menos que haya un cierre automático para cuando el tanque está lleno.",
+              "Si no estás seguro de cómo funciona la válvula de tu rack, pregunta antes de cargar."
+            ]
+          },
+          {
+            "heading": "Caídas desde arriba",
+            "items": [
+              "En una muerte investigada por un programa estatal financiado por NIOSH, un chofer de tanque se subió arriba para ventilar los compartimientos y se cayó casi 10 pies al concreto.",
+              "La carga por abajo y la ventilación automática te pueden evitar tener que subir.",
+              "Los investigadores dicen que los empleadores que exigen que los trabajadores se suban encima de los tanques deben dar protección adecuada contra caídas, y deben considerar sistemas de barandas de protección en los camiones."
+            ]
+          }
+        ],
+        "ask": "Cuando alguien de nuestra cuadrilla tiene que subirse encima de un tanque, ¿qué evita que se caiga?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "trailer-checks",
+    "industries": [
+      "truck",
+      "wh"
+    ],
+    "code": "1910.178(k)(1) / (k)(3) / (m)(7)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.178(k)(1): brakes set and wheel chocks under rear wheels of highway trucks",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.178(k)(3): fixed jacks for uncoupled semitrailers",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.178(m)(7): brakes, wheel blocks, fixed jacks, trailer floor check",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA TIB 00-07-31: Inspection of Suspension-Type Highway Trailers Prior to Loading and Unloading with Powered Industrial Trucks",
+        "url": "https://www.osha.gov/sites/default/files/publications/tib20000731.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Trucking Industry: Standards (DOT preemption of wheel chocking on interstate trucks)",
+        "url": "https://www.osha.gov/trucking-industry/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Trucking Industry: Loading and Unloading",
+        "url": "https://www.osha.gov/trucking-industry/loading-unloading",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Check the Trailer Before the Forklift Goes In",
+        "hook": "A damaged trailer may not hold the weight of a forklift. OSHA has had reports of trailers giving way during loading and unloading. A careful look first can help stop that.",
+        "sections": [
+          {
+            "heading": "Hold it still",
+            "items": [
+              "Under OSHA's rule, a highway truck's brakes get set and wheel chocks go under the rear wheels so it can't roll while a forklift is on it. On interstate trucks, a DOT brake rule covers chocking instead. Either way, know how this site holds the trailer.",
+              "If the trailer isn't hooked to a tractor, fixed jacks may be needed to keep it from tipping up while you load."
+            ]
+          },
+          {
+            "heading": "Walk around the outside",
+            "items": [
+              "Look at the rear impact guard, the bar under the back doors. Damage there can mean other damage, and it can keep a trailer restraint from catching.",
+              "Look at the front landing gear. If it's damaged, the front of the trailer can collapse under the forklift and the load.",
+              "Look underneath for cross members that are missing, badly rusted or bent. Look for missing rivets near the bottom.",
+              "Check the sides for tears or cuts longer than 21 inches, or that affect more than one side post."
+            ]
+          },
+          {
+            "heading": "Look inside",
+            "items": [
+              "The floor has to be checked for breaks and weak spots before a forklift drives on. That's an OSHA rule.",
+              "Look for a wavy floor, layers coming apart, cracks, missing pieces and water stains.",
+              "Check the inside walls, especially the bottom two feet. A cut post is a hazard.",
+              "Keep checking the floor as you unload and more of it shows."
+            ]
+          },
+          {
+            "heading": "If you find damage",
+            "items": [
+              "One problem doesn't always mean the trailer is unsafe. But it's a warning sign. Report it, and your company needs to decide if a forklift can go in safely.",
+              "If it can't be done safely with a forklift, the load comes off another way. If the trailer can't be trusted and there's no other way, the trailer should come out of service."
+            ]
+          }
+        ],
+        "ask": "Who looks over the trailer before our first forklift goes in, and what happens if they find damage?"
+      },
+      "es": {
+        "title": "Revisa el tráiler antes de que entre el montacargas",
+        "hook": "Un tráiler dañado puede no aguantar el peso de un montacargas. OSHA ha recibido reportes de tráileres que se vinieron abajo mientras los cargaban o descargaban. Una buena revisión primero puede ayudar a evitarlo.",
+        "sections": [
+          {
+            "heading": "Que no se mueva",
+            "items": [
+              "Según la regla de OSHA, al camión de carretera se le ponen los frenos y se colocan calzas bajo las ruedas traseras para que no ruede mientras un montacargas está adentro. En los camiones interestatales, una regla de frenos del DOT cubre las calzas en su lugar. De cualquier forma, conoce cómo se asegura el tráiler en este lugar.",
+              "Si el tráiler no está enganchado a un tractor, puede que se necesiten gatos fijos para que no se levante de un lado mientras cargas."
+            ]
+          },
+          {
+            "heading": "Revisa por fuera",
+            "items": [
+              "Mira la defensa trasera, la barra debajo de las puertas de atrás. Si está dañada, puede haber otros daños, y puede impedir que el seguro del tráiler se enganche.",
+              "Mira el tren de aterrizaje de adelante. Si está dañado, el frente del tráiler se puede desplomar con el peso del montacargas y la carga.",
+              "Mira por debajo si hay travesaños que faltan, muy oxidados o doblados. Busca remaches que falten cerca de la parte de abajo.",
+              "Revisa los lados por rasgaduras o cortes de más de 21 pulgadas, o que afecten más de un poste lateral."
+            ]
+          },
+          {
+            "heading": "Revisa por dentro",
+            "items": [
+              "El piso se tiene que revisar por roturas y partes débiles antes de que entre un montacargas. Esa es una regla de OSHA.",
+              "Busca un piso ondulado, capas que se están despegando, grietas, pedazos que faltan y manchas de agua.",
+              "Revisa las paredes de adentro, sobre todo los dos pies de abajo. Un poste cortado es un peligro.",
+              "Sigue revisando el piso mientras descargas y se va viendo más."
+            ]
+          },
+          {
+            "heading": "Si encuentras daños",
+            "items": [
+              "Un solo problema no siempre quiere decir que el tráiler no es seguro. Pero es una señal de alerta. Repórtalo, y tu empresa tiene que decidir si un montacargas puede entrar con seguridad.",
+              "Si no se puede hacer con seguridad con un montacargas, la carga se saca de otra forma. Si no se puede confiar en el tráiler y no hay otra forma, el tráiler se debe sacar de servicio."
+            ]
+          }
+        ],
+        "ask": "¿Quién revisa el tráiler antes de que entre nuestro primer montacargas, y qué pasa si encuentra daños?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "trailer-doors",
+    "industries": [
+      "truck",
+      "wh"
+    ],
+    "code": "No OSHA standard for opening trailer doors; Washington State FACE report and tip sheet (guidance)",
+    "minutes": 4,
+    "sources": [
+      {
+        "label": "Washington State FACE program report 71-207-2021: Truck Driver Crushed by Cardboard Bale (CDC Stacks)",
+        "url": "https://stacks.cdc.gov/view/cdc/229106",
+        "kind": "guidance"
+      },
+      {
+        "label": "Washington State FACE program report 71-207-2021 (full text, WA Dept. of Labor and Industries)",
+        "url": "https://seguridad.lni.wa.gov/safety-health/safety-research/files/2021/71_207_2021_TruckDriverCrushedByCardboardBale.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "Washington State Dept. of Labor and Industries tip sheet: Protect yourself from falling objects (CDC Stacks)",
+        "url": "https://stacks.cdc.gov/view/cdc/200358",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Opening Trailer Doors",
+        "hook": "Opening a trailer door sounds like nothing. In one Washington State fatality investigation, a driver was killed by a 1,500-pound bale that fell out when he opened the second door.",
+        "sections": [
+          {
+            "heading": "What can go wrong",
+            "items": [
+              "Loads can shift on the road. He opened the passenger side door first and chained it open. When he opened the driver's side door, the stack of bales became unstable and two bales fell out.",
+              "The company had straps to keep bales from tipping over and falling out when the doors opened. The drivers didn't use them."
+            ]
+          },
+          {
+            "heading": "Before you open",
+            "items": [
+              "Park on level ground before you open the doors.",
+              "That trailer was parked on uneven ground, which may have made the stack less stable."
+            ]
+          },
+          {
+            "heading": "Open it right",
+            "items": [
+              "Unlock and open one door at a time. Stand behind that door so it shields you from anything that falls.",
+              "Washington State's tip sheet says: if cargo starts to fall, don't try to catch it."
+            ]
+          },
+          {
+            "heading": "Secure it at the start",
+            "items": [
+              "Freight should be loaded and secured so it won't fall over on the road or when the doors open.",
+              "Use what you're given. The investigators said your company should provide straps or other securement devices and require their use. Washington State guidance also lists a cargo bar or webbing, and shrink-wrapping or strapping goods to the pallet, or securing them to the side wall."
+            ]
+          }
+        ],
+        "ask": "On your next trailer, which door do you open first, and where exactly are you standing when it swings open?"
+      },
+      "es": {
+        "title": "Cómo abrir las puertas del tráiler",
+        "hook": "Abrir la puerta de un tráiler parece algo sin importancia. En una investigación de una muerte en el estado de Washington, un chofer murió por una paca de 1,500 libras que se cayó cuando abrió la segunda puerta.",
+        "sections": [
+          {
+            "heading": "Qué puede salir mal",
+            "items": [
+              "La carga se puede mover en el camino. Él abrió primero la puerta del lado del pasajero y la sujetó con cadena. Cuando abrió la puerta del lado del chofer, las pacas se desestabilizaron y se cayeron dos.",
+              "La compañía tenía correas para que las pacas no se voltearan ni se salieran al abrir las puertas. Los choferes no las usaban."
+            ]
+          },
+          {
+            "heading": "Antes de abrir",
+            "items": [
+              "Estaciónate en terreno plano antes de abrir las puertas.",
+              "Ese tráiler estaba en terreno disparejo, y eso pudo haber hecho que la carga quedara menos estable."
+            ]
+          },
+          {
+            "heading": "Ábrelo bien",
+            "items": [
+              "Quita el seguro y abre una puerta a la vez. Párate detrás de esa puerta para que te proteja de lo que se caiga.",
+              "La hoja de consejos del estado de Washington dice: si la carga se empieza a caer, no trates de agarrarla."
+            ]
+          },
+          {
+            "heading": "Asegúrala desde el principio",
+            "items": [
+              "La carga se debe cargar y asegurar para que no se caiga en el camino ni cuando se abran las puertas.",
+              "Usa lo que te dan. Los investigadores dijeron que tu compañía debe darte correas u otros aparatos para asegurar la carga y exigir que se usen. La guía del estado de Washington también menciona una barra de carga o cinchas, y envolver con plástico o amarrar la mercancía a la tarima, o asegurarla a la pared lateral."
+            ]
+          }
+        ],
+        "ask": "En tu próximo tráiler, ¿qué puerta abres primero y dónde exactamente estás parado cuando se abre?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "loading-ergonomics",
+    "industries": [
+      "truck",
+      "wh"
+    ],
+    "code": "No OSHA ergonomics standard; OSH Act Sec. 5(a)(1) / NIOSH 2007-131 (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Standard Interpretation 2024-03-18: no specific ergonomics standard; General Duty Clause, OSH Act Sec. 5(a)(1)",
+        "url": "https://www.osha.gov/laws-regs/standardinterpretations/2024-03-18",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Warehousing: Hazards and Solutions (ergonomics and musculoskeletal disorders)",
+        "url": "https://www.osha.gov/warehousing/hazards-solutions",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 2007-131: Ergonomic Guidelines for Manual Material Handling",
+        "url": "https://www.cdc.gov/niosh/docs/2007-131/pdfs/2007-131.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Loading and Unloading by Hand",
+        "hook": "Moving freight by hand is how backs and shoulders get hurt. OSHA lists overexertion sprains and strains from moving materials by hand as a warehouse hazard.",
+        "sections": [
+          {
+            "heading": "Know the risk",
+            "items": [
+              "Risk factors include heavy lifts, bending, twisting, reaching overhead, pushing and pulling heavy loads, and doing it over and over.",
+              "Cases run from a few pounds to over 100 pounds. OSHA's warehouse guidance suggests keeping cases to 35 pounds or less where you can.",
+              "OSHA has no ergonomics standard. But OSHA can still use the General Duty Clause, which says employers must keep work free of recognized hazards that can cause death or serious harm."
+            ]
+          },
+          {
+            "heading": "Plan the load",
+            "items": [
+              "Look at the load before you touch it. NIOSH's checklist marks any load over 50 pounds as a risk for low back pain.",
+              "Let equipment do the work: a hand truck, a cart, a conveyor or chute, or a lift that raises the load for you.",
+              "A team lift cuts the load in half. NIOSH calls it a stopgap until a better fix is in place."
+            ]
+          },
+          {
+            "heading": "In the trailer and at the pallet",
+            "items": [
+              "Lift in the zone above your knees and below your shoulders, close to your body.",
+              "Stooping to the floor and reaching overhead are stressful positions. Get close to the load instead of reaching for it.",
+              "For cases over 35 pounds, OSHA suggests raising the pallet so you lift between your knees and mid-chest.",
+              "Don't twist. Step to the side to turn."
+            ]
+          },
+          {
+            "heading": "Fix the job",
+            "items": [
+              "Good habits help, but NIOSH says training alone is not an ergonomic improvement.",
+              "Fixes OSHA and NIOSH point to include lighter cases, better heights, and equipment that takes the weight."
+            ]
+          }
+        ],
+        "ask": "What's the heaviest or most awkward thing we'll move today, and what equipment or help are we using for it?"
+      },
+      "es": {
+        "title": "Cargar y descargar a mano",
+        "hook": "Mover carga a mano es como se lastiman la espalda y los hombros. OSHA pone las torceduras y distensiones por mover materiales a mano entre los peligros en los almacenes.",
+        "sections": [
+          {
+            "heading": "Conoce el riesgo",
+            "items": [
+              "Los factores de riesgo incluyen levantar mucho peso, agacharte, torcerte, alcanzar por encima de la cabeza, empujar y jalar cargas pesadas, y hacerlo una y otra vez.",
+              "Las cajas pesan desde unas cuantas libras hasta más de 100 libras. La guía de OSHA para almacenes sugiere que las cajas pesen 35 libras o menos cuando se pueda.",
+              "OSHA no tiene una norma de ergonomía. Pero OSHA puede usar la Cláusula de Deber General, que dice que el empleador tiene que mantener el trabajo libre de peligros conocidos que puedan causar la muerte o daño grave."
+            ]
+          },
+          {
+            "heading": "Planea la carga",
+            "items": [
+              "Mira la carga antes de tocarla. La lista de revisión de NIOSH marca cualquier carga de más de 50 libras como un riesgo de dolor de espalda baja.",
+              "Deja que el equipo haga el trabajo: un diablito, un carrito, una banda transportadora o rampa, o un elevador que suba la carga por ti.",
+              "Levantar entre dos reduce la carga a la mitad. NIOSH dice que es una solución temporal hasta que haya una mejor."
+            ]
+          },
+          {
+            "heading": "En el tráiler y en la tarima",
+            "items": [
+              "Levanta en la zona arriba de las rodillas y abajo de los hombros, pegado al cuerpo.",
+              "Agacharte hasta el piso y alcanzar por encima de la cabeza son posiciones que cansan el cuerpo. Acércate a la carga en vez de estirarte para alcanzarla.",
+              "Para cajas de más de 35 libras, OSHA sugiere subir la tarima para que levantes entre las rodillas y la mitad del pecho.",
+              "No te tuerzas. Da un paso al lado para girar."
+            ]
+          },
+          {
+            "heading": "Arregla el trabajo",
+            "items": [
+              "Los buenos hábitos ayudan, pero NIOSH dice que el entrenamiento por sí solo no es una mejora ergonómica.",
+              "Entre las soluciones que señalan OSHA y NIOSH están cajas más ligeras, mejores alturas y equipo que cargue el peso."
+            ]
+          }
+        ],
+        "ask": "¿Qué es lo más pesado o más incómodo que vamos a mover hoy, y qué equipo o ayuda vamos a usar?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "grain-elevators",
+    "industries": [
+      "truck",
+      "ag"
+    ],
+    "code": "1910.272(k) / 1910.272(g) / 1910.272(j)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.272(b)(1): facilities covered (grain elevators, feed mills and others)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.272(k): receiving-pit grates, 2 1/2 inch maximum openings",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.272(e)(1)(i), (e)(2): training on ignition sources such as smoking; bin entry training",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.272(f): hot work permits",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.272(g)(1)(i)-(g)(1)(iii), (g)(2), (g)(3): bin entry permit, lockout, air testing, lifeline, observer",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.272(i): informing contractors",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.272(j)(1), (j)(2): written housekeeping program; 1/8 inch dust in priority areas (or equivalent protection)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Grain Handling",
+        "url": "https://www.osha.gov/grain-handling",
+        "kind": "guidance"
+      },
+      {
+        "label": "Minnesota FACE program report 00MN036 (hosted on the NIOSH FACE site): farm worker engulfed in wheat in a truck box",
+        "url": "https://www.cdc.gov/niosh/face/stateface/mn/00mn036.html",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Hauling to Grain Elevators",
+        "hook": "Moving grain can bury a person in seconds. That's true in a bin, and it's true in the back of your truck while it drains.",
+        "sections": [
+          {
+            "heading": "Stay out of the grain",
+            "items": [
+              "Never climb into a grain trailer or hopper while it's being emptied. In one fatality investigation by Minnesota's FACE program, a 19-year-old truck driver walked into wheat flowing out of his truck box, was engulfed, and died.",
+              "Stop the unloading equipment and lock out the power before anyone gets into hauling equipment.",
+              "Going into the elevator's bins, silos or tanks is a special task. Only workers trained for it go in. Entry takes a permit or a supervisor there the whole time, lockout, air testing, a lifeline when required, and an observer outside."
+            ]
+          },
+          {
+            "heading": "At the dump pit",
+            "items": [
+              "Truck receiving pits have to be covered by grates. The openings can be no wider than 2 and a half inches.",
+              "If a grate is missing or out of place, stop and tell the elevator staff before you dump.",
+              "Augers and conveyors have moving parts that can catch you and cause amputations."
+            ]
+          },
+          {
+            "heading": "Dust and fire",
+            "items": [
+              "Grain dust is the main fuel for explosions in grain handling.",
+              "Elevators have to keep a written housekeeping program for dust. In priority areas, dust that builds past 1/8 inch has to be removed promptly, or the site has to use another method that protects just as well.",
+              "Smoking is a common ignition source.",
+              "Welding or torch work at an elevator needs a hot work permit, with a few exceptions."
+            ]
+          },
+          {
+            "heading": "Know the site",
+            "items": [
+              "This OSHA rule covers grain elevators, feed mills, flour mills and similar plants.",
+              "Elevators have to tell contractors who work there about fire and explosion hazards, the site safety rules, and the emergency plan. Ask what applies to you."
+            ]
+          }
+        ],
+        "ask": "When you pull onto the pit today, what will you check before you open the hopper, and where will you stand while it drains?"
+      },
+      "es": {
+        "title": "Llevar grano al elevador",
+        "hook": "El grano en movimiento puede enterrar a una persona en segundos. Eso pasa en un silo, y también pasa en la caja de tu camión mientras se vacía.",
+        "sections": [
+          {
+            "heading": "No te metas en el grano",
+            "items": [
+              "Nunca te subas a un tráiler o tolva de grano mientras se está vaciando. En una investigación de una muerte del programa FACE de Minnesota, un chofer de 19 años se metió al trigo que salía de la caja de su camión, el grano lo cubrió y murió.",
+              "Para el equipo de descarga y bloquea la energía antes de que alguien se meta al equipo de transporte.",
+              "Entrar a los silos, depósitos o tanques del elevador es una tarea especial. Solo entran los trabajadores entrenados para eso. Para entrar se necesita un permiso o un supervisor presente todo el tiempo, bloqueo de energía, prueba del aire, una línea de vida cuando se requiera, y un observador afuera."
+            ]
+          },
+          {
+            "heading": "En la fosa de descarga",
+            "items": [
+              "Las fosas de recibo para camiones tienen que estar tapadas con rejillas. Las aberturas no pueden medir más de 2 pulgadas y media.",
+              "Si falta una rejilla o está fuera de lugar, para y avísale al personal del elevador antes de descargar.",
+              "Los sinfines y las bandas transportadoras tienen partes en movimiento que te pueden atrapar y causar amputaciones."
+            ]
+          },
+          {
+            "heading": "Polvo y fuego",
+            "items": [
+              "El polvo de grano es el combustible principal de las explosiones en el manejo de grano.",
+              "Los elevadores tienen que tener un programa escrito de limpieza para el polvo. En las áreas prioritarias, el polvo que pasa de 1/8 de pulgada se tiene que quitar pronto, o el lugar tiene que usar otro método que proteja igual.",
+              "Fumar es una fuente común de ignición.",
+              "Soldar o usar soplete en un elevador necesita un permiso de trabajo en caliente, con algunas excepciones."
+            ]
+          },
+          {
+            "heading": "Conoce el lugar",
+            "items": [
+              "Esta regla de OSHA cubre elevadores de grano, molinos de alimento, molinos de harina y plantas parecidas.",
+              "Los elevadores tienen que informar a los contratistas que trabajan ahí sobre los peligros de fuego y explosión, las reglas de seguridad del lugar y el plan de emergencia. Pregunta qué te aplica a ti."
+            ]
+          }
+        ],
+        "ask": "Cuando llegues hoy a la fosa, ¿qué vas a revisar antes de abrir la tolva, y dónde te vas a parar mientras se vacía?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "organic-dust",
+    "industries": [
+      "ag"
+    ],
+    "code": "No OSHA farm respirator standard (1928.21(b)); OSHA Youth in Agriculture eTool (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Youth in Agriculture eTool: Organic Dust",
+        "url": "https://www.osha.gov/etools/youth-agriculture/organic-dust",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1928.21(b): Part 1910 subparts B-T and Z (incl. 1910.134) do not apply to agricultural operations",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.21",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Barn and Organic Dust",
+        "hook": "Dust from moldy hay, grain and animal barns can make you sick within hours. It feels like the flu, so it's easy to brush off.",
+        "sections": [
+          {
+            "heading": "Where it comes from",
+            "items": [
+              "Organic dust comes from hay, grain, straw and livestock. It carries molds, bacteria, pollen, bits of feed and bedding, and animal hair, feathers and droppings.",
+              "It gets heaviest in closed-in spaces like grain dryers, livestock pens and swine buildings.",
+              "The dustiest jobs include handling moldy hay, uncapping silos, cleaning grain bins, and working in dusty fields and buildings."
+            ]
+          },
+          {
+            "heading": "Know the signs",
+            "items": [
+              "Organic dust toxic syndrome, or ODTS, is a flu-like illness. Fever, chills, body aches, cough, tiredness and shortness of breath show up 4 to 12 hours after heavy dust.",
+              "It's temporary, but it can last up to seven days.",
+              "If you get sick after dusty work, see a doctor and tell them about the dust.",
+              "Breathing this dust over time can cause congestion, coughing or wheezing, and frequent infections. It's also tied to farmer's lung."
+            ]
+          },
+          {
+            "heading": "Cut the dust first",
+            "items": [
+              "Wet down feed and silo tops before you uncap or move them. Wet the material when you clean out bins.",
+              "Keep the ventilation working. Use machines, not hands and shovels, to feed and move material when you can.",
+              "Keeping hay, silage and grain dry, and drying grain before you store it, keeps mold down."
+            ]
+          },
+          {
+            "heading": "When you need a respirator",
+            "items": [
+              "A basic dust mask helps with nuisance dust. It does not protect you from organic vapors.",
+              "For grain or silage work in closed-in areas, wear the respirator your company gives you, like a NIOSH-approved N95.",
+              "A respirator only works if it fits. Your company should arrange a fit test and train you to wear it, care for it and store it."
+            ]
+          }
+        ],
+        "ask": "Which job this week will be the dustiest, and what will we do to cut the dust before anyone starts?"
+      },
+      "es": {
+        "title": "Polvo de granero y polvo orgánico",
+        "hook": "El polvo del heno con moho, del grano y de los corrales te puede enfermar en cuestión de horas. Se siente como una gripe, así que es fácil no hacerle caso.",
+        "sections": [
+          {
+            "heading": "De dónde viene",
+            "items": [
+              "El polvo orgánico viene del heno, el grano, la paja y los animales. Trae moho, bacterias, polen, pedacitos de alimento y de cama, y pelo, plumas y excremento de animales.",
+              "Se pone más fuerte en lugares cerrados, como secadoras de grano, corrales de animales y naves de cerdos.",
+              "Los trabajos con más polvo incluyen manejar heno con moho, destapar silos, limpiar silos de grano y trabajar en campos y edificios con mucho polvo."
+            ]
+          },
+          {
+            "heading": "Conoce las señales",
+            "items": [
+              "El síndrome tóxico por polvo orgánico, o ODTS, es una enfermedad parecida a la gripe. La fiebre, los escalofríos, el dolor de cuerpo, la tos, el cansancio y la falta de aire aparecen de 4 a 12 horas después de mucho polvo.",
+              "Es pasajero, pero puede durar hasta siete días.",
+              "Si te enfermas después de un trabajo con polvo, ve al médico y dile lo del polvo.",
+              "Respirar este polvo con el tiempo puede causar congestión, tos o silbido en el pecho, e infecciones frecuentes. También está ligado al pulmón del granjero."
+            ]
+          },
+          {
+            "heading": "Primero, baja el polvo",
+            "items": [
+              "Moja el alimento y la parte de arriba del silo antes de destaparlo o moverlo. Moja el material cuando limpies los silos.",
+              "Mantén la ventilación funcionando. Usa máquinas, no las manos ni la pala, para dar de comer y mover material cuando se pueda.",
+              "Mantener seco el heno, el ensilaje y el grano, y secar el grano antes de guardarlo, ayuda a que no salga moho."
+            ]
+          },
+          {
+            "heading": "Cuando necesitas respirador",
+            "items": [
+              "Una mascarilla sencilla contra el polvo sirve para el polvo común. No te protege de los vapores orgánicos.",
+              "Para trabajar con grano o ensilaje en lugares cerrados, usa el respirador que te da tu compañía, como un N95 aprobado por NIOSH.",
+              "Un respirador solo sirve si te queda bien. Tu compañía debe conseguir una prueba de ajuste y capacitarte para ponértelo, cuidarlo y guardarlo."
+            ]
+          }
+        ],
+        "ask": "¿Cuál trabajo de esta semana va a tener más polvo, y qué vamos a hacer para bajar el polvo antes de que alguien empiece?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "youth-farm",
+    "industries": [
+      "ag"
+    ],
+    "code": "FLSA child labor in agriculture (DOL Wage and Hour Division) / OSHA Youth in Agriculture eTool (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "DOL Wage and Hour Division Fact Sheet #40: Youth employment in agricultural occupations under the FLSA (rev. Dec. 2016)",
+        "url": "https://www.dol.gov/agencies/whd/fact-sheets/40-child-labor-farms",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Youth in Agriculture eTool: home (worker rights, employer responsibility)",
+        "url": "https://www.osha.gov/etools/youth-agriculture",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Youth in Agriculture eTool: Rights and Laws",
+        "url": "https://www.osha.gov/etools/youth-agriculture/rights-laws",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Youth in Agriculture eTool: Tractors",
+        "url": "https://www.osha.gov/etools/youth-agriculture/tractors",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Youth in Agriculture eTool: Other Machinery",
+        "url": "https://www.osha.gov/etools/youth-agriculture/other-machinery",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Young Workers on the Farm",
+        "hook": "Agriculture is one of the most dangerous industries in the nation. Young workers are new to its hazards, so we match each job to their age and their training.",
+        "sections": [
+          {
+            "heading": "The age rules",
+            "items": [
+              "These are federal child labor rules from the U.S. Department of Labor's Wage and Hour Division, not OSHA.",
+              "At 16 and older, a young worker can do any farm job at any time.",
+              "At 14 and 15, they can work outside school hours, but not in jobs the Department of Labor has declared hazardous.",
+              "Kids working on a farm their own parents own or run are not covered by these limits. Some states have stricter rules, and the more protective rule applies."
+            ]
+          },
+          {
+            "heading": "Off-limits under 16",
+            "items": [
+              "Driving a tractor over 20 PTO horsepower, or hooking up or unhooking its implements.",
+              "Running hazardous farm machines, like balers, combines, feed grinders, forklifts and power saws.",
+              "Working in a pen or stall with a breeding bull, boar or stud horse, a sow with suckling pigs, or a cow with a newborn calf.",
+              "Working on a ladder or scaffold above 20 feet, riding on a tractor as a passenger or helper, going into manure pits or certain silos, transporting or applying anhydrous ammonia, or handling chemicals labeled Danger, Poison or Warning."
+            ]
+          },
+          {
+            "heading": "Training and speaking up",
+            "items": [
+              "A 14- or 15-year-old with a 4-H or vocational agriculture training certificate may run certain equipment they were trained on. Student-learners have a similar exception. If you're not sure, ask before the job starts.",
+              "Every worker has the right to safety training in a language and words they understand. Training about pesticides is covered by EPA rules.",
+              "Get trained on a machine before you run it, and do the pre-start check first.",
+              "You can report a hazard and use your rights without being punished for it."
+            ]
+          },
+          {
+            "heading": "Around machines",
+            "items": [
+              "Keep guards in place. Never reach into a machine to clear a jam.",
+              "Never allow extra riders on a tractor.",
+              "Tie back long hair, and skip loose clothes, jewelry and drawstrings near moving parts."
+            ]
+          }
+        ],
+        "ask": "For each young worker here today: what's your job, and is any part of it on the off-limits list?"
+      },
+      "es": {
+        "title": "Trabajadores jóvenes en la granja",
+        "hook": "La agricultura es una de las industrias más peligrosas del país. Los trabajadores jóvenes no conocen todavía sus peligros, así que cada trabajo tiene que ir de acuerdo con su edad y su capacitación.",
+        "sections": [
+          {
+            "heading": "Las reglas de edad",
+            "items": [
+              "Estas son reglas federales de trabajo infantil de la División de Salarios y Horas del Departamento de Trabajo de EE. UU., no de OSHA.",
+              "A los 16 años o más, un trabajador joven puede hacer cualquier trabajo de granja a cualquier hora.",
+              "A los 14 y 15 años, puede trabajar fuera del horario escolar, pero no en trabajos que el Departamento de Trabajo ha declarado peligrosos.",
+              "Los muchachos que trabajan en una granja que es de sus propios padres, o que sus padres manejan, no tienen estos límites. Algunos estados tienen reglas más estrictas, y se aplica la regla que más protege."
+            ]
+          },
+          {
+            "heading": "Prohibido para menores de 16",
+            "items": [
+              "Manejar un tractor de más de 20 caballos de fuerza en la toma de fuerza (PTO), o enganchar o desenganchar sus implementos.",
+              "Operar máquinas peligrosas de granja, como empacadoras, cosechadoras, molinos de alimento, montacargas y sierras eléctricas.",
+              "Trabajar en un corral o establo con un toro, verraco o semental de cría, una cerda con lechones, o una vaca con un becerro recién nacido.",
+              "Trabajar en una escalera o andamio a más de 20 pies, ir en un tractor como pasajero o ayudante, entrar a fosas de estiércol o a ciertos silos, transportar o aplicar amoníaco anhidro, o manejar químicos con la etiqueta Danger, Poison o Warning (peligro, veneno o advertencia)."
+            ]
+          },
+          {
+            "heading": "Capacitación y hablar claro",
+            "items": [
+              "Un joven de 14 o 15 años con un certificado de capacitación de 4-H o de educación agrícola vocacional puede operar cierto equipo en el que lo capacitaron. Los estudiantes aprendices tienen una excepción parecida. Si no estás seguro, pregunta antes de empezar el trabajo.",
+              "Todo trabajador tiene derecho a capacitación de seguridad en un idioma y con palabras que entienda. La capacitación sobre pesticidas la cubren las reglas de la EPA.",
+              "Recibe capacitación en una máquina antes de operarla, y primero haz la revisión antes de arrancar.",
+              "Puedes reportar un peligro y usar tus derechos sin que te castiguen por eso."
+            ]
+          },
+          {
+            "heading": "Cerca de las máquinas",
+            "items": [
+              "Deja las guardas en su lugar. Nunca metas la mano en una máquina para destaparla.",
+              "Nunca permitas pasajeros de más en un tractor.",
+              "Amárrate el pelo largo, y no uses ropa suelta, joyas ni cordones cerca de partes en movimiento."
+            ]
+          }
+        ],
+        "ask": "Para cada trabajador joven aquí hoy: ¿cuál es tu trabajo, y alguna parte está en la lista de lo prohibido?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "farm-emergency",
+    "industries": [
+      "ag"
+    ],
+    "code": "OSHA DSG FS-3870 (guidance) / 1928.21(b)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Agricultural Safety Fact Sheet DSG FS-3870 (06/2016): Emergency Preparedness for Farmworkers",
+        "url": "https://www.osha.gov/Publications/OSHA3870.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1928.21(a)-(b): which Part 1910 standards apply to agriculture (emergency action plan and first aid standards are not listed)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.21",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Emergency Plans for Farm Crews",
+        "hook": "Out in the field, there may be no clinic close by. The plan we make now is what gets someone help fast.",
+        "sections": [
+          {
+            "heading": "Know the plan",
+            "items": [
+              "OSHA's farm emergency guidance says the best plans are built for your own farm and the work you do.",
+              "A good plan shows escape routes, places to shelter, and meeting points on a map. It names who's in charge, so nobody is guessing.",
+              "It also says how we account for every worker, and who handles rescue and first aid.",
+              "Think about what could happen here: storms, lightning, wildfire, a fire or explosion, a chemical spill, a grain entrapment, an animal or vehicle incident."
+            ]
+          },
+          {
+            "heading": "Calling for help",
+            "items": [
+              "Emergency phone numbers should be posted where people can see them, inside farm vehicles, and on phones.",
+              "Know the one way we report an emergency on this farm, and who to call with questions about the plan.",
+              "Crews spread out across fields need a way to reach each other and first responders, like two-way radios.",
+              "Local first responders can be invited to walk the farm, so they learn the layout, the hazards and the utility shutoffs before they're ever needed."
+            ]
+          },
+          {
+            "heading": "First aid",
+            "items": [
+              "Basic first aid supplies should be on hand.",
+              "If there's no clinic or hospital nearby, at least one person should be trained in first aid. Know who that is today.",
+              "The plan should keep a list of the electrical shutoffs, buildings, livestock and machinery, so responders know what they're walking into."
+            ]
+          },
+          {
+            "heading": "Practice it",
+            "items": [
+              "Training should be in a language you understand. It covers the alarm, how to evacuate, how to report, how to shut down equipment, and the kinds of emergencies we could face.",
+              "Drills should happen every year or as needed. Afterward, and after any real emergency, we talk about what to fix.",
+              "The plan gets reviewed every year, with every new worker, and whenever it changes."
+            ]
+          }
+        ],
+        "ask": "If someone got hurt in the far field right now, who calls, how do they call, and where do we all meet?"
+      },
+      "es": {
+        "title": "Planes de emergencia para cuadrillas de granja",
+        "hook": "En el campo puede que no haya una clínica cerca. El plan que hagamos ahora es lo que le consigue ayuda rápido a alguien.",
+        "sections": [
+          {
+            "heading": "Conoce el plan",
+            "items": [
+              "La guía de OSHA sobre emergencias en granjas dice que los mejores planes se hacen a la medida de tu propia granja y del trabajo que haces.",
+              "Un buen plan muestra en un mapa las rutas de escape, los lugares para refugiarse y los puntos de reunión. Dice quién está a cargo, para que nadie esté adivinando.",
+              "También dice cómo vamos a contar a todos los trabajadores, y quién se encarga del rescate y los primeros auxilios.",
+              "Piensa en lo que podría pasar aquí: tormentas, rayos, incendio forestal, un incendio o explosión, un derrame de químicos, alguien atrapado en grano, un accidente con animales o con un vehículo."
+            ]
+          },
+          {
+            "heading": "Pedir ayuda",
+            "items": [
+              "Los números de emergencia deben estar puestos donde la gente los vea, dentro de los vehículos de la granja y en los teléfonos.",
+              "Conoce la forma en que reportamos una emergencia en esta granja, y a quién llamar con preguntas sobre el plan.",
+              "Las cuadrillas que están regadas por los campos necesitan una forma de comunicarse entre ellas y con los servicios de emergencia, como radios de dos vías.",
+              "Se puede invitar a los bomberos y paramédicos locales a recorrer la granja, para que conozcan el terreno, los peligros y dónde se cortan los servicios antes de que haga falta."
+            ]
+          },
+          {
+            "heading": "Primeros auxilios",
+            "items": [
+              "Debe haber materiales básicos de primeros auxilios a la mano.",
+              "Si no hay clínica ni hospital cerca, por lo menos una persona debe estar capacitada en primeros auxilios. Sabe quién es hoy.",
+              "El plan debe tener una lista de los interruptores de electricidad, los edificios, los animales y la maquinaria, para que los rescatistas sepan con qué se van a encontrar."
+            ]
+          },
+          {
+            "heading": "Practícalo",
+            "items": [
+              "La capacitación debe ser en un idioma que entiendas. Cubre la alarma, cómo evacuar, cómo reportar, cómo apagar el equipo y los tipos de emergencias que podríamos tener.",
+              "Los simulacros deben hacerse cada año o cuando haga falta. Después, y después de cualquier emergencia real, hablamos de qué hay que mejorar.",
+              "El plan se revisa cada año, con cada trabajador nuevo y cada vez que cambia."
+            ]
+          }
+        ],
+        "ask": "Si alguien se lastimara ahorita en el campo más lejano, ¿quién llama, cómo llama y dónde nos reunimos todos?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "labor-camps",
+    "industries": [
+      "ag"
+    ],
+    "code": "1910.142",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.142(b)(1)-(b)(3), (b)(8), (b)(11): shelter, sleeping space, beds, screens, heating and cooking equipment, cold-weather heat",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.142",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.142(c)(1)-(c)(2), (c)(4): water supply, 35 gallons per person per day, no common drinking cups",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.142",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.142(d)(3), (d)(8)-(d)(10): toilet location, lighting, toilet paper, daily cleaning",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.142",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.142(f)(1)(i)-(ii), (f)(3): handwashing basins, showers, hot and cold running water",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.142",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.142(h)(1), (h)(3), (i)(2), (i)(3), (j): garbage, kitchens and food handlers, insects and rodents",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.142",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.142(k)(1)-(k)(2), (l)(1)-(l)(2): first aid, reporting disease and food poisoning",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.142",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1928.21(a)(1): temporary labor camps standard applies to agriculture",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.21",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Field Operations Manual, Chapter 12: temporary labor camps and agricultural housing",
+        "url": "https://www.osha.gov/fom/chapter-12",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Temporary Labor Camps",
+        "hook": "When the job comes with housing in a temporary labor camp, an OSHA rule covers that camp. Know what it should have, and speak up when something is wrong.",
+        "sections": [
+          {
+            "heading": "Sleeping quarters",
+            "items": [
+              "Each sleeping room needs at least 50 square feet of floor space per person, and a ceiling at least 7 feet high.",
+              "Beds have to be at least 36 inches apart, side to side and end to end, and at least 12 inches off the floor. Triple-deck bunks are not allowed.",
+              "Shelters have to protect you from the weather. Outside openings need screens, and screen doors have to close on their own.",
+              "Central kitchens and dining halls are kept separate from sleeping rooms."
+            ]
+          },
+          {
+            "heading": "Water, toilets and washing",
+            "items": [
+              "The camp needs a water supply approved by the health authority, able to deliver 35 gallons per person per day. Shared drinking cups are not allowed.",
+              "There has to be a toilet room within 200 feet of the door of each sleeping room.",
+              "Toilet rooms are lit day and night, stocked with toilet paper, and cleaned at least once a day.",
+              "The camp needs a shower for every 10 people, a handwash basin for every 6 people in shared facilities or one per family shelter, and hot and cold running water."
+            ]
+          },
+          {
+            "heading": "Heat, cooking and garbage",
+            "items": [
+              "This rule doesn't spell out fire extinguishers. It does say heating, cooking and water-heating equipment has to be installed under state and local codes. A camp used in cold weather needs adequate heat.",
+              "If a stove or heater looks unsafe, report it to the person who runs the camp.",
+              "Each shelter needs a garbage can within 100 feet. Cans get emptied when full, and at least twice a week.",
+              "The camp has to take real steps to keep insects and rodents out."
+            ]
+          },
+          {
+            "heading": "Getting sick or hurt",
+            "items": [
+              "Every camp has to keep first aid facilities, in the charge of a person trained in first aid.",
+              "The camp superintendent has to report suspected contagious disease to the local health officer, and suspected food poisoning to the health authority, right away.",
+              "Nobody with a contagious disease can work preparing, cooking or serving food."
+            ]
+          }
+        ],
+        "ask": "Who is the first aid person for this camp, and who do you tell when something in the housing is broken?"
+      },
+      "es": {
+        "title": "Campamentos temporales de trabajo",
+        "hook": "Cuando el trabajo incluye vivienda en un campamento temporal de trabajo, una regla de OSHA cubre ese campamento. Sabe lo que debe tener, y habla cuando algo esté mal.",
+        "sections": [
+          {
+            "heading": "Dormitorios",
+            "items": [
+              "Cada cuarto para dormir necesita por lo menos 50 pies cuadrados de piso por persona, y un techo de por lo menos 7 pies de alto.",
+              "Las camas tienen que estar por lo menos a 36 pulgadas una de otra, de lado y de cabecera a pie, y por lo menos a 12 pulgadas del piso. No se permiten literas de tres pisos.",
+              "Las viviendas tienen que protegerte del clima. Las aberturas hacia afuera necesitan tela de mosquitero, y las puertas de mosquitero se tienen que cerrar solas.",
+              "Las cocinas y comedores centrales se mantienen separados de los cuartos para dormir."
+            ]
+          },
+          {
+            "heading": "Agua, baños y lavado",
+            "items": [
+              "El campamento necesita un suministro de agua aprobado por la autoridad de salud, que pueda dar 35 galones por persona al día. No se permiten vasos compartidos para tomar agua.",
+              "Tiene que haber un baño a no más de 200 pies de la puerta de cada cuarto para dormir.",
+              "Los baños tienen luz de día y de noche, papel higiénico, y se limpian por lo menos una vez al día.",
+              "El campamento necesita una regadera por cada 10 personas, un lavamanos por cada 6 personas en instalaciones compartidas o uno por cada vivienda familiar, y agua corriente caliente y fría."
+            ]
+          },
+          {
+            "heading": "Calefacción, cocina y basura",
+            "items": [
+              "Esta regla no menciona extintores. Sí dice que el equipo de calefacción, de cocina y para calentar agua se tiene que instalar según los códigos estatales y locales. Un campamento que se usa con frío necesita calefacción suficiente.",
+              "Si una estufa o calentador se ve peligroso, repórtalo a la persona que maneja el campamento.",
+              "Cada vivienda necesita un bote de basura a no más de 100 pies. Los botes se vacían cuando se llenan, y por lo menos dos veces por semana.",
+              "El campamento tiene que tomar medidas reales para que no entren insectos ni roedores."
+            ]
+          },
+          {
+            "heading": "Si te enfermas o te lastimas",
+            "items": [
+              "Todo campamento tiene que tener instalaciones de primeros auxilios, a cargo de una persona capacitada en primeros auxilios.",
+              "El encargado del campamento tiene que reportar de inmediato cualquier sospecha de enfermedad contagiosa al oficial de salud local, y cualquier sospecha de intoxicación por comida a la autoridad de salud.",
+              "Nadie con una enfermedad contagiosa puede trabajar preparando, cocinando o sirviendo comida."
+            ]
+          }
+        ],
+        "ask": "¿Quién es la persona de primeros auxilios de este campamento, y a quién le avisas cuando algo de la vivienda está descompuesto?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "field-equipment",
+    "industries": [
+      "ag"
+    ],
+    "code": "1928.57(b)(2)-(b)(4) / (c)(3) / (c)(5)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1928.57(a)(3): guarding rules that don't apply to equipment built before October 25, 1976",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.57",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1928.57(a)(6)(iii)-(v): shut down before unclogging; everyone clear; lock out farmstead equipment",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.57",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1928.57(b)(2), (b)(3), (b)(4)(i): power transmission parts, functional components, guards in place (farm field equipment)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.57",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1928.57(c)(3)(i), (c)(3)(iii)(A)-(B): farmstead augers; portable grain auger guards",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.57",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1928.57(c)(5)(i)(A)-(B): electrical disconnect and locking on farmstead equipment",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1928/1928.57",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA FS-3835: Protecting Agricultural Workers from Tractor Hazards",
+        "url": "https://osha.gov/Publications/OSHA3835.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 86-119: Preventing Grain Auger Electrocutions",
+        "url": "https://www.cdc.gov/niosh/docs/86-119",
+        "kind": "guidance"
+      },
+      {
+        "label": "Iowa FACE 95IA047: Man Dies After Getting His Leg Caught in a Grain Auger",
+        "url": "https://www.cdc.gov/niosh/face/stateface/ia/95ia047.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH FACE 95WI003: Farmer Dies of Entanglement in Corn Picker/Husker",
+        "url": "https://stacks.cdc.gov/view/cdc/166919",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Augers and Field Equipment Guards",
+        "hook": "In an Iowa death investigation, nine bars were missing from the grate over a floor hopper auger. A man unloading corn alone got his leg caught in the open auger and bled to death.",
+        "sections": [
+          {
+            "heading": "What gets guarded",
+            "items": [
+              "The pinch points where gears, belts and chains meet have to be guarded. So do spinning shafts, including bolts, keys or set screws sticking out of them.",
+              "Some parts have to be open to do their job: augers, cutterbars, snapping rolls, beaters, straw choppers. They still have to be guarded as far as possible without stopping the work.",
+              "Some of these guarding rules don't cover equipment built before October 25, 1976. An older machine may have more open moving parts, so look it over before you work near it."
+            ]
+          },
+          {
+            "heading": "Augers",
+            "items": [
+              "The open flighting on a portable grain auger has to have a grate or a solid cover over it.",
+              "Grate openings can be no bigger than 4 3/4 inches across or 10 square inches, and no closer than 2 1/2 inches to the flighting.",
+              "Never pull bars off a grate or take off a shield on a running auger. After the Iowa death, investigators said workers should not remove grates or shields from augers while they run.",
+              "Lower a portable auger all the way down before you move it. Moving one while it's raised can put it into a power line or tip it over."
+            ]
+          },
+          {
+            "heading": "Unplugging and servicing",
+            "items": [
+              "Combines, pickers and choppers plug up. Before you reach in, stop the engine, disconnect the power, and wait for every part to stop moving.",
+              "In a Wisconsin case, a farmer got off the tractor with the PTO still running and went to the corn picker. A spinning shaft caught his clothes and pulled him in. Shut off the PTO and the engine before you walk up to the machine.",
+              "Guards, shields and access doors stay in place whenever the machine runs.",
+              "On augers and other farmstead equipment, lock out the electrical power first. Your company has to give you a lock for the main switch that only the people doing the work can operate, or, in a bulk storage bin, a disconnect right on the equipment."
+            ]
+          },
+          {
+            "heading": "Keep clear",
+            "items": [
+              "Make sure everyone is clear before you start the engine, engage power, or run the machine.",
+              "Find the parts on each machine where you could reach a moving part. Make sure the guards the manufacturer or dealer recommends are on."
+            ]
+          }
+        ],
+        "ask": "On the auger or combine we run today, where is an open moving part, and how do you shut it all the way down before you clear a plug?"
+      },
+      "es": {
+        "title": "Sinfines y protecciones de equipo de campo",
+        "hook": "En una investigación de una muerte en Iowa, a la rejilla sobre el sinfín de una tolva de piso le faltaban nueve barras. Un hombre que descargaba maíz solo metió la pierna en el sinfín abierto y murió desangrado.",
+        "sections": [
+          {
+            "heading": "Qué lleva protección",
+            "items": [
+              "Los puntos de atrapamiento donde se juntan engranes, bandas y cadenas tienen que llevar protección. También los ejes que giran, incluidos los pernos, cuñas o tornillos prisioneros que sobresalen.",
+              "Algunas partes tienen que estar abiertas para hacer su trabajo: sinfines, barras de corte, rodillos despanojadores, batidores, picadoras de paja. Aun así tienen que llevar toda la protección posible sin impedir el trabajo.",
+              "Algunas de estas reglas de protección no cubren el equipo fabricado antes del 25 de octubre de 1976. Una máquina vieja puede tener más partes móviles abiertas, así que revísala antes de trabajar cerca."
+            ]
+          },
+          {
+            "heading": "Sinfines",
+            "items": [
+              "El helicoide abierto de un sinfín portátil para grano tiene que tener una rejilla o una cubierta sólida encima.",
+              "Las aberturas de la rejilla no pueden medir más de 4 3/4 pulgadas de ancho ni más de 10 pulgadas cuadradas, y no pueden estar a menos de 2 1/2 pulgadas del helicoide.",
+              "Nunca quites barras de una rejilla ni una protección de un sinfín que está funcionando. Después de la muerte en Iowa, los investigadores dijeron que no se deben quitar rejillas ni protecciones de los sinfines mientras funcionan.",
+              "Baja el sinfín portátil por completo antes de moverlo. Si lo mueves levantado, puede tocar una línea eléctrica o voltearse."
+            ]
+          },
+          {
+            "heading": "Destapar y dar servicio",
+            "items": [
+              "Las cosechadoras, pizcadoras y picadoras se tapan. Antes de meter la mano, apaga el motor, desconecta la fuerza y espera a que todas las partes dejen de moverse.",
+              "En un caso en Wisconsin, un granjero se bajó del tractor con la toma de fuerza (PTO) todavía girando y fue hacia la pizcadora de maíz. Un eje que giraba le agarró la ropa y lo jaló. Apaga la toma de fuerza y el motor antes de acercarte a la máquina.",
+              "Las protecciones, escudos y puertas de acceso se quedan puestos siempre que la máquina esté funcionando.",
+              "En los sinfines y otro equipo fijo de la granja, primero bloquea la corriente eléctrica. Tu compañía tiene que darte un candado para el interruptor principal que solo puedan operar las personas que hacen el trabajo, o, en un silo de almacenamiento a granel, un desconectador en el mismo equipo."
+            ]
+          },
+          {
+            "heading": "Mantente alejado",
+            "items": [
+              "Asegúrate de que todos estén alejados antes de arrancar el motor, conectar la fuerza o hacer funcionar la máquina.",
+              "Ubica en cada máquina los lugares donde podrías alcanzar una parte en movimiento. Asegúrate de que tenga puestas las protecciones que recomienda el fabricante o el distribuidor."
+            ]
+          }
+        ],
+        "ask": "En el sinfín o la cosechadora que usamos hoy, ¿dónde hay una parte móvil abierta, y cómo la apagas por completo antes de destapar un atasco?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "grain-dust",
+    "industries": [
+      "ag",
+      "mfg"
+    ],
+    "code": "1910.272",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.272: Grain handling facilities",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Grain Handling (explosions, housekeeping priority areas, 1/8 inch, ignition sources, hot work, bucket elevators)",
+        "url": "https://www.osha.gov/grain-handling",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Grain Dust Explosions",
+        "hook": "Grain dust is the main fuel for explosions in grain handling. OSHA says these explosions are often severe and take lives.",
+        "sections": [
+          {
+            "heading": "How it goes off",
+            "items": [
+              "Grain dust burns easily. It can burn or explode if enough of it gets into the air or builds up on a surface.",
+              "All it takes is that dust and an ignition source, like a hot bearing or a welding spark.",
+              "OSHA's grain handling rule covers places like grain elevators, feed mills and flour mills. Wherever you work with grain, the dust is highly combustible."
+            ]
+          },
+          {
+            "heading": "Keep the dust down",
+            "items": [
+              "Your company has to have a written housekeeping program to keep dust from building up.",
+              "Priority areas are floors within 35 feet of inside bucket elevators, and enclosed areas with grinding equipment or grain dryers.",
+              "In those areas, dust can't be allowed to build up past 1/8 inch. OSHA says 1/8 inch is more than enough to fuel an explosion."
+            ]
+          },
+          {
+            "heading": "Watch the sparks",
+            "items": [
+              "Ignition sources include hot bearings, overheated motors, misaligned conveyor belts, welding, cutting and brazing. If you see a bearing running hot or a belt slipping, tell your supervisor.",
+              "Preventive maintenance cuts down on sparks. It can include checking motors, bearings and belts for heat and vibration.",
+              "Inside bucket elevators are one place an explosion can start. Report any problem with a leg right away."
+            ]
+          },
+          {
+            "heading": "Hot work and electrical",
+            "items": [
+              "Hot work means welding, cutting, brazing or any similar job that makes a flame. OSHA says hot work has to be controlled.",
+              "Don't weld, cut or braze until your supervisor says the area is ready.",
+              "Electrical equipment in grain dust areas should be the kind made for hazardous locations. If something looks wrong, tell your supervisor."
+            ]
+          }
+        ],
+        "ask": "Where is the nearest priority housekeeping area to where we work today, and who do you call if you find dust building up or a bearing running hot?"
+      },
+      "es": {
+        "title": "Explosiones de polvo de grano",
+        "hook": "El polvo de grano es el principal combustible de las explosiones en el manejo de granos. OSHA dice que estas explosiones muchas veces son graves y cobran vidas.",
+        "sections": [
+          {
+            "heading": "Cómo explota",
+            "items": [
+              "El polvo de grano se quema fácilmente. Puede arder o explotar si suficiente polvo queda en el aire o se acumula en una superficie.",
+              "Solo hace falta ese polvo y una fuente de ignición, como un balero caliente o una chispa de soldadura.",
+              "La regla de OSHA para el manejo de granos cubre lugares como elevadores de granos, fábricas de alimento para animales y molinos de harina. Dondequiera que trabajes con grano, el polvo es muy combustible."
+            ]
+          },
+          {
+            "heading": "Mantén el polvo bajo control",
+            "items": [
+              "Tu compañía tiene que tener un programa de limpieza por escrito para que el polvo no se acumule.",
+              "Las áreas prioritarias son los pisos a menos de 35 pies de los elevadores de cangilones interiores, y las áreas cerradas con equipo de molienda o secadoras de grano.",
+              "En esas áreas, no se puede dejar que el polvo pase de 1/8 de pulgada. OSHA dice que 1/8 de pulgada es más que suficiente para alimentar una explosión."
+            ]
+          },
+          {
+            "heading": "Cuidado con las chispas",
+            "items": [
+              "Las fuentes de ignición incluyen baleros calientes, motores sobrecalentados, bandas transportadoras desalineadas, y soldar, cortar o soldar con latón. Si ves un balero muy caliente o una banda patinando, avísale a tu supervisor.",
+              "El mantenimiento preventivo reduce las chispas. Puede incluir revisar motores, baleros y bandas para ver si se calientan o vibran.",
+              "Los elevadores de cangilones interiores son un lugar donde puede empezar una explosión. Reporta de inmediato cualquier problema con una columna."
+            ]
+          },
+          {
+            "heading": "Trabajo en caliente y electricidad",
+            "items": [
+              "Trabajo en caliente quiere decir soldar, cortar, soldar con latón o cualquier trabajo parecido que haga flama. OSHA dice que el trabajo en caliente se tiene que controlar.",
+              "No soldes, cortes ni sueldes con latón hasta que tu supervisor diga que el área está lista.",
+              "El equipo eléctrico en áreas con polvo de grano debe ser del tipo hecho para lugares peligrosos. Si algo se ve mal, avísale a tu supervisor."
+            ]
+          }
+        ],
+        "ask": "¿Dónde está el área prioritaria de limpieza más cercana a donde trabajamos hoy, y a quién llamas si encuentras polvo acumulándose o un balero muy caliente?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "animal-illness",
+    "industries": [
+      "ag"
+    ],
+    "code": "No OSHA avian flu or hantavirus standard; OSH Act Sec. 5(a)(1) / OSHA HA-4442 (guidance)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Avian Influenza: Standards (no specific standard; General Duty Clause)",
+        "url": "https://www.osha.gov/avian-flu/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Avian Influenza: Control and Prevention",
+        "url": "https://www.osha.gov/avian-flu/control-prevention",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA HA-4442 Hazard Alert: H5N1 (Avian Influenza) in Dairy Cattle (October 2024)",
+        "url": "https://www.osha.gov/sites/default/files/publications/OSHA4442.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Hantavirus",
+        "url": "https://www.osha.gov/hantavirus",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Hazards to Veterinary Medicine and Animal Care Workers",
+        "url": "https://cdc.gov/niosh/veterinary/about/hazards.html",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Illness from Animals",
+        "hook": "Some diseases jump from animals to people. On a farm, sick animals, manure and rodent droppings can all carry them.",
+        "sections": [
+          {
+            "heading": "Where it comes from",
+            "items": [
+              "Diseases that spread from animals to people are called zoonoses. Bird flu is one of them.",
+              "Bird flu has shown up in dairy cattle, not just birds. In its 2024 alert, OSHA said there was no evidence yet of it spreading person to person.",
+              "Hantavirus comes from the dried droppings, urine or saliva of mice and rats. People working in infested buildings are at higher risk, especially during dusty cleanup.",
+              "Hantavirus starts like the flu, with fever, chills and aches. It can turn into a life-threatening breathing problem."
+            ]
+          },
+          {
+            "heading": "The riskiest jobs",
+            "items": [
+              "OSHA's dairy alert lists the riskiest contact. First, sick animals, and animals that died of unknown causes.",
+              "Manure and litter, and surfaces or water that may be contaminated with animal waste, like ponds, waterers and troughs.",
+              "Raw milk, and udders and organs from milking cows. Barns where animals were sick or died, before they've been disinfected, call for the same protection.",
+              "If you see sick birds, tell your supervisor right away. OSHA says sick birds should be reported to animal health officials right away."
+            ]
+          },
+          {
+            "heading": "Protect yourself",
+            "items": [
+              "Wash your hands often with soap and water, for at least 15 seconds. Use hand sanitizer when soap and water aren't close by.",
+              "Don't touch your face with gloved hands. Don't eat, drink or smoke while you're wearing PPE.",
+              "For the riskiest dairy jobs, OSHA's alert lists fluid-resistant coveralls, an N95 or better respirator, goggles or a face shield, fluid-resistant gloves, rubber boots, and a head cover. Your company should assess which jobs need it and train you in words you understand.",
+              "Take off your PPE at work and don't take dirty clothes home. Shower at the end of your shift."
+            ]
+          },
+          {
+            "heading": "If you get sick",
+            "items": [
+              "After being around infected animals, watch yourself for at least 10 days for signs of a breathing illness, or red, irritated eyes.",
+              "If you get sick, stay home except to get medical care. See a doctor or your local health department.",
+              "A seasonal flu shot won't stop bird flu, but it lowers your chance of getting both at the same time.",
+              "Get any animal bite or scratch checked by a doctor right away. It can get infected, and it can expose you to rabies."
+            ]
+          }
+        ],
+        "ask": "Which job on this farm puts you closest to sick animals, manure or raw milk, and what will you wear for it?"
+      },
+      "es": {
+        "title": "Enfermedades de los animales",
+        "hook": "Algunas enfermedades pasan de los animales a las personas. En una granja, los animales enfermos, el estiércol y el excremento de roedores las pueden traer.",
+        "sections": [
+          {
+            "heading": "De dónde vienen",
+            "items": [
+              "Las enfermedades que pasan de los animales a las personas se llaman zoonosis. La gripe aviar es una de ellas.",
+              "La gripe aviar ha aparecido en ganado lechero, no solo en aves. En su alerta de 2024, OSHA dijo que todavía no había pruebas de que se contagiara de persona a persona.",
+              "El hantavirus viene del excremento seco, la orina o la saliva de ratones y ratas. Las personas que trabajan en edificios infestados corren más riesgo, sobre todo al limpiar con mucho polvo.",
+              "El hantavirus empieza como una gripe, con fiebre, escalofríos y dolores. Se puede convertir en un problema para respirar que pone en peligro la vida."
+            ]
+          },
+          {
+            "heading": "Los trabajos de más riesgo",
+            "items": [
+              "La alerta de OSHA para lecherías menciona el contacto de más riesgo. Primero, los animales enfermos y los que murieron por causas desconocidas.",
+              "El estiércol y las camas de los animales, y las superficies o el agua que pueden estar contaminadas con desechos de animales, como estanques, bebederos y pilas.",
+              "La leche cruda, y las ubres y órganos de vacas lecheras. Los establos donde hubo animales enfermos o muertos, antes de que los desinfecten, piden la misma protección.",
+              "Si ves aves enfermas, avísale a tu supervisor de inmediato. OSHA dice que las aves enfermas se deben reportar de inmediato a las autoridades de salud animal."
+            ]
+          },
+          {
+            "heading": "Protégete",
+            "items": [
+              "Lávate las manos seguido con agua y jabón, por lo menos 15 segundos. Usa gel desinfectante cuando no tengas agua y jabón cerca.",
+              "No te toques la cara con los guantes puestos. No comas, bebas ni fumes mientras traigas puesto el equipo de protección.",
+              "Para los trabajos de más riesgo en lecherías, la alerta de OSHA menciona overol resistente a líquidos, un respirador N95 o mejor, gafas de seguridad o careta, guantes resistentes a líquidos, botas de hule y una cubierta para la cabeza. Tu compañía debe evaluar qué trabajos lo necesitan y capacitarte con palabras que entiendas.",
+              "Quítate el equipo de protección en el trabajo y no te lleves la ropa sucia a la casa. Báñate al final del turno."
+            ]
+          },
+          {
+            "heading": "Si te enfermas",
+            "items": [
+              "Después de estar cerca de animales infectados, vigílate por lo menos 10 días por si tienes señales de una enfermedad respiratoria, u ojos rojos e irritados.",
+              "Si te enfermas, quédate en casa excepto para ir al médico. Consulta a un médico o al departamento de salud local.",
+              "La vacuna contra la gripe de temporada no evita la gripe aviar, pero baja la probabilidad de que te den las dos al mismo tiempo.",
+              "Haz que un médico revise de inmediato cualquier mordida o rasguño de un animal. Se puede infectar y te puede exponer a la rabia."
+            ]
+          }
+        ],
+        "ask": "¿Qué trabajo en esta granja te pone más cerca de animales enfermos, estiércol o leche cruda, y qué te vas a poner para hacerlo?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "vet-needles",
+    "industries": [
+      "ag"
+    ],
+    "code": "No OSHA standard for livestock needles; NIOSH guidance and NIOSH-funded farm safety center guidance",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "NIOSH Hazards to Veterinary Medicine and Animal Care Workers: sharps injuries",
+        "url": "https://cdc.gov/niosh/veterinary/about/hazards.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Veterinary Safety and Health Hazard Prevention and Control: training topics",
+        "url": "https://www.cdc.gov/niosh/veterinary/prevention/index.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 2000-135: Preventing Needlestick Injuries (report every needlestick; avoid recapping)",
+        "url": "https://stacks.cdc.gov/view/cdc/6018/cdc_6018_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "Nebraska FACE 2003-04 (Nebraska Department of Labor, NIOSH-funded state FACE program): Cattleman Dies Due To Accidental Injection",
+        "url": "https://stacks.cdc.gov/view/cdc/166969/cdc_166969_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "Needlestick Prevention on the Farm (2016), Southwest Center for Agricultural Health, NIOSH-funded; NIOSHTIC 20053316",
+        "url": "https://stacks.cdc.gov/view/cdc/216103/cdc_216103_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "Don't Stick Yourself (2014), Southwest Center for Agricultural Health, NIOSH-funded; NIOSHTIC 20053426",
+        "url": "https://stacks.cdc.gov/view/cdc/216179/cdc_216179_DS1.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Needles and Animal Medicines",
+        "hook": "In Nebraska, a cattleman died after he accidentally injected himself with a cattle antibiotic. It has no known antidote.",
+        "sections": [
+          {
+            "heading": "Why a small stick matters",
+            "items": [
+              "A needlestick can expose you to germs, including diseases that spread from animals to people.",
+              "The drug itself can hurt you. A NIOSH-funded farm safety center warns that some animal antibiotics and other medicines can cause a severe reaction, or even death, if they're injected into a person.",
+              "Most of the steps in this talk come from that center. Before you start, read the label, the package insert and the safety data sheet for each product. Use it only the way the package or your vet says."
+            ]
+          },
+          {
+            "heading": "Hold the animal still",
+            "items": [
+              "Sticks happen when an animal jumps or moves. Secure the animal in a stock or squeeze chute before you inject.",
+              "Never put your hand between the animal and the side of the stall when you inject.",
+              "Know the right spot and the right way to inject. If you're not comfortable giving a shot, call the vet."
+            ]
+          },
+          {
+            "heading": "Handle needles right",
+            "items": [
+              "Don't recap needles unless a procedure calls for it. Never pull a cap off with your mouth, and never put a syringe in your mouth.",
+              "Never carry a syringe and needle in your pocket.",
+              "Don't use bent or damaged needles. Work with your vet on how often to change needles.",
+              "Put used needles and syringes in a puncture-proof sharps container kept where you work. Never put sharps in the regular trash, and don't use a device that cuts needles before you throw them away."
+            ]
+          },
+          {
+            "heading": "If you get stuck",
+            "items": [
+              "Report every needlestick to your supervisor right away, so you get the right follow-up care.",
+              "See a doctor about the specific risk from the product that was in the syringe.",
+              "Your company should train you on the hazards of the drugs, hormones and vaccines you use, and have a plan to get every needlestick checked by a doctor."
+            ]
+          }
+        ],
+        "ask": "What are we injecting today, what does its label say about a needlestick, and where is the sharps container?"
+      },
+      "es": {
+        "title": "Agujas y medicinas para animales",
+        "hook": "En Nebraska, un ganadero murió después de inyectarse por accidente un antibiótico para ganado. No tiene antídoto conocido.",
+        "sections": [
+          {
+            "heading": "Por qué un piquete pequeño importa",
+            "items": [
+              "Un piquete de aguja te puede exponer a gérmenes, incluidas enfermedades que pasan de los animales a las personas.",
+              "La medicina misma te puede hacer daño. Un centro de seguridad agrícola financiado por NIOSH advierte que algunos antibióticos y otras medicinas para animales pueden causar una reacción grave, o hasta la muerte, si se inyectan en una persona.",
+              "La mayoría de los pasos de esta plática vienen de ese centro. Antes de empezar, lee la etiqueta, el instructivo del paquete y la hoja de datos de seguridad de cada producto. Úsalo solo como dice el paquete o tu veterinario."
+            ]
+          },
+          {
+            "heading": "Mantén quieto al animal",
+            "items": [
+              "Los piquetes pasan cuando un animal brinca o se mueve. Asegura al animal en un brete o una manga de compresión antes de inyectarlo.",
+              "Nunca pongas la mano entre el animal y el lado del corral cuando inyectes.",
+              "Conoce el lugar correcto y la forma correcta de inyectar. Si no te sientes seguro de poner una inyección, llama al veterinario."
+            ]
+          },
+          {
+            "heading": "Maneja bien las agujas",
+            "items": [
+              "No le vuelvas a poner la tapa a las agujas a menos que un procedimiento lo pida. Nunca quites una tapa con la boca, y nunca te pongas una jeringa en la boca.",
+              "Nunca cargues una jeringa con aguja en el bolsillo.",
+              "No uses agujas dobladas o dañadas. Ponte de acuerdo con tu veterinario sobre cada cuánto cambiar las agujas.",
+              "Pon las agujas y jeringas usadas en un recipiente para objetos punzantes, resistente a perforaciones, que esté donde trabajas. Nunca tires objetos punzantes en la basura normal, y no uses un aparato que corte las agujas antes de tirarlas."
+            ]
+          },
+          {
+            "heading": "Si te picas",
+            "items": [
+              "Reporta cada piquete de aguja a tu supervisor de inmediato, para que recibas la atención de seguimiento correcta.",
+              "Consulta a un médico sobre el riesgo específico del producto que tenía la jeringa.",
+              "Tu compañía debe capacitarte sobre los peligros de las medicinas, hormonas y vacunas que usas, y tener un plan para que un médico revise cada piquete de aguja."
+            ]
+          }
+        ],
+        "ask": "¿Qué vamos a inyectar hoy, qué dice su etiqueta sobre un piquete de aguja, y dónde está el recipiente para objetos punzantes?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "exposure-followup",
+    "industries": [
+      "health",
+      "facil"
+    ],
+    "code": "1910.1030(f)(3) / (f)(5) / (d)(2)(vi)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1030(b): definition of exposure incident",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(d)(2)(vi), (d)(3)(vi): washing and removing soaked garments",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(f)(1)(ii), (f)(3)(i)-(vi): post-exposure evaluation and follow-up at no cost",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(f)(5), (f)(5)(ii)-(iii): written opinion within 15 days",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(g)(2)(vii)(J)-(K): training on what to do and how to report",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(h)(1)(iii)(B): confidentiality of medical records",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Fact Sheet: Bloodborne Pathogen Exposure Incidents",
+        "url": "https://osha.gov/OshDoc/data_BloodborneFacts/bbfact04.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "After a Blood Exposure",
+        "hook": "A needlestick, a splash in the eye, blood in a cut. What you do in the next few minutes matters, so know the plan before it happens.",
+        "sections": [
+          {
+            "heading": "What counts",
+            "items": [
+              "An exposure is blood, or certain other body fluids that can carry disease, getting into your eyes, nose or mouth, onto broken skin, or under your skin from a needle or sharp.",
+              "It counts when it happens while you're doing your job. Blood on unbroken skin isn't an exposure incident, but you still wash it off right away."
+            ]
+          },
+          {
+            "heading": "First, wash",
+            "items": [
+              "Wash your skin with soap and water. If it got in your eyes, nose or mouth, flush with water.",
+              "Do it right away, or as soon as you can.",
+              "If blood soaked through your clothes, take them off right away or as soon as you can."
+            ]
+          },
+          {
+            "heading": "Then, report it now",
+            "items": [
+              "Tell your supervisor right away. Don't wait until the end of your shift.",
+              "Reporting fast lets your company get you a medical evaluation right away. OSHA says early reporting is crucial to start care for a possible infection.",
+              "Your training should cover how to report and who to call. If you're not sure, ask today."
+            ]
+          },
+          {
+            "heading": "What your company has to do",
+            "items": [
+              "If OSHA's bloodborne pathogens rule covers your job, your company has to make a confidential medical evaluation and follow-up available to you right away, at no cost, at a reasonable time and place.",
+              "That includes writing down how it happened, trying to identify and test the source person, testing your blood if you agree, preventive treatment when it's medically called for, and counseling.",
+              "You get a copy of the doctor's written opinion within 15 days after the evaluation is done. It only says you were told your results and about any condition that needs more care. Everything else stays confidential.",
+              "Your medical records can't be shared with anyone at work or outside without your written OK, unless the law requires it."
+            ]
+          }
+        ],
+        "ask": "If you get stuck or splashed on this shift, who do you call first, and where do you go?"
+      },
+      "es": {
+        "title": "Después de una exposición a sangre",
+        "hook": "Un piquete de aguja, una salpicadura en el ojo, sangre en una cortada. Lo que hagas en los próximos minutos importa, así que conoce el plan antes de que pase.",
+        "sections": [
+          {
+            "heading": "Qué cuenta",
+            "items": [
+              "Una exposición es cuando sangre, o ciertos otros fluidos del cuerpo que pueden transmitir enfermedades, te entran en los ojos, la nariz o la boca, te caen en piel lastimada, o entran bajo la piel por una aguja o un objeto filoso.",
+              "Cuenta cuando pasa mientras haces tu trabajo. La sangre en piel sana no es un incidente de exposición, pero igual te la lavas de inmediato."
+            ]
+          },
+          {
+            "heading": "Primero, lávate",
+            "items": [
+              "Lávate la piel con agua y jabón. Si te cayó en los ojos, la nariz o la boca, enjuágate con agua.",
+              "Hazlo de inmediato, o lo antes que puedas.",
+              "Si la sangre traspasó tu ropa, quítatela de inmediato o lo antes que puedas."
+            ]
+          },
+          {
+            "heading": "Luego, repórtalo ya",
+            "items": [
+              "Avísale a tu supervisor de inmediato. No esperes al final de tu turno.",
+              "Reportar rápido le permite a tu compañía conseguirte una evaluación médica de inmediato. OSHA dice que reportar temprano es clave para empezar a atender una posible infección.",
+              "Tu capacitación debe enseñarte cómo reportar y a quién llamar. Si no estás seguro, pregunta hoy."
+            ]
+          },
+          {
+            "heading": "Lo que tu compañía tiene que hacer",
+            "items": [
+              "Si la regla de OSHA sobre patógenos de la sangre cubre tu trabajo, tu compañía tiene que ofrecerte de inmediato una evaluación médica confidencial y seguimiento, sin costo, a una hora y en un lugar razonables.",
+              "Eso incluye anotar cómo pasó, tratar de identificar y hacerle pruebas a la persona de origen, hacerte pruebas de sangre si estás de acuerdo, tratamiento preventivo cuando sea médicamente necesario, y consejería.",
+              "Recibes una copia de la opinión escrita del médico dentro de 15 días después de terminar la evaluación. Solo dice que te informaron tus resultados y de cualquier condición que necesite más atención. Todo lo demás es confidencial.",
+              "Tus expedientes médicos no se pueden compartir con nadie en el trabajo ni fuera de él sin tu permiso por escrito, a menos que la ley lo exija."
+            ]
+          }
+        ],
+        "ask": "Si te pinchas o te salpicas en este turno, ¿a quién llamas primero y a dónde vas?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "ppe-donning",
+    "industries": [
+      "health"
+    ],
+    "code": "1910.132(f) / 1910.1030(d)(3)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.132(e): defective or damaged PPE not used",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.132",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.132(f)(1)-(2): training on how to don, doff, adjust and wear PPE",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.132",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(d)(3)(i), (iii), (v): PPE at no cost, in the right sizes, repaired or replaced",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(d)(3)(vii)-(viii), (ix)(A)-(B): removing PPE, glove replacement, no re-use of disposable gloves",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1030(d)(2)(v): wash hands after removing gloves",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      },
+      {
+        "label": "CDC guidance: Sequence for Putting On and Removing PPE (CS250672-E)",
+        "url": "https://www.cdc.gov/infection-control/media/pdfs/Toolkits-PPE-Sequence-P.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Putting On and Taking Off PPE",
+        "hook": "The outside of your gear is the dirty part. Take it off the wrong way and you put those germs right on your skin and face.",
+        "sections": [
+          {
+            "heading": "Before you start",
+            "items": [
+              "Your company has to train you on when you need PPE, what kind, and how to put it on, take it off, adjust it and wear it. You have to show you understand before you do the work.",
+              "Where you can be exposed to blood, your company provides the gear at no cost, in sizes that fit you.",
+              "Damaged gear doesn't get used. Torn glove or cracked face shield, get a new one."
+            ]
+          },
+          {
+            "heading": "Putting it on",
+            "items": [
+              "CDC's order is gown, then mask or respirator, then goggles or face shield, then gloves.",
+              "The gown covers you from neck to knees and arms to the ends of your wrists. Wrap it around the back and tie it at the neck and waist.",
+              "Fit the mask's nose band, and make it snug to your face and under your chin. If it's a respirator, do a fit check.",
+              "Gloves go on last and pull up over the cuffs of the gown."
+            ]
+          },
+          {
+            "heading": "While you work",
+            "items": [
+              "Keep your hands away from your face, and touch as few surfaces as you can.",
+              "Change gloves when they tear or get heavily soiled. Never wash disposable gloves to use them again."
+            ]
+          },
+          {
+            "heading": "Taking it off",
+            "items": [
+              "One CDC order is gloves, then goggles or face shield, then gown, then mask or respirator. CDC also shows a way to take off the gown and gloves together.",
+              "Peel off one glove with the other gloved hand, then peel the second one off over the first. Take goggles off from the back, by the headband or ear pieces. Pull the gown away and roll it inside out. Take the mask off by the ties or elastic, never by the front.",
+              "OSHA's blood rule says take your PPE off before you leave the work area. CDC adds one thing for a respirator: it comes off after you leave the room and close the door.",
+              "Put each item in the bin or container meant for it. Then clean your hands right away with soap and water or alcohol hand rub, and between steps if your hands get dirty."
+            ]
+          }
+        ],
+        "ask": "Who will walk us through taking off gloves, goggles, gown and mask, in order, right now?"
+      },
+      "es": {
+        "title": "Cómo ponerte y quitarte el equipo de protección",
+        "hook": "Lo de afuera de tu equipo es la parte sucia. Si te lo quitas mal, te pasas esos gérmenes directo a la piel y la cara.",
+        "sections": [
+          {
+            "heading": "Antes de empezar",
+            "items": [
+              "Tu compañía tiene que capacitarte sobre cuándo necesitas equipo de protección, de qué tipo, y cómo ponértelo, quitártelo, ajustarlo y usarlo. Tienes que demostrar que lo entiendes antes de hacer el trabajo.",
+              "Donde puedes estar expuesto a sangre, tu compañía te da el equipo sin costo, en tallas que te queden.",
+              "El equipo dañado no se usa. Si el guante está roto o la careta rajada, pide uno nuevo."
+            ]
+          },
+          {
+            "heading": "Cómo ponértelo",
+            "items": [
+              "El orden de los CDC es bata, luego mascarilla o respirador, luego gafas o careta, y al final guantes.",
+              "La bata te cubre del cuello a las rodillas y los brazos hasta las muñecas. Envuélvela por la espalda y amárrala en el cuello y la cintura.",
+              "Ajusta la banda de la nariz de la mascarilla y deja que quede bien pegada a la cara y debajo de la barbilla. Si es un respirador, revisa que selle bien.",
+              "Los guantes van al final y se jalan por encima de los puños de la bata."
+            ]
+          },
+          {
+            "heading": "Mientras trabajas",
+            "items": [
+              "No te toques la cara con las manos, y toca la menor cantidad de superficies que puedas.",
+              "Cámbiate los guantes cuando se rompan o se ensucien mucho. Nunca laves guantes desechables para volver a usarlos."
+            ]
+          },
+          {
+            "heading": "Cómo quitártelo",
+            "items": [
+              "Un orden de los CDC es guantes, luego gafas o careta, luego bata, y al final mascarilla o respirador. Los CDC también muestran una forma de quitarte la bata y los guantes juntos.",
+              "Quítate un guante jalándolo con la otra mano enguantada, y luego quítate el segundo por encima del primero. Quítate las gafas por detrás, por la banda o las patillas. Jala la bata hacia afuera y enróllala al revés. Quítate la mascarilla por las tiras o el elástico, nunca por el frente.",
+              "La regla de OSHA sobre sangre dice que te quites el equipo de protección antes de salir del área de trabajo. Los CDC agregan algo para el respirador: te lo quitas después de salir del cuarto y cerrar la puerta.",
+              "Pon cada cosa en el bote o recipiente que le toca. Luego límpiate las manos de inmediato con agua y jabón o con gel con alcohol, y también entre pasos si se te ensucian las manos."
+            ]
+          }
+        ],
+        "ask": "¿Quién nos enseña ahora mismo cómo quitarse los guantes, las gafas, la bata y la mascarilla, en orden?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "healthcare-violence",
+    "industries": [
+      "health"
+    ],
+    "code": "OSH Act Sec. 5(a)(1)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Workplace Violence: Enforcement (no specific standard; General Duty Clause)",
+        "url": "https://osha.gov/workplace-violence/enforcement",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 3148 Guidelines for Preventing Workplace Violence for Healthcare and Social Service Workers: risk factors (pp. 4-5)",
+        "url": "https://osha.gov/Publications/osha3148.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 3148: policy, alarms, exit routes, buddy system, reporting (pp. 7, 14, 18-21)",
+        "url": "https://osha.gov/Publications/osha3148.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 3148: training topics and post-incident care (pp. 22-23, 26)",
+        "url": "https://osha.gov/Publications/osha3148.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Violence in Healthcare",
+        "hook": "Being hit, kicked or threatened by a patient or visitor is not part of the job. OSHA's healthcare guidelines say a good policy makes that clear.",
+        "sections": [
+          {
+            "heading": "Where OSHA stands",
+            "items": [
+              "OSHA has no specific standard for workplace violence. Employers still have a general duty to keep the workplace free from recognized hazards likely to cause death or serious harm.",
+              "OSHA's guidelines for healthcare and social service workers are advice, not a rule. They lay out what a good prevention program looks like."
+            ]
+          },
+          {
+            "heading": "Know the risks",
+            "items": [
+              "Risk goes up when you work with people who have a history of violence or who are using drugs or alcohol, when you work alone, and when you transport patients.",
+              "Short staffing, long waits in crowded waiting rooms, and poorly lit halls and parking lots raise it too.",
+              "Know how your facility flags patients with a history of violence, like chart tags or shift reports, and follow the updates on patients' behavior.",
+              "Your training should cover how to spot behavior that's building up, and ways to calm a tense situation down early."
+            ]
+          },
+          {
+            "heading": "Get help",
+            "items": [
+              "Know where the panic buttons or personal alarms are, how they work, and who responds when you use one.",
+              "Keep a clear path to the door.",
+              "Use the buddy system when your safety may be at risk, and make sure someone knows where you are.",
+              "Skip necklaces or chains someone could grab, and don't carry items that could be used as a weapon."
+            ]
+          },
+          {
+            "heading": "Report it",
+            "items": [
+              "Report every assault and every threat to your supervisor or manager, even if no one was hurt.",
+              "OSHA's guidelines say research finds workplace violence is underreported.",
+              "No one should face payback for reporting in good faith.",
+              "If you're hurt, get treated promptly. Debriefing and counseling help too, so ask what your facility offers."
+            ]
+          }
+        ],
+        "ask": "Where is the nearest panic button or alarm from where you work, and who comes when it goes off?"
+      },
+      "es": {
+        "title": "Violencia en el cuidado de la salud",
+        "hook": "Que un paciente o un visitante te pegue, te patee o te amenace no es parte del trabajo. Las guías de OSHA para el cuidado de la salud dicen que una buena política deja eso claro.",
+        "sections": [
+          {
+            "heading": "Lo que dice OSHA",
+            "items": [
+              "OSHA no tiene una norma específica sobre la violencia en el trabajo. Aun así, los empleadores tienen el deber general de mantener el lugar de trabajo libre de peligros reconocidos que puedan causar la muerte o daño grave.",
+              "Las guías de OSHA para trabajadores del cuidado de la salud y servicios sociales son consejos, no una regla. Explican cómo es un buen programa de prevención."
+            ]
+          },
+          {
+            "heading": "Conoce los riesgos",
+            "items": [
+              "El riesgo sube cuando trabajas con personas que tienen historial de violencia o que están usando drogas o alcohol, cuando trabajas solo y cuando transportas pacientes.",
+              "La falta de personal, las esperas largas en salas llenas y los pasillos y estacionamientos mal iluminados también lo suben.",
+              "Conoce cómo tu centro marca a los pacientes con historial de violencia, como etiquetas en el expediente o reportes de turno, y sigue las actualizaciones sobre su comportamiento.",
+              "Tu capacitación debe enseñarte a reconocer cuando alguien se está alterando cada vez más, y formas de calmar una situación tensa a tiempo."
+            ]
+          },
+          {
+            "heading": "Pide ayuda",
+            "items": [
+              "Conoce dónde están los botones de pánico o las alarmas personales, cómo funcionan y quién responde cuando usas uno.",
+              "Mantén libre el camino hacia la puerta.",
+              "Trabaja en pareja cuando tu seguridad pueda estar en riesgo, y asegúrate de que alguien sepa dónde estás.",
+              "No uses collares ni cadenas que alguien pueda jalar, y no cargues cosas que se puedan usar como arma."
+            ]
+          },
+          {
+            "heading": "Repórtalo",
+            "items": [
+              "Reporta cada agresión y cada amenaza a tu supervisor o gerente, aunque nadie haya salido herido.",
+              "Las guías de OSHA dicen que los estudios muestran que la violencia en el trabajo no se reporta lo suficiente.",
+              "Nadie debe sufrir represalias por reportar de buena fe.",
+              "Si te lastiman, busca atención pronto. Las reuniones después del incidente y la consejería también ayudan, así que pregunta qué ofrece tu centro."
+            ]
+          }
+        ],
+        "ask": "¿Dónde está el botón de pánico o la alarma más cercana a donde trabajas, y quién llega cuando suena?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "ethylene-oxide",
+    "industries": [
+      "health",
+      "mfg"
+    ],
+    "code": "1910.1047",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1047(b), (c)(1)-(c)(2): action level 0.5 ppm, limits 1 ppm (8-hr) and 5 ppm (15-min)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1047",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1047(e)(1)-(2), (j)(2)(i)(A): regulated areas and signs",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1047",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1047(f)(2)(i)-(ii): written program where limits are exceeded, incl. leak detection survey schedule",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1047",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1047(h)(1)(i), (h)(2): emergency plan, alerting and evacuation",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1047",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1047(i)(1)(i)(A)-(B): medical surveillance, including after an emergency",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1047",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1047(j)(3)(i): training at assignment and at least annually for those potentially exposed at or above the action level or excursion limit",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1047",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1047 Appendix A (non-mandatory): odor, first aid, sterilant use in health care facilities",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1047AppA",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Fact Sheet: Ethylene Oxide",
+        "url": "https://osha.gov/OshDoc/data_General_Facts/ethylene-oxide-factsheet.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Ethylene Oxide Sterilizers",
+        "hook": "Ethylene oxide sterilizes surgical tools and is used in some plants. It can cause cancer, and by the time you can smell it, you're far over the limit.",
+        "sections": [
+          {
+            "heading": "Why it matters",
+            "items": [
+              "Ethylene oxide, or EtO, is a flammable, colorless gas. It may cause leukemia and other cancers, and it's linked to miscarriage and nerve damage.",
+              "Exposure can cause eye pain, sore throat, trouble breathing, headache, nausea and dizziness.",
+              "You usually can't smell it until it's around 700 ppm. The limit is 1 ppm. Your nose is not a detector."
+            ]
+          },
+          {
+            "heading": "The limits",
+            "items": [
+              "Your company has to keep your exposure at or below 1 ppm averaged over 8 hours, and at or below 5 ppm over any 15 minutes.",
+              "At 0.5 ppm, the action level, more steps kick in. One is medical exams for people exposed at or above it for 30 days or more a year.",
+              "Where exposure may go over the limits, your company sets up a regulated area. Only authorized people go in, and the sign warns it may cause cancer.",
+              "If you could be exposed at or above the action level or the 15-minute limit, you get EtO training when you're first assigned and at least once a year after that."
+            ]
+          },
+          {
+            "heading": "Around the sterilizer",
+            "items": [
+              "OSHA's guidance for hospitals says to take a load out right when the purge cycle ends. If you can't, run the purge again before you open the door.",
+              "Move loads to the aerator quickly, and pull carts, don't push them, so you stay out of the gas coming off the load.",
+              "Where exposure goes over the limits, your company's written plan has to include a schedule for leak checks. If you can smell EtO while wearing a respirator, get to fresh air right away."
+            ]
+          },
+          {
+            "heading": "In an emergency",
+            "items": [
+              "Where an emergency is possible, your company has to have a written emergency plan. In a release, people who could be exposed are warned and get out right away.",
+              "If liquid EtO soaks your clothes or shoes, take them off right away. Contaminated leather shoes get thrown out. If it gets in your eyes, flush with lots of water.",
+              "Don't try a rescue until you've told at least one other person.",
+              "If you were exposed in an emergency, your company has to make a medical exam available to you."
+            ]
+          }
+        ],
+        "ask": "Where's the emergency plan for our sterilizer area, and what do you do first if the alarm goes off?"
+      },
+      "es": {
+        "title": "Esterilizadores de óxido de etileno",
+        "hook": "El óxido de etileno se usa para esterilizar instrumentos quirúrgicos y también en algunas plantas. Puede causar cáncer, y cuando ya lo hueles, estás muy por encima del límite.",
+        "sections": [
+          {
+            "heading": "Por qué importa",
+            "items": [
+              "El óxido de etileno, u OE, es un gas inflamable y sin color. Puede causar leucemia y otros tipos de cáncer, y se relaciona con abortos espontáneos y daño a los nervios.",
+              "La exposición puede causar dolor de ojos, dolor de garganta, dificultad para respirar, dolor de cabeza, náuseas y mareos.",
+              "Por lo general no se huele hasta que llega a unas 700 ppm. El límite es 1 ppm. Tu nariz no es un detector."
+            ]
+          },
+          {
+            "heading": "Los límites",
+            "items": [
+              "Tu compañía tiene que mantener tu exposición en 1 ppm o menos en promedio durante 8 horas, y en 5 ppm o menos en cualquier período de 15 minutos.",
+              "A 0.5 ppm, el nivel de acción, se activan más pasos. Uno es dar exámenes médicos a quienes están expuestos a ese nivel o más por 30 días o más al año.",
+              "Donde la exposición puede pasar los límites, tu compañía establece un área regulada. Solo entran personas autorizadas, y el letrero advierte que puede causar cáncer.",
+              "Si podrías estar expuesto al nivel de acción o más, o por encima del límite de 15 minutos, recibes capacitación sobre el OE cuando te asignan por primera vez y al menos una vez al año después."
+            ]
+          },
+          {
+            "heading": "Cerca del esterilizador",
+            "items": [
+              "La guía de OSHA para hospitales dice que saques la carga en cuanto termine el ciclo de purga. Si no puedes, vuelve a correr la purga antes de abrir la puerta.",
+              "Lleva las cargas al aireador rápido, y jala los carritos, no los empujes, para que no te llegue el gas que suelta la carga.",
+              "Donde la exposición pasa los límites, el plan escrito de tu compañía tiene que incluir un calendario para revisar fugas. Si hueles OE mientras usas un respirador, sal al aire fresco de inmediato."
+            ]
+          },
+          {
+            "heading": "En una emergencia",
+            "items": [
+              "Donde puede haber una emergencia, tu compañía tiene que tener un plan de emergencia por escrito. En una fuga, se avisa a quienes podrían estar expuestos y salen de inmediato.",
+              "Si el OE líquido te moja la ropa o los zapatos, quítatelos de inmediato. Los zapatos de cuero contaminados se tiran. Si te cae en los ojos, enjuágalos con mucha agua.",
+              "No intentes un rescate hasta que le hayas avisado al menos a otra persona.",
+              "Si estuviste expuesto en una emergencia, tu compañía tiene que ofrecerte un examen médico."
+            ]
+          }
+        ],
+        "ask": "¿Dónde está el plan de emergencia del área del esterilizador, y qué es lo primero que haces si suena la alarma?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "home-health",
+    "industries": [
+      "health"
+    ],
+    "code": "No OSHA home-health standard; 1910.1030 where blood exposure is expected",
+    "minutes": 6,
+    "sources": [
+      {
+        "label": "OSHA Home Healthcare: hazards and letters of interpretation",
+        "url": "https://osha.gov/home-healthcare",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 2010-125 Occupational Hazards in Home Healthcare: 2.5.2 ergonomics, 4.5.2 and 4.6 sharps, 6.5.2 violence",
+        "url": "https://www.cdc.gov/niosh/docs/2010-125/pdfs/2010-125.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 2012-122 Fast Facts: How to Prevent Driving-Related Injuries",
+        "url": "https://cdc.gov/niosh/publications/hcp/numbered/2012-122.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 2012-122 fact card (PDF): recommendations for employees",
+        "url": "https://stacks.cdc.gov/view/cdc/11733/cdc_11733_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 2012-121 Fast Facts: How to Prevent Exposure in Unsafe Conditions",
+        "url": "https://www.cdc.gov/niosh/docs/2012-121/pdfs/2012-121.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1910.1030(a) scope and (d)(2)(vii): contaminated needles not bent or recapped",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Home Health Visits",
+        "hook": "Every home you visit is a new worksite, and you have little control over it. You have to read it fast.",
+        "sections": [
+          {
+            "heading": "On the road",
+            "items": [
+              "Driving from client to client puts you at high risk for crash injuries. Wear your seatbelt every trip.",
+              "Stop the car before you use your phone. Don't eat, drink, or fiddle with the radio while you drive.",
+              "Plan your route before you leave, keep the tank at least a quarter full, and don't drive when you're over-tired."
+            ]
+          },
+          {
+            "heading": "Pulling up",
+            "items": [
+              "Have accurate directions, and always let your office know where you are and when to expect you back.",
+              "Park in a well-lit spot, away from bushes someone could hide behind. Lock supplies and personal things out of sight in the trunk.",
+              "Before you get out, check what's going on around you. If you feel uneasy, don't get out of the car.",
+              "If a pet threatens you, wait outside until it's restrained."
+            ]
+          },
+          {
+            "heading": "Inside the home",
+            "items": [
+              "Keep an open path to the door if you can. Trust your judgment. If you feel threatened, leave right away and call your office or 911, depending on how serious it is.",
+              "Report any violence to your company. Tell them if you see an unsecured weapon in the home.",
+              "If a home is unsanitary or has pests, follow your company's rules for reporting it. Take in only the supplies you need."
+            ]
+          },
+          {
+            "heading": "Needles and lifting",
+            "items": [
+              "Bring your own labeled, leak-proof, puncture-resistant sharps container. Drop used needles in it promptly, and secure it in the car so it can't spill.",
+              "Don't recap or bend a used needle. Pets and kids can distract you, so plan for sudden movement.",
+              "If you get stuck, wash it with soap and water, report it to your supervisor, and get medical treatment right away.",
+              "Use lifting devices when you have them. When you move a client by hand, stand close and don't twist. Tell your company if you need more training or equipment."
+            ]
+          }
+        ],
+        "ask": "You pull up to a home and something doesn't feel right. What do you do, and who do you call?"
+      },
+      "es": {
+        "title": "Visitas de salud a domicilio",
+        "hook": "Cada casa que visitas es un lugar de trabajo nuevo, y tienes poco control sobre él. Tienes que leerlo rápido.",
+        "sections": [
+          {
+            "heading": "En el camino",
+            "items": [
+              "Manejar de un cliente a otro te pone en alto riesgo de lesiones por choques. Ponte el cinturón de seguridad en cada viaje.",
+              "Detén el carro antes de usar el celular. No comas, no bebas ni le muevas al radio mientras manejas.",
+              "Planea tu ruta antes de salir, mantén el tanque por lo menos a un cuarto, y no manejes cuando estés demasiado cansado."
+            ]
+          },
+          {
+            "heading": "Al llegar",
+            "items": [
+              "Lleva direcciones exactas, y siempre avísale a tu oficina dónde estás y a qué hora esperarte de regreso.",
+              "Estaciónate en un lugar bien iluminado, lejos de arbustos donde alguien se pueda esconder. Guarda con llave los materiales y tus cosas personales en la cajuela, donde no se vean.",
+              "Antes de bajarte, fíjate en lo que pasa a tu alrededor. Si te sientes inseguro, no te bajes del carro.",
+              "Si una mascota te amenaza, espera afuera hasta que la amarren o la encierren."
+            ]
+          },
+          {
+            "heading": "Dentro de la casa",
+            "items": [
+              "Si puedes, mantén libre el camino hacia la puerta. Confía en tu criterio. Si te sientes amenazado, sal de inmediato y llama a tu oficina o al 911, según qué tan grave sea.",
+              "Reporta cualquier violencia a tu compañía. Avísales si ves un arma sin asegurar en la casa.",
+              "Si una casa está insalubre o tiene plagas, sigue las reglas de tu compañía para reportarlo. Mete solo los materiales que necesitas."
+            ]
+          },
+          {
+            "heading": "Agujas y cargar",
+            "items": [
+              "Lleva tu propio contenedor para objetos punzocortantes, etiquetado, que no gotee y resistente a perforaciones. Echa ahí las agujas usadas enseguida, y asegúralo en el carro para que no se derrame.",
+              "No le vuelvas a poner la tapa a una aguja usada ni la dobles. Las mascotas y los niños te pueden distraer, así que prepárate para movimientos repentinos.",
+              "Si te pinchas, lávate con agua y jabón, repórtalo a tu supervisor y busca atención médica de inmediato.",
+              "Usa aparatos para levantar cuando los tengas. Cuando muevas a un cliente a mano, párate cerca y no te tuerzas. Dile a tu compañía si necesitas más entrenamiento o equipo."
+            ]
+          }
+        ],
+        "ask": "Llegas a una casa y algo no se siente bien. ¿Qué haces y a quién llamas?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "surgical-smoke",
+    "industries": [
+      "health"
+    ],
+    "code": "No specific OSHA plume standard; 1910.132 / 1910.134 / 1910.1030(d)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Laser/Electrosurgery Plume",
+        "url": "https://www.osha.gov/laser-electrosurgery-plume",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Laser/Electrosurgery Plume: Standards (no specific standard; 1910.134 surgical-mask note; 1910.1030(d)(3)(i))",
+        "url": "https://osha.gov/laser-electrosurgery-plume/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA letter of interpretation, Oct. 7, 2016: smoke plume from laser and electrosurgical instruments",
+        "url": "https://osha.gov/laws-regs/standardinterpretations/2016-10-07",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Hospitals eTool: Surgical Suite, Smoke Plume",
+        "url": "https://www.osha.gov/etools/hospitals/surgical-suite/smoke-plume",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Hospitals eTool: Surgical Suite, Laser Hazards",
+        "url": "https://osha.gov/etools/hospitals/surgical-suite/laser-hazards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Laser Hazards: laser classes",
+        "url": "https://osha.gov/laser-hazards/hazards",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH Hazard Controls HC11 (96-128): Control of Smoke from Laser/Electric Surgical Procedures",
+        "url": "https://cdc.gov/niosh/docs/hazardcontrol/hc11.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1910.134(c)(1), (e)(1), (f)(2): written program, medical evaluation, fit testing",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.134",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Surgical Smoke and Lasers",
+        "hook": "When a laser or electrosurgery tool burns tissue, it makes smoke. That smoke can carry toxic gases like benzene, hydrogen cyanide and formaldehyde.",
+        "sections": [
+          {
+            "heading": "What's in the smoke",
+            "items": [
+              "At high levels it irritates your eyes, nose and throat. It can also blur the surgeon's view.",
+              "It can carry bits of cells and viruses. OSHA says no disease has been documented as spread through surgical smoke, but the risk may exist.",
+              "OSHA has no specific standard for surgical smoke. Other OSHA rules can still apply, like the ones for protective equipment, respirators and air contaminants."
+            ]
+          },
+          {
+            "heading": "Catch it at the source",
+            "items": [
+              "Room ventilation alone isn't enough. Use a smoke evacuator, or room suction with an in-line filter.",
+              "Keep the nozzle within 2 inches of the surgical site.",
+              "Keep the evacuator on the whole time particles are being made. Evacuate all the smoke, no matter how little there is.",
+              "Use new tubing for each procedure, and change the filter the way the maker says. Treat used tubing, filters and absorbers as infectious waste."
+            ]
+          },
+          {
+            "heading": "Masks and respirators",
+            "items": [
+              "A surgical mask is there to protect the patient. It is not certified as a respirator for you.",
+              "If your company requires respirators, it has to have a written program and give you a medical evaluation before you're fit tested or use one.",
+              "Tight-fitting respirators get fit tested before first use, with any new size or model, and at least once a year."
+            ]
+          },
+          {
+            "heading": "The beam",
+            "items": [
+              "A direct or reflected laser beam can cause severe eye injuries. Wear laser eyewear made for the wavelength in use. OSHA's hospital guidance says it should be marked with its optical density and wavelength.",
+              "The most powerful lasers, Class 4, can burn skin and eyes from a direct or reflected beam. They can also be a fire hazard.",
+              "Warning signs go on every door into the laser treatment area. Only trained, authorized technicians do maintenance on the laser."
+            ]
+          }
+        ],
+        "ask": "Where is the smoke evacuator for today's case, and who checks that it's on before the first cut?"
+      },
+      "es": {
+        "title": "Humo quirúrgico y láseres",
+        "hook": "Cuando un láser o un aparato de electrocirugía quema tejido, hace humo. Ese humo puede llevar gases tóxicos como benceno, cianuro de hidrógeno y formaldehído.",
+        "sections": [
+          {
+            "heading": "Qué lleva el humo",
+            "items": [
+              "En niveles altos te irrita los ojos, la nariz y la garganta. También le puede nublar la vista al cirujano.",
+              "Puede llevar pedacitos de células y virus. OSHA dice que no hay casos documentados de enfermedades contagiadas por el humo quirúrgico, pero el riesgo puede existir.",
+              "OSHA no tiene una norma específica para el humo quirúrgico. Otras reglas de OSHA sí pueden aplicar, como las de equipo de protección, respiradores y contaminantes del aire."
+            ]
+          },
+          {
+            "heading": "Atrápalo donde se produce",
+            "items": [
+              "La ventilación del cuarto sola no es suficiente. Usa un evacuador de humo, o la succión del cuarto con un filtro en línea.",
+              "Mantén la boquilla a 2 pulgadas o menos del sitio quirúrgico.",
+              "Mantén el evacuador prendido todo el tiempo que se estén produciendo partículas. Saca todo el humo, por poco que sea.",
+              "Usa tubería nueva en cada procedimiento, y cambia el filtro como dice el fabricante. Trata la tubería, los filtros y los absorbentes usados como desecho infeccioso."
+            ]
+          },
+          {
+            "heading": "Mascarillas y respiradores",
+            "items": [
+              "La mascarilla quirúrgica está para proteger al paciente. No está certificada como respirador para ti.",
+              "Si tu compañía exige respiradores, tiene que tener un programa por escrito y darte una evaluación médica antes de la prueba de ajuste o de que uses uno.",
+              "Los respiradores ajustados a la cara llevan prueba de ajuste antes del primer uso, con cada tamaño o modelo nuevo, y por lo menos una vez al año."
+            ]
+          },
+          {
+            "heading": "El rayo",
+            "items": [
+              "Un rayo láser directo o reflejado puede causar lesiones graves en los ojos. Usa lentes para láser hechos para la longitud de onda que se está usando. La guía de OSHA para hospitales dice que deben estar marcados con su densidad óptica y su longitud de onda.",
+              "Los láseres más potentes, los de Clase 4, pueden quemar la piel y los ojos con el rayo directo o reflejado. También pueden causar un incendio.",
+              "En cada puerta del área de tratamiento con láser van letreros de advertencia. Solo técnicos entrenados y autorizados le dan mantenimiento al láser."
+            ]
+          }
+        ],
+        "ask": "¿Dónde está el evacuador de humo para el caso de hoy, y quién revisa que esté prendido antes del primer corte?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "latex-allergy",
+    "industries": [
+      "health",
+      "food"
+    ],
+    "code": "1910.1030(d)(3)(iii); NIOSH 97-135",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "NIOSH Alert 97-135: Preventing Allergic Reactions to Natural Rubber Latex in the Workplace",
+        "url": "https://stacks.cdc.gov/view/cdc/21446/cdc_21446_DS1.pdf",
+        "kind": "guidance"
+      },
+      {
+        "label": "NIOSH 97-135 web page (2021 update on powdered gloves)",
+        "url": "https://archive.cdc.gov/www_cdc_gov/niosh/docs/97-135/default.html",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Hospitals eTool: Latex Allergy",
+        "url": "https://www.osha.gov/etools/hospitals/hospital-wide-hazards/latex-allergy",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Latex Allergy: Standards",
+        "url": "https://osha.gov/latex-allergy/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA 1910.1030(d)(3)(iii): hypoallergenic gloves, liners, powderless gloves for allergic employees",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030",
+        "kind": "standard"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Latex Allergy",
+        "hook": "Latex gloves can make some people sick, and it can get worse with repeated exposure. NIOSH says about 8% to 12% of health care workers who use latex regularly are sensitized to it.",
+        "sections": [
+          {
+            "heading": "Know the signs",
+            "items": [
+              "Dry, itchy, irritated hands can be simple irritation. That's not a true allergy.",
+              "A rash like poison ivy that starts 24 to 48 hours after contact is an allergic skin reaction. It can turn into oozing blisters.",
+              "True latex allergy can cause redness, hives or itching. Worse cases bring a runny nose, sneezing, itchy eyes, a scratchy throat and asthma. Rarely, shock.",
+              "A skin rash may be the first sign. Keep getting exposed, and more serious reactions could follow."
+            ]
+          },
+          {
+            "heading": "Pick the right glove",
+            "items": [
+              "If the task isn't likely to involve infectious material, like food prep, housekeeping or maintenance, use nonlatex gloves.",
+              "When you need barrier protection and latex gloves are used, they should be powder-free with reduced protein.",
+              "Gloves called hypoallergenic do not lower the risk of latex allergy. And hypoallergenic or powderless doesn't mean latex-free."
+            ]
+          },
+          {
+            "heading": "Protect your skin",
+            "items": [
+              "Don't use oil-based hand creams or lotions with latex gloves.",
+              "After you take latex gloves off, wash with a mild soap and dry your hands well.",
+              "Areas with latex dust should be cleaned often, and filters and vacuum bags changed often."
+            ]
+          },
+          {
+            "heading": "If you react",
+            "items": [
+              "If you get symptoms, stay away from latex gloves and latex products until you can see a doctor who knows latex allergy.",
+              "Tell your supervisor. Tell your doctors, nurses and dentists too. NIOSH also suggests wearing a medical alert bracelet.",
+              "Where blood exposure is part of the job, your company has to keep hypoallergenic gloves, glove liners, powderless gloves or similar options handy for anyone allergic to the usual gloves."
+            ]
+          }
+        ],
+        "ask": "Has anyone had a rash or itching from gloves? Where do we keep the nonlatex gloves?"
+      },
+      "es": {
+        "title": "Alergia al látex",
+        "hook": "Los guantes de látex le pueden hacer daño a algunas personas, y puede empeorar con la exposición repetida. NIOSH dice que entre el 8% y el 12% de los trabajadores de salud que usan látex seguido están sensibilizados a él.",
+        "sections": [
+          {
+            "heading": "Conoce las señales",
+            "items": [
+              "Las manos secas, con comezón e irritadas pueden ser solo irritación. Eso no es una alergia de verdad.",
+              "Un salpullido como de hiedra venenosa que empieza de 24 a 48 horas después del contacto es una reacción alérgica de la piel. Puede convertirse en ampollas que supuran.",
+              "La alergia al látex de verdad puede causar enrojecimiento, ronchas o comezón. Los casos peores traen escurrimiento nasal, estornudos, ojos con comezón, garganta irritada y asma. Rara vez, choque.",
+              "Un salpullido puede ser la primera señal. Si te sigues exponiendo, pueden venir reacciones más graves."
+            ]
+          },
+          {
+            "heading": "Escoge el guante correcto",
+            "items": [
+              "Si la tarea no va a tener contacto con material infeccioso, como preparar comida, limpieza o mantenimiento, usa guantes que no sean de látex.",
+              "Cuando necesitas protección de barrera y se usan guantes de látex, deben ser sin polvo y con proteína reducida.",
+              "Los guantes llamados hipoalergénicos no bajan el riesgo de alergia al látex. Y hipoalergénico o sin polvo no quiere decir sin látex."
+            ]
+          },
+          {
+            "heading": "Cuida tu piel",
+            "items": [
+              "No uses cremas ni lociones para manos a base de aceite con guantes de látex.",
+              "Después de quitarte los guantes de látex, lávate con un jabón suave y sécate bien las manos.",
+              "Las áreas con polvo de látex se deben limpiar seguido, y los filtros y las bolsas de la aspiradora se deben cambiar seguido."
+            ]
+          },
+          {
+            "heading": "Si tienes una reacción",
+            "items": [
+              "Si te dan síntomas, aléjate de los guantes y productos de látex hasta que te vea un médico que sepa de alergia al látex.",
+              "Dile a tu supervisor. Diles también a tus médicos, enfermeras y dentistas. NIOSH también sugiere usar una pulsera de alerta médica.",
+              "Donde el trabajo incluye exposición a sangre, tu compañía tiene que tener a la mano guantes hipoalergénicos, forros para guantes, guantes sin polvo u opciones parecidas para quien sea alérgico a los guantes de siempre."
+            ]
+          }
+        ],
+        "ask": "¿Alguien ha tenido salpullido o comezón por los guantes? ¿Dónde guardamos los guantes que no son de látex?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "formaldehyde",
+    "industries": [
+      "health",
+      "mfg",
+      "facil"
+    ],
+    "code": "1910.1048",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1048(c): permissible exposure limits (TWA and STEL); (e) regulated areas",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1048",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1048(h)(1): eye and skin protection; (i)(2)-(i)(3): drench showers and eyewash",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1048",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1048(j): leaks and spills; (l)(1)(ii): medical surveillance for signs and symptoms; (n): training",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1048",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1048 Appendix A: substance technical guidelines for formalin (health effects, odor, first aid, spills)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1048AppA",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Formaldehyde safety and health topic: uses",
+        "url": "https://www.osha.gov/formaldehyde",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Formaldehyde",
+        "hook": "Formaldehyde shows up in more places than you'd think. It's a preservative in medical labs, a sterilizer, an embalming fluid, and it's in resins used to make particle board, plywood and treated fabrics.",
+        "sections": [
+          {
+            "heading": "Why it matters",
+            "items": [
+              "It's very irritating to your eyes and airways. Some people feel it in their eyes, nose and throat at levels between 0.5 and 2 parts per million.",
+              "Liquid formaldehyde is a severe skin irritant. It can also make you allergic, so later contact brings on a rash or hives.",
+              "Some people have gotten asthma or bronchitis from it, and it has the potential to cause cancer.",
+              "Don't trust your nose. Over time you get used to the smell and the sting, and that can lead to overexposure."
+            ]
+          },
+          {
+            "heading": "Limits and posted areas",
+            "items": [
+              "Your company has to keep your exposure at or below 0.75 parts per million over 8 hours, and 2 parts per million over any 15 minutes.",
+              "Where the air goes over those limits, it's a regulated area with signs. Only trained, authorized people go in."
+            ]
+          },
+          {
+            "heading": "Eyes and skin",
+            "items": [
+              "For liquids with 1 percent or more formaldehyde, all eye and skin contact has to be prevented. That means protective clothing formaldehyde can't get through, plus goggles or a face shield. If you wear a face shield and it could reach your eyes, wear goggles too.",
+              "Where eyes could get splashed with a solution of 0.1 percent or more, there has to be an eyewash in the work area. Where skin could get splashed with 1 percent or more, there has to be a quick drench shower.",
+              "Splashed in the eyes? Flush right away with lots of water, lifting your lids, for at least 15 to 20 minutes. Then get medical help.",
+              "Splashed on skin? Get the wet clothes and shoes off right away, and wash with soap and lots of water for at least 15 to 20 minutes."
+            ]
+          },
+          {
+            "heading": "Spills, symptoms and training",
+            "items": [
+              "Your company has to look for leaks and spills on a regular basis. Spills get cleaned up promptly by trained people wearing the right protection.",
+              "Big spill? Leave the area quickly unless you have emergency duties. Don't touch the spilled material.",
+              "If your eyes, nose or throat get irritated, or you get a rash, tell your supervisor. The rule gives workers with these signs access to medical checks.",
+              "If you work where there's formaldehyde exposure, you get trained when you start and at least once a year. The exception is when data shows exposure stays below 0.1 parts per million."
+            ]
+          }
+        ],
+        "ask": "Where is the nearest eyewash to where we use formaldehyde, and how long do you flush?"
+      },
+      "es": {
+        "title": "Formaldehído",
+        "hook": "El formaldehído aparece en más lugares de lo que crees. Es conservante en laboratorios médicos, esterilizante, líquido de embalsamar, y está en resinas que se usan para hacer aglomerado, contrachapado y telas tratadas.",
+        "sections": [
+          {
+            "heading": "Por qué importa",
+            "items": [
+              "Irrita mucho los ojos y las vías respiratorias. Algunas personas lo sienten en los ojos, la nariz y la garganta a niveles entre 0.5 y 2 partes por millón.",
+              "El formaldehído líquido irrita fuerte la piel. También te puede volver alérgico, y después cualquier contacto te da sarpullido o ronchas.",
+              "A algunas personas les ha dado asma o bronquitis, y puede causar cáncer.",
+              "No confíes en tu nariz. Con el tiempo te acostumbras al olor y al ardor, y eso puede llevar a que te expongas de más."
+            ]
+          },
+          {
+            "heading": "Límites y áreas señalizadas",
+            "items": [
+              "Tu compañía tiene que mantener tu exposición en 0.75 partes por millón o menos en 8 horas, y en 2 partes por millón en cualquier periodo de 15 minutos.",
+              "Donde el aire pasa esos límites, es un área regulada con letreros. Solo entra personal capacitado y autorizado."
+            ]
+          },
+          {
+            "heading": "Ojos y piel",
+            "items": [
+              "Con líquidos de 1 por ciento o más de formaldehído, hay que evitar todo contacto con los ojos y la piel. Eso quiere decir ropa protectora que el formaldehído no traspase, más gafas protectoras o careta. Si usas careta y te puede llegar a los ojos, usa gafas también.",
+              "Donde te puede salpicar en los ojos una solución de 0.1 por ciento o más, tiene que haber un lavaojos en el área de trabajo. Donde te puede salpicar la piel con 1 por ciento o más, tiene que haber una ducha de emergencia.",
+              "¿Te salpicó en los ojos? Enjuágalos de inmediato con mucha agua, levantando los párpados, por lo menos de 15 a 20 minutos. Luego busca atención médica.",
+              "¿Te salpicó en la piel? Quítate la ropa y los zapatos mojados de inmediato, y lávate con jabón y mucha agua por lo menos de 15 a 20 minutos."
+            ]
+          },
+          {
+            "heading": "Derrames, síntomas y capacitación",
+            "items": [
+              "Tu compañía tiene que buscar fugas y derrames con regularidad. Los derrames los limpia pronto personal capacitado con la protección adecuada.",
+              "¿Un derrame grande? Sal del área rápido, a menos que tengas tareas de emergencia. No toques el material derramado.",
+              "Si se te irritan los ojos, la nariz o la garganta, o te sale sarpullido, avísale a tu supervisor. La regla les da a los trabajadores con estas señales acceso a revisiones médicas.",
+              "Si trabajas donde hay exposición al formaldehído, te capacitan al empezar y por lo menos una vez al año. La excepción es cuando los datos muestran que la exposición se queda por debajo de 0.1 partes por millón."
+            ]
+          }
+        ],
+        "ask": "¿Dónde está el lavaojos más cercano a donde usamos formaldehído, y cuánto tiempo hay que enjuagar?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "radiation",
+    "industries": [
+      "health"
+    ],
+    "code": "1910.1096",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1096(d)(2): personnel monitoring",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1096",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1096(e): caution signs and labels",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1096",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1096(i)(2): informing people who work in radiation areas; (p): NRC and Agreement State licensees",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1096",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA Ionizing Radiation: standards and which agency regulates what",
+        "url": "https://www.osha.gov/ionizing-radiation/standards",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Ionizing Radiation: control and prevention (ALARA, time, distance, shielding, lead aprons)",
+        "url": "https://www.osha.gov/ionizing-radiation/control-prevention",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Radiation Safety in Healthcare",
+        "hook": "X-ray machines and radioactive materials are everyday tools in healthcare. The goal is simple: keep your dose as low as reasonably achievable.",
+        "sections": [
+          {
+            "heading": "Who sets the rules",
+            "items": [
+              "OSHA's rule covers radiation sources the Nuclear Regulatory Commission doesn't, like X-ray equipment and some accelerators.",
+              "Radioactive materials, like those used in nuclear medicine, are regulated by the NRC, or by your state if it has an agreement with the NRC. Those states can also regulate X-ray machines. So your facility's radiation safety program may follow NRC or state rules.",
+              "Under OSHA's rule, everyone who works in or regularly enters a radiation area has to be told about the hazards and the precautions."
+            ]
+          },
+          {
+            "heading": "Time, distance, shielding",
+            "items": [
+              "Time: spend as little time as you can in areas with higher radiation levels.",
+              "Distance: get as far from the source as you can.",
+              "Shielding: the right shielding can greatly cut or even stop the dose you get.",
+              "A lead apron only works if you wear it the right way. A lead thyroid collar adds protection for your thyroid."
+            ]
+          },
+          {
+            "heading": "Dosimeters",
+            "items": [
+              "Under OSHA's rule, if you enter a restricted area and could get more than 25 percent of the quarterly limit, your company has to give you a monitoring badge and require you to wear it. The same goes for anyone entering a high radiation area.",
+              "If you're issued a dosimeter, wear it. It's what measures the dose you get.",
+              "In fluoroscopy, a lead glove in the main beam can make the machine automatically turn up its radiation output."
+            ]
+          },
+          {
+            "heading": "Know the signs",
+            "items": [
+              "Radiation signs use the radiation symbol in magenta or purple on a yellow background.",
+              "Watch for CAUTION RADIATION AREA, CAUTION HIGH RADIATION AREA, and CAUTION RADIOACTIVE MATERIALS. If you don't know whether you belong there, stop and ask before you go in."
+            ]
+          }
+        ],
+        "ask": "Who here wears a dosimeter, and where do we keep the lead aprons and thyroid collars?"
+      },
+      "es": {
+        "title": "Seguridad con la radiación en el cuidado de la salud",
+        "hook": "Las máquinas de rayos X y los materiales radiactivos son herramientas de todos los días en el cuidado de la salud. La meta es sencilla: mantener tu dosis tan baja como sea razonablemente posible.",
+        "sections": [
+          {
+            "heading": "Quién pone las reglas",
+            "items": [
+              "La regla de OSHA cubre las fuentes de radiación que no regula la Comisión Reguladora Nuclear (NRC), como los equipos de rayos X y algunos aceleradores.",
+              "Los materiales radiactivos, como los que se usan en medicina nuclear, los regula la NRC, o tu estado si tiene un acuerdo con la NRC. Esos estados también pueden regular las máquinas de rayos X. Así que el programa de seguridad con la radiación de tu centro puede seguir reglas de la NRC o del estado.",
+              "Según la regla de OSHA, a todos los que trabajan en un área de radiación o entran a ella con frecuencia se les tiene que informar de los peligros y las precauciones."
+            ]
+          },
+          {
+            "heading": "Tiempo, distancia, blindaje",
+            "items": [
+              "Tiempo: pasa el menor tiempo posible en áreas con niveles de radiación más altos.",
+              "Distancia: aléjate lo más que puedas de la fuente.",
+              "Blindaje: el blindaje adecuado puede reducir mucho o hasta eliminar la dosis que recibes.",
+              "Un delantal de plomo solo funciona si lo usas como debe ser. Un collar de plomo para la tiroides le da protección extra a tu tiroides."
+            ]
+          },
+          {
+            "heading": "Dosímetros",
+            "items": [
+              "Según la regla de OSHA, si entras a un área restringida y podrías recibir más del 25 por ciento del límite trimestral, tu compañía tiene que darte un gafete de monitoreo y exigirte que lo uses. Lo mismo para cualquiera que entre a un área de alta radiación.",
+              "Si te dan un dosímetro, úsalo. Es lo que mide la dosis que recibes.",
+              "En fluoroscopia, un guante de plomo dentro del haz principal puede hacer que la máquina suba automáticamente su radiación."
+            ]
+          },
+          {
+            "heading": "Conoce los letreros",
+            "items": [
+              "Los letreros de radiación usan el símbolo de radiación en magenta o morado sobre fondo amarillo.",
+              "Fíjate en CAUTION RADIATION AREA (área de radiación), CAUTION HIGH RADIATION AREA (área de alta radiación) y CAUTION RADIOACTIVE MATERIALS (materiales radiactivos). Si no sabes si te toca entrar, detente y pregunta antes de pasar."
+            ]
+          }
+        ],
+        "ask": "¿Quién de aquí usa dosímetro, y dónde guardamos los delantales de plomo y los collares para la tiroides?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "lab-chemicals",
+    "industries": [
+      "health"
+    ],
+    "code": "1910.1450",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1910.1450(a) scope and (b) definition of laboratory use",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1450",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1450(e)(1)-(e)(3): Chemical Hygiene Plan, incl. (e)(3)(iii) fume hoods",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1450",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1450(f)(2)-(f)(4): information and training",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1450",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1450(g)(1)-(g)(2): medical consultation; (h)(1): labels and safety data sheets",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1450",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.1450 Appendix A (non-mandatory): hoods, spills, eating and drinking",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1450AppA",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Lab Chemicals",
+        "hook": "In a lab you may handle a lot of different chemicals in small amounts. OSHA's lab rule says your company needs a written plan for doing that safely, and you need to know it.",
+        "sections": [
+          {
+            "heading": "The Chemical Hygiene Plan",
+            "items": [
+              "Your company has to have a written Chemical Hygiene Plan and actually carry it out. It has to be easy for you to get to.",
+              "The plan covers standard procedures, how exposures get controlled, fume hoods working properly, training, medical help, who is in charge of the plan, and extra protection for especially dangerous chemicals.",
+              "Your training has to tell you where the plan is, the exposure limits, the signs and symptoms of exposure, and where to find safety data sheets. You get it before your first assignment and before any new exposure situation."
+            ]
+          },
+          {
+            "heading": "Labels and safety data sheets",
+            "items": [
+              "Labels on incoming chemical containers stay on. Don't remove them or cover them up.",
+              "Safety data sheets that come with chemical shipments have to be kept and easy for you to get to.",
+              "If a byproduct is made and nobody knows what's in it, it's treated as hazardous."
+            ]
+          },
+          {
+            "heading": "Fume hoods",
+            "items": [
+              "The plan has to require that fume hoods and other protective equipment work properly. OSHA's lab guidance calls chemical hoods the most important equipment for protecting lab workers from hazardous chemicals.",
+              "Hoods should be maintained, monitored and tested on a routine basis.",
+              "Don't use a hood to store chemicals, and don't get rid of chemical waste by letting it evaporate in the hood. Keep the hood clear of clutter."
+            ]
+          },
+          {
+            "heading": "Spills and exposures",
+            "items": [
+              "Before you start work, know the procedures for spills, releases and fires. Know where the safety equipment, nearest fire alarm and phone are.",
+              "After a spill, leak or explosion that likely exposed you, your company has to offer you a medical consultation. If you get signs or symptoms from a chemical you may have been exposed to in the lab, you get the chance for a medical exam.",
+              "That medical care is at no cost to you, without loss of pay, at a reasonable time and place.",
+              "OSHA's lab guidance says eating, drinking and smoking should be strictly prohibited where hazardous chemicals are used or stored, and food and drinks shouldn't be kept there."
+            ]
+          }
+        ],
+        "ask": "Where is our Chemical Hygiene Plan kept, and who is in charge of it?"
+      },
+      "es": {
+        "title": "Químicos de laboratorio",
+        "hook": "En un laboratorio puedes manejar muchos químicos distintos en cantidades pequeñas. La regla de laboratorios de OSHA dice que tu compañía necesita un plan por escrito para hacerlo con seguridad, y tú necesitas conocerlo.",
+        "sections": [
+          {
+            "heading": "El Plan de Higiene Química",
+            "items": [
+              "Tu compañía tiene que tener un Plan de Higiene Química por escrito y cumplirlo de verdad. Tiene que estar fácil de consultar para ti.",
+              "El plan cubre los procedimientos de trabajo, cómo se controlan las exposiciones, que las campanas de extracción funcionen bien, la capacitación, la atención médica, quién está a cargo del plan y protección extra para químicos especialmente peligrosos.",
+              "Tu capacitación tiene que decirte dónde está el plan, los límites de exposición, las señales y síntomas de exposición y dónde encontrar las hojas de datos de seguridad. La recibes antes de tu primera asignación y antes de cualquier situación nueva de exposición."
+            ]
+          },
+          {
+            "heading": "Etiquetas y hojas de datos de seguridad",
+            "items": [
+              "Las etiquetas de los envases de químicos que llegan se quedan puestas. No las quites ni las tapes.",
+              "Las hojas de datos de seguridad que llegan con los envíos de químicos se tienen que guardar y estar fáciles de consultar para ti.",
+              "Si se produce un subproducto y nadie sabe qué contiene, se trata como peligroso."
+            ]
+          },
+          {
+            "heading": "Campanas de extracción",
+            "items": [
+              "El plan tiene que exigir que las campanas de extracción y el demás equipo de protección funcionen bien. La guía de laboratorios de OSHA dice que las campanas químicas son el equipo más importante para proteger al personal de laboratorio de los químicos peligrosos.",
+              "Las campanas se deben mantener, vigilar y probar de forma rutinaria.",
+              "No uses la campana para guardar químicos, y no te deshagas de desechos químicos dejándolos evaporar en la campana. Mantén la campana libre de cosas."
+            ]
+          },
+          {
+            "heading": "Derrames y exposiciones",
+            "items": [
+              "Antes de empezar a trabajar, conoce los procedimientos para derrames, fugas e incendios. Sabe dónde están el equipo de seguridad, la alarma de incendio y el teléfono más cercanos.",
+              "Después de un derrame, una fuga o una explosión que probablemente te expuso, tu compañía tiene que ofrecerte una consulta médica. Si te dan señales o síntomas por un químico al que te pudiste exponer en el laboratorio, tienes la oportunidad de un examen médico.",
+              "Esa atención médica no te cuesta nada, no pierdes pago, y es en un horario y lugar razonables.",
+              "La guía de laboratorios de OSHA dice que comer, beber y fumar se debe prohibir estrictamente donde se usan o guardan químicos peligrosos, y que ahí no se deben guardar comidas ni bebidas."
+            ]
+          }
+        ],
+        "ask": "¿Dónde se guarda nuestro Plan de Higiene Química, y quién está a cargo de él?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "anesthetic-gases",
+    "industries": [
+      "health"
+    ],
+    "code": "No specific OSHA standard (OSHA guidelines)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA Waste Anesthetic Gases: overview, health effects, no specific standard",
+        "url": "https://www.osha.gov/waste-anesthetic-gases",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Anesthetic Gases: Guidelines for Workplace Exposures (leak sources, work practices, scavenging, monitoring, training)",
+        "url": "https://www.osha.gov/waste-anesthetic-gases/workplace-exposures-guidelines",
+        "kind": "guidance"
+      },
+      {
+        "label": "OSHA Waste Anesthetic Gases: possible solutions (NIOSH 94-118 on scavenging monitoring)",
+        "url": "https://www.osha.gov/waste-anesthetic-gases/solutions",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Waste Anesthetic Gases",
+        "hook": "Anesthetic gas that leaks into the room during a procedure is called waste anesthetic gas. If you work in operating rooms, recovery, dental offices or vet clinics, you can breathe it.",
+        "sections": [
+          {
+            "heading": "Why it matters",
+            "items": [
+              "The gases of concern are nitrous oxide and halogenated agents like isoflurane and desflurane.",
+              "Possible effects of exposure include nausea, dizziness, headaches, tiredness and irritability. It has also been linked to miscarriages, birth defects, cancer, and liver and kidney disease among operating room staff or their spouses.",
+              "OSHA has no specific standard and no exposure limits for these gases. This talk follows OSHA's guidelines, which say to keep exposure to the lowest practical level."
+            ]
+          },
+          {
+            "heading": "Where leaks come from",
+            "items": [
+              "No anesthesia machine is totally leak-free. Leaks can come from tank valves and the high- and low-pressure connections.",
+              "Gas also gets out around a poorly fitting face mask, or a breathing tube or airway cuff that isn't inflated right.",
+              "Flow valves left open and vaporizers left on after use let gas escape.",
+              "In recovery, the patient is the main source. They breathe the gas out into the room."
+            ]
+          },
+          {
+            "heading": "Work practices",
+            "items": [
+              "Do a full anesthesia machine checkout each day before the first case, and test daily for low-pressure leaks.",
+              "Don't start gas flow before induction actually begins. Use a mask that seals as well as possible.",
+              "Turn vaporizers off when they're not in use. When you can, flush the breathing system into the scavenging system, not the room."
+            ]
+          },
+          {
+            "heading": "Scavenging and checks",
+            "items": [
+              "A scavenging system traps waste gas where it overflows from the breathing circuit. It needs to be monitored and maintained.",
+              "OSHA's guidelines call for checking waste gas levels in the air regularly, preferably at least twice a year, to make sure the equipment and controls are working.",
+              "Maintenance should be done by trained people following the manufacturer's recommendations.",
+              "Personal protective equipment is not a replacement for these controls."
+            ]
+          }
+        ],
+        "ask": "What's one leak source you've seen on our machines or in recovery, and who do we tell about it?"
+      },
+      "es": {
+        "title": "Gases anestésicos residuales",
+        "hook": "El gas anestésico que se escapa al cuarto durante un procedimiento se llama gas anestésico residual. Si trabajas en quirófanos, recuperación, consultorios dentales o clínicas veterinarias, lo puedes respirar.",
+        "sections": [
+          {
+            "heading": "Por qué importa",
+            "items": [
+              "Los gases que preocupan son el óxido nitroso y los agentes halogenados como el isoflurano y el desflurano.",
+              "Los posibles efectos de la exposición incluyen náuseas, mareos, dolores de cabeza, cansancio e irritabilidad. También se ha relacionado con abortos espontáneos, defectos de nacimiento, cáncer y enfermedades del hígado y los riñones entre el personal de quirófano o sus parejas.",
+              "OSHA no tiene una norma específica ni límites de exposición para estos gases. Esta charla sigue las pautas de OSHA, que dicen que hay que mantener la exposición al nivel más bajo que se pueda en la práctica."
+            ]
+          },
+          {
+            "heading": "De dónde vienen las fugas",
+            "items": [
+              "Ninguna máquina de anestesia está totalmente libre de fugas. Las fugas pueden venir de las válvulas de los tanques y de las conexiones de alta y baja presión.",
+              "El gas también se escapa alrededor de una mascarilla que no ajusta bien, o de un tubo de respiración o un manguito de vía aérea mal inflado.",
+              "Las válvulas de flujo abiertas y los vaporizadores encendidos después de usarlos dejan escapar gas.",
+              "En recuperación, el paciente es la fuente principal. Exhala el gas al cuarto."
+            ]
+          },
+          {
+            "heading": "Prácticas de trabajo",
+            "items": [
+              "Haz una revisión completa de la máquina de anestesia cada día antes del primer caso, y prueba a diario si hay fugas de baja presión.",
+              "No abras el flujo de gas antes de que empiece de verdad la inducción. Usa una mascarilla que selle lo mejor posible.",
+              "Apaga los vaporizadores cuando no se estén usando. Cuando se pueda, purga el sistema de respiración hacia el sistema de extracción, no hacia el cuarto."
+            ]
+          },
+          {
+            "heading": "Extracción y revisiones",
+            "items": [
+              "Un sistema de extracción atrapa el gas residual donde se desborda del circuito de respiración. Hay que vigilarlo y darle mantenimiento.",
+              "Las pautas de OSHA piden medir con regularidad los niveles de gas residual en el aire, de preferencia por lo menos dos veces al año, para asegurarse de que el equipo y los controles funcionan.",
+              "El mantenimiento lo debe hacer personal capacitado siguiendo las recomendaciones del fabricante.",
+              "El equipo de protección personal no reemplaza estos controles."
+            ]
+          }
+        ],
+        "ask": "¿Qué fuga has visto en nuestras máquinas o en recuperación, y a quién le avisamos?"
       }
     },
     "translationStatus": {

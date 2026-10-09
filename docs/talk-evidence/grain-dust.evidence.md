@@ -1,0 +1,47 @@
+# Evidence: grain-dust
+
+Scope note: the existing "grain-bins" talk covers engulfment and bin entry (1910.272(g)); nothing here repeats it. The existing "combustible-dust" talk (mfg) covers combustible dust in general (secondary explosions, vacuums, 30 psi compressed-air NEP guidance); this talk sticks to the grain handling standard's specific rules (housekeeping priority areas, 1/8 inch, hot work permit, bucket elevators).
+
+Access note: www.osha.gov standardnumber pages could not be fetched in this session (WebFetch provenance refusal; curl blocked). 1910.272 and Appendix A were read from the Cornell LII copy (https://www.law.cornell.edu/cfr/text/29/1910.272), which the checker brief accepts; Appendix A was also cross-checked on a J.J. Keller copy. Sources keep the osha.gov URLs. OSHA Grain Handling (https://www.osha.gov/grain-handling) and its hazards subpage were fetched directly. WebFetch returns summaries with short quotes; "exact" means that fragment came back verbatim.
+
+Paragraph corrections to the assignment: the hint "1910.272" is right. Specifics: (b)(1) facilities list; (b)(2) says (o), (p), (q) apply only to grain elevators; fugitive grain dust is defined in (c); preventive maintenance is (m); grain stream processing equipment is (n); emergency escape (o); dryers (p); inside bucket elevators (q). Training is (e)(1); hot work (f); contractors (i); housekeeping (j).
+
+| English sentence | Source | Supporting quote |
+|---|---|---|
+| Title: Grain Dust Explosions | n/a | title |
+| Grain dust is the main fuel for explosions in grain handling. | guidance: OSHA Grain Handling | "Grain dust is the main source of fuel for explosions in grain handling." (exact) |
+| OSHA says these explosions are often severe and take lives. | guidance: OSHA Grain Handling | explosions "are often severe, involving loss of life and substantial property damage." (exact) |
+| Grain dust burns easily. | guidance: OSHA Grain Handling | "Grain dust is highly combustible" (exact) |
+| It can burn or explode if enough of it gets into the air, or if it settles on a surface and finds an ignition source. | guidance: OSHA Grain Handling | "can burn or explode if enough becomes airborne" / "or accumulates on a surface and finds an ignition source" (exact) |
+| It takes fuel, which is the dust, plus oxygen and an ignition source. For an explosion, add a closed-in space. | guidance: 1910.272 App. A item 3 | "fuel (such as grain dust), oxygen, ignition source, and (in the case of explosions) confinement." (exact) |
+| OSHA's grain handling rule covers grain elevators, feed mills, flour mills, rice mills, dry corn mills, soybean flaking and similar plants. | OSHA 1910.272(b)(1) | "apply to grain elevators, feed mills, flour mills..." plus rice mills, dust pelletizing plants, dry corn mills, soybean flaking operations, and dry grinding of soycake (exact fragment + paraphrase) |
+| Farms aren't on that list, but the dust is just as combustible. | 1910.272(b)(1) list; OSHA Grain Handling | List names no farms (paraphrase); "Grain dust is highly combustible" (exact). Reviewer: the grain-bins talk cites an OSHA 1991 interpretation on farms; not re-fetched here, so the line only says farms aren't on the list. |
+| Your company has to have a written housekeeping plan that says how often and how dust gets cleaned off ledges, floors and equipment. | OSHA 1910.272(j)(1) | written housekeeping program establishing frequency and method for reducing fugitive grain dust on ledges, floors, equipment, and other exposed surfaces (paraphrase) |
+| Priority areas are floors within 35 feet of inside bucket elevators, and floors of enclosed areas with grinding equipment or grain dryers. | OSHA 1910.272(j)(2)(i)(A)-(C); OSHA Grain Handling | "floor areas within 35 feet of inside bucket elevators" (exact); floors of enclosed areas containing grinding equipment; floors of enclosed areas containing grain dryers located inside the facility (paraphrase) |
+| In those areas, dust deeper than 1/8 inch has to be removed right away, unless the plan shows it protects just as well another way. | OSHA 1910.272(j)(2)(ii) | "The employer shall immediately remove any fugitive grain dust accumulations whenever they exceed 1/8 inch" at priority areas, or demonstrate and assure equivalent protection through the program (exact fragment + paraphrase) |
+| OSHA says 1/8 inch is more than enough to fuel an explosion. | guidance: App. A item 7; OSHA Grain Handling | "a 1/8 inch dust accumulation is more than enough to fuel such occurrences" (exact; "occurrences" = fires/explosions) |
+| Blowing dust down with compressed air is only allowed when all machinery in the area that could ignite it is shut down and other ignition sources are removed or controlled. | OSHA 1910.272(j)(3) | "The use of compressed air to blow dust from ledges, walls, and other areas shall only be permitted" / "when all machinery that presents an ignition source in the area is shut-down" and other known potential ignition sources removed or controlled (exact fragments) |
+| Ignition sources include hot bearings, overheated motors, misaligned belts, welding, cutting and brazing. | guidance: OSHA Grain Handling | "(such as hot bearing, overheated motor, misaligned conveyor belt, welding, cutting, and brazing)" (exact) |
+| If you see a bearing running hot or a belt slipping, tell your supervisor. | practical, from (m)(2) | (m)(2) requires overheated bearings and slipping/misaligned belts be corrected or removed from service; reporting is how a worker triggers that. Reviewer: practical line. |
+| Many grain elevator fires and explosions start in the inside bucket elevator legs. | guidance: App. A item 13 | "Hazards associated with inside bucket elevator legs are the source of many grain elevator fires and explosions." (exact) |
+| Overheated bearings and slipping or misaligned belts there have to be fixed or taken out of service. | OSHA 1910.272(m)(2) | overheated bearings and slipping or misaligned belts on inside bucket elevators shall be promptly corrected or removed from service (paraphrase). (m) applies to all (b)(1) facilities. |
+| At grain elevators, never jog a bucket elevator to free a choked leg. | OSHA 1910.272(q)(1); (b)(2) | "Bucket elevators shall not be jogged to free a choked leg." (exact); (b)(2) "(o), (p), and (q) ... apply only to grain elevators." (exact) |
+| Metal in the grain can throw sparks in hammer mills and grinders. | guidance: App. A item 10 | "Introduction of foreign objects and ferrous material into such equipment can produce sparks which can create an explosion hazard." (exact) |
+| Those machines need a way to pull iron and steel out of the grain first. | OSHA 1910.272(n) | hammer mills, grinders, and pulverizers must have "an effective means of removing ferrous material from the incoming grain stream" (paraphrase) |
+| Your company has to issue a permit for hot work. | OSHA 1910.272(f)(1) | "The employer shall issue a permit for all hot work, with the following exceptions" (exact) |
+| The exceptions are when the employer or its representative is there during the work, in an authorized welding shop, or in an authorized hot work area outside the grain building. | OSHA 1910.272(f)(1)(i)-(iii) | employer or authorized representative present while hot work is performed; welding shops authorized by the employer; hot work areas authorized by the employer located outside the grain handling structure (paraphrase) |
+| The permit shows the fire safety precautions were in place before the work started. It stays on file until the job is done. | OSHA 1910.272(f)(2) | permit certifies that the requirements in §1910.252(a) (fire prevention and protection) were implemented prior to beginning the hot work; kept on file until completion (paraphrase) |
+| Your company has to train you at least once a year on dust hazards and common ignition sources, like smoking. | OSHA 1910.272(e)(1), (e)(1)(i) | "at least annually and when changes in job assignment will expose them to new hazards"; general safety precautions incl. hazards of dust accumulations and common ignition sources such as smoking (exact fragment + paraphrase) |
+| Ask: Where is the nearest priority housekeeping area to where we work today, and who do you call if you find dust building up or a bearing running hot? | n/a | discussion prompt |
+
+Dropped / left out:
+- Contractors (1910.272(i)(1)-(2)): sourced but cut to stay under 450 words.
+- Grate opening 2 1/2 inches over receiving pits (k), filter collector location (l), dryer controls (p), belt conductivity 300 megohms (q)(2), 20% belt-speed motion detector (q)(5), and the 1-million-bushel exemption (q)(7): sourced but equipment-design details a crew can't act on.
+- Secondary explosions: not on the 1910.272 pages fetched (Appendix A does not use the term); covered in the combustible-dust talk.
+- Any fatality statistics: none on the fetched OSHA grain pages.
+
+Pages that failed: www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.272 (provenance refusal; used Cornell LII); osha.prod.pace.dol.gov/.../1910.272AppA (fetch error; used Cornell LII, which includes Appendix A).
+
+
+## Fact-check round (2026-10-08)
+JSON edited by independent checker; lines above that no longer appear in the JSON were removed or reworded. See checker report. grain-dust: 1910.272 standard page could not be opened; remaining lines rest on osha.gov/grain-handling only.

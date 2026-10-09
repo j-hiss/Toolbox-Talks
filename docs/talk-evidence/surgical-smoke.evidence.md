@@ -1,0 +1,43 @@
+# surgical-smoke evidence
+
+Scope: OSHA has no specific standard for surgical smoke. osha.gov/laser-electrosurgery-plume: "There are currently no specific OSHA standards for laser/electrosurgery plume hazards." LOI 2016-10-07: "OSHA does not have a specific standard that addresses smoke from surgical procedures in either operating rooms or dental offices." It lists the General Duty Clause, 1910.132, 1910.134 and 1910.1000 as enforceable. The controls below are OSHA eTool and NIOSH guidance (kind "guidance"); the respirator lines are 1910.134 (kind "standard") and apply only where respirators are required.
+
+| English sentence | Source | Supporting quote |
+|---|---|---|
+| When a laser or electrosurgery tool burns tissue, it makes smoke. | guidance: NIOSH HC11 | paraphrase: "During surgical procedures using a laser or electrosurgical unit, the thermal destruction of tissue creates a smoke byproduct." |
+| That smoke can carry toxic gases like benzene, hydrogen cyanide and formaldehyde. | guidance: NIOSH HC11 | exact: "this smoke plume can contain toxic gases and vapors such as benzene, hydrogen cyanide, and formaldehyde" |
+| At high levels it irritates your eyes, nose and throat. | guidance: NIOSH HC11; OSHA eTool smoke plume | paraphrase: "At high concentrations the smoke causes ocular and upper respiratory tract irritation in health care personnel" |
+| It can also blur the surgeon's view. | guidance: NIOSH HC11; OSHA eTool smoke plume | exact: smoke "creates visual problems for the surgeon" (HC11); eTool: high concentrations can cause visual problems for the perioperative team. |
+| It can carry bits of cells and viruses. | guidance: NIOSH HC11 | exact: the plume can contain "bioaerosols, dead and live cellular material (including blood fragments), and viruses". |
+| OSHA says no disease has been documented as spread through surgical smoke, but the risk may exist. | guidance: osha.gov/laser-electrosurgery-plume; eTool smoke plume | exact: "Although there has been no documented transmission of infectious disease through surgical smoke" ... "the potential for generating infectious viral fragments, particularly following treatment of venereal warts, may exist." |
+| OSHA has no specific standard for surgical smoke. | guidance: osha.gov/laser-electrosurgery-plume/standards; LOI 2016-10-07 | exact: "There are currently no specific OSHA standards for laser/electrosurgery plume hazards." |
+| Other rules still apply, like the ones for protective equipment, respirators and air contaminants. | guidance: LOI 2016-10-07 | paraphrase: lists 1910.132 PPE ("requires employers to provide appropriate personal protective equipment"), 1910.134 respiratory protection, 1910.1000 air contaminants, and the General Duty Clause. |
+| Room ventilation alone isn't enough. | guidance: NIOSH HC11 | exact: "General room ventilation is not by itself sufficient to capture contaminants generated at the source." |
+| Use a smoke evacuator, or room suction with an in-line filter. | guidance: OSHA eTool smoke plume | exact: "Use portable local smoke evacuators and room suction systems with in-line filters." |
+| Keep the nozzle within 2 inches of the surgical site. | guidance: OSHA eTool smoke plume; NIOSH HC11 | exact: "Keep the smoke evacuator or room suction hose nozzle inlet within 2 inches of the surgical site" |
+| Keep the evacuator on the whole time particles are being made. | guidance: OSHA eTool smoke plume | exact: "Keep the smoke evacuator "ON" (activated) at all times when airborne particles are produced" |
+| Evacuate all the smoke, no matter how little there is. | guidance: OSHA eTool smoke plume | exact: "Evacuate all smoke, no matter how much is generated." |
+| Use new tubing for each procedure, and change the filter the way the maker says. | guidance: OSHA eTool smoke plume | exact: "Use new tubing before each procedure and replace the smoke evacuator filter as recommended by the manufacturer." (NIOSH HC11 says new filters and tubing for each procedure; eTool wording used.) |
+| Treat used tubing, filters and absorbers as infectious waste. | guidance: OSHA eTool smoke plume; NIOSH HC11 | exact: "Consider all tubing, filters, and absorbers as infectious waste and dispose of them appropriately." |
+| A surgical mask is there to protect the patient. It is not certified as a respirator for you. | guidance: osha.gov/laser-electrosurgery-plume/standards (1910.134 entry) | paraphrase: "Surgical masks used to prevent contamination of the patient" are not certified as respiratory protection for medical employees. |
+| If your company requires respirators, it has to have a written program and give you a medical evaluation before you're fit tested or use one. | OSHA 1910.134(c)(1), (e)(1) | paraphrase: (c)(1) "In any workplace where respirators are necessary ... [or required by the employer] the employer shall establish and implement a written respiratory protection program"; (e)(1) "The employer shall provide a medical evaluation ... before the employee is fit tested or required to use the respirator in the workplace." |
+| Tight-fitting respirators get fit tested before first use, with any new size or model, and at least once a year. | OSHA 1910.134(f)(1)-(f)(2) | paraphrase: fit tested "prior to initial use of the respirator, whenever a different respirator facepiece (size, style, model or make) is used, and at least annually thereafter." |
+| A direct or reflected laser beam can cause severe eye injuries. | guidance: OSHA eTool laser hazards | exact: "Severe eye injuries from direct or reflected laser beams." |
+| Wear laser eyewear made for the wavelength in use. | guidance: OSHA eTool laser hazards | paraphrase: "Use laser protective eyewear that provides adequate protection against the specific laser wavelengths being used." |
+| It must be marked with its optical density and wavelength. | guidance: OSHA eTool laser hazards | exact: "All laser eyewear must be marked with Optical Density (OD) and laser wavelength." (eTool wording; the eTool cites ANSI Z136, not an OSHA standard. "must" kept as the eTool states it; checker may soften to "should".) |
+| The most powerful lasers, Class 4, can burn skin and eyes from a direct or reflected beam. | guidance: osha.gov/laser-hazards/hazards | exact: Class IV: "Immediate skin hazard and eye hazard from exposure to either the direct or reflected beam"; examples include "medical device lasers for eye surgery or skin treatments." |
+| They can also be a fire hazard. | guidance: osha.gov/laser-hazards/hazards; eTool laser hazards | exact: Class IV "may also present a fire hazard." eTool: Class 4 systems "may pose a diffuse reflection or fire hazard." |
+| Warning signs go on every door into the laser treatment area. | guidance: OSHA eTool laser hazards | exact: "Display warning signs conspicuously on all doors entering the Laser Treatment Controlled Area (LTCA)." |
+| Only trained, authorized technicians do maintenance on the laser. | guidance: OSHA eTool laser hazards | exact: "Ensure that maintenance on lasers and laser systems is performed only by facility-authorized technicians" trained in laser service. |
+| Ask: Where is the smoke evacuator for today's case, and who checks that it's on before the first cut? | n/a | Discussion prompt. |
+
+Dropped for lack of a source or for length:
+- Surgical fire prevention steps (oxygen-enriched atmosphere, alcohol preps, drapes, fire triad): no fetched OSHA/NIOSH page gives fire controls. The OSHA laser pages only say Class 4 lasers may present a fire hazard; the talk says only that.
+- "Wear an N95 / fit-tested respirator for plume": no fetched OSHA page recommends a respirator for plume; the eTool lists evacuation controls only. Talk says only what 1910.134 requires when respirators are required.
+- Capture velocity "100 to 150 feet per minute at the inlet nozzle" and HEPA filter (NIOSH HC11): accurate, but equipment-spec detail for a crew talk; left out.
+- 1910.1030(d)(1) universal precautions / (d)(3)(i) PPE for contaminated items: OSHA standards page says 1910.1030 "would apply if such items become contaminated with viable bloodborne pathogens from laser smoke or plume." Covered only by "treat as infectious waste"; cut for length.
+- ANSI Z136.3: consensus standard, not an OSHA rule; not cited.
+
+Notes / corrections:
+- Assignment hinted 1910.134 "if respirators apply": it applies only where respirators are necessary or required; the talk is conditioned that way.
+- osha.gov/laser-electrosurgery-plume/health-effects-solutions loaded but only lists references (no control text). osha.gov/laser-hazards/solutions likewise only references. osha.gov/etools/hospitals/surgical-suite (index) could not be fetched.
