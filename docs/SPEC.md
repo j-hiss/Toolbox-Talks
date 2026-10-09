@@ -168,6 +168,11 @@ customer #1, not a special case.
 - **Earlier looks kept as presets:** Clarity (A: the apple.com-inspired light look, #F5F5F7 page, #0071E3 blue, white
   cards), Field (C's colors: charcoal and safety orange), Ledger, Signal (the ANSI Z535 / ISO 3864 safety-sign
   colors), Harbor, Graphite. No Apple names, logos, images or fonts are copied.
+- **Light by day, dark at night (Joe, 2026-10-09):** the default is now **Paper**: deep forest #1F4D3A on warm tan
+  (page #E9E7DF, cards #F6F5F0, text #1E2422), like the logo board. A phone in dark mode gets **Momentum**, the
+  default's designed night version (green-black page, bright green #3DDC97, gold streaks), including its status
+  colors. The phone's status bar follows (tan by day, green-black at night). Momentum stays a preset for companies
+  that want dark all the time.
 - **Brand pass (2026-10-09, after the look book):** Momentum's page and cards take a green-black tint that matches the
   brand charcoal (#111613 / #1A211D). The signature line (bar and dot) sits under every page title and on the signing
   pad (the dot fills in green once signed; it is drawn over the pad, never into the saved signature). New light
@@ -175,9 +180,9 @@ customer #1, not a special case.
   darkened until it reads on white (`printBrand`), and each signed line ends in a small brand-colored dot; the printed
   status beside it stays the record.
 - **Admin → Brand:** an admin can change any of the eight colors (brand, buttons, done, caution, missed, background,
-  cards, text) with a color picker or an exact hex code, or start from a preset (Momentum, Paper, Clarity, Field, Ledger, Signal, Harbor, Graphite).
+  cards, text) with a color picker or an exact hex code, or start from a preset (Paper, Momentum, Clarity, Field, Ledger, Signal, Harbor, Graphite).
   The whole app changes live while trying colors; nothing is saved until "Save colors"; leaving the tab puts the
-  saved colors back. "Back to default" returns to Momentum.
+  saved colors back. "Back to default" returns to Paper.
 - **Checks, not blocks:** plain-language warnings when a choice makes text hard to read (WCAG contrast) or makes
   two meanings look alike (done vs missed, buttons vs missed). They warn; the admin can still save.
 - Saved per company (`companies.theme`, only the changed colors), seen by everyone in that company, remembered on

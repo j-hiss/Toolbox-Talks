@@ -1,12 +1,13 @@
 // A company's colors. Pure logic: which colors can be set, the default look, readable text on each color,
 // and plain-language warnings when a choice makes something hard to read or easy to confuse.
 //
-// The default ("Momentum", chosen 2026-10-09) is dark-first: near-black page, one bright green for progress and
-// action, warm gold for caution and streaks, a soft red for misses. It reads well outdoors and makes keeping the
-// program going feel like closing a ring. "Clarity" (calm and bright, one blue accent), "Field" (charcoal and safety
-// orange), "Ledger" (deep ink-blue) and "Signal" (the safety-sign colors, ANSI Z535 / ISO 3864) are presets. Every
-// color can be changed per company; the warnings say when a change hurts readability or meaning. A light theme gets
-// dark versions worked out for phones in dark mode (themeVars → --t-dark-*); a dark theme stays as it is.
+// The default ("Paper", 2026-10-09) is deep forest on warm tan, like the logo board. Phones in dark mode get its
+// designed night version, "Momentum": a green-black page with one bright green for progress and action, warm gold for
+// streaks and caution, a soft red for misses. Momentum is also a preset for companies that want dark all the time.
+// "Clarity" (one blue accent), "Field" (charcoal and safety orange), "Ledger" (deep ink-blue) and "Signal" (the
+// safety-sign colors, ANSI Z535 / ISO 3864) are presets too. Every color can be changed per company; the warnings say
+// when a change hurts readability or meaning. Other light themes get dark versions worked out for phones in dark
+// mode (themeVars → --t-dark-*); a dark theme stays as it is.
 
 export const THEME_ROLES = [
   { id: "brand", label: "Brand", hint: "Header, week card, links, selected tab" },
@@ -22,22 +23,25 @@ export const THEME_ROLES = [
 export type ThemeRole = (typeof THEME_ROLES)[number]["id"];
 export type Theme = Record<ThemeRole, string>;
 
-/** The default look ("Momentum"): one green accent for brand, buttons and done, on a green-black page that matches
- *  the brand's charcoal (look book, 2026-10-09). */
+/**
+ * The default look ("Paper", Joe 2026-10-09: "light by day, dark at night"): deep forest on warm tan, like the logo
+ * board. Phones in dark mode get Momentum instead (darkVersion), the bright-green-on-green-black night look.
+ */
 export const DEFAULT_THEME: Theme = {
-  brand: "#3DDC97",
-  action: "#3DDC97",
-  done: "#3DDC97",
-  caution: "#FFC24B",
-  danger: "#FF6B6B",
-  bg: "#111613",
-  surface: "#1A211D",
-  text: "#F2F4F7",
+  brand: "#1F4D3A",
+  action: "#1F4D3A",
+  done: "#1E7A50",
+  caution: "#A86A00",
+  danger: "#B42318",
+  bg: "#E9E7DF",
+  surface: "#F6F5F0",
+  text: "#1E2422",
 };
 
-/** The brand's own light look: deep forest on warm paper, like the logo and the partner material. */
-const PAPER: Theme = {
-  brand: "#1F4D3A", action: "#1F4D3A", done: "#1E7A50", caution: "#A86A00", danger: "#B42318", bg: "#F6F5F0", surface: "#FFFFFF", text: "#1E2422",
+/** "Momentum": one bright green for brand, buttons and done on a green-black page. The default's night version, and a
+ *  preset for companies that want dark all the time. */
+const MOMENTUM: Theme = {
+  brand: "#3DDC97", action: "#3DDC97", done: "#3DDC97", caution: "#FFC24B", danger: "#FF6B6B", bg: "#111613", surface: "#1A211D", text: "#F2F4F7",
 };
 
 /** Calm and bright, one blue accent on a grey page (the default 2026-10-08 to 10-09). */
@@ -62,8 +66,8 @@ const SIGNAL: Theme = {
 
 /** Starting points in Admin → Brand. Each passes every check in themeWarnings. */
 export const THEME_PRESETS: { id: string; name: string; theme: Theme }[] = [
-  { id: "momentum", name: "Momentum", theme: DEFAULT_THEME },
-  { id: "paper", name: "Paper", theme: PAPER },
+  { id: "paper", name: "Paper", theme: DEFAULT_THEME },
+  { id: "momentum", name: "Momentum", theme: MOMENTUM },
   { id: "clarity", name: "Clarity", theme: CLARITY },
   { id: "field", name: "Field", theme: FIELD },
   { id: "ledger", name: "Ledger", theme: LEDGER },
@@ -191,17 +195,28 @@ function liftUntil(color: string, on: string, min: number): string {
 }
 
 /**
- * The colors for a phone in dark mode. A dark theme keeps its own; a light theme gets a dark page, cards and text,
- * with brand (used as link text, so 4.5:1) and buttons (3:1) lifted toward white until they read on the dark cards.
+ * The colors for a phone in dark mode. A dark theme keeps its own. The default (or any theme with the default's
+ * accents) gets Momentum, its designed night look. Any other light theme gets a dark page, cards and text, with brand
+ * (used as link text, so 4.5:1) and buttons and status colors (3:1) lifted toward white until they read on dark cards.
  */
 export function darkVersion(t: Theme) {
-  if (isDark(t)) {
-    const d = derived(t);
-    return { bg: t.bg, surface: t.surface, text: t.text, brand: t.brand, brandInk: d.brandInk, action: t.action, actionInk: d.actionInk };
-  }
+  const pick = (n: Theme) => {
+    const d = derived(n);
+    return {
+      bg: n.bg, surface: n.surface, text: n.text, brand: n.brand, brandInk: d.brandInk, action: n.action, actionInk: d.actionInk,
+      done: n.done, doneInk: d.doneInk, caution: n.caution, danger: n.danger, dangerInk: d.dangerInk,
+    };
+  };
+  if (isDark(t)) return pick(t);
+  if (t.brand === DEFAULT_THEME.brand && t.action === DEFAULT_THEME.action && t.done === DEFAULT_THEME.done) return pick(MOMENTUM);
   const brand = liftUntil(t.brand, DARK_SURFACE, 4.5);
   const action = liftUntil(t.action, DARK_SURFACE, 3);
-  return { bg: DARK_BG, surface: DARK_SURFACE, text: DARK_TEXT, brand, brandInk: inkOn(brand), action, actionInk: inkOn(action) };
+  const done = liftUntil(t.done, DARK_SURFACE, 3);
+  const danger = liftUntil(t.danger, DARK_SURFACE, 3);
+  return {
+    bg: DARK_BG, surface: DARK_SURFACE, text: DARK_TEXT, brand, brandInk: inkOn(brand), action, actionInk: inkOn(action),
+    done, doneInk: inkOn(done), caution: liftUntil(t.caution, DARK_SURFACE, 3), danger, dangerInk: inkOn(danger),
+  };
 }
 
 /** The CSS variables to set on the page. Only the inputs, the text-on-color inks and the dark-mode set; the CSS derives the rest. */
@@ -217,6 +232,11 @@ export function themeVars(t: Theme): Record<string, string> {
     "--t-dark-brand-ink": k.brandInk,
     "--t-dark-action": k.action,
     "--t-dark-action-ink": k.actionInk,
+    "--t-dark-done": k.done,
+    "--t-dark-done-ink": k.doneInk,
+    "--t-dark-caution": k.caution,
+    "--t-dark-danger": k.danger,
+    "--t-dark-danger-ink": k.dangerInk,
     "--t-brand": t.brand,
     "--t-brand-ink": d.brandInk,
     "--t-action": t.action,

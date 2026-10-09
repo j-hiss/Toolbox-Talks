@@ -16,24 +16,35 @@
   --surface: var(--t-dark-surface, #1a211d);
   --fg: var(--t-dark-text, #f2f4f7);
   --brand: var(--t-dark-brand, #3ddc97);
-  --brand-ink: var(--t-dark-brand-ink, #0e1116);
+  --brand-ink: var(--t-dark-brand-ink, #14202e);
   --action: var(--t-dark-action, #3ddc97);
-  --action-ink: var(--t-dark-action-ink, #0e1116);
+  --action-ink: var(--t-dark-action-ink, #14202e);
+  --ok: var(--t-dark-done, #3ddc97);
+  --ok-ink: var(--t-dark-done-ink, #14202e);
+  --caution: var(--t-dark-caution, #ffc24b);
+  --warn: var(--t-dark-danger, #ff6b6b);
+  --warn-ink: var(--t-dark-danger-ink, #14202e);
   --brand-text: var(--brand);
   --warn-text: color-mix(in srgb, var(--warn) 70%, #ffffff);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
   :root[data-theme="light"] {
-    --bg: var(--t-bg, #111613);
-    --surface: var(--t-surface, #1a211d);
-    --fg: var(--t-text, #f2f4f7);
-    --brand: var(--t-brand, #3ddc97);
-    --brand-ink: var(--t-brand-ink, #0e1116);
-    --action: var(--t-action, #3ddc97);
-    --action-ink: var(--t-action-ink, #0e1116);
+    --bg: var(--t-bg, #e9e7df);
+    --surface: var(--t-surface, #f6f5f0);
+    --fg: var(--t-text, #1e2422);
+    --brand: var(--t-brand, #1f4d3a);
+    --brand-ink: var(--t-brand-ink, #ffffff);
+    --action: var(--t-action, #1f4d3a);
+    --action-ink: var(--t-action-ink, #ffffff);
+    --ok: var(--t-done, #1e7a50);
+    --ok-ink: var(--t-done-ink, #ffffff);
+    --caution: var(--t-caution, #a86a00);
+    --warn: var(--t-danger, #b42318);
+    --warn-ink: var(--t-danger-ink, #ffffff);
     --brand-text: var(--brand);
     --warn-text: var(--warn);
-    color-scheme: var(--t-scheme, dark);
+    color-scheme: var(--t-scheme, light);
   }
 }
+

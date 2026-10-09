@@ -1,27 +1,26 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. The default look is "Momentum" (chosen by Joe 2026-10-09: B first, then C, then A): a dark home
- * with one bright green for progress and action, warm gold for streaks, heavy display type (Archivo) and big
- * buttons, so keeping the program going feels like closing a ring and reads well outdoors. Light looks ("Clarity",
- * "Ledger", "Signal") are presets in Admin → Brand.
+ * Design tokens. The default look is "Paper" by day and "Momentum" at night (Joe, 2026-10-09: "light by day, dark at
+ * night"): deep forest on warm tan, like the logo board; a phone in dark mode gets the green-black page with one bright
+ * green for progress and action. Titles and big numbers in Archivo, big pill buttons.
  * A company can change any of the eight inputs (--t-*) from Admin → Brand; src/core/theme.ts sets them, works out
  * their phone-dark-mode versions (--t-dark-*) and checks readability. Everything else is mixed from them here.
  */
 :root {
-  --brand: var(--t-brand, #3ddc97);
-  --brand-ink: var(--t-brand-ink, #0e1116);
-  --action: var(--t-action, #3ddc97);
-  --action-ink: var(--t-action-ink, #0e1116);
-  --ok: var(--t-done, #3ddc97);
-  --ok-ink: var(--t-done-ink, #0e1116);
-  --caution: var(--t-caution, #ffc24b);
-  --warn: var(--t-danger, #ff6b6b);
-  --warn-ink: var(--t-danger-ink, #0e1116);
-  --bg: var(--t-bg, #111613);
-  --surface: var(--t-surface, #1a211d);
-  --fg: var(--t-text, #f2f4f7);
-  color-scheme: var(--t-scheme, dark);
+  --brand: var(--t-brand, #1f4d3a);
+  --brand-ink: var(--t-brand-ink, #ffffff);
+  --action: var(--t-action, #1f4d3a);
+  --action-ink: var(--t-action-ink, #ffffff);
+  --ok: var(--t-done, #1e7a50);
+  --ok-ink: var(--t-done-ink, #ffffff);
+  --caution: var(--t-caution, #a86a00);
+  --warn: var(--t-danger, #b42318);
+  --warn-ink: var(--t-danger-ink, #ffffff);
+  --bg: var(--t-bg, #e9e7df);
+  --surface: var(--t-surface, #f6f5f0);
+  --fg: var(--t-text, #1e2422);
+  color-scheme: var(--t-scheme, light);
 
   --muted: color-mix(in srgb, var(--fg) 64%, var(--surface));
   --line: color-mix(in srgb, var(--fg) 12%, var(--surface));
@@ -43,17 +42,23 @@
   --band-bad: color-mix(in srgb, var(--warn) 24%, var(--surface));
 }
 
-/* Phone in dark mode: a dark theme stays as it is; a light company theme gets its dark versions, worked out in
-   src/core/theme.ts (themeVars → --t-dark-*): dark page, cards and text, brand and button lifted until readable. */
+/* Phone in dark mode: a dark theme stays as it is; the default becomes Momentum; another light company theme gets its
+   dark versions, worked out in src/core/theme.ts (themeVars → --t-dark-*): dark page, cards and text, brand, buttons
+   and status colors lifted until readable. */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: var(--t-dark-bg, #111613);
     --surface: var(--t-dark-surface, #1a211d);
     --fg: var(--t-dark-text, #f2f4f7);
     --brand: var(--t-dark-brand, #3ddc97);
-    --brand-ink: var(--t-dark-brand-ink, #0e1116);
+    --brand-ink: var(--t-dark-brand-ink, #14202e);
     --action: var(--t-dark-action, #3ddc97);
-    --action-ink: var(--t-dark-action-ink, #0e1116);
+    --action-ink: var(--t-dark-action-ink, #14202e);
+    --ok: var(--t-dark-done, #3ddc97);
+    --ok-ink: var(--t-dark-done-ink, #14202e);
+    --caution: var(--t-dark-caution, #ffc24b);
+    --warn: var(--t-dark-danger, #ff6b6b);
+    --warn-ink: var(--t-dark-danger-ink, #14202e);
     --brand-text: var(--brand);
     --warn-text: color-mix(in srgb, var(--warn) 70%, #ffffff);
     color-scheme: dark;

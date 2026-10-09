@@ -47,31 +47,40 @@ describe("theme", () => {
   });
 
   it("warns, in plain words, when text gets hard to read", () => {
-    const w = themeWarnings({ ...DEFAULT_THEME, text: "#3A3F47" });
+    const w = themeWarnings({ ...DEFAULT_THEME, text: "#C8C4B8" });
     expect(w.some((x) => x.text.startsWith("Text on the background is hard to read"))).toBe(true);
     expect(w.every((x) => x.roles.length > 0)).toBe(true);
   });
 
   it("warns when Done and Missed can be confused", () => {
-    const w = themeWarnings({ ...DEFAULT_THEME, done: "#FF5C70" });
+    const w = themeWarnings({ ...DEFAULT_THEME, done: "#C0182A" });
     expect(w.map((x) => x.text)).toContain("Done and Missed look alike. They should never be confused.");
   });
 
   it("warns when buttons look like an alarm", () => {
-    expect(themeWarnings({ ...DEFAULT_THEME, action: "#FF5050" }).some((x) => x.roles.includes("action") && x.roles.includes("danger"))).toBe(true);
+    expect(themeWarnings({ ...DEFAULT_THEME, action: "#C21D2B" }).some((x) => x.roles.includes("action") && x.roles.includes("danger"))).toBe(true);
   });
 
   it("sets a variable for every color plus readable inks", () => {
     const v = themeVars(DEFAULT_THEME);
     for (const { id } of THEME_ROLES) expect(Object.values(v)).toContain(DEFAULT_THEME[id]);
-    expect(v["--t-action-ink"]).not.toBe("#FFFFFF"); // dark ink on the bright green
-    expect(v["--t-scheme"]).toBe("dark");
+    expect(v["--t-action-ink"]).toBe("#FFFFFF"); // white on deep forest
+    expect(v["--t-scheme"]).toBe("light");
+  });
+
+  it("the default is light by day, and its night version is Momentum", () => {
+    expect(isDark(DEFAULT_THEME)).toBe(false);
+    const night = darkVersion(DEFAULT_THEME);
+    const momentum = THEME_PRESETS.find((p) => p.id === "momentum")!.theme;
+    expect([night.bg, night.surface, night.brand, night.action, night.done]).toEqual([momentum.bg, momentum.surface, momentum.brand, momentum.action, momentum.done]);
+    expect(themeVars(DEFAULT_THEME)["--t-dark-done"]).toBe(momentum.done);
   });
 
   it("a dark theme keeps its own colors in phone dark mode", () => {
-    expect(isDark(DEFAULT_THEME)).toBe(true);
-    const k = darkVersion(DEFAULT_THEME);
-    expect([k.bg, k.surface, k.text, k.brand, k.action]).toEqual([DEFAULT_THEME.bg, DEFAULT_THEME.surface, DEFAULT_THEME.text, DEFAULT_THEME.brand, DEFAULT_THEME.action]);
+    const momentum = THEME_PRESETS.find((p) => p.id === "momentum")!.theme;
+    expect(isDark(momentum)).toBe(true);
+    const k = darkVersion(momentum);
+    expect([k.bg, k.surface, k.text, k.brand, k.action]).toEqual([momentum.bg, momentum.surface, momentum.text, momentum.brand, momentum.action]);
   });
 
   it("a light theme gets readable dark-mode versions of every preset", () => {
@@ -81,6 +90,8 @@ describe("theme", () => {
       expect([p.id, contrast(k.brand, k.surface) >= 4.5]).toEqual([p.id, true]);
       expect([p.id, contrast(k.action, k.surface) >= 3]).toEqual([p.id, true]);
       expect([p.id, contrast(k.actionInk, k.action) >= 3]).toEqual([p.id, true]);
+      expect([p.id, contrast(k.done, k.surface) >= 3]).toEqual([p.id, true]);
+      expect([p.id, contrast(k.danger, k.surface) >= 3]).toEqual([p.id, true]);
       expect(themeVars(p.theme)["--t-scheme"]).toBe("light");
     }
   });
@@ -88,7 +99,7 @@ describe("theme", () => {
 
 describe("printBrand", () => {
   it("darkens a light brand color until it reads on white paper, and keeps a dark one", () => {
-    expect(contrast(printBrand(DEFAULT_THEME), "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
-    expect(printBrand({ ...DEFAULT_THEME, brand: "#1F4D3A" })).toBe("#1F4D3A");
+    expect(contrast(printBrand({ ...DEFAULT_THEME, brand: "#3DDC97" }), "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
+    expect(printBrand(DEFAULT_THEME)).toBe("#1F4D3A");
   });
 });

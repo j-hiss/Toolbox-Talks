@@ -12,7 +12,7 @@ import "@fontsource/archivo/800.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { BRAND } from "@/content/brand";
-import { DEFAULT_THEME } from "@/core/theme";
+import { DEFAULT_THEME, darkVersion } from "@/core/theme";
 
 export const metadata: Metadata = {
   title: BRAND.name,
@@ -27,7 +27,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: DEFAULT_THEME.bg,
+  // The phone's status-bar color: warm tan by day, Momentum's green-black at night (src/core/theme.ts).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: DEFAULT_THEME.bg },
+    { media: "(prefers-color-scheme: dark)", color: darkVersion(DEFAULT_THEME).bg },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
