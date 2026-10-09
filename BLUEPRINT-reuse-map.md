@@ -131,6 +131,9 @@ point the row at the real file and keep the prototype line as its origin.
 | `PRETASK_TALK_ID` · `pretaskProblems` · `pretaskContent` · `tidyPlan` · `EQUIPMENT_PROMPTS` · `HAZARD_SUGGESTIONS` · `DAILY_STATEMENT` · `dailyTally` | `src/core/pretask.ts` | **The** daily pre-task plan rules and content; saved as a talk record of kind `daily` (same pipeline), never scored |
 | `PretaskPlanStep` · `newDailyDraft` · `useHeatCheck` | `src/components/PretaskPlanStep.tsx` · `src/lib/draft.ts` · `src/lib/useHeatCheck.ts` | Step 1 of a daily plan; starting one; the one heat check used by talks and daily plans |
 | `listDailyPlans` | `src/lib/data/reports.ts` | Days with a daily plan (held time, crew) for Reports; never part of the weekly math |
+| `RepeatSetting` · `repeatsFor` · `REPEAT_CHOICES` (in `buildPlan`) | `src/core/plan.ts` | Repeat talks: each placed at least once per 3/6/12-month block; same plan builder, no second one |
+| `REPEAT_NOTES` · `repeatNoteText` | `src/content/repeats.ts` | What a rule asks on a fixed schedule, per talk; shown on Read and in the picker; never claims a talk satisfies it |
+| `RepeatPicker` · `listRepeats` · `saveRepeat` · `removeRepeat` | `src/components/RepeatPicker.tsx` · `src/lib/data/plan.ts` | Admin → Plan → Repeat talks |
 | `LateArrival` | `src/app/talk/page.tsx` | "+ Someone arrived late" on the review screen: adds a walk-in and jumps to their signing turn |
 | `Fold` | `src/app/reports/page.tsx` | A report section that folds away (closed by default) so Reports stays short on a phone |
 | `readWalkinCompanies` · `rememberWalkinCompany` | `src/lib/lastSetup.ts` | Walk-in companies used on this phone, suggested next time |

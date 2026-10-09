@@ -254,6 +254,15 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.locator('section[aria-label="How often"] label:has-text("Every week")').click();
   await r.locator('section[aria-label="How often"] button').click(); await r.waitForTimeout(700);
   log("6 after keep:", (await r.locator('section[aria-label="How often"]').innerText()).split("\n").filter((l) => /Now:|Staying/.test(l)).join(" | "));
+  // Repeat talks: respirators every 3 months, with the rule's own reminder (a talk is a refresher, not the training).
+  const rep = r.locator('section[aria-label="Repeat talks"]');
+  await rep.locator('select[aria-label="Talk to repeat"]').selectOption("respirators"); await r.waitForTimeout(150);
+  await rep.locator("button[role=radio]:has-text('Every 3 months')").click();
+  log("6 repeat note:", (await rep.locator("[role=status]").first().innerText().catch(() => "none")).replace(/\s+/g, " ").slice(0, 160));
+  await rep.locator("button:has-text('Add repeat')").click(); await r.waitForTimeout(700);
+  log("6 repeat saved:", (await rep.locator("li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
+  const plannedResp = await r.locator("main ul li:has-text('Respirators')").count();
+  log("6 respirators in the plan list:", plannedResp > 0);
   // Scenario 7: Admin -> Safety log. Turn on "Since last talk", log an inspection, catch a name in the crew summary,
   // approve it, see it in the next talk (can't finish reading until it's checked off), add a finding, withdraw.
   await r.click("[role=tab]:has-text('Safety log')"); await r.waitForTimeout(500);

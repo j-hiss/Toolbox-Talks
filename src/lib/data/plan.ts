@@ -1,7 +1,7 @@
 // Admin swaps of a week's talk. The database refuses a swap for a week that is over or already given
 // (supabase/migrations/20261005000005_weekly_lock_makeups.sql), so the lock holds even if the app is wrong.
 import { supabase } from "@/lib/supabase";
-import type { Cadence, CadenceSetting, TalkList } from "@/core/plan";
+import type { Cadence, CadenceSetting, RepeatEvery, RepeatSetting, TalkList } from "@/core/plan";
 import type { PlanOverride } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -64,4 +64,23 @@ export async function saveCadence(companyId: string, fromWeek: string, weeks: Ca
 
 export async function removeCadence(companyId: string, fromWeek: string): Promise<void> {
   check(await supabase().from("company_cadences").delete().eq("company_id", companyId).eq("from_week", fromWeek).select("from_week"));
+}
+
+// Repeat talks (Admin → Plan). A change starts on a Monday after today; the database refuses to add, change or
+// remove one that has started (supabase/migrations/20261008000019_repeat_talks.sql).
+export async function listRepeats(companyId: string): Promise<RepeatSetting[]> {
+  return check(await supabase().from("company_repeats").select("talk_id, from_week, every_months").eq("company_id", companyId).order("from_week"));
+}
+
+export async function saveRepeat(companyId: string, talkId: string, fromWeek: string, everyMonths: RepeatEvery): Promise<void> {
+  check(
+    await supabase()
+      .from("company_repeats")
+      .upsert({ company_id: companyId, talk_id: talkId, from_week: fromWeek, every_months: everyMonths }, { onConflict: "company_id,talk_id,from_week" })
+      .select("from_week"),
+  );
+}
+
+export async function removeRepeat(companyId: string, talkId: string, fromWeek: string): Promise<void> {
+  check(await supabase().from("company_repeats").delete().eq("company_id", companyId).eq("talk_id", talkId).eq("from_week", fromWeek).select("from_week"));
 }

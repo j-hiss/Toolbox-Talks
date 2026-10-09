@@ -1,6 +1,6 @@
 // Demo version of src/lib/data/plan.ts: same functions and the same lock the database enforces.
 import type * as Real from "@/../src/lib/data/plan";
-import type { Cadence, CadenceSetting, TalkList } from "@/core/plan";
+import type { Cadence, CadenceSetting, TalkList, RepeatEvery, RepeatSetting } from "@/core/plan";
 import type { PlanOverride } from "@/lib/data/types";
 import { isoDay, mondayOf } from "@/core/weeks";
 import { db, save, tick } from "./store";
@@ -88,5 +88,30 @@ export async function removeCadence(companyId: string, fromWeek: string): Promis
   save();
 }
 
-const _sameShape = { listOverrides, setOverride, clearOverride, listTalkLists, saveTalkList, removeTalkList, listCadences, saveCadence, removeCadence } satisfies Omit<typeof Real, never>;
+// Repeat talks, with the database's rule: only a change that starts after today can be added, changed or removed.
+const reps = () => (db().repeats ??= []);
+function repeatGuard(fromWeek: string) {
+  if (fromWeek <= isoDay(new Date())) throw new Error(`A repeat has to start after today (${fromWeek}), so weeks already planned keep their talks.`);
+}
+
+export async function listRepeats(companyId: string): Promise<RepeatSetting[]> {
+  await tick();
+  return reps().filter((r) => r.company_id === companyId).sort((a, b) => a.from_week.localeCompare(b.from_week))
+    .map(({ talk_id, from_week, every_months }) => ({ talk_id, from_week, every_months }));
+}
+
+export async function saveRepeat(companyId: string, talkId: string, fromWeek: string, everyMonths: RepeatEvery): Promise<void> {
+  await tick(); mustBeAdmin(companyId); repeatGuard(fromWeek);
+  const hit = reps().find((r) => r.company_id === companyId && r.talk_id === talkId && r.from_week === fromWeek);
+  if (hit) hit.every_months = everyMonths; else reps().push({ company_id: companyId, talk_id: talkId, from_week: fromWeek, every_months: everyMonths });
+  save();
+}
+
+export async function removeRepeat(companyId: string, talkId: string, fromWeek: string): Promise<void> {
+  await tick(); mustBeAdmin(companyId); repeatGuard(fromWeek);
+  db().repeats = reps().filter((r) => !(r.company_id === companyId && r.talk_id === talkId && r.from_week === fromWeek));
+  save();
+}
+
+const _sameShape = { listOverrides, setOverride, clearOverride, listTalkLists, saveTalkList, removeTalkList, listCadences, saveCadence, removeCadence, listRepeats, saveRepeat, removeRepeat } satisfies Omit<typeof Real, never>;
 void _sameShape;

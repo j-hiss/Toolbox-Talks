@@ -28,6 +28,7 @@ import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
 import { TalkPicker } from "@/components/TalkPicker";
 import { CadencePicker } from "@/components/CadencePicker";
+import { RepeatPicker } from "@/components/RepeatPicker";
 import { saveFile } from "@/lib/download";
 import { appWebAddress, jobsiteSticker } from "@/lib/sticker";
 import { SafetyLog } from "@/components/SafetyLog";
@@ -554,7 +555,7 @@ function TalksTab({ m }: { m: Membership }) {
 // week's talk until the week is over or someone has given it. The database enforces the same lock.
 function PlanTab({ m }: { m: Membership }) {
   const co = m.company;
-  const { plan, week, input, cadences, reload } = usePlan(co);
+  const { plan, week, input, cadences, repeats, reload } = usePlan(co);
   // What the plan itself gives each week, before any swap: picking that talk again removes the swap.
   const planned = useMemo(() => new Map(buildPlan({ ...input, overrides: {} }).map((w) => [w.key, w.talkId])), [input]);
   const [recorded, setRecorded] = useState<string[] | null>(null);
@@ -599,6 +600,7 @@ function PlanTab({ m }: { m: Membership }) {
     <>
       <CadencePicker key={JSON.stringify(cadences)} companyId={co.id} industry={co.industry} state={climateFor(co.zip).state}
         input={input} cadences={cadences} reload={reload} msg={cadenceMsg} setMsg={setCadenceMsg} />
+      <RepeatPicker companyId={co.id} input={input} repeats={repeats} reload={reload} />
       <p className="mt-4 text-sm text-muted">
         Every crew gives the same talk each {unit}, as many times as needed. You can swap a {unit}&apos;s talk until someone
         gives it; then it&apos;s locked. Missed talks are made up from Home.

@@ -244,6 +244,17 @@ async function main() {
     check("A cadence starts on a Monday", await fails(() => setCad(userA, coA, tuesday)));
     check("A future cadence can be set and removed", !(await fails(() => setCad(userA, coA, laterWk)))
       && (await as(userA, "delete from public.company_cadences where company_id = $1 and from_week = $2 returning 1", [coA, laterWk])).rows.length === 1);
+    // Repeat talks (Admin → Plan): same rules as cadences.
+    const setRep = (user, company, wk, every = 12, talk = "loto") =>
+      as(user, "insert into public.company_repeats (company_id, talk_id, from_week, every_months) values ($1, $2, $3, $4) on conflict (company_id, talk_id, from_week) do update set every_months = excluded.every_months", [company, talk, wk, every]);
+    await setRep(userB, coB, nextWk, 3);
+    check("A cannot set B's repeats", await fails(() => setRep(userA, coB, laterWk)));
+    check("A sees no repeat of B's", (await as(userA, "select 1 from public.company_repeats")).rows.length === 0);
+    check("A presenter cannot set repeats", await fails(() => setRep(presenterA, coA, nextWk)));
+    check("A repeat can't start today or earlier", await fails(() => setRep(userA, coA, monday(0))));
+    check("A repeat is 0, 3, 6 or 12 months", await fails(() => setRep(userA, coA, nextWk, 4)));
+    check("A future repeat can be set and removed", !(await fails(() => setRep(userA, coA, laterWk)))
+      && (await as(userA, "delete from public.company_repeats where company_id = $1 and talk_id = 'loto' and from_week = $2 returning 1", [coA, laterWk])).rows.length === 1);
     // Every 4 weeks since 10 weeks ago: periods start at -10, -6 and -2 weeks. The one that started two weeks ago can
     // still be swapped (it isn't over), then locks once given; the one before it is over. Backdate the cadence as
     // the database owner, since the app can't.

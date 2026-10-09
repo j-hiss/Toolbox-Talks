@@ -13,6 +13,7 @@ export type DemoDb = {
   overrides: { company_id: string; week_start: string; talk_id: string }[];
   talkLists?: { company_id: string; from_week: string; talk_ids: string[] }[];
   cadences?: { company_id: string; from_week: string; weeks: 1 | 2 | 4 }[];
+  repeats?: { company_id: string; talk_id: string; from_week: string; every_months: 0 | 3 | 6 | 12 }[];
   events?: (import("@/lib/data/types").SafetyEvent & { company_id: string })[];
   eventFiles?: { company_id: string; event_id: string; name: string; path: string; data: string }[];
   issues: (import("@/lib/data/types").Issue & { company_id: string })[];

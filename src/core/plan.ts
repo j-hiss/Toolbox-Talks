@@ -61,6 +61,33 @@ export function cycleStart(programStart: string, today: Date = new Date()): Date
  */
 export type TalkList = { from_week: string; talk_ids: string[] };
 
+/**
+ * A talk the company wants back on a schedule (Admin → Plan → Repeat talks): every 3, 6 or 12 months, starting the
+ * Monday `from_week`. 0 = stop repeating from then. Kept once its week starts, like talk lists, so past weeks keep
+ * their talks.
+ */
+export type RepeatEvery = 0 | 3 | 6 | 12;
+export type RepeatSetting = { talk_id: string; from_week: string; every_months: RepeatEvery };
+export const REPEAT_CHOICES: { months: Exclude<RepeatEvery, 0>; name: string; weeks: number }[] = [
+  { months: 3, name: "Every 3 months", weeks: 13 },
+  { months: 6, name: "Every 6 months", weeks: 26 },
+  { months: 12, name: "Every year", weeks: 52 },
+];
+
+/** The repeats in effect for a week: per talk, the latest setting starting on or before it (0 = off). */
+export function repeatsFor(settings: RepeatSetting[] | undefined, weekKey: string): { talkId: string; fromWeek: string; weeks: number }[] {
+  const latest = new Map<string, RepeatSetting>();
+  for (const r of settings ?? []) {
+    if (r.from_week > weekKey) continue;
+    const cur = latest.get(r.talk_id);
+    if (!cur || r.from_week > cur.from_week) latest.set(r.talk_id, r);
+  }
+  return [...latest.values()]
+    .filter((r) => r.every_months > 0)
+    .map((r) => ({ talkId: r.talk_id, fromWeek: r.from_week, weeks: REPEAT_CHOICES.find((c) => c.months === r.every_months)!.weeks }))
+    .sort((a, b) => a.talkId.localeCompare(b.talkId));
+}
+
 export type PlanInput = {
   talks: Talk[];
   industry: IndustryId;
@@ -72,6 +99,8 @@ export type PlanInput = {
   lists?: TalkList[];
   /** How often the company gives a new talk. None = every week. */
   cadences?: CadenceSetting[];
+  /** Talks that must come back on a schedule. None = rotation only. */
+  repeats?: RepeatSetting[];
   today?: Date;
 };
 
@@ -101,7 +130,7 @@ export function talksInPlan(input: Pick<PlanInput, "talks" | "industry" | "clima
  * company's climate; every other period cycles through the remaining talks in library order, from the talk list in
  * effect when the period starts. Admin overrides win.
  */
-export function buildPlan({ talks, industry, climate: c, programStart, overrides = {}, lists, cadences, today = new Date() }: PlanInput): PlanWeek[] {
+export function buildPlan({ talks, industry, climate: c, programStart, overrides = {}, lists, cadences, repeats, today = new Date() }: PlanInput): PlanWeek[] {
   if (!talksFor(talks, industry, c).some((t) => !SEASONAL.has(t.id))) throw new Error(`No non-seasonal talks for industry "${industry}"`);
 
   const start = cycleStart(programStart, today);
@@ -119,6 +148,10 @@ export function buildPlan({ talks, industry, climate: c, programStart, overrides
   const starts = new Set((cadences ?? []).map((x) => x.from_week));
   const periods: PlanWeek[] = [];
   let next = 0;
+  // Repeat talks: each one is given at least once in every block of its interval (counted from when the repeat
+  // started). The first open rotation slot in a block takes it; the rotation then carries on where it was.
+  const given = new Set<string>(); // `${talkId}@${block}`
+  const blockOf = (r: { fromWeek: string; weeks: number }, d: Date) => Math.floor(weeksBetween(parseDay(r.fromWeek), d) / r.weeks);
 
   for (let w = 0, p = 0; w < WEEKS_PER_PLAN; p++) {
     const monday = addDays(start, 7 * w);
@@ -139,9 +172,17 @@ export function buildPlan({ talks, industry, climate: c, programStart, overrides
     else if (shoulderHeat.includes(m) && p % 3 === 0 && has("heat")) id = "heat";
     else if (c.cold === "full" && [11, 0, 1].includes(m) && p % 3 === 0 && has("cold")) id = "cold";
     else if (c.cold === "light" && mondays.some((d) => d.getMonth() === 0 && d.getDate() <= 7) && has("cold")) id = "cold";
-    else id = pool[next++ % pool.length].id;
+    else {
+      const due = repeatsFor(repeats, key).find((r) => {
+        const t = talks.find((x) => x.id === r.talkId);
+        return t && !SEASONAL.has(t.id) && talkFitsClimate(t, c) && !given.has(`${r.talkId}@${blockOf(r, monday)}`);
+      });
+      id = due ? due.talkId : pool[next++ % pool.length].id;
+    }
 
     const override = overrides[key];
+    const final = override ?? id;
+    for (const r of repeatsFor(repeats, key)) if (r.talkId === final) given.add(`${r.talkId}@${blockOf(r, monday)}`);
     periods.push({ n: w + 1, monday, key, weeks: len, talkId: override ?? id, changed: override !== undefined && override !== id });
     w += len;
   }

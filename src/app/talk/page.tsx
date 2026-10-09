@@ -22,6 +22,7 @@ import { useOpenMakeups, type OpenMakeups } from "@/lib/useOpenMakeups";
 import { useHeatCheck } from "@/lib/useHeatCheck";
 import { alertWorthy, HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/content/heat";
+import { REPEAT_NOTES, repeatNoteText } from "@/content/repeats";
 import { addDays, isoDay } from "@/core/weeks";
 import { readWalkinCompanies, rememberWalkinCompany, writeLastSetup } from "@/lib/lastSetup";
 import { buzz, dismissToast, toast } from "@/components/toast";
@@ -382,6 +383,8 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
         </p>
       )}
       {heatMsg && !draft.heat && <p className="mt-2 text-xs text-muted">Heat check unavailable: {heatMsg}</p>}
+      {/* A rule asks for something on a schedule (yearly training, a 3-year evaluation): say so, and that this talk isn't it. */}
+      {REPEAT_NOTES[talk.id] && <div className="mt-2"><Notice tone="caution">{repeatNoteText(REPEAT_NOTES[talk.id])}</Notice></div>}
       {since?.status === "unavailable" && (
         <div className="mt-2"><Notice tone="caution">Couldn&apos;t load the safety log for &ldquo;Since last talk&rdquo; (no signal?). The talk saves without it, marked as not loaded.</Notice></div>
       )}

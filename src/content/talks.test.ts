@@ -50,3 +50,13 @@ describe("talk sources and wording", () => {
     for (const t of TALKS) expect(allText(t.content.en), t.id).not.toMatch(/complian/i);
   });
 });
+
+describe("repeat notes", () => {
+  it("every note belongs to a talk in the library and never claims a talk satisfies a rule", async () => {
+    const { REPEAT_NOTES, repeatNoteText } = await import("./repeats");
+    for (const [id, n] of Object.entries(REPEAT_NOTES)) {
+      expect(TALKS.some((t) => t.id === id), id).toBe(true);
+      expect(repeatNoteText(n)).not.toMatch(/complian|satisf|counts as|meets the/i);
+    }
+  });
+});

@@ -377,3 +377,18 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   "Daily plan"; the PDF says "Daily plan · separate from the weekly toolbox talk".
 - **Reports:** "Daily pre-task plans" shows days with a plan per crew: a count, not a rate, because the app doesn't
   know which days were worked yet (a "worked today" signal is a later item).
+
+## Repeat talks and yearly-rule reminders (built, migration 0019)
+- **Admin → Plan → Repeat talks:** pick a talk and "every 3 months", "every 6 months" or "every year". The plan puts
+  it in the first open week of each block (counted from when the repeat starts); the rotation carries on after it;
+  an admin's swap of that week moves the repeat to the next open week. Changes start next week and are kept once
+  their week starts (`company_repeats`, same lock as talk lists and cadences). "Stop" adds an "off" row from next
+  week.
+- **Rule reminders** (`src/content/repeats.ts`, versioned content): talks that touch a rule with a fixed schedule show
+  a caution note on the Read screen and in the picker: who it applies to, what the rule asks and how often, the cite,
+  and either "This talk can help cover it" (extinguisher education only) or "This talk is a refresher, not that
+  training, test or inspection." Covered: forklift evaluation (3 years), respirator retraining and fit test,
+  hearing conservation, extinguisher education, bloodborne pathogens, asbestos, lead, permit-space rescue practice,
+  lockout periodic inspection, and EPA Worker Protection Standard training (named as EPA).
+- **Later:** per-person due dates (each operator's evaluation, each fit test, certificates) and trigger prompts
+  (after an incident or a new truck or respirator) are a separate feature.
