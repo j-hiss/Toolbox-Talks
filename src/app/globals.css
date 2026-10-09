@@ -1,65 +1,61 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. The default look is "Clarity": calm, bright and plain, in the manner of a premium consumer app
- * (light grey page, white cards with a soft shadow, one blue accent, pill buttons, the phone's own font), so it sits
- * as well in a hospital or a restaurant as on a jobsite or a shop floor. Status colors are the familiar phone ones,
- * darkened enough to read outdoors. "Ledger" and "Signal" (the ANSI Z535 sign colors) are presets in Admin → Brand.
- * A company can change any of the eight inputs (--t-*) from Admin → Brand; src/core/theme.ts sets them and
- * checks readability. Everything else is mixed from them here.
+ * Design tokens. The default look is "Momentum" (chosen by Joe 2026-10-09: B first, then C, then A): a dark home
+ * with one bright green for progress and action, warm gold for streaks, heavy display type (Archivo) and big
+ * buttons, so keeping the program going feels like closing a ring and reads well outdoors. Light looks ("Clarity",
+ * "Ledger", "Signal") are presets in Admin → Brand.
+ * A company can change any of the eight inputs (--t-*) from Admin → Brand; src/core/theme.ts sets them, works out
+ * their phone-dark-mode versions (--t-dark-*) and checks readability. Everything else is mixed from them here.
  */
 :root {
-  --brand: var(--t-brand, #0071e3);
-  --brand-ink: var(--t-brand-ink, #ffffff);
-  --action: var(--t-action, #0071e3);
-  --action-ink: var(--t-action-ink, #ffffff);
-  --ok: var(--t-done, #248a3d);
-  --ok-ink: var(--t-done-ink, #ffffff);
-  --caution: var(--t-caution, #c96f00);
-  --warn: var(--t-danger, #d70015);
-  --warn-ink: var(--t-danger-ink, #ffffff);
-  --bg: var(--t-bg, #f5f5f7);
-  --surface: var(--t-surface, #ffffff);
-  --fg: var(--t-text, #1d1d1f);
+  --brand: var(--t-brand, #3ddc97);
+  --brand-ink: var(--t-brand-ink, #0e1116);
+  --action: var(--t-action, #3ddc97);
+  --action-ink: var(--t-action-ink, #0e1116);
+  --ok: var(--t-done, #3ddc97);
+  --ok-ink: var(--t-done-ink, #0e1116);
+  --caution: var(--t-caution, #ffc24b);
+  --warn: var(--t-danger, #ff6b6b);
+  --warn-ink: var(--t-danger-ink, #0e1116);
+  --bg: var(--t-bg, #0e1116);
+  --surface: var(--t-surface, #171c23);
+  --fg: var(--t-text, #f2f4f7);
+  color-scheme: var(--t-scheme, dark);
 
   --muted: color-mix(in srgb, var(--fg) 64%, var(--surface));
   --line: color-mix(in srgb, var(--fg) 12%, var(--surface));
-  --brand-soft: color-mix(in srgb, var(--brand) 11%, var(--surface));
+  --brand-soft: color-mix(in srgb, var(--brand) 14%, var(--surface));
   --brand-text: var(--brand);
-  --ok-bg: color-mix(in srgb, var(--ok) 13%, var(--surface));
+  --ok-bg: color-mix(in srgb, var(--ok) 14%, var(--surface));
   --ok-text: color-mix(in srgb, var(--ok) 75%, var(--fg));
   --caution-bg: color-mix(in srgb, var(--caution) 13%, var(--surface));
   --caution-text: color-mix(in srgb, var(--caution) 35%, var(--fg));
-  --warn-bg: color-mix(in srgb, var(--warn) 11%, var(--surface));
+  --warn-bg: color-mix(in srgb, var(--warn) 13%, var(--surface));
   --warn-text: var(--warn);
 
-  /* Charts (two series, gridlines, score bands) follow the brand: compliance in brand, on time in button color. */
+  /* Charts (two series, gridlines, score bands) follow the brand: compliance in brand, on time in caution gold. */
   --series-1: var(--brand-text);
-  --series-2: var(--action);
+  --series-2: var(--caution);
   --grid: var(--line);
   --band-good: color-mix(in srgb, var(--ok) 24%, var(--surface));
   --band-warn: color-mix(in srgb, var(--caution) 38%, var(--surface));
   --band-bad: color-mix(in srgb, var(--warn) 24%, var(--surface));
 }
 
-/* Dark: own background, cards and text; the company's colors stay, lightened where they're used as text. */
+/* Phone in dark mode: a dark theme stays as it is; a light company theme gets its dark versions, worked out in
+   src/core/theme.ts (themeVars → --t-dark-*): dark page, cards and text, brand and button lifted until readable. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;
-    --surface: #1c1c1e;
-    --fg: #f5f5f7;
-    /* Deep brand and button colors would sink into a dark background: lift them toward white and put dark text on
-       them. Works for any company color: a third white is enough for dark text to read. */
-    --brand: color-mix(in srgb, var(--t-brand, #0071e3) 65%, #ffffff);
-    --brand-ink: #0f1419;
-    --action: color-mix(in srgb, var(--t-action, #0071e3) 65%, #ffffff);
-    --action-ink: #0f1419;
+    --bg: var(--t-dark-bg, #0e1116);
+    --surface: var(--t-dark-surface, #171c23);
+    --fg: var(--t-dark-text, #f2f4f7);
+    --brand: var(--t-dark-brand, #3ddc97);
+    --brand-ink: var(--t-dark-brand-ink, #0e1116);
+    --action: var(--t-dark-action, #3ddc97);
+    --action-ink: var(--t-dark-action-ink, #0e1116);
     --brand-text: var(--brand);
-    --warn-text: color-mix(in srgb, var(--warn) 60%, #ffffff);
-    --brand-soft: color-mix(in srgb, var(--brand) 16%, var(--surface));
-    --ok-bg: color-mix(in srgb, var(--ok) 22%, var(--surface));
-    --caution-bg: color-mix(in srgb, var(--caution) 18%, var(--surface));
-    --warn-bg: color-mix(in srgb, var(--warn) 22%, var(--surface));
+    --warn-text: color-mix(in srgb, var(--warn) 70%, #ffffff);
     color-scheme: dark;
   }
 }
@@ -87,7 +83,8 @@
   --color-warn-ink: var(--warn-ink);
   --color-warn-bg: var(--warn-bg);
   --color-warn-text: var(--warn-text);
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+  /* Archivo for titles and big numbers (bundled); the phone font for everything else (Inter off Apple devices). */
+  --font-display: "Archivo", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
   /* Generous corners: chips 8px, inputs 12px, cards 18px, sheets 22px; buttons are pills (rounded-full). */
   --radius-sm: 0.5rem;
@@ -95,8 +92,8 @@
   --radius-lg: 0.875rem;
   --radius-xl: 1.125rem;
   --radius-2xl: 1.375rem;
-  /* One soft shadow for cards, so they lift off the grey page without borders. */
-  --shadow-card: 2px 4px 12px rgba(0, 0, 0, 0.08);
+  /* One soft shadow for cards; on the dark default a hairline highlight does the lifting. */
+  --shadow-card: 0 0 0 1px color-mix(in srgb, var(--fg) 6%, transparent), 2px 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 html,
@@ -124,6 +121,11 @@ body {
 .toast-in { animation: toast-in 180ms ease-out; }
 .sheet-in { animation: slide-up 200ms ease-out; }
 .skeleton { background: var(--line); animation: pulse-bg 1.2s ease-in-out infinite; }
+/* Home's ring fills as people sign; the saved screen draws its check (ring first, then the tick). */
+.ring-fill { transition: stroke-dashoffset 700ms cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes draw { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+.done-ring { --len: 264; stroke-dasharray: 264; animation: draw 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.done-check { --len: 60; stroke-dasharray: 60; animation: draw 320ms 380ms ease-out both; }
 /* Jobsite weather sky (src/components/Weather.tsx). Transform and opacity only, so it stays smooth on phones. */
 @keyframes wx-spin { to { transform: rotate(360deg); } }
 @keyframes wx-pulse { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
@@ -171,7 +173,8 @@ body {
 .wx-ring-caution { box-shadow: 0 0 0 2px var(--caution), 0 0 22px color-mix(in srgb, var(--caution) 40%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-in, .toast-in, .sheet-in, .skeleton { animation: none; }
+  .page-in, .toast-in, .sheet-in, .skeleton, .done-ring, .done-check { animation: none; }
+  .ring-fill { transition: none; }
   .wx-spin, .wx-spin-fast, .wx-pulse, .wx-flare, .wx-cross, .wx-fall, .wx-twinkle, .wx-fog, .wx-streak, .wx-debris, .wx-tumble, .wx-shimmer, .wx-ring-alert, .wx-ping, .wx-area { animation: none; }
   .wx-flash-a, .wx-flash-b, .wx-flash-b-bolt { animation: none; opacity: 0; }
   .wx-flash-a-bolt { animation: none; opacity: 1; } /* a still bolt still says "lightning" */

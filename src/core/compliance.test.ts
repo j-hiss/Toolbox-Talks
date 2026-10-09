@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onStaff, onTimeRate, pct, periodChange, score, teamGrid, trend, weekKeys, type ReportPerson, type ReportRecord } from "./compliance";
+import { buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onStaff, onTimeRate, pct, periodChange, score, talkStreak, teamGrid, trend, weekKeys, type ReportPerson, type ReportRecord } from "./compliance";
 import { isoDay } from "./weeks";
 
 const TODAY = new Date(2026, 9, 7); // Wed Oct 7 2026; this week = Oct 5
@@ -125,5 +125,28 @@ describe("report views", () => {
   it("makeup reasons group by quick pick, with average lateness", () => {
     const s = makeupSummary(c, ["Off that week", "Out sick", "Other"]);
     expect(s).toEqual({ total: 1, reasons: [{ reason: "Out sick", n: 1 }], avgDaysLate: 3 }); // 2.5 days after the week ended
+  });
+});
+
+describe("talkStreak", () => {
+  const P = (...keys: string[]) => keys.map((key) => ({ key, weeks: 1 }));
+  const periods = P("2026-10-05", "2026-09-28", "2026-09-21", "2026-09-14", "2026-09-07");
+  it("counts back from the newest finished period and stops at the first miss", () => {
+    const s = talkStreak(periods, ["2026-09-28", "2026-09-21", "2026-09-07"]);
+    expect(s.count).toBe(2);
+    expect(s.missedInYear).toBe(1);
+    expect(s.recent.map((d) => d.state)).toEqual(["held", "missed", "held", "held", "open"]);
+  });
+  it("the current period adds once a talk is held, and never breaks the streak while open", () => {
+    expect(talkStreak(periods, ["2026-10-05", "2026-09-28"]).count).toBe(2);
+    expect(talkStreak(periods, ["2026-09-28"]).count).toBe(1);
+  });
+  it("zero records is a miss, not a pass", () => {
+    const s = talkStreak(periods, []);
+    expect(s.count).toBe(0);
+    expect(s.missedInYear).toBe(4);
+  });
+  it("a makeup key that isn't in the period list doesn't count", () => {
+    expect(talkStreak(P("2026-10-05", "2026-09-28"), ["2026-09-30"]).count).toBe(0);
   });
 });

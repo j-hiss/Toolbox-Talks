@@ -20,7 +20,7 @@ export function toast(text: string, opts: { tone?: "ok" | "error"; action?: Toas
 export function dismissToast() { current = null; emit(); }
 
 /** A short buzz on phones that support it (Android, and the native apps). Never required for meaning. */
-export function buzz(ms = 12) {
+export function buzz(ms: number | number[] = 12) {
   try { navigator.vibrate?.(ms); } catch { /* not supported */ }
 }
 

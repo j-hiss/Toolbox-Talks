@@ -143,24 +143,36 @@ customer #1, not a special case.
   - Accepts `.xlsx` and `.csv`.
 
 ## Look and company colors (built)
-- **Default look, "Clarity" (2026-10-09, Joe: "take a page out of Apple's branding"):** modeled on the patterns
-  measured on apple.com (light grey page #F5F5F7, near-black text #1D1D1F, white cards with an 18px radius and a soft
-  2px 4px 12px shadow, one blue accent #0071E3, pill buttons, a translucent blurred header and tab bar, bold tight
-  headlines). No Apple names, logos, images or fonts are copied: the interface uses the phone's own system font (San
-  Francisco on iPhone and Mac) and bundled Inter elsewhere (works offline, covers Vietnamese). Status colors are the
-  familiar phone ones, darkened to read outdoors: green done, orange caution, red missed. Segmented controls are a grey
-  track with the chosen segment raised in white. Dark mode: black page, #1C1C1E cards, brand and buttons lifted with
-  dark text on them. Industry-neutral: hospital, kitchen, jobsite, shop floor.
+- **Default look, "Momentum" (2026-10-09, Joe ranked the directions B, then C, then A):** dark-first. Near-black
+  page #0E1116, cards #171C23, text #F2F4F7, one bright green #3DDC97 for brand, buttons and done, warm gold #FFC24B for
+  caution and the streak, soft red #FF6B6B for missed. Titles and big numbers in Archivo (bundled, heavy weights);
+  everything else in the phone's own font (Inter off Apple devices). The one main action on a screen is a large pill
+  ("Start this talk"). Reads well outdoors and in any workplace.
+- **Home hero:** a ring that closes as people on staff sign this period's talk (same count as the team chips), and the
+  streak: talk periods in a row with a talk given in that period (`talkStreak`, up to a year back, never before the
+  program start). A row of dots shows the last 8 periods: gold = held, red = missed, dashed = this period not held yet.
+  A makeup given later doesn't repair the streak, and missed periods in the last year are counted in red. Honest
+  status: nothing is hidden to keep a streak.
+- **Saved screen:** a check draws itself; when every person on the roster signed and the presenter signed, it turns
+  green, says "Everyone signed" and the phone buzzes. Anything flagged (not signed or absent) gets the plain grey check
+  and the flagged count, as before. Animations are off for people who ask for reduced motion.
+- **Earlier looks kept as presets:** Clarity (A: the apple.com-inspired light look, #F5F5F7 page, #0071E3 blue, white
+  cards), Field (C's colors: charcoal and safety orange), Ledger, Signal (the ANSI Z535 / ISO 3864 safety-sign
+  colors), Harbor, Graphite. No Apple names, logos, images or fonts are copied.
 - **Admin → Brand:** an admin can change any of the eight colors (brand, buttons, done, caution, missed, background,
-  cards, text) with a color picker or an exact hex code, or start from a preset (Clarity, Ledger, Signal, Harbor, Graphite). Signal keeps the old safety-sign colors (ANSI Z535 / ISO 3864).
+  cards, text) with a color picker or an exact hex code, or start from a preset (Momentum, Clarity, Field, Ledger, Signal, Harbor, Graphite).
   The whole app changes live while trying colors; nothing is saved until "Save colors"; leaving the tab puts the
-  saved colors back. "Back to default" returns to Clarity.
+  saved colors back. "Back to default" returns to Momentum.
 - **Checks, not blocks:** plain-language warnings when a choice makes text hard to read (WCAG contrast) or makes
   two meanings look alike (done vs missed, buttons vs missed). They warn; the admin can still save.
 - Saved per company (`companies.theme`, only the changed colors), seen by everyone in that company, remembered on
   the phone so the app opens in the right colors offline. The PDF header band uses the brand color; the PDF's
   status colors and content don't change with it.
-- Dark mode keeps the company's colors and uses its own background, cards and text.
+- Phone dark mode: a dark theme (like Momentum) stays as it is. A light theme gets a dark page, cards and text, with its
+  brand lifted toward white until it reads as link text (4.5:1) and its buttons until they stand out (3:1), worked out
+  in `src/core/theme.ts` (`darkVersion`).
+- Saved colors are only the ones changed from the default, so a company that changed one color under Clarity now sees
+  it on Momentum. Admin → Brand shows any readability warning that causes; picking a preset sets all eight.
 
 ## Jobsites and the office
 - Talks can happen on a jobsite **or at the office or shop**. Each place is marked Jobsite or Office or shop. Where a

@@ -978,8 +978,19 @@ function IssuesEditor({ org, draft, update }: { org: Org; draft: TalkDraft; upda
 // ---------------------------------------------------------------------------------------------------------------
 function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
   const c = done.counts;
+  // Only a full roster earns the celebration: every person signed and the presenter too (absent counts as flagged).
+  const everyone = c.total > 0 && c.flagged === 0 && done.presenterSigned;
+  useEffect(() => { if (everyone) buzz([20, 60, 40]); }, [everyone]);
   return (
     <>
+      <div className="mt-2 flex flex-col items-center text-center">
+        <svg viewBox="0 0 96 96" className={`h-24 w-24 ${everyone ? "" : "opacity-80"}`} aria-hidden>
+          <circle cx="48" cy="48" r="42" fill="none" stroke={everyone ? "var(--ok)" : "var(--line)"} strokeWidth="8" className="done-ring" />
+          <path d="M30 49 l12 12 l24 -26" fill="none" stroke={everyone ? "var(--ok)" : "var(--muted)"} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" className="done-check" />
+        </svg>
+        {everyone && <p className="mt-3 font-display text-[26px] font-extrabold leading-tight tracking-[-0.03em]" role="status">Everyone signed</p>}
+        {everyone && <p className="text-sm text-muted">{c.signed} of {c.total} on the roster, plus the presenter.</p>}
+      </div>
       <Eyebrow>Recorded{done.makeupLabel ? ` · ${done.makeupLabel}` : ""}</Eyebrow>
       <Title>{done.title}</Title>
       <div className="mt-4">

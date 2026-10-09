@@ -1,10 +1,12 @@
 // A company's colors. Pure logic: which colors can be set, the default look, readable text on each color,
 // and plain-language warnings when a choice makes something hard to read or easy to confuse.
 //
-// The default ("Clarity") is calm and bright, like a premium consumer app: one blue accent, grey page, white cards,
-// the familiar phone status colors darkened to read outdoors. It fits any workplace. "Ledger" (deep ink-blue) and
-// "Signal" (the safety-sign colors, ANSI Z535 / ISO 3864) are presets. Every color can be changed per company; the
-// warnings say when a change hurts readability or meaning.
+// The default ("Momentum", chosen 2026-10-09) is dark-first: near-black page, one bright green for progress and
+// action, warm gold for caution and streaks, a soft red for misses. It reads well outdoors and makes keeping the
+// program going feel like closing a ring. "Clarity" (calm and bright, one blue accent), "Field" (charcoal and safety
+// orange), "Ledger" (deep ink-blue) and "Signal" (the safety-sign colors, ANSI Z535 / ISO 3864) are presets. Every
+// color can be changed per company; the warnings say when a change hurts readability or meaning. A light theme gets
+// dark versions worked out for phones in dark mode (themeVars → --t-dark-*); a dark theme stays as it is.
 
 export const THEME_ROLES = [
   { id: "brand", label: "Brand", hint: "Header, week card, links, selected tab" },
@@ -20,16 +22,26 @@ export const THEME_ROLES = [
 export type ThemeRole = (typeof THEME_ROLES)[number]["id"];
 export type Theme = Record<ThemeRole, string>;
 
-/** The default look ("Clarity"). */
+/** The default look ("Momentum"): one green accent for brand, buttons and done, on a dark page. */
 export const DEFAULT_THEME: Theme = {
-  brand: "#0071E3",
-  action: "#0071E3",
-  done: "#248A3D",
-  caution: "#C96F00",
-  danger: "#D70015",
-  bg: "#F5F5F7",
-  surface: "#FFFFFF",
-  text: "#1D1D1F",
+  brand: "#3DDC97",
+  action: "#3DDC97",
+  done: "#3DDC97",
+  caution: "#FFC24B",
+  danger: "#FF6B6B",
+  bg: "#0E1116",
+  surface: "#171C23",
+  text: "#F2F4F7",
+};
+
+/** Calm and bright, one blue accent on a grey page (the default 2026-10-08 to 10-09). */
+const CLARITY: Theme = {
+  brand: "#0071E3", action: "#0071E3", done: "#248A3D", caution: "#C96F00", danger: "#D70015", bg: "#F5F5F7", surface: "#FFFFFF", text: "#1D1D1F",
+};
+
+/** Charcoal with safety-orange buttons and heavy type: the "jobsite" direction. */
+const FIELD: Theme = {
+  brand: "#FF7A1A", action: "#FF7A1A", done: "#4ADE80", caution: "#FACC15", danger: "#F87171", bg: "#141414", surface: "#1F1F1F", text: "#F5F5F4",
 };
 
 /** Deep ink-blue on cool paper (the default for one day, 2026-10-09). */
@@ -44,11 +56,13 @@ const SIGNAL: Theme = {
 
 /** Starting points in Admin → Brand. Each passes every check in themeWarnings. */
 export const THEME_PRESETS: { id: string; name: string; theme: Theme }[] = [
-  { id: "clarity", name: "Clarity", theme: DEFAULT_THEME },
+  { id: "momentum", name: "Momentum", theme: DEFAULT_THEME },
+  { id: "clarity", name: "Clarity", theme: CLARITY },
+  { id: "field", name: "Field", theme: FIELD },
   { id: "ledger", name: "Ledger", theme: LEDGER },
   { id: "signal", name: "Signal", theme: SIGNAL },
   { id: "harbor", name: "Harbor", theme: { ...SIGNAL, brand: "#0F6A6E", action: "#D2492F", done: "#1E8A5A", danger: "#9F1239", bg: "#EDF1F1", text: "#15232A" } },
-  { id: "graphite", name: "Graphite", theme: { ...DEFAULT_THEME, brand: "#1D1D1F", action: "#1D1D1F" } },
+  { id: "graphite", name: "Graphite", theme: { ...CLARITY, brand: "#1D1D1F", action: "#1D1D1F" } },
 ];
 
 const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
@@ -125,24 +139,65 @@ export function inkOn(color: string): string {
  */
 export function derived(t: Theme) {
   return {
-    muted: mix(t.text, t.surface, 0.68),
-    line: mix(t.text, t.surface, 0.13),
+    muted: mix(t.text, t.surface, 0.64),
+    line: mix(t.text, t.surface, 0.12),
     brandInk: inkOn(t.brand),
     actionInk: inkOn(t.action),
     doneInk: inkOn(t.done),
     dangerInk: inkOn(t.danger),
-    doneBg: mix(t.done, t.surface, 0.13),
+    doneBg: mix(t.done, t.surface, 0.14),
     doneText: mix(t.done, t.text, 0.75),
     cautionBg: mix(t.caution, t.surface, 0.13),
     cautionText: mix(t.caution, t.text, 0.35),
-    dangerBg: mix(t.danger, t.surface, 0.11),
+    dangerBg: mix(t.danger, t.surface, 0.13),
   };
 }
 
-/** The CSS variables to set on the page. Only the inputs and the text-on-color inks; the CSS derives the rest. */
+/** A dark theme: its page is dark enough that phone dark mode should leave it alone. */
+export function isDark(t: Theme): boolean {
+  return luminance(t.bg) < 0.2;
+}
+
+const DARK_BG = "#0F1113";
+const DARK_SURFACE = "#1A1D21";
+const DARK_TEXT = "#F2F4F7";
+
+/** Mix a color toward white, a step at a time, until it reaches `min` contrast on `on`. */
+function liftUntil(color: string, on: string, min: number): string {
+  for (let p = 1; p >= 0; p -= 0.05) {
+    const c = mix(color, WHITE, p);
+    if (contrast(c, on) >= min) return c;
+  }
+  return WHITE;
+}
+
+/**
+ * The colors for a phone in dark mode. A dark theme keeps its own; a light theme gets a dark page, cards and text,
+ * with brand (used as link text, so 4.5:1) and buttons (3:1) lifted toward white until they read on the dark cards.
+ */
+export function darkVersion(t: Theme) {
+  if (isDark(t)) {
+    const d = derived(t);
+    return { bg: t.bg, surface: t.surface, text: t.text, brand: t.brand, brandInk: d.brandInk, action: t.action, actionInk: d.actionInk };
+  }
+  const brand = liftUntil(t.brand, DARK_SURFACE, 4.5);
+  const action = liftUntil(t.action, DARK_SURFACE, 3);
+  return { bg: DARK_BG, surface: DARK_SURFACE, text: DARK_TEXT, brand, brandInk: inkOn(brand), action, actionInk: inkOn(action) };
+}
+
+/** The CSS variables to set on the page. Only the inputs, the text-on-color inks and the dark-mode set; the CSS derives the rest. */
 export function themeVars(t: Theme): Record<string, string> {
   const d = derived(t);
+  const k = darkVersion(t);
   return {
+    "--t-scheme": isDark(t) ? "dark" : "light",
+    "--t-dark-bg": k.bg,
+    "--t-dark-surface": k.surface,
+    "--t-dark-text": k.text,
+    "--t-dark-brand": k.brand,
+    "--t-dark-brand-ink": k.brandInk,
+    "--t-dark-action": k.action,
+    "--t-dark-action-ink": k.actionInk,
     "--t-brand": t.brand,
     "--t-brand-ink": d.brandInk,
     "--t-action": t.action,
@@ -206,6 +261,7 @@ export function themeWarnings(t: Theme): ThemeWarning[] {
   if (alike(t.done, t.danger)) out.push({ roles: ["done", "danger"], text: "Done and Missed look alike. They should never be confused." });
   if (alike(t.action, t.danger)) out.push({ roles: ["action", "danger"], text: "Buttons look like the Missed color, so a normal button can read as an alarm." });
   if (alike(t.caution, t.danger)) out.push({ roles: ["caution", "danger"], text: "Caution and Missed look alike." });
-  if (alike(t.action, t.done)) out.push({ roles: ["action", "done"], text: "Buttons look like the Done color, so it's unclear what's finished." });
+  // One accent for buttons and done (Momentum) is a deliberate choice; two near-but-different shades are the confusing case.
+  if (t.action !== t.done && alike(t.action, t.done)) out.push({ roles: ["action", "done"], text: "Buttons look like the Done color, so it's unclear what's finished." });
   return out;
 }

@@ -19,7 +19,7 @@ import { newDailyDraft, newDraft, useDraft } from "@/lib/draft";
 import { useOutbox } from "@/lib/useOutbox";
 import { usePlan } from "@/lib/usePlan";
 import { readLastSetup } from "@/lib/lastSetup";
-import { GettingStarted, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
+import { GettingStarted, MomentumHero, WeekStatusCard, useHomeStatus } from "@/components/HomeCards";
 import { workSettingFor } from "@/core/worksetting";
 import { WeatherCard } from "@/components/Weather";
 import type { Jobsite } from "@/lib/data/types";
@@ -121,8 +121,10 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
+      {week && talk && text && st && <MomentumHero st={st} />}
+
       {week && talk && text ? (
-        <section className="mt-5">
+        <section className="mt-3">
           <div className="overflow-hidden rounded-xl bg-surface shadow-card">
             {/* The week as an entry in the year's record: where we are in the 52, then the talk's title. */}
             <div className="border-b border-line px-5 pt-5 pb-4">
@@ -135,13 +137,13 @@ function Home({ m }: { m: Membership }) {
                 <span className="bg-brand" style={{ flex: week.weeks }} />
                 <span className="bg-line" style={{ flex: 52 - (week.n - 1) - week.weeks }} />
               </div>
-              <h1 className="mt-4 font-display text-[30px] font-bold leading-[1.1] tracking-[-0.025em] text-balance">{text.title}</h1>
+              <h1 className="mt-4 font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.03em] text-balance">{text.title}</h1>
             </div>
             <div className="px-5 pt-4 pb-5">
               <p className="leading-relaxed">{text.hook}</p>
               <p className="mt-2 text-sm text-muted">{talk.code} · about {talk.minutes} min to read aloud · same talk for every team {week.weeks > 1 ? `through ${periodLabel(week.monday, week.weeks).split(" – ")[1]}` : "this week"}</p>
               {canPresent(m.access) && <div className="mt-4 flex flex-col gap-2">
-                <Button onClick={() => start(week.talkId)}>Start this talk</Button>
+                <Button size="lg" onClick={() => start(week.talkId)}>Start this talk</Button>
                 {lastCrew && <p className="text-center text-sm text-muted">Set up like last time: {lastCrew}</p>}
                 {/* Only when someone owes a past talk (or the status hasn't loaded, offline). */}
                 {(!st || st.owed > 0) && <Button variant="soft" onClick={() => start(null)}>Make up a missed talk</Button>}

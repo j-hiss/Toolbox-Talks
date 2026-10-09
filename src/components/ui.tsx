@@ -9,13 +9,15 @@ import { canAdmin, canPresent, canReport, isStaff } from "@/lib/data/types";
 import { pending, onOutboxChange } from "@/lib/outbox";
 import { BRAND } from "@/content/brand";
 
-type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" };
+type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "soft" | "ghost" | "danger"; size?: "md" | "sm" | "lg" };
 
 export function Button({ variant = "primary", size = "md", className = "", ...rest }: BtnProps) {
   // Disabled buttons stay readable outdoors: a plain outline with dark text, not a faded color.
   const base = "font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:border disabled:border-dashed disabled:border-muted disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:brightness-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-fg";
   // Pill buttons, like a premium consumer app: one filled blue for the main action, a tinted fill for the second one.
-  const sizes = size === "sm" ? "min-h-11 rounded-full px-4 py-2 text-[15px]" : "min-h-[54px] w-full rounded-full px-5 py-3.5 text-[17px] tracking-[-0.02em]";
+  const sizes = size === "sm" ? "min-h-11 rounded-full px-4 py-2 text-[15px]"
+    : size === "lg" ? "min-h-16 w-full rounded-full px-6 py-4 font-display text-[19px] font-extrabold tracking-[-0.02em]" // the one big action on a screen
+    : "min-h-[54px] w-full rounded-full px-5 py-3.5 text-[17px] tracking-[-0.02em]";
   const variants = {
     primary: "bg-action text-action-ink hover:brightness-110",
     soft: "bg-brand-soft text-brand-text hover:brightness-[0.97]",

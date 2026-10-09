@@ -207,3 +207,28 @@ export function makeupSummary(c: Compliance, reasons: readonly string[]) {
     avgDaysLate: late.length ? Math.max(0, Math.round(late.reduce((a, b) => a + b, 0) / late.length)) : null,
   };
 }
+
+export type StreakDot = { key: string; weeks: number; state: "held" | "missed" | "now" | "open" };
+
+/**
+ * Home's streak: how many talk periods in a row, counting back from the newest finished one, had a talk given in
+ * that period (a makeup given later doesn't count: the period itself was missed). The current period counts once a
+ * talk is held; until then it is "open" and neither adds nor breaks the streak. Periods before the program started
+ * aren't passed in. `periods` is newest first, as periodKeys returns it; `held` is the recorded period keys
+ * (listRecordedWeeks, makeups excluded). Every missed period shows as missed: nothing is hidden to keep a streak.
+ */
+export function talkStreak(periods: { key: string; weeks: number }[], held: Iterable<string>, show = 8) {
+  const had = new Set(held);
+  const dots: StreakDot[] = periods.map((p, i) => ({
+    key: p.key, weeks: p.weeks,
+    state: had.has(p.key) ? (i === 0 ? "now" : "held") : i === 0 ? "open" : "missed",
+  }));
+  let count = 0;
+  for (const d of dots) {
+    if (d.state === "open") continue;
+    if (d.state === "missed") break;
+    count++;
+  }
+  const missedInYear = dots.filter((d) => d.state === "missed").length;
+  return { count, missedInYear, recent: dots.slice(0, show).reverse() }; // oldest → newest, for a left-to-right row
+}

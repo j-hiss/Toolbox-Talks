@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_THEME, THEME_PRESETS, THEME_ROLES, contrast, derived, inkOn, mix, normalizeHex, normalizeTheme, themeChanges, themeVars, themeWarnings,
+  DEFAULT_THEME, THEME_PRESETS, THEME_ROLES, contrast, darkVersion, derived, inkOn, isDark, mix, normalizeHex, normalizeTheme, themeChanges, themeVars, themeWarnings,
 } from "./theme";
 
 describe("theme", () => {
@@ -47,23 +47,41 @@ describe("theme", () => {
   });
 
   it("warns, in plain words, when text gets hard to read", () => {
-    const w = themeWarnings({ ...DEFAULT_THEME, text: "#C8CCD2" });
+    const w = themeWarnings({ ...DEFAULT_THEME, text: "#3A3F47" });
     expect(w.some((x) => x.text.startsWith("Text on the background is hard to read"))).toBe(true);
     expect(w.every((x) => x.roles.length > 0)).toBe(true);
   });
 
   it("warns when Done and Missed can be confused", () => {
-    const w = themeWarnings({ ...DEFAULT_THEME, done: "#C0182A" });
+    const w = themeWarnings({ ...DEFAULT_THEME, done: "#FF5C70" });
     expect(w.map((x) => x.text)).toContain("Done and Missed look alike. They should never be confused.");
   });
 
   it("warns when buttons look like an alarm", () => {
-    expect(themeWarnings({ ...DEFAULT_THEME, action: "#D2101E" }).some((x) => x.roles.includes("action") && x.roles.includes("danger"))).toBe(true);
+    expect(themeWarnings({ ...DEFAULT_THEME, action: "#FF5050" }).some((x) => x.roles.includes("action") && x.roles.includes("danger"))).toBe(true);
   });
 
   it("sets a variable for every color plus readable inks", () => {
     const v = themeVars(DEFAULT_THEME);
     for (const { id } of THEME_ROLES) expect(Object.values(v)).toContain(DEFAULT_THEME[id]);
-    expect(v["--t-action-ink"]).toBe("#FFFFFF");
+    expect(v["--t-action-ink"]).not.toBe("#FFFFFF"); // dark ink on the bright green
+    expect(v["--t-scheme"]).toBe("dark");
+  });
+
+  it("a dark theme keeps its own colors in phone dark mode", () => {
+    expect(isDark(DEFAULT_THEME)).toBe(true);
+    const k = darkVersion(DEFAULT_THEME);
+    expect([k.bg, k.surface, k.text, k.brand, k.action]).toEqual([DEFAULT_THEME.bg, DEFAULT_THEME.surface, DEFAULT_THEME.text, DEFAULT_THEME.brand, DEFAULT_THEME.action]);
+  });
+
+  it("a light theme gets readable dark-mode versions of every preset", () => {
+    for (const p of THEME_PRESETS.filter((x) => !isDark(x.theme))) {
+      const k = darkVersion(p.theme);
+      expect([p.id, contrast(k.text, k.surface) >= 4.5]).toEqual([p.id, true]);
+      expect([p.id, contrast(k.brand, k.surface) >= 4.5]).toEqual([p.id, true]);
+      expect([p.id, contrast(k.action, k.surface) >= 3]).toEqual([p.id, true]);
+      expect([p.id, contrast(k.actionInk, k.action) >= 3]).toEqual([p.id, true]);
+      expect(themeVars(p.theme)["--t-scheme"]).toBe("light");
+    }
   });
 });

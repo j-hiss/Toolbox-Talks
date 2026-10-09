@@ -348,6 +348,8 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   // Scenario 9: safety profile (company with example history). Add a self-reported EMR, check the honest missed-weeks
   // count and program elements, then download the renewal packet through the preview's save prompt.
   await q.goto(PAGE); await q.waitForTimeout(1200); // page q was left mid-talk by an earlier scenario
+  log("9 home streak:", (await q.locator("section[aria-label^='This']").innerText().catch(() => "none")).replace(/\s+/g, " "));
+  await q.screenshot({ path: `${OUT}/e-home-streak.png` });
   await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1000);
   await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
   log("9 profile:", await q.locator("h1").textContent(), "| figures:", (await q.locator("main dl").innerText()).replace(/\s+/g, " ").slice(0, 160));

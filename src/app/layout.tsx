@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from "next";
 // The interface font is the phone's own: San Francisco on iPhone and Mac (the system font, not bundled), and Inter,
 // bundled so it works with no signal, everywhere else (Android, Windows). Inter is the closest open match.
+// Archivo (bundled) is the display face: titles and big numbers.
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
+import "@fontsource/archivo/600.css";
+import "@fontsource/archivo/700.css";
+import "@fontsource/archivo/800.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { BRAND } from "@/content/brand";
