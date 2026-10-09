@@ -39,6 +39,8 @@ export type TalkDraft = {
   issues: DraftIssue[];
   /** Optional crew photo (shrunk JPEG data URL) and when it was taken. */
   photo: { image: string; takenAt: string } | null;
+  /** Optional photo of a paper sign-in sheet (never counts as anyone signing). */
+  sheet: { image: string; takenAt: string } | null;
   /** The "Since last talk" section (safety log), once loaded; undefined = not loaded or not used. */
   sinceLast?: SinceLastDraft;
 };
@@ -64,9 +66,9 @@ export function readDraft(companyId: string): TalkDraft | null {
 
 /** Drafts saved by an earlier version of the app (free talk picking) become a makeup choice or carry on as is. */
 function upgrade(raw: unknown): TalkDraft {
-  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues" | "photo" | "walkins"> & { step: string; walkins?: (string | Walkin)[] };
+  const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues" | "photo" | "sheet" | "walkins"> & { step: string; walkins?: (string | Walkin)[] };
   const step = (d.step === "pick" ? (d.talkId ? "read" : "makeup") : d.step) as TalkDraft["step"];
-  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], photo: d.photo ?? null,
+  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], photo: d.photo ?? null, sheet: d.sheet ?? null,
     walkins: (d.walkins ?? []).map((w) => (typeof w === "string" ? { name: w, company: "" } : w)), step };
 }
 
@@ -108,6 +110,7 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
     heat: null,
     issues: [],
     photo: null,
+    sheet: null,
   };
   writeDraft(d);
   return d;

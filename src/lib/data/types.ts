@@ -113,6 +113,9 @@ export type TalkRecord = TalkRecordSummary & {
   /** Optional crew photo (image loaded from private storage) and when it was taken. */
   photo?: string | null;
   photo_taken_at?: string | null;
+  /** Optional photo of a paper sign-in sheet. Evidence only: statuses come from the phone signatures. */
+  sheet?: string | null;
+  sheet_taken_at?: string | null;
 };
 
 /** Something the crew raised at a talk. */

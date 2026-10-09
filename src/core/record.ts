@@ -72,6 +72,11 @@ export type RecordInput = {
   makeup?: { weekStart: string; reason: string } | null;
   /** An optional photo of the crew at the talk (JPEG data URL, already shrunk) and when it was taken. */
   photo?: { image: string; takenAt: string } | null;
+  /**
+   * An optional photo of a paper sign-in sheet (when the phone couldn't go around). Evidence kept with the record;
+   * it never changes anyone's status: people who didn't sign on the phone stay "not signed".
+   */
+  sheet?: { image: string; takenAt: string } | null;
   /** A line or two the presenter added for this site today. Read to the crew; saved with the record. */
   siteNotes?: string;
   /** The heat forecast checked for this talk (src/core/heat.ts), and whether the heat reminder was read. */
@@ -124,6 +129,8 @@ export function recordPayload(r: RecordInput) {
     signing_statement: r.signingStatement ?? null,
     photo: r.photo?.image ?? null,
     photo_taken_at: r.photo?.takenAt ?? null,
+    sheet: r.sheet?.image ?? null,
+    sheet_taken_at: r.sheet?.takenAt ?? null,
   };
 }
 export type RecordPayload = ReturnType<typeof recordPayload>;
@@ -161,12 +168,14 @@ export function toUpload(record: RecordPayload, attendees: AttendeeRow[]) {
     files.push({ path, image, contentType });
     return path;
   };
-  const { presenter_signature, photo, ...rest } = record;
+  const { presenter_signature, photo, sheet, ...rest } = record;
   const stored = {
     ...rest,
     presenter_signature_path: put("presenter", presenter_signature),
     photo_path: put("photo", photo),
     photo_taken_at: photo ? record.photo_taken_at : null,
+    sheet_path: put("sheet", sheet),
+    sheet_taken_at: sheet ? record.sheet_taken_at : null,
   };
   const storedAttendees = attendees.map(({ signature, ...a }, i) => ({ ...a, signature_path: put(`sig-${i}`, signature) }));
   return { files, record: stored, attendees: storedAttendees };

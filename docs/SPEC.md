@@ -300,12 +300,28 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   files upload first and the record second. Retrying is safe (fixed file names, one record per talk).
 - **Crew photo (optional):** on the review screen, "Take a crew photo". Shrunk on the phone (longest side 1280 px,
   JPEG, hidden photo metadata dropped), with retake and remove. Shows on the record and the PDF with its time.
+- **Paper sign-in sheet (optional, migration 0017):** on the review screen, "Add a photo of a paper sheet", for when
+  the phone can't go around (dead battery, someone who won't sign on a phone). Kept larger (2000 px) so handwriting
+  stays readable, saved as `sheet.jpg` in the talk's folder, shown on the record and the PDF. **It never changes a
+  status:** anyone who didn't sign on the phone is still Not signed, and the record and PDF say so next to the photo.
 - **Walk-ins:** name plus an optional company (a sub, a supplier). Companies used before are suggested. Shown on the
-  roster, record and PDF. Walk-ins don't count toward compliance (they aren't on staff).
+  roster, record and PDF. Walk-ins don't count toward the sign-in rate (they aren't on staff).
+- **Late arrivals:** "+ Someone arrived late" on the review screen adds a walk-in and goes straight to their signing
+  turn, without going back to Who's here.
+
+## Jobsite QR stickers (built)
+- **Admin → Jobsites → QR sticker** makes a one-page PDF to print and post at the site: a QR code, the jobsite name and
+  address, and the company name. The code holds only a link: `<app web address>/?site=<jobsite id>`.
+- **Scanning** it with the presenter's phone camera opens the app with that jobsite picked for today's talk. It's
+  picked only if the jobsite belongs to the company the person is signed in to; otherwise the app says so. A scan
+  made while signed out is held through sign-in (this browser tab only). Crews never scan or sign in.
+- The app's web address comes from `NEXT_PUBLIC_APP_URL` (set once the website is live); the phone apps run from an
+  app-only address a camera can't open, so stickers are made from the website. Opening the app itself from a scan
+  (universal links) comes with the native apps.
 
 ## Admin reports (built)
 **Home → Reports** (owners and admins).
-- **Compliance score:** everyone on staff signs each week's talk. Score = people-weeks signed (on time or made up) ÷
+- **Sign-in rate** (was "compliance score"): everyone on staff signs each week's talk. Score = people-weeks signed (on time or made up) ÷
   people-weeks expected, over weeks that are over. Shown next to it: the on-time rate, so makeups never hide lateness.
 - **Every person, every week, ends in one state:**
   - **On time:** signed that week's talk.

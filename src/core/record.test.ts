@@ -84,6 +84,13 @@ describe("signatures and the crew photo become private files", () => {
     expect(toUpload(base, rows).files.map((f) => f.path)).toEqual(up.files.map((f) => f.path));
   });
 
+  it("a paper sheet photo uploads to the same folder and changes no one's status", () => {
+    const withSheet = toUpload({ ...base, sheet: "data:image/jpeg;base64,BB", sheet_taken_at: "2026-10-05T12:10:00Z" }, rows);
+    expect(withSheet.files.map((f) => f.path)).toContain("co-1/cl-1/sheet.jpg");
+    expect(withSheet.record).toMatchObject({ sheet_path: "co-1/cl-1/sheet.jpg", sheet_taken_at: "2026-10-05T12:10:00Z" });
+    expect(withSheet.attendees.map((a) => a.status)).toEqual(up.attendees.map((a) => a.status));
+  });
+
   it("no photo and no presenter signature means no files and null paths", () => {
     const bare = toUpload({ ...base, photo: null, photo_taken_at: null, presenter_signature: null }, []);
     expect(bare.files).toEqual([]);

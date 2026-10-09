@@ -67,11 +67,11 @@ export function useHomeStatus(co: Company, input: Omit<PlanInput, "today">, vers
 /** "This week: 7 of 9 signed", one chip per crew, and how many people owe a past week. */
 export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin: boolean; onMakeup: () => void }) {
   if (st.thisWeek.expected === 0 && st.owed === 0 && st.openIssues === 0) return null;
-  const name = (id: string | null) => (id ? st.teams.find((t) => t.id === id)?.name ?? "Former team" : "No team");
+  const name = (id: string | null) => (id ? st.teams.find((t) => t.id === id)?.name ?? "Former crew" : "No crew");
   const crews = st.week
     .map((g) => ({ name: name(g.teamId), t: g.weeks[0]?.tally }))
     .filter((c) => c.t && c.t.expected > 0)
-    .sort((a, b) => (a.name === "No team" ? 1 : b.name === "No team" ? -1 : a.name.localeCompare(b.name)));
+    .sort((a, b) => (a.name === "No crew" ? 1 : b.name === "No crew" ? -1 : a.name.localeCompare(b.name)));
   return (
     <section className="mt-3 rounded-2xl bg-surface p-4">
       <div className="flex items-baseline justify-between gap-2">

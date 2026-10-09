@@ -125,14 +125,14 @@ function Reports({ m }: { m: Membership }) {
   const made = makeupSummary(report, MAKEUP_REASONS);
   const grid = teamGrid(report)
     .map((g) => ({ name: g.teamId ? teamName(g.teamId) || "Former team" : "No team", cells: g.weeks }))
-    .sort((a, b) => (a.name === "No team" ? 1 : b.name === "No team" ? -1 : a.name.localeCompare(b.name)));
+    .sort((a, b) => (a.name === "No crew" ? 1 : b.name === "No crew" ? -1 : a.name.localeCompare(b.name)));
   const gridWeeks = [...report.weeks].reverse().map((w) => ({ key: w.key, label: short(parseDay(w.key)) }));
   const flags = data.records.flatMap((r) => r.attendees.filter((a) => a.status !== "signed").map((a) => ({ r, a }))).reverse();
 
   const exportCsv = async () => {
     setCsvMsg(null);
     const q = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-    const rows = [["Week of", "Week #", "Weeks in period", "Talk", "Person", "Team", "Status", "Signed on", "Makeup reason", "Record ID"]];
+    const rows = [["Week of", "Week #", "Weeks in period", "Talk", "Person", "Crew", "Status", "Signed on", "Makeup reason", "Record ID"]];
     for (const w of [...report.weeks].reverse()) {
       for (const p of w.people) {
         const person = names.get(p.personId)!;
@@ -153,21 +153,54 @@ function Reports({ m }: { m: Membership }) {
       <Title>{multi ? "Talk sign-ins" : "Weekly sign-ins"}</Title>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Date range">
+        <div className="grid w-full grid-cols-4 overflow-hidden rounded-lg border border-line sm:w-auto" role="group" aria-label="Date range">
           {RANGES.map((r) => (
             <button key={r.id} aria-pressed={range === r.id} onClick={() => setRange(r.id)}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${range === r.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface"}`}>
+              className={`min-h-11 px-2 text-sm font-semibold ${range === r.id ? "bg-brand text-brand-ink" : "bg-surface"}`}>
               {r.label}
             </button>
           ))}
         </div>
-        <select aria-label="Team" className={`${inputClass} w-auto py-1.5`} value={team} onChange={(e) => setTeam(e.target.value)}>
-          <option value="all">All teams</option>
+        <select aria-label="Crew" className={`${inputClass} w-full sm:w-auto`} value={team} onChange={(e) => setTeam(e.target.value)}>
+          <option value="all">All crews</option>
           {data.teams.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-          <option value="none">No team</option>
+          <option value="none">No crew</option>
         </select>
       </div>
-      <p className="mt-2 text-sm text-muted tabular-nums">Week of {short(parseDay(data.from))} to today{team !== "all" ? " · team as of today" : ""}</p>
+      <p className="mt-2 text-sm text-muted tabular-nums">Week of {short(parseDay(data.from))} to today{team !== "all" ? " · crew as of today" : ""}</p>
+
+      {/* Who owes a makeup: one card per week, one tap to start it ------------------------------------------------- */}
+      <GroupHeading aside={owed.length ? `${owed.length}` : undefined}>Needs a makeup</GroupHeading>
+      {owedWeeks.length === 0 ? (
+        <p className="mt-3 text-sm text-muted">No one owes a past week right now.</p>
+      ) : (
+        <ul className="mt-3 flex flex-col gap-2">
+          {owedWeeks.map((g) => {
+            const pw = plan(g.week);
+            const urgent = g.daysLeft <= 7;
+            return (
+              <li key={g.week} className={`rounded-lg border p-3 ${urgent ? "border-caution bg-caution-bg" : "border-line bg-surface"}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <span className="min-w-0">
+                    <b className="block">{pw ? `${weekNumbers(pw)} · ` : ""}{talkTitle(g.week)}</b>
+                    <small className="text-muted">{periodName({ key: g.week, weeks: pw?.weeks ?? 1 })}</small>
+                  </span>
+                  <span className="shrink-0 text-right text-sm tabular-nums">
+                    <b className="block">{g.daysLeft === 0 ? "Last day" : `${g.daysLeft} day${g.daysLeft === 1 ? "" : "s"} left`}</b>
+                    <small className="text-muted">by {short(g.deadline)}</small>
+                  </span>
+                </div>
+                <p className="mt-2 text-sm"><b>{g.people.length} still need it:</b> {g.people.map((p) => names.get(p)?.name).join(", ")}</p>
+                {pw && (
+                  <Button className="mt-2 !py-3" onClick={() => startMakeup(pw, g.people)}>
+                    Give this makeup now
+                  </Button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       {/* Score ------------------------------------------------------------------------------------------------------- */}
       <section className="mt-5 rounded-xl bg-surface p-4">
@@ -216,41 +249,9 @@ function Reports({ m }: { m: Membership }) {
         </div>
       </div>
 
-      {/* Who owes a makeup: one card per week, one tap to start it ------------------------------------------------- */}
-      <GroupHeading aside={owed.length ? `${owed.length}` : undefined}>Needs a makeup</GroupHeading>
-      {owedWeeks.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">No one owes a past week right now.</p>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {owedWeeks.map((g) => {
-            const pw = plan(g.week);
-            const urgent = g.daysLeft <= 7;
-            return (
-              <li key={g.week} className={`rounded-lg border p-3 ${urgent ? "border-caution bg-caution-bg" : "border-line bg-surface"}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <span className="min-w-0">
-                    <b className="block">{pw ? `${weekNumbers(pw)} · ` : ""}{talkTitle(g.week)}</b>
-                    <small className="text-muted">{periodName({ key: g.week, weeks: pw?.weeks ?? 1 })}</small>
-                  </span>
-                  <span className="shrink-0 text-right text-sm tabular-nums">
-                    <b className="block">{g.daysLeft === 0 ? "Last day" : `${g.daysLeft} day${g.daysLeft === 1 ? "" : "s"} left`}</b>
-                    <small className="text-muted">by {short(g.deadline)}</small>
-                  </span>
-                </div>
-                <p className="mt-2 text-sm"><b>{g.people.length} still need it:</b> {g.people.map((p) => names.get(p)?.name).join(", ")}</p>
-                {pw && (
-                  <Button className="mt-2 !py-3" onClick={() => startMakeup(pw, g.people)}>
-                    Give this makeup now
-                  </Button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
+      {/* Everything below folds away so the page stays short on a phone. ---------------------------------------- */}
       {/* Trend ------------------------------------------------------------------------------------------------------- */}
-      <GroupHeading>Trend</GroupHeading>
+      <Fold title="Trend">
       {points.length === 0 ? (
         <p className="mt-3 text-sm text-muted">The trend starts once your first week is finished.</p>
       ) : (
@@ -263,27 +264,26 @@ function Reports({ m }: { m: Membership }) {
           <div className="mt-3 rounded-xl bg-surface p-3"><TrendChart points={points} /></div>
         </>
       )}
+      </Fold>
 
       {/* Teams ------------------------------------------------------------------------------------------------------- */}
       {team === "all" && grid.length > 0 && (
-        <>
-          <GroupHeading>By team</GroupHeading>
-          <p className="mt-1 text-sm text-muted">Score per team per week (team as of today). Tap a square for the count.</p>
+        <Fold title="By crew">
+          <p className="mt-1 text-sm text-muted">Score per crew per week (crew as of today). Tap a square for the count.</p>
           <div className="mt-3"><TeamGrid rows={grid} weeks={gridWeeks} currentKey={current?.key ?? isoDay(mondayOf(today))} /></div>
-        </>
+        </Fold>
       )}
 
       {/* Makeups ----------------------------------------------------------------------------------------------------- */}
       {made.total > 0 && (
-        <>
-          <GroupHeading aside={`${made.total}`}>Why weeks were made up</GroupHeading>
+        <Fold title="Why weeks were made up" aside={`${made.total}`}>
           <p className="mt-1 text-sm text-muted">
-            People-weeks closed by a makeup, by reason.{made.avgDaysLate !== null ? ` On average ${made.avgDaysLate} day${made.avgDaysLate === 1 ? "" : "s"} after the week ended.` : ""}
+            Missed sign-ins closed by a makeup, by reason.{made.avgDaysLate !== null ? ` On average ${made.avgDaysLate} day${made.avgDaysLate === 1 ? "" : "s"} after the week ended.` : ""}
           </p>
           <div className="mt-3 rounded-xl bg-surface p-3">
             <HBars items={made.reasons.map((r) => ({ label: r.reason, n: r.n }))} unit={(n) => String(n)} />
           </div>
-        </>
+        </Fold>
       )}
 
       {/* Issues ------------------------------------------------------------------------------------------------------ */}
@@ -296,20 +296,19 @@ function Reports({ m }: { m: Membership }) {
         const avg = days.length ? Math.round(days.reduce((a, b) => a + b, 0) / days.length) : null;
         if (!raised.length && !open.length) return null;
         return (
-          <>
-            <GroupHeading>Issues the crew raised</GroupHeading>
+          <Fold title="Issues the crew raised" aside={open.length ? `${open.length} open` : undefined}>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
               <div className="rounded-xl bg-surface p-2"><b className="block text-2xl">{raised.length}</b><small className="text-muted">raised in range</small></div>
               <div className={`rounded-lg border p-2 ${late ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}><b className="block text-2xl">{open.length}</b><small className="text-muted">open{late ? ` · ${late} overdue` : ""}</small></div>
               <div className="rounded-xl bg-surface p-2"><b className="block text-2xl">{avg ?? "–"}</b><small className="text-muted">avg days to fix</small></div>
             </div>
             <Link href="/records/#issues" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-text underline underline-offset-2">See all issues</Link>
-          </>
+          </Fold>
         );
       })()}
 
       {/* Weeks ------------------------------------------------------------------------------------------------------- */}
-      <GroupHeading>{multi ? "By talk period" : "By week"}</GroupHeading>
+      <Fold title={multi ? "By talk period" : "By week"} aside={`${report.weeks.length}`}>
       <ul className="mt-3 flex flex-col gap-2">
         {report.weeks.map((w) => {
           const pw = plan(w.key);
@@ -367,13 +366,29 @@ function Reports({ m }: { m: Membership }) {
         })}
       </ul>
 
+      </Fold>
+
       {/* People ------------------------------------------------------------------------------------------------------ */}
-      <GroupHeading aside={`${report.people.length}`}>By person</GroupHeading>
+      <Fold title="By person" aside={`${report.people.length}`}>
       <label className="mt-3 flex items-center gap-2 text-sm">
         <input type="checkbox" className="h-5 w-5 accent-[var(--brand)]" checked={onlyGaps} onChange={(e) => setOnlyGaps(e.target.checked)} />
         Only people with open or missed weeks ({gapsCount})
       </label>
-      <div className="mt-3 overflow-x-auto rounded-xl bg-surface">
+      {/* Phones: one card per person. Wider screens: the table. */}
+      <ul className="mt-3 flex flex-col gap-2 sm:hidden">
+        {people.length === 0 ? <li className="text-sm text-muted">No one to show.</li> : people.map(({ person, tally }) => (
+          <li key={person.id} className={`rounded-xl p-3 text-sm tabular-nums ${tally.open + tally.missed ? "bg-warn-bg" : "bg-surface"}`}>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0"><b>{person.name}</b>{person.deactivatedAt && <small className="ml-1 text-muted">inactive</small>}<small className="block text-muted">{teamName(person.teamId)}</small></span>
+              <b className="text-xl">{pct(score(tally))}</b>
+            </div>
+            <p className="mt-1 text-muted">
+              {tally.on_time} on time{tally.made_up ? ` · ${tally.made_up} made up` : ""}{tally.open ? ` · ${tally.open} open` : ""}{tally.missed ? ` · ${tally.missed} missed` : ""}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3 hidden overflow-x-auto rounded-xl bg-surface sm:block">
         <table className="w-full text-sm tabular-nums">
           <thead className="text-left font-display text-xs text-muted">
             <tr><th className="p-2">Name</th><th className="p-2 text-right">On time</th><th className="p-2 text-right">Made up</th><th className="p-2 text-right">Open</th><th className="p-2 text-right">Missed</th><th className="p-2 text-right">Score</th></tr>
@@ -395,8 +410,10 @@ function Reports({ m }: { m: Membership }) {
         </table>
       </div>
 
+      </Fold>
+
       {/* Flags ------------------------------------------------------------------------------------------------------- */}
-      <GroupHeading aside={`${flags.length}`}>Flags on sign-in sheets</GroupHeading>
+      <Fold title="Flags on sign-in sheets" aside={`${flags.length}`}>
       {flags.length === 0 ? (
         <p className="mt-3 text-sm text-muted">No one marked not signed or absent in this range.</p>
       ) : (
@@ -411,6 +428,7 @@ function Reports({ m }: { m: Membership }) {
           ))}
         </ul>
       )}
+      </Fold>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <Button size="sm" onClick={exportCsv}>Export CSV</Button>
@@ -463,5 +481,21 @@ function PeopleList({ title, tone, rows, names, note, detail }: {
         {rows.map((p) => `${names.get(p.personId)?.name ?? "?"}${detail ? ` (${detail(p)})` : ""}`).join(", ")}
       </p>
     </div>
+  );
+}
+
+/** A report section that folds away. Closed by default so the page is short on a phone; tap the heading to open. */
+function Fold({ title, aside, children }: { title: string; aside?: string; children: React.ReactNode }) {
+  return (
+    <details className="group mt-6 rounded-xl border border-line px-3 pb-1">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+        <h2 className="font-display text-base font-semibold">{title}</h2>
+        <span className="flex items-center gap-2 text-sm font-semibold text-muted">
+          {aside}
+          <span aria-hidden className="transition group-open:rotate-180">▾</span>
+        </span>
+      </summary>
+      <div className="pb-3">{children}</div>
+    </details>
   );
 }

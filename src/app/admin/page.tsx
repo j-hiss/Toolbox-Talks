@@ -28,12 +28,14 @@ import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
 import { TalkPicker } from "@/components/TalkPicker";
 import { CadencePicker } from "@/components/CadencePicker";
+import { saveFile } from "@/lib/download";
+import { appWebAddress, jobsiteSticker } from "@/lib/sticker";
 import { SafetyLog } from "@/components/SafetyLog";
 import { BrandEditor } from "@/components/BrandEditor";
 
 const TABS = [
   { id: "people", label: "People", group: "people" },
-  { id: "teams", label: "Teams", group: "people" },
+  { id: "teams", label: "Crews", group: "people" },
   { id: "jobsites", label: "Jobsites", group: "people" },
   { id: "roles", label: "Roles", group: "people" },
   { id: "talks", label: "Talks", group: "program" },
@@ -178,7 +180,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
   const [editing, setEditing] = useState<Person | null>(null);
   const [importing, setImporting] = useState(false);
   const roleOptions = <><option value={CREW}>Crew member</option>{roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</>;
-  const teamOptions = <><option value="">No team</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</>;
+  const teamOptions = <><option value="">No crew</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</>;
   const roleName = (p: Person) => roles.find((r) => r.id === p.role_id)?.name ?? "Crew member";
   const isLead = (p: Person) => teams.some((t) => t.lead_person_id === p.id);
   const shown = people.filter((p) => !q.trim() || p.full_name.toLowerCase().includes(q.trim().toLowerCase()));
@@ -226,7 +228,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
           </Field>
           <div className="flex flex-wrap gap-2">
             <select aria-label="Role" className={`${inputClass} flex-1 basis-36`} value={roleId} onChange={(e) => setRoleId(e.target.value)}>{roleOptions}</select>
-            <select aria-label="Team" className={`${inputClass} flex-1 basis-36`} value={teamId} onChange={(e) => setTeamId(e.target.value)}>{teamOptions}</select>
+            <select aria-label="Crew" className={`${inputClass} flex-1 basis-36`} value={teamId} onChange={(e) => setTeamId(e.target.value)}>{teamOptions}</select>
           </div>
           <div className="flex gap-2">
             <Button size="sm" type="submit">Add person</Button>
@@ -249,7 +251,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
                 <button className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg" onClick={() => setEditing(p)}>
                   <span className="min-w-0 flex-1">
                     <b className="block truncate">{p.full_name}</b>
-                    <small className="text-muted">{isLead(p) ? "Team lead · " : ""}{roleName(p)}</small>
+                    <small className="text-muted">{isLead(p) ? "Crew lead · " : ""}{roleName(p)}</small>
                   </span>
                   <span aria-hidden className="text-xl text-muted">›</span>
                 </button>
@@ -276,7 +278,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
           >
             <Field label="Name" id="ep-name"><input id="ep-name" name="name" defaultValue={editing.full_name} className={`${inputClass} font-semibold`} /></Field>
             <Field label="Role" id="ep-role"><select id="ep-role" name="role" defaultValue={editing.role_id ?? CREW} className={inputClass}>{roleOptions}</select></Field>
-            <Field label="Team" id="ep-team"><select id="ep-team" name="team" defaultValue={editing.team_id ?? ""} className={inputClass}>{teamOptions}</select></Field>
+            <Field label="Crew" id="ep-team"><select id="ep-team" name="team" defaultValue={editing.team_id ?? ""} className={inputClass}>{teamOptions}</select></Field>
             <Button type="submit">Save</Button>
             <Button type="button" size="sm" variant="danger" onClick={() => remove(editing)}>Remove {editing.full_name}</Button>
           </form>
@@ -294,11 +296,11 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
         className="flex gap-2"
         onSubmit={(e) => { e.preventDefault(); const n = name.trim(); if (n) act(async () => { await addTeam(companyId, n); setName(""); })(); }}
       >
-        <input aria-label="New team name" placeholder="Team name, like Crew 3" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
-        <Button size="sm" type="submit">Add team</Button>
+        <input aria-label="New crew name" placeholder="Crew name, like Crew 3" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+        <Button size="sm" type="submit">Add crew</Button>
       </form>
       {teams.length === 0 ? (
-        <p className="mt-4 text-sm text-muted">No teams yet. Add one, then put people on it from the People tab.</p>
+        <p className="mt-4 text-sm text-muted">No crews yet. Add one, then put people on it from the People tab.</p>
       ) : (
         <ul className="mt-4 flex flex-col gap-2">
           {teams.map((t) => {
@@ -306,7 +308,7 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
             return (
               <li key={t.id} className="flex flex-col gap-2 rounded-xl bg-surface p-3">
                 <input
-                  aria-label="Team name"
+                  aria-label="Crew name"
                   defaultValue={t.name}
                   className={`${inputClass} font-semibold`}
                   onBlur={(e) => {
@@ -316,9 +318,9 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
                   }}
                 />
                 <div className="flex flex-wrap items-center gap-2">
-                  <label htmlFor={`lead-${t.id}`} className="text-sm text-muted">Team lead</label>
+                  <label htmlFor={`lead-${t.id}`} className="text-sm text-muted">Crew lead</label>
                   <select id={`lead-${t.id}`} className={`${inputClass} flex-1 basis-40`} value={t.lead_person_id ?? ""} onChange={(e) => act(() => updateTeam(companyId, t.id, { lead_person_id: e.target.value || null }))()}>
-                    <option value="">{members.length ? "No lead set" : "Add people to this team first"}</option>
+                    <option value="">{members.length ? "No lead set" : "Add people to this crew first"}</option>
                     {members.map((p) => <option key={p.id} value={p.id}>{p.full_name}</option>)}
                   </select>
                   <span className="text-sm text-muted tabular-nums">{members.length} {members.length === 1 ? "person" : "people"}</span>
@@ -329,7 +331,7 @@ function TeamsTab({ companyId, people, teams, act }: { companyId: string; people
           })}
         </ul>
       )}
-      <p className="mt-4 text-xs text-muted">Removing a team leaves its people in the company with no team.</p>
+      <p className="mt-4 text-xs text-muted">Removing a crew leaves its people in the company with no crew.</p>
     </>
   );
 }
@@ -495,6 +497,16 @@ function JobsitesTab({ companyId, company, jobsites, act }: { companyId: string;
                   >
                     {locating === j.id ? "Finding you…" : hasGps ? "Re-pin to my location" : "Pin to my location"}
                   </Button>
+                  <Button size="sm" variant="ghost" onClick={async () => {
+                    // A printable QR sticker for the site (src/lib/sticker.ts): scan it to pick this jobsite.
+                    const origin = appWebAddress();
+                    if (!origin) { setMsg("QR stickers need the app's web address. Set it once the website is live (NEXT_PUBLIC_APP_URL)."); return; }
+                    try {
+                      const blob = await jobsiteSticker(j, company.name, origin);
+                      const res = await saveFile(`QR sticker - ${j.name}.pdf`, blob);
+                      if (res !== "canceled") toast("QR sticker ready to print");
+                    } catch (e) { setMsg(e instanceof Error ? e.message : String(e)); }
+                  }}>QR sticker</Button>
                   <span className="ml-auto"><Button size="sm" variant="ghost" onClick={act(async () => {
                     await deactivateJobsite(companyId, j.id);
                     toast(`${j.name} removed`, { action: { label: "Undo", run: act(() => updateJobsite(companyId, j.id, { active: true }), `${j.name} is back`) } });

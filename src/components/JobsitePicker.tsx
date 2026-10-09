@@ -8,6 +8,8 @@ import { listJobsites } from "@/lib/data/company";
 import type { Jobsite } from "@/lib/data/types";
 import { getLocation, LocationError } from "@/lib/location";
 import { formatDistance, nearestJobsite } from "@/core/geo";
+import { resolveScannedSite } from "@/core/sitelink";
+import { takeScan } from "@/lib/scan";
 import { Button, GroupHeading, Notice, inputClass } from "./ui";
 
 const key = (companyId: string) => `tt-jobsite-${companyId}`;
@@ -30,6 +32,14 @@ export function JobsitePicker({ companyId, isAdmin, onChange }: { companyId: str
       .then((s) => {
         if (!live) return;
         setSites(s);
+        // Opened from a jobsite QR sticker: pick that site, but only if it's one of this company's.
+        const scanned = resolveScannedSite(takeScan(), s);
+        if (scanned.kind === "found") {
+          writeChosenJobsite(companyId, scanned.site.id);
+          setStatus({ tone: "ok", text: `Jobsite set from the QR sticker: ${scanned.site.name}.` });
+        } else if (scanned.kind === "not_ours") {
+          setStatus({ tone: "error", text: "That QR sticker is for a jobsite this company doesn't have (or it was removed). Pick the jobsite below." });
+        }
         const saved = readChosenJobsite(companyId);
         setChosen(s.some((x) => x.id === saved) ? saved! : "");
         onChange?.(s.find((x) => x.id === saved) ?? null);

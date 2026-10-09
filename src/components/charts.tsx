@@ -179,7 +179,7 @@ export function TeamGrid({ rows, weeks, currentKey }: {
         <table className="border-separate border-spacing-[2px] text-xs tabular-nums">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-bg pr-2 text-left font-normal text-muted">Team</th>
+              <th className="sticky left-0 z-10 bg-bg pr-2 text-left font-normal text-muted">Crew</th>
               {weeks.map((w) => <th key={w.key} scope="col" className="min-w-11 px-0.5 font-normal text-muted">{w.label}</th>)}
             </tr>
           </thead>

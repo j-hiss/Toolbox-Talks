@@ -25,7 +25,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await p.goto(PAGE); await p.waitForTimeout(800);
   await p.fill("#co-name", "Demo Roofing"); await p.fill("#co-zip", "33913"); await p.click("text=Create company"); await p.waitForTimeout(900);
   // teams
-  await p.click("[role=tab]:has-text('Teams')"); await p.fill('input[aria-label="New team name"]', "Crew 1"); await p.click("text=Add team"); await p.waitForTimeout(400);
+  await p.click("[role=tab]:has-text('Crews')"); await p.fill('input[aria-label="New crew name"]', "Crew 1"); await p.click("text=Add crew"); await p.waitForTimeout(400);
   await p.click("[role=tab]:has-text('People')"); await p.waitForTimeout(300);
   const add = async (n, role) => { await p.fill("#np-name", n); await p.selectOption('select[aria-label="Role"]', { label: role }); await p.click("text=Add person"); await p.waitForTimeout(350); };
   await add("Fred Foreman", "Foreman"); await add("Ana Worker", "Crew member"); await add("Ben Worker", "Crew member"); await add("Cal Worker", "Crew member");
@@ -106,9 +106,22 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("text=See records"); await q.waitForTimeout(700); await q.locator("main ul li a").first().click(); await q.waitForTimeout(800);
   await q.click("text=Download PDF"); await q.waitForTimeout(2500);
   log("2 pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  // Jobsite QR sticker, then "scanning" it: opening the app with ?site=<id> picks that jobsite.
+  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Jobsites')"); await q.waitForTimeout(400);
+  await q.locator("button:has-text('QR sticker')").first().click(); await q.waitForTimeout(1500);
+  log("2 qr sticker:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  const siteId = await q.evaluate(() => { const d = JSON.parse(localStorage.getItem("tt-preview-db")); return d.jobsites.find((j) => j.active !== false)?.id; });
+  await q.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith("tt-jobsite-")) localStorage.removeItem(k); });
+  await q.goto(PAGE + "?site=" + siteId); await q.waitForTimeout(1200);
+  log("2 scanned:", await q.locator("text=Jobsite set from the QR sticker").innerText().catch(() => "not set"), "| url cleaned:", !q.url().includes("site="));
+  await q.goto(PAGE + "?site=99999999-2222-4333-8444-555555555555"); await q.waitForTimeout(1200);
+  log("2 other company's sticker:", await q.locator("text=doesn't have").count() > 0);
   await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1200);
   log("2 reports score:", await q.locator("p.text-6xl").textContent());
   log("2 needs-makeup cards:", (await q.locator("li:has(button:has-text('Give this makeup now'))").allInnerTexts()).map((t) => t.replace(/\s+/g, " ").slice(0, 120)).join(" || "));
+  log("2 reports folded sections:", await q.locator("main details").count(), "| open:", await q.locator("main details[open]").count());
+  await q.locator("summary:has-text('By person')").click(); await q.waitForTimeout(200);
+  log("2 person cards on phone:", await q.locator("details[open] ul.sm\\:hidden li").count(), "| table hidden:", !(await q.locator("details[open] table").isVisible()));
   await q.screenshot({ path: `${OUT}/e-reports-top.png`, fullPage: true });
   await q.locator("button:has-text('Give this makeup now')").first().click(); await q.waitForTimeout(700);
   log("2 one-tap makeup:", (await q.locator("[role=radio][aria-checked=true]").innerText()).replace(/\s+/g, " "));
@@ -154,11 +167,17 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   const JPEG = Buffer.from("/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAADAAQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCOiiivmj7A/9k=", "base64");
   await r.setInputFiles('input[aria-label="Take a crew photo"]', { name: "crew.jpg", mimeType: "image/jpeg", buffer: JPEG }); await r.waitForTimeout(600);
   log("3 crew photo on review:", await r.locator('img[alt="Crew photo for this talk"]').count(), "| retake/remove:", await r.locator("button:has-text('Retake'), button:has-text('Remove')").count());
+  await r.setInputFiles('input[aria-label="Take a photo of the paper sign-in sheet"]', { name: "sheet.jpg", mimeType: "image/jpeg", buffer: JPEG }); await r.waitForTimeout(600);
+  log("3 paper sheet on review:", await r.locator('img[alt="Paper sign-in sheet for this talk"]').count());
+  await r.click("text=+ Someone arrived late"); await r.fill("#late-name", "Late Larry"); await r.click("button:has-text('Add and sign')"); await r.waitForTimeout(400);
+  log("3 late arrival goes to their turn:", await r.locator("h1").textContent());
+  await r.click("text=Review all"); await r.waitForTimeout(300);
   await r.screenshot({ path: `${OUT}/e-review-issue.png`, fullPage: true });
   await r.click("button:has-text('Save')"); await r.waitForTimeout(1200);
   log("3 saved:", (await r.locator("main").innerText()).split("\n").filter((t) => /issue/.test(t)).join(" | "));
   await r.click("text=See records"); await r.waitForTimeout(700);
   await r.locator("main ul li a").first().click(); await r.waitForTimeout(900);
+  log("3 record sheet + late arrival:", await r.locator('img[alt="Paper sign-in sheet for this talk"]').count(), "|", (await r.locator("main").innerText()).split("\n").filter((t) => /Late Larry/.test(t)).join(" ").replace(/\s+/g, " "));
   log("3 record walk-in + photo:", (await r.locator("main").innerText()).split("\n").filter((t) => /Example Electric/.test(t)).join(" | "), "| photo:", await r.locator('img[alt="Crew photo taken at this talk"]').count());
   await r.screenshot({ path: `${OUT}/e-record-photo.png`, fullPage: true });
   log("3 record on site:", (await r.locator("main").innerText()).split("\n").filter((t) => /site|Heat index|ladder/i.test(t)).join(" | "));

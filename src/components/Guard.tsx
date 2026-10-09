@@ -4,6 +4,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSession } from "@/lib/session";
+import { holdScan } from "@/lib/scan";
 import { canAdmin, type Membership } from "@/lib/data/types";
 import { Loading, Notice, Shell } from "./ui";
 
@@ -12,7 +13,7 @@ export function RequireCompany({ admin = false, children }: { admin?: boolean; c
   const router = useRouter();
 
   useEffect(() => {
-    if (s.status === "signed-out") router.replace("/sign-in/");
+    if (s.status === "signed-out") { holdScan(); router.replace("/sign-in/"); }
     else if (s.status === "signed-in" && !s.error && s.memberships.length === 0) router.replace("/setup/");
   }, [s.status, s.error, s.memberships.length, router]);
 

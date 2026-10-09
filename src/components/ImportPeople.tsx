@@ -77,7 +77,7 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
     <Sheet title="Import people" open={open} onClose={close}>
       {!plan ? (
         <div className="flex flex-col gap-3">
-          <p className="text-sm">Upload your crew list from Excel or a CSV. The first row names the columns: <b>Name</b> (required), Role, Team, Employee ID, Phone, Preferred language.</p>
+          <p className="text-sm">Upload your crew list from Excel or a CSV. The first row names the columns: <b>Name</b> (required), Role, Crew (or Team), Employee ID, Phone, Preferred language.</p>
           <p className="text-sm text-muted">Re-uploading the same list updates people with a matching Employee ID instead of adding them twice. New crews and roles are created for you.</p>
           <label className={`flex min-h-14 cursor-pointer items-center justify-center rounded-lg bg-action px-4 font-display text-xl font-semibold text-action-ink ${busy ? "opacity-50" : ""}`}>
             {busy ?? "Choose a file"}
@@ -108,7 +108,7 @@ export function ImportPeople({ companyId, open, onClose, onDone }: { companyId: 
                     {r.action === "add" ? "Add" : r.action === "update" ? "Update" : "Skip"} · row {r.line}
                   </span>
                 </div>
-                <small className="text-muted">{[r.role || "Crew member", r.team || "No team", r.employeeId && `ID ${r.employeeId}`].filter(Boolean).join(" · ")}</small>
+                <small className="text-muted">{[r.role || "Crew member", r.team || "No crew", r.employeeId && `ID ${r.employeeId}`].filter(Boolean).join(" · ")}</small>
                 {[...r.problems, ...r.notes].map((n) => <small key={n} className={`block ${r.problems.includes(n) ? "font-semibold text-warn-text" : "text-muted"}`}>{n}</small>)}
               </li>
             ))}

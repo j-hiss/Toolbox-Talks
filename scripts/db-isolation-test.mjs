@@ -160,6 +160,19 @@ async function main() {
       check("B can't save a record pointing at A's files",
         await fails(() => as(userB, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", [JSON.stringify({ ...JSON.parse(withFiles), company_id: coB, client_id: randomUUID() }), "[]"])));
     }
+    {
+      // A paper sign-in sheet photo is kept with the record but never makes anyone signed.
+      const c = randomUUID(), base = `${coA}/${c}/`;
+      await upload(userA, base + "sheet.jpg");
+      const [r] = rec(coA, c, []);
+      const withSheet = JSON.stringify({ ...JSON.parse(r), sheet_path: base + "sheet.jpg", sheet_taken_at: new Date().toISOString() });
+      const id = (await as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", [withSheet, JSON.stringify([{ name: "W9", status: "not_signed" }])])).rows[0].id;
+      const row = (await as(userA, "select r.sheet_path, r.sheet_taken_at, a.status from public.talk_records r join public.talk_attendees a on a.record_id = r.id where r.id = $1", [id])).rows[0];
+      check("Paper sheet photo saves with the record; the person on it stays not signed",
+        row?.sheet_path === base + "sheet.jpg" && !!row.sheet_taken_at && row.status === "not_signed");
+      check("A sheet photo has to be in that talk's own folder",
+        await fails(() => { const c2 = randomUUID(); return as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", [JSON.stringify({ ...JSON.parse(rec(coA, c2, [])[0]), sheet_path: base + "sheet.jpg", sheet_taken_at: new Date().toISOString() }), "[]"]); }));
+    }
 
     // Weekly lock and makeups.
     const monday = (offsetWeeks) => {

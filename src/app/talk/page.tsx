@@ -477,7 +477,7 @@ function MakeupBanner({ draft }: { draft: TalkDraft }) {
 
 function rosterFor(org: Org, draft: TalkDraft): RosterEntry[] {
   const roleName = (p: Person) => {
-    if (org.teams.some((t) => t.lead_person_id === p.id)) return "Team lead";
+    if (org.teams.some((t) => t.lead_person_id === p.id)) return "Crew lead";
     return org.roles.find((r) => r.id === p.role_id)?.name ?? "Crew member";
   };
   const teamName = (p: Person) => org.teams.find((t) => t.id === p.team_id)?.name ?? "";
@@ -539,11 +539,11 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
             <Notice>No one can give talks yet. In Admin → People, give someone a role like Foreman or Supervisor.</Notice>
           )}
         </Field>
-        <Field label="Team" id="team">
+        <Field label="Crew" id="team">
           <select id="team" className={inputClass} value={draft.teamId} onChange={(e) => setTeam(e.target.value)}>
-            <option value="">Choose a team</option>
+            <option value="">Choose a crew</option>
             {org.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            {org.teams.length > 1 && <option value="all">All teams</option>}
+            {org.teams.length > 1 && <option value="all">All crews</option>}
             {(signedIds || draft.teamId === "needs") && <option value="needs">{needsLabel}</option>}
           </select>
         </Field>
@@ -561,7 +561,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
       <GroupHeading aside={roster.length ? `${here} here · ${absent} absent` : undefined}>Roster</GroupHeading>
       {roster.length > 0 && <p className="mt-1 px-1 text-sm text-muted">Uncheck anyone who isn&apos;t here. They&apos;re recorded as absent.</p>}
       {roster.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">{draft.teamId === "needs" ? "Everyone has this week covered. Add walk-ins below if needed." : draft.teamId ? "No one on this team yet. Add walk-ins below, or add people in Admin." : "Choose a team to load its roster."}</p>
+        <p className="mt-3 text-sm text-muted">{draft.teamId === "needs" ? "Everyone has this week covered. Add walk-ins below if needed." : draft.teamId ? "No one on this crew yet. Add walk-ins below, or add people in Admin." : "Choose a crew to load its roster."}</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {roster.map((r) => {
@@ -687,7 +687,7 @@ function Sign({
         week,
         jobsite: jobsite ? { id: jobsite.id, name: jobsite.name } : null,
         team: team ? { id: team.id, name: team.name, leadName: lead?.full_name ?? "" }
-          : draft.teamId === "all" ? { id: "", name: "All teams", leadName: "" }
+          : draft.teamId === "all" ? { id: "", name: "All crews", leadName: "" }
           : draft.teamId === "needs" ? { id: "", name: "Still needed it", leadName: "" }
           : null,
         presenter: { personId: presenter?.id ?? null, name: presenter?.full_name ?? "", role: presenterRole, signature: draft.presenterSignature },
@@ -696,6 +696,7 @@ function Sign({
         makeup: draft.makeup ? { weekStart: draft.makeup.weekStart, reason: makeupReasonText(draft.makeupPick, draft.makeupNote) } : null,
         siteNotes: draft.siteNotes,
         photo: draft.photo,
+        sheet: draft.sheet,
         signingStatement: signingStatement(lang),
         heat: draft.heat ? {
           max_heat_index_f: draft.heat.max_heat_index_f, level: draft.heat.level, reminder_read: draft.heat.reminder_read,
@@ -766,8 +767,16 @@ function Sign({
             </li>
           ))}
         </ul>
+        <LateArrival onAdd={(name, company) => {
+          // Someone who showed up after signing started: added as a walk-in and taken straight to their turn.
+          const key = `walkin:${draft.walkins.length}`;
+          update({ walkins: [...draft.walkins, { name, company }], present: { ...draft.present, [key]: true } });
+          if (company) rememberWalkinCompany(m.company.id, company);
+          go(turns.length);
+        }} />
         <IssuesEditor org={org} draft={draft} update={update} />
         <CrewPhoto draft={draft} update={update} />
+        <CrewPhoto draft={draft} update={update} kind="sheet" />
 
         {(missing.length > 0 || !draft.presenterSignature) && (
           <div className="mt-4">
@@ -884,6 +893,35 @@ function Sign({
         </div>
       </div>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+/** "Someone show up late?" on the review screen: add them without going back to who's here. */
+function LateArrival({ onAdd }: { onAdd: (name: string, company: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
+  if (!open) {
+    return (
+      <button className="mt-3 flex min-h-11 items-center text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => setOpen(true)}>
+        + Someone arrived late
+      </button>
+    );
+  }
+  return (
+    <form
+      className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-3"
+      onSubmit={(e) => { e.preventDefault(); const n = name.trim(); if (!n) return; onAdd(n, company.trim()); setName(""); setCompany(""); setOpen(false); }}
+    >
+      <label className="text-sm font-semibold" htmlFor="late-name">Late arrival</label>
+      <input id="late-name" className={inputClass} placeholder="Their name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+      <input aria-label="Their company (if not yours)" className={inputClass} placeholder="Their company, if not yours" value={company} onChange={(e) => setCompany(e.target.value)} />
+      <div className="flex gap-2">
+        <Button size="sm" type="submit" disabled={!name.trim()}>Add and sign</Button>
+        <Button size="sm" variant="ghost" type="button" onClick={() => setOpen(false)}>Cancel</Button>
+      </div>
+    </form>
   );
 }
 

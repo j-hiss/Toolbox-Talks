@@ -79,10 +79,10 @@ export async function getRecord(companyId: string, id: string): Promise<TalkReco
       .eq("id", id)
       .order("position", { referencedTable: "talk_attendees" })
       .maybeSingle(),
-  ) as (Omit<SummaryRow, "talk_attendees"> & Omit<TalkRecord, keyof TalkRecordSummary | "attendees"> & { presenter_signature_path: string | null; photo_path: string | null; talk_attendees: Att[] }) | null;
+  ) as (Omit<SummaryRow, "talk_attendees"> & Omit<TalkRecord, keyof TalkRecordSummary | "attendees"> & { presenter_signature_path: string | null; photo_path: string | null; sheet_path?: string | null; talk_attendees: Att[] }) | null;
   if (!row) return null;
   // Records saved before signatures moved to private storage keep their inline images; newer ones load from files.
-  const paths = [row.presenter_signature_path, row.photo_path, ...row.talk_attendees.map((a) => a.signature_path)].filter((p): p is string => !!p);
+  const paths = [row.presenter_signature_path, row.photo_path, row.sheet_path ?? null, ...row.talk_attendees.map((a) => a.signature_path)].filter((p): p is string => !!p);
   const img = await loadImages(paths);
   const pick = (inline: string | null, path: string | null) => inline ?? (path ? img.get(path) ?? null : null);
   return {
@@ -90,6 +90,8 @@ export async function getRecord(companyId: string, id: string): Promise<TalkReco
     presenter_signature: pick(row.presenter_signature, row.presenter_signature_path),
     photo: row.photo_path ? img.get(row.photo_path) ?? null : null,
     photo_taken_at: row.photo_taken_at ?? null,
+    sheet: row.sheet_path ? img.get(row.sheet_path) ?? null : null,
+    sheet_taken_at: row.sheet_taken_at ?? null,
     attendees: row.talk_attendees.map(({ signature_path, ...a }) => ({ ...a, company_name: a.company_name ?? "", signature: pick(a.signature, signature_path) })),
   } as TalkRecord;
 }

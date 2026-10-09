@@ -109,8 +109,8 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   const pairs: [string, string][] = [
     ["Date and time", `${held.date}, ${held.time}`],
     ["Where", r.jobsite_name],
-    ["Team", r.team_name],
-    ["Team lead", r.team_lead_name],
+    ["Crew", r.team_name],
+    ["Crew lead", r.team_lead_name],
     ["Presented by", r.presenter_name ? `${r.presenter_name}${r.presenter_role ? `, ${r.presenter_role}` : ""}` : ""],
     ["Language presented", `${lang}${industry ? `  ·  ${industry}` : ""}`],
   ];
@@ -253,20 +253,24 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   doc.setDrawColor(120); doc.line(COL.sig, y + 36, COL.sig + 150, y + 36);
   stampCell(r.presenter_signed_at, y - 4);
 
-  // Crew photo (optional) -------------------------------------------------------------------------------------------
-  if (r.photo) {
+  // Crew photo and paper sign-in sheet (both optional) --------------------------------------------------------------
+  const photoBlock = (img: string, label: string, takenAt: string | null | undefined, maxH: number, note?: string) => {
     try {
-      const p = doc.getImageProperties(r.photo);
-      const scale = Math.min(CW / p.width, 300 / p.height);
+      const p = doc.getImageProperties(img);
+      const scale = Math.min(CW / p.width, maxH / p.height);
       const w = p.width * scale, h = p.height * scale;
-      y += 52; newPageIf(h + 30);
+      y += 52; newPageIf(h + (note ? 44 : 30));
       doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY);
-      const when = r.photo_taken_at ? stampParts(r.photo_taken_at) : null;
-      doc.text(`CREW PHOTO${when ? ` · TAKEN ${when.date.toUpperCase()} ${when.time}` : ""}`, M, y); doc.setTextColor(0); y += 8;
-      doc.addImage(r.photo, /^data:image\/png/i.test(r.photo) ? "PNG" : "JPEG", M, y, w, h);
+      const when = takenAt ? stampParts(takenAt) : null;
+      doc.text(`${label}${when ? ` · TAKEN ${when.date.toUpperCase()} ${when.time}` : ""}`, M, y); doc.setTextColor(0); y += 8;
+      if (note) { doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.text(note, M, y + 4); y += 14; }
+      doc.addImage(img, /^data:image\/png/i.test(img) ? "PNG" : "JPEG", M, y, w, h);
       y += h;
     } catch { /* an unreadable photo never blocks the record */ }
-  }
+  };
+  if (r.photo) photoBlock(r.photo, "CREW PHOTO", r.photo_taken_at, 300);
+  if (r.sheet) photoBlock(r.sheet, "PAPER SIGN-IN SHEET (PHOTO)", r.sheet_taken_at, 560,
+    "Kept as evidence. The statuses above come from signatures on the phone; this sheet doesn't change them.");
   footer();
   return doc;
 }

@@ -49,7 +49,7 @@ function Home({ m }: { m: Membership }) {
   const [site, setSite] = useState<Jobsite | null>(null);
   const isAdmin = canAdmin(m.access);
   const last = readLastSetup(co.id);
-  const lastCrew = last?.teamId === "all" ? "All teams" : st?.teams.find((t) => t.id === last?.teamId)?.name;
+  const lastCrew = last?.teamId === "all" ? "All crews" : st?.teams.find((t) => t.id === last?.teamId)?.name;
   const [remind, setRemind] = useState(() => remindersOn());
   const nextWeek = plan[nextIdx];
   const crewGrid = st?.week.find((g) => g.teamId === (last?.teamId || null))?.weeks[0]?.tally;

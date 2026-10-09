@@ -69,7 +69,7 @@ function RecordView({ m }: { m: Membership }) {
   const details: [string, string][] = [
     ["When", when],
     ["Where", rec.jobsite_name || "Not set"],
-    ["Team", rec.team_name ? `${rec.team_name}${rec.team_lead_name ? ` (lead: ${rec.team_lead_name})` : ""}` : "Not set"],
+    ["Crew", rec.team_name ? `${rec.team_name}${rec.team_lead_name ? ` (lead: ${rec.team_lead_name})` : ""}` : "Not set"],
     ["Presented by", `${rec.presenter_name}${rec.presenter_role ? `, ${rec.presenter_role}` : ""}`],
     ["Language", LANGUAGES.find((l) => l.id === rec.language)?.label ?? rec.language],
   ];
@@ -136,6 +136,14 @@ function RecordView({ m }: { m: Membership }) {
           <GroupHeading aside={rec.photo_taken_at ? time(rec.photo_taken_at) : undefined}>Crew photo</GroupHeading>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={rec.photo} alt="Crew photo taken at this talk" className="mt-3 max-h-96 w-full rounded-xl object-cover" />
+        </>
+      )}
+      {rec.sheet && (
+        <>
+          <GroupHeading aside={rec.sheet_taken_at ? time(rec.sheet_taken_at) : undefined}>Paper sign-in sheet</GroupHeading>
+          <p className="mt-1 px-1 text-sm text-muted">A photo kept as evidence. The statuses above come from signatures on the phone; this sheet doesn&apos;t change them.</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={rec.sheet} alt="Paper sign-in sheet for this talk" className="mt-3 w-full rounded-xl bg-white object-contain" />
         </>
       )}
 

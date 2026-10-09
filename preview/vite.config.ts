@@ -39,6 +39,8 @@ export default defineConfig({
   css: { postcss: { plugins: [] } },
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
+    // Jobsite QR stickers need a web address; the preview prints an example one (the real app sets NEXT_PUBLIC_APP_URL).
+    "process.env.NEXT_PUBLIC_APP_URL": JSON.stringify("https://app.example.com"),
     __BUILT_AT__: JSON.stringify(
       new Date().toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
     ),
