@@ -7,6 +7,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/session";
 import { myTalks, type MyTalk } from "@/lib/data/members";
+import { listCerts, type StoredCert } from "@/lib/data/certs";
+import { certState, latestCerts } from "@/core/certs";
+import { certTypeName } from "@/content/certTypes";
+import { CERT_CHIP } from "./Training";
 import type { Membership } from "@/lib/data/types";
 import { Button, ErrorNotice, Eyebrow, GroupHeading, Loading, Notice, Shell, Title } from "./ui";
 
@@ -23,10 +27,12 @@ export function EmployeeHome({ m }: { m: Membership }) {
   const [talks, setTalks] = useState<MyTalk[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [cards, setCards] = useState<StoredCert[]>([]);
 
   useEffect(() => {
     let live = true;
     myTalks(co.id).then((t) => live && setTalks(t)).catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
+    listCerts(co.id).then((c) => live && setCards(latestCerts(c))).catch(() => { /* cards are optional here */ });
     return () => { live = false; };
   }, [co.id, attempt]);
 
@@ -60,6 +66,24 @@ export function EmployeeHome({ m }: { m: Membership }) {
                 <span className={`shrink-0 rounded px-2 py-0.5 font-display text-xs font-semibold ${STATUS[t.status].tone}`}>{STATUS[t.status].label}</span>
               </li>
             ))}
+          </ul>
+        </>
+      )}
+
+      {cards.length > 0 && (
+        <>
+          <GroupHeading>My training cards</GroupHeading>
+          <ul className="mt-3 flex flex-col gap-2">
+            {cards.map((c) => {
+              const st = certState(c, new Date());
+              return (
+                <li key={c.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface px-4 py-3">
+                  <span className="min-w-0"><b className="block">{certTypeName(c.cert_type, c.custom_name)}</b>
+                    <small className="text-muted">{c.expires_on ? `Expires ${day(`${c.expires_on}T12:00:00`)}` : "No expiry on the card"}</small></span>
+                  <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-semibold ${CERT_CHIP[st].tone}`}>{CERT_CHIP[st].label}</span>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}

@@ -507,6 +507,26 @@ async function main() {
       check("Employee sees no issues, teams or jobsites", (await as(empA, "select id from public.talk_issues union all select id from public.teams union all select id from public.jobsites")).rows.length === 0);
       check("Employee can't record a talk", await fails(() => as(empA, "select public.save_talk_record($1::jsonb, $2::jsonb)", rec(coA, randomUUID(), []))));
       check("Employee sees only their own membership", (await as(empA, "select user_id from public.company_members")).rows.every((r) => r.user_id === empA));
+      // Training cards (migration 0023).
+      const otherPerson = (await as(userA, "select id from public.people where company_id = $1 and id <> $2 limit 1", [coA, empPerson])).rows[0].id;
+      const certEmp = (await as(userA, "insert into public.person_certs (company_id, person_id, cert_type, expires_on) values ($1, $2, 'forklift', '2028-01-01') returning id", [coA, empPerson])).rows[0].id;
+      await as(userA, "insert into public.person_certs (company_id, person_id, cert_type, custom_name) values ($1, $2, 'custom', 'Site orientation')", [coA, otherPerson]);
+      check("Office reads the company's training cards", (await as(officeA, "select id from public.person_certs")).rows.length === 2);
+      check("Office can't add a card", await fails(() => as(officeA, "insert into public.person_certs (company_id, person_id, cert_type) values ($1, $2, 'osha10')", [coA, otherPerson])));
+      check("Employee sees only their own card", (await as(empA, "select id from public.person_certs")).rows.map((r) => r.id).join() === certEmp);
+      check("Presenter sees no one's cards", (await as(presenterA, "select id from public.person_certs")).rows.length === 0);
+      check("B sees none of A's cards", (await as(userB, "select id from public.person_certs")).rows.length === 0);
+      check("A can't add a card for B's person", await fails(() => as(userA, "insert into public.person_certs (company_id, person_id, cert_type) values ($1, (select id from public.people where company_id = $2 limit 1), 'osha10')", [coA, coB])));
+      check("A card can't be edited", await fails(() => as(userA, "update public.person_certs set expires_on = '2030-01-01' where id = $1", [certEmp])));
+      check("A card can't be deleted", await fails(() => as(userA, "delete from public.person_certs where id = $1", [certEmp])));
+      check("Withdrawing needs a reason", await fails(() => as(userA, "update public.person_certs set withdrawn_at = now() where id = $1", [certEmp])));
+      await as(userA, "update public.person_certs set withdrawn_at = now(), withdrawn_reason = 'Wrong person' where id = $1", [certEmp]);
+      check("A withdrawn card stays on file", (await as(userA, "select withdrawn_reason from public.person_certs where id = $1", [certEmp])).rows[0]?.withdrawn_reason === "Wrong person");
+      check("A card is withdrawn only once", await fails(() => as(userA, "update public.person_certs set withdrawn_at = now(), withdrawn_reason = 'again' where id = $1", [certEmp])));
+      const roleA = (await as(userA, "select id from public.roles where company_id = $1 limit 1", [coA])).rows[0].id;
+      await as(userA, "insert into public.title_cert_requirements (company_id, role_id, cert_type) values ($1, $2, 'forklift')", [coA, roleA]);
+      check("B can't set A's title requirements", await fails(() => as(userB, "insert into public.title_cert_requirements (company_id, role_id, cert_type) values ($1, $2, 'osha10')", [coA, roleA])));
+      check("Card photos: A can't upload into B's folder", await fails(() => as(userA, "insert into storage.objects (bucket_id, name) values ('person-certs', $1)", [`${coB}/x/card.jpg`])));
     }
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));

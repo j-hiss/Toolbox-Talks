@@ -17,6 +17,9 @@ import { listRecords } from "@/lib/data/records";
 import { listEvents } from "@/lib/data/safety";
 import { listIssues } from "@/lib/data/issues";
 import { addEmr, documentUrl, listDocuments, listEmr, uploadDocument, type StoredDocument } from "@/lib/data/profile";
+import { listCerts, listRequirements } from "@/lib/data/certs";
+import { listPeople } from "@/lib/data/company";
+import { trainingSummary } from "@/core/certs";
 import type { Membership } from "@/lib/data/types";
 import { usePlan } from "@/lib/usePlan";
 import { saveFile } from "@/lib/download";
@@ -31,6 +34,7 @@ type RangeId = "year" | "month" | "custom";
 type Data = {
   people: ReportPerson[]; reportRecs: ReportRecord[]; records: ProfileRecord[]; daily: { held_at: string }[];
   events: ProfileEvent[]; issues: ProfileIssue[]; emr: EmrEntry[]; documents: StoredDocument[];
+  training?: { current: number; expiring: number; expired: number; missing: number };
 };
 const pct = (v: number | null) => (v === null ? "–" : `${Math.round(v * 100)}%`);
 const fmtDay = (iso: string) => parseDay(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -56,9 +60,11 @@ function Profile({ m }: { m: Membership }) {
 
   useEffect(() => {
     let live = true;
-    Promise.all([reportPeople(co.id), reportRecords(co.id, fetchFrom), listRecords(co.id, 1000), listDailyPlans(co.id, from), listEvents(co.id), listIssues(co.id), listEmr(co.id), listDocuments(co.id)])
-      .then(([people, reportRecs, recs, daily, events, issues, emr, documents]) => live && setData({
-        people, reportRecs, daily, events, issues, emr, documents,
+    Promise.all([reportPeople(co.id), reportRecords(co.id, fetchFrom), listRecords(co.id, 1000), listDailyPlans(co.id, from), listEvents(co.id), listIssues(co.id), listEmr(co.id), listDocuments(co.id),
+      // Training cards are optional here: a database without migration 0023 just leaves them out.
+      Promise.all([listPeople(co.id), listCerts(co.id), listRequirements(co.id)]).then(([p, c, r]) => trainingSummary(p, c, r, new Date())).catch(() => undefined)])
+      .then(([people, reportRecs, recs, daily, events, issues, emr, documents, training]) => live && setData({
+        people, reportRecs, daily, events, issues, emr, documents, training,
         records: recs.map((r) => ({ id: r.id, talk_id: r.talk_id, language: r.language, held_at: r.held_at, makeup_for_week: r.makeup_for_week, kind: r.kind })),
       }))
       .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
@@ -68,7 +74,7 @@ function Profile({ m }: { m: Membership }) {
   const profile = useMemo(() => {
     if (!data) return null;
     const compliance = buildCompliance({ people: data.people, records: data.reportRecs, weeks: keys, makeupWeeks: co.makeup_weeks ?? 4, today });
-    return buildProfile({ compliance, records: data.records, daily: data.daily, events: data.events, issues: data.issues, emr: data.emr, documents: data.documents, from, to, today });
+    return buildProfile({ compliance, records: data.records, daily: data.daily, events: data.events, issues: data.issues, emr: data.emr, documents: data.documents, training: data.training, from, to, today });
   }, [data, keys, co.makeup_weeks, today, from, to]);
 
   if (error) return <Shell><ErrorNotice what="Couldn't load the safety profile." detail={error} onRetry={() => { setError(null); reload(); }} /></Shell>;

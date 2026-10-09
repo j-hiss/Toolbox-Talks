@@ -424,3 +424,20 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Pricing idea (Joe, 2026-10-09, not decided):** carriers drive adoption; the app may be paid, discounted for a
   company that shares its profile with its carrier, or carrier-sponsored.
 
+## Training cards and certifications (built, migration 0023)
+- **Admin → Training:** every person with their cards (OSHA 10/30, fall protection, scaffold, aerial lift, forklift,
+  crane, respirator fit test, hearing, first aid/CPR, bloodborne pathogens, confined space, HAZWOPER, asbestos, lead,
+  EPA lead-safe renovator, EPA WPS pesticide, CDL medical card, flagger, or a typed name). Each card: issued date,
+  expiry typed from the card (none = stays current), note, optional photo of the card (private, admins only).
+- **What each job title needs:** tick the cards a title needs; anyone with that title shows **Missing** until one is
+  on file. Status per card: current, expiring (within 30 days), expired, missing. Home tells admins the counts.
+- **Append-only:** a renewal is a new card; a mistake is withdrawn with a reason and stays on file. The latest card per
+  type counts.
+- **The app never works out an expiry from a rule.** Rule notes show only where the rule text was checked (the
+  repeat-talk rules, crane 29 CFR 1926.1427, scaffold 1926.454). HAZWOPER, CDL medical, fall protection, OSHA 10/30,
+  first aid, confined space and RRP have no note until their rule is checked.
+- **Who sees cards:** owners, admins and office see the company's; employees see only their own on their home screen;
+  presenters see none. Photos of cards: admins only.
+- **Safety profile:** the training element adds "Training cards entered by the company, as of today: N current,
+  N expired, N missing" (labelled as company-entered; expired and missing said plainly).
+

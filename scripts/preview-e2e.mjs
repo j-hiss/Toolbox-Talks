@@ -381,6 +381,23 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.screenshot({ path: `${OUT}/e-employee-home.png`, fullPage: true });
   await viewAs("owner");
   log("10 back to owner tabs:", (await q.locator("nav[aria-label=Main] a").allInnerTexts()).join(","));
+  // Scenario 11: training cards. Foreman needs a forklift card; add one expiring soon; Home and the profile show it.
+  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(600);
+  await q.selectOption('section[aria-label="What each job title needs"] select', { label: "Foreman" }); await q.waitForTimeout(200);
+  await q.locator('input[aria-label="Foreman needs Forklift operator evaluation"]').check(); await q.waitForTimeout(500);
+  log("11 summary:", (await q.locator("main p.tabular-nums").first().innerText()).replace(/\s+/g, " "));
+  await q.locator("button[aria-label='Training for Example Lead Alvarez']").click(); await q.waitForTimeout(400);
+  log("11 sheet before:", (await q.locator("[role=dialog] ul li").first().innerText()).replace(/\s+/g, " "), "| rule note:", (await q.locator("[role=dialog]").innerText()).includes("29 CFR 1910.178"));
+  const soon = new Date(Date.now() + 20 * 86400e3).toISOString().slice(0, 10);
+  await q.fill("#ct-issued", "2024-01-15"); await q.fill("#ct-expires", soon); await q.click("button:has-text('Save card')"); await q.waitForTimeout(800);
+  log("11 sheet after:", (await q.locator("[role=dialog] ul li").first().innerText()).replace(/\s+/g, " "));
+  await q.screenshot({ path: `${OUT}/e-training-sheet.png`, fullPage: true });
+  await q.click("[role=dialog] button[aria-label=Close]"); await q.waitForTimeout(300);
+  await q.screenshot({ path: `${OUT}/e-training.png`, fullPage: true });
+  await q.click("nav[aria-label=Main] >> text=Home"); await q.waitForTimeout(1200);
+  log("11 home alert:", (await q.locator("text=Training cards:").first().locator("..").innerText().catch(() => "none")).replace(/\s+/g, " "));
+  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  log("11 profile training:", (await q.locator("li:has-text('Safety training')").first().innerText()).replace(/\s+/g, " ").slice(0, 220));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

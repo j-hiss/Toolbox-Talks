@@ -37,6 +37,7 @@ import { appWebAddress, jobsiteSticker } from "@/lib/sticker";
 import { SafetyLog } from "@/components/SafetyLog";
 import { BrandEditor } from "@/components/BrandEditor";
 import { AppAccess } from "@/components/AppAccess";
+import { Training } from "@/components/Training";
 
 const TABS = [
   { id: "people", label: "People", group: "people" },
@@ -44,13 +45,14 @@ const TABS = [
   { id: "jobsites", label: "Jobsites", group: "people" },
   { id: "roles", label: "Job titles", group: "people" },
   { id: "access", label: "App access", group: "people" },
+  { id: "training", label: "Training", group: "people" },
   { id: "talks", label: "Talks", group: "program" },
   { id: "plan", label: "Plan", group: "program" },
   { id: "safety", label: "Safety log", group: "program" },
   { id: "company", label: "Company", group: "program" },
   { id: "brand", label: "Brand", group: "program" },
 ] as const;
-// Two short labelled rows instead of one wrapped block of ten chips.
+// Two short labelled rows instead of one wrapped block of eleven chips.
 const TAB_GROUPS = [
   { id: "people", label: "People and places" },
   { id: "program", label: "Program" },
@@ -167,6 +169,8 @@ function Admin({ m }: { m: Membership }) {
           <TeamsTab companyId={companyId} people={people} teams={teams} act={act} />
         ) : tab === "jobsites" ? (
           <JobsitesTab companyId={companyId} company={m.company} jobsites={jobsites} act={act} />
+        ) : tab === "training" ? (
+          <Training companyId={companyId} people={people} roles={roles} />
         ) : tab === "access" ? (
           <AppAccess companyId={companyId} myAccess={m.access} myUserId={s.user?.id ?? null} people={people} />
         ) : tab === "safety" ? (

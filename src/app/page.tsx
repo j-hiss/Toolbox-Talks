@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useSession } from "@/lib/session";
 import { canAdmin, canPresent, canReport, type Membership } from "@/lib/data/types";
 import { EmployeeHome } from "@/components/EmployeeHome";
+import { TrainingAlert } from "@/components/TrainingAlert";
 import { RequireCompany } from "@/components/Guard";
 import { JobsitePicker, readChosenJobsite } from "@/components/JobsitePicker";
 import { newDailyDraft, newDraft, useDraft } from "@/lib/draft";
@@ -111,6 +112,8 @@ function Home({ m }: { m: Membership }) {
           </Notice>
         </div>
       )}
+
+      {canAdmin(m.access) && <TrainingAlert companyId={co.id} />}
 
       {!co.zip && canAdmin(m.access) && (
         <div className="mt-4">

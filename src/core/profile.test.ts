@@ -80,4 +80,9 @@ describe("company safety profile", () => {
     expect(profileRange("year", today)).toEqual({ from: "2025-10-09", to: "2026-10-08" });
     expect(profileRange("month", today)).toEqual({ from: "2026-09-01", to: "2026-09-30" });
   });
+  it("adds training cards to the training element, labelled as entered by the company", () => {
+    const p = buildProfile({ ...base, training: { current: 5, expiring: 1, expired: 2, missing: 1 } });
+    const e = p.elements.find((x) => x.id === "training")!;
+    expect(e.evidence).toContain("Training cards entered by the company, as of today: 6 current (1 expiring within 30 days), 2 expired, 1 missing");
+  });
 });

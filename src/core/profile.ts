@@ -37,6 +37,8 @@ export type ProfileInput = {
   issues: ProfileIssue[];
   emr: EmrEntry[];
   documents: CompanyDocument[];
+  /** Training cards entered by the company (src/core/certs.ts trainingSummary), counted today. Optional. */
+  training?: { current: number; expiring: number; expired: number; missing: number };
   /** Inclusive range, YYYY-MM-DD. */
   from: string;
   to: string;
@@ -136,6 +138,11 @@ export function buildProfile(input: ProfileInput): SafetyProfile {
   const findings = raised.filter((i) => i.event_id).length;
   const firstAidTalks = records.filter((r) => /first-aid|bloodborne|sharps/.test(r.talk_id)).length;
   const s = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+  const t = input.training;
+  // Training cards are entered by the company, so they're labelled that way; expired and missing are said plainly.
+  const cards = t && t.current + t.expiring + t.expired + t.missing > 0
+    ? ` Training cards entered by the company, as of today: ${t.current + t.expiring} current${t.expiring ? ` (${t.expiring} expiring within 30 days)` : ""}${t.expired ? `, ${t.expired} expired` : ""}${t.missing ? `, ${t.missing} missing for job titles that need them` : ""}.`
+    : "";
   const elements: ProgramElement[] = [
     docs.some((d) => d.kind === "safety_program")
       ? { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "records", evidence: `Attached: ${docs.filter((d) => d.kind === "safety_program").map((d) => d.title).join(", ")}.` }
@@ -145,8 +152,8 @@ export function buildProfile(input: ProfileInput): SafetyProfile {
       : { id: "inspections", name: PROGRAM_ELEMENTS[1].name, status: "outside", evidence: "No inspections were logged in the app in this range." },
     { id: "maintenance", name: PROGRAM_ELEMENTS[2].name, status: "outside", evidence: "Equipment maintenance records aren't part of the app." },
     records.length + dailyDays > 0
-      ? { id: "training", name: PROGRAM_ELEMENTS[3].name, status: "records", evidence: `${s(records.length, "signed toolbox talk")} and ${s(dailyDays, "day")} with a signed daily pre-task plan.` }
-      : { id: "training", name: PROGRAM_ELEMENTS[3].name, status: "outside", evidence: "No talks recorded in this range." },
+      ? { id: "training", name: PROGRAM_ELEMENTS[3].name, status: "records", evidence: `${s(records.length, "signed toolbox talk")} and ${s(dailyDays, "day")} with a signed daily pre-task plan.${cards}` }
+      : { id: "training", name: PROGRAM_ELEMENTS[3].name, status: cards ? "some" : "outside", evidence: `No talks recorded in this range.${cards}` },
     { id: "first_aid", name: PROGRAM_ELEMENTS[4].name, status: firstAidTalks ? "some" : "outside",
       evidence: `${firstAidTalks ? `${s(firstAidTalks, "talk")} on first aid or bloodborne pathogens. ` : ""}First aid kits and trained responders aren't part of the app.` },
     log.incidents + log.nearMisses > 0
