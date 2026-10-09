@@ -53,6 +53,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `holdScan` · `takeScan` | `src/lib/scan.ts` | Keeps a scanned jobsite through sign-in (session storage) and hands it to `JobsitePicker` once |
 | `AttendanceStatus` · `countStatuses` · `resolveStatus` · `signedSummary` | `src/core/attendance.ts:4` · `:16` · `:29` · `:39` | **The** attendance model: `signed` · `not_signed` · `absent`. Every report counts with this. `signedSummary` is **the** signed-count line every screen shows ("2 of 3 here signed · 1 absent"; presenter stated separately) |
 | `enoughInk` · `MIN_INK_PX` | `src/core/record.ts` | A signature needs real ink (stroke length); a tap or dot isn't taken as signing. Used by `SignaturePad` |
+| `buildProfile` · `profileRange` · `PROGRAM_ELEMENTS` · `DOCUMENT_KINDS` | `src/core/profile.ts` | **The** company safety profile: counts and rates from the company's own records over a range (talk periods held/missed from `buildCompliance`, sign-in and on-time rates, month rows, daily-plan days, safety-log counts, issue fix times), program elements with honest status (shown by records / partly / outside the app), self-reported EMR (latest per year). No names, no compliance wording |
 
 ## Content
 
@@ -78,6 +79,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `companies.theme` · `private.valid_theme` | `supabase/migrations/20261005000008_company_theme.sql` | A company's changed colors (only known parts, only `#RRGGBB`); admins update their own company under the existing policy |
 | `public.create_company` | `supabase/migrations/20261004000002_default_roles.sql` | The only way to create a company; makes the caller its owner and adds the default presenting roles |
 | `supabase()` | `src/lib/supabase.ts:7` | The one browser Supabase client. Public URL + anon key only |
+| company_emr · company_documents · company-docs bucket | `supabase/migrations/20261009000020_company_profile.sql` | Self-reported EMR and program documents: admins of the company read/insert only; no update or delete (a correction is a new row); path must sit in the company's folder |
 | company isolation test | `scripts/db-isolation-test.mjs` | Applies all migrations to a throwaway DB and proves one company can't read or write another's rows; self-checks by switching RLS off. **Extend it for every new company table** |
 
 ## App (screens and data access)
@@ -94,6 +96,9 @@ point the row at the real file and keep the prototype line as its origin.
 | `listTalkLists` · `saveTalkList` · `removeTalkList` | `src/lib/data/plan.ts` | Picked talk lists (demo twin in `preview/demo/plan.ts` with the same lock); `usePlan` loads and caches them for offline |
 | `usePlan` | `src/lib/usePlan.ts` | The plan with the admin's swaps, cached on the phone for offline. Every screen that shows a week's talk uses it |
 | `buildRecordPdf` · `pdfFileName` · `stampParts` · `PDF_FOOTER` | `src/lib/pdf.ts` | **The** PDF record, built only from the saved record: company header, week line (or makeup week + real week + reason), details with GPS, attendance summary, talk text that was read, sign-in sheet with full date and time on every signature line and flagged rows shaded, presenter block, no-compliance footer. Origin: prototype `buildPdf` (`prototype/index.html:967`) |
+| `companyHeader` · `buildProfilePdf` · `profilePdfFileName` | `src/lib/pdf.ts` | `companyHeader` is **the** company block at the top of every PDF (record and summary). `buildProfilePdf` is **the** renewal packet / monthly summary PDF from a `SafetyProfile`: key figures, weeks with no talk recorded (red), month table, safety log, self-reported EMR and document titles, program elements (Florida s. 440.1025 label when the company ZIP is in FL), footer |
+| `listEmr` · `addEmr` · `listDocuments` · `uploadDocument` · `documentUrl` | `src/lib/data/profile.ts` (twin `preview/demo/profile.ts`) | Self-reported profile pieces: EMR per rating year and program documents in the private `company-docs` bucket; admins only, append-only, one-minute signed links |
+| Safety profile screen | `src/app/profile/page.tsx` | Reports → Safety profile & renewal packet: range picker, figures, missed weeks, months, program elements, EMR entry, document upload, PDF downloads |
 | `saveFile` | `src/lib/download.ts` | **The** file hand-off: share sheet on phones, download on computers. Preview twin: `preview/demo/download.ts` |
 | `reportPeople` · `reportRecords` | `src/lib/data/reports.ts` | **The** report query layer: all people incl. deactivated (with dates), records held in or making up weeks in range. No signatures loaded |
 | `TrendChart` · `TeamGrid` · `HBars` · `BANDS` · `bandOf` | `src/components/charts.tsx` | **The** report charts, hand-built on app tokens (`--series-1/2`, `--grid`, `--band-*` in `globals.css`; series follow the brand and button colors, bands follow done/caution/missed). Reuse these for any new chart |

@@ -392,3 +392,24 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   lockout periodic inspection, and EPA Worker Protection Standard training (named as EPA).
 - **Later:** per-person due dates (each operator's evaluation, each fit test, certificates) and trigger prompts
   (after an incident or a new truck or respirator) are a separate feature.
+
+## Safety profile and renewal packet (built, migration 0020; partner portal phase 1)
+- **Company first, privacy first.** The profile is the company's own summary of its safety effort. Nothing is shared
+  with an agent, carrier or consultant; the company downloads the PDF and sends it when it chooses. Partner access
+  (phase 2) needs counsel's privacy review and the company's approval per partner.
+- **Reports → Safety profile & renewal packet** (admins): last 12 months, last month, or picked dates. Shows weekly
+  talks held of weeks ended, crew sign-in rate and on-time rate, talks and topics, makeups, daily-plan days,
+  inspections, crew-raised issues fixed and typical days to fix, a month table, languages.
+- **Honest and worded for the company.** Weeks with no talk recorded are listed on the screen and in red in the PDF;
+  they're never dropped. Wording credits what was done and states gaps plainly ("not part of the app"), without instructions or blame in the PDF.
+- **Program elements:** the seven elements of a workplace safety program (labelled Florida s. 440.1025 when the
+  company ZIP is in Florida), each marked "Shown by app records", "Partly shown by app records" or "Outside the
+  app", with the evidence count. The insurer decides any premium credit; the app never says a requirement is met.
+- **Self-reported:** EMR per rating year typed from the worksheet (append-only; latest per year shown; always labelled
+  self-reported, never computed) and program documents (written program, EMR worksheet, OSHA 300A, other) in private
+  storage; the PDF lists titles only.
+- **Two PDFs from the same builder:** the renewal packet (12 months) and the monthly program summary. Counts and rates
+  only: no worker names, signatures, phone numbers or injury details. No-compliance footer on every page.
+- **Pricing idea (Joe, 2026-10-09, not decided):** carriers drive adoption; the app may be paid, discounted for a
+  company that shares its profile with its carrier, or carrier-sponsored.
+

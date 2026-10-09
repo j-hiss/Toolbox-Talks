@@ -255,6 +255,26 @@ async function main() {
     check("A repeat is 0, 3, 6 or 12 months", await fails(() => setRep(userA, coA, nextWk, 4)));
     check("A future repeat can be set and removed", !(await fails(() => setRep(userA, coA, laterWk)))
       && (await as(userA, "delete from public.company_repeats where company_id = $1 and talk_id = 'loto' and from_week = $2 returning 1", [coA, laterWk])).rows.length === 1);
+    // Safety profile (Reports → Safety profile): self-reported EMR and program documents. Admins of the company
+    // only, append-only, private files.
+    await as(userA, "insert into public.company_emr (company_id, rating_year, emr) values ($1, 2026, 0.92)", [coA]);
+    check("A admin can add an EMR entry", (await as(userA, "select emr from public.company_emr")).rows.length === 1);
+    check("B sees no EMR of A's", (await as(userB, "select 1 from public.company_emr")).rows.length === 0);
+    check("A presenter can't read or add the EMR", (await as(presenterA, "select 1 from public.company_emr")).rows.length === 0
+      && await fails(() => as(presenterA, "insert into public.company_emr (company_id, rating_year, emr) values ($1, 2025, 1.1)", [coA])));
+    check("An EMR entry can't be changed or deleted", await fails(() => as(userA, "update public.company_emr set emr = 0.5"))
+      && await fails(() => as(userA, "delete from public.company_emr")));
+    check("B can't add an EMR to A", await fails(() => as(userB, "insert into public.company_emr (company_id, rating_year, emr) values ($1, 2026, 0.7)", [coA])));
+    const docPath = `${coA}/${randomUUID()}-manual.pdf`;
+    await as(userA, "insert into storage.objects (bucket_id, name) values ('company-docs', $1)", [docPath]);
+    await as(userA, "insert into public.company_documents (company_id, kind, title, path) values ($1, 'safety_program', 'Safety manual', $2)", [coA, docPath]);
+    check("A admin can add a program document", (await as(userA, "select title from public.company_documents")).rows[0]?.title === "Safety manual");
+    check("B sees neither A's document nor its file", (await as(userB, "select 1 from public.company_documents")).rows.length === 0
+      && (await as(userB, "select 1 from storage.objects where name = $1", [docPath])).rows.length === 0);
+    check("A presenter can't see the company documents", (await as(presenterA, "select 1 from storage.objects where bucket_id = 'company-docs'")).rows.length === 0);
+    check("A document must point into the company's own folder", await fails(() =>
+      as(userA, "insert into public.company_documents (company_id, kind, title, path) values ($1, 'other', 'x', $2)", [coA, `${coB}/x.pdf`])));
+    check("B can't put a file in A's documents folder", await fails(() => as(userB, "insert into storage.objects (bucket_id, name) values ('company-docs', $1)", [`${coA}/y.pdf`])));
     // Every 4 weeks since 10 weeks ago: periods start at -10, -6 and -2 weeks. The one that started two weeks ago can
     // still be swapped (it isn't over), then locks once given; the one before it is over. Backdate the cadence as
     // the database owner, since the app can't.

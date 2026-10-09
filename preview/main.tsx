@@ -12,6 +12,7 @@ import TalkPage from "@/app/talk/page";
 import RecordsPage from "@/app/records/page";
 import RecordPage from "@/app/record/page";
 import ReportsPage from "@/app/reports/page";
+import ProfilePage from "@/app/profile/page";
 import { usePreviewPath } from "./shims/router";
 import { DEMO_CODE } from "./demo/supabase";
 import { resetDemo } from "./demo/store";
@@ -28,6 +29,7 @@ const ROUTES: Record<string, () => React.ReactElement> = {
   "/records/": () => <RecordsPage />,
   "/record/": () => <RecordPage />,
   "/reports/": () => <ReportsPage />,
+  "/profile/": () => <ProfilePage />,
 };
 
 function Banner() {

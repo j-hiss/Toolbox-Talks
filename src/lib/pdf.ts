@@ -11,6 +11,7 @@ import { weekNumbers } from "@/core/plan";
 import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { normalizeTheme, rgb } from "@/core/theme";
+import type { SafetyProfile } from "@/core/profile";
 
 export const PDF_FOOTER = "Documents a safety meeting. Does not by itself certify OSHA compliance.";
 
@@ -34,6 +35,26 @@ export function pdfFileName(r: Pick<TalkRecord, "week_number" | "title" | "held_
   const week = r.week_number ? `Week ${String(r.week_number).padStart(2, "0")} - ` : "";
   const makeup = r.makeup_for_week ? "Makeup - " : "";
   return `${week}${makeup}Toolbox Talk - ${r.title.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim()} - ${iso}.pdf`;
+}
+
+const PAGE = { W: 612, H: 792, M: 48 } as const;
+
+/**
+ * The company header every PDF starts with: a band in the company's brand color (Admin → Brand; decoration only,
+ * content never depends on it), the name, a label on the right, address, phone, email and licenses, and a rule.
+ * Returns the y where the content starts.
+ */
+function companyHeader(doc: jsPDF, co: Company, label: string, top: number = PAGE.M): number {
+  const { W, M } = PAGE, CW = W - 2 * M;
+  let y = top;
+  doc.setFillColor(...rgb(normalizeTheme(co.theme).brand)); doc.rect(0, 0, W, 8, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text(co.name || "Company name not set", M, y + 4);
+  doc.setFontSize(9); doc.setTextColor(GREY); doc.text(label, W - M, y + 4, { align: "right" });
+  y += 18; doc.setTextColor(60); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+  const coLines = [co.address, [co.phone, co.email].filter(Boolean).join("  ·  "), (co.licenses || "").split(/\n+/).map((s) => s.trim()).filter(Boolean).join("  ·  ")].filter(Boolean);
+  coLines.forEach((l) => doc.splitTextToSize(l, CW).forEach((x: string) => { doc.text(x, M, y); y += 11; }));
+  doc.setTextColor(0); y += 6; doc.setDrawColor(30); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); doc.setLineWidth(0.6); y += 26;
+  return y;
 }
 
 export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = []): jsPDF {
@@ -67,14 +88,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   };
 
   // Company header ------------------------------------------------------------------------------------------------
-  // A band in the company's brand color (Admin → Brand). Decoration only: the record's content never depends on it.
-  doc.setFillColor(...rgb(normalizeTheme(co.theme).brand)); doc.rect(0, 0, W, 8, "F");
-  doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text(co.name || "Company name not set", M, y + 4);
-  doc.setFontSize(9); doc.setTextColor(GREY); doc.text(r.kind === "daily" ? "DAILY PRE-TASK PLAN RECORD" : "TOOLBOX TALK RECORD", W - M, y + 4, { align: "right" });
-  y += 18; doc.setTextColor(60); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-  const coLines = [co.address, [co.phone, co.email].filter(Boolean).join("  ·  "), (co.licenses || "").split(/\n+/).map((s) => s.trim()).filter(Boolean).join("  ·  ")].filter(Boolean);
-  coLines.forEach((l) => doc.splitTextToSize(l, CW).forEach((x: string) => { doc.text(x, M, y); y += 11; }));
-  doc.setTextColor(0); y += 6; doc.setDrawColor(30); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); doc.setLineWidth(0.6); y += 26;
+  y = companyHeader(doc, co, r.kind === "daily" ? "DAILY PRE-TASK PLAN RECORD" : "TOOLBOX TALK RECORD", y);
 
   // Week line and title -------------------------------------------------------------------------------------------
   // Weekly companies: "WEEK 12 OF 52 · WEEK OF OCT 5 – OCT 9". Every 2 or 4 weeks: the whole talk period.
@@ -274,6 +288,142 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   if (r.photo) photoBlock(r.photo, "CREW PHOTO", r.photo_taken_at, 300);
   if (r.sheet) photoBlock(r.sheet, "PAPER SIGN-IN SHEET (PHOTO)", r.sheet_taken_at, 560,
     "Kept as evidence. The statuses above come from signatures on the phone; this sheet doesn't change them.");
+  footer();
+  return doc;
+}
+
+// Safety program summary ------------------------------------------------------------------------------------------
+// The renewal packet (12 months) and the monthly "program stayed on" summary, built from the company safety profile
+// (src/core/profile.ts). Counts and rates only: no names, no signatures. Missed weeks are listed, never hidden.
+
+const fmtDay = (iso: string) => parseDay(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const fmtMonth = (ym: string) => parseDay(`${ym}-01`).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+const pctText = (v: number | null) => (v === null ? "-" : `${Math.round(v * 100)}%`);
+
+export function profilePdfFileName(kind: "renewal" | "monthly", p: Pick<SafetyProfile, "from" | "to">, co: Pick<Company, "name">): string {
+  const name = (co.name || "Company").replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim();
+  return `${name} - ${kind === "renewal" ? "Safety Program Summary" : "Monthly Program Summary"} - ${p.from} to ${p.to}.pdf`;
+}
+
+export function buildProfilePdf(p: SafetyProfile, co: Company, opts: { kind: "renewal" | "monthly"; florida: boolean; crew: number; generatedAt?: Date }): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const { W, H, M } = PAGE, CW = W - 2 * M;
+  let page = 1;
+  const footer = () => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(GREY);
+    doc.text(`${co.name ? co.name + " · " : ""}Safety program summary · Page ${page}`, M, H - 28);
+    doc.text(PDF_FOOTER, W - M, H - 28, { align: "right" });
+    doc.setTextColor(0);
+    page++;
+  };
+  let y = companyHeader(doc, co, opts.kind === "renewal" ? "SAFETY PROGRAM SUMMARY" : "MONTHLY PROGRAM SUMMARY");
+  const newPageIf = (h: number) => { if (y + h <= H - M - 24) return; footer(); doc.addPage(); y = M; };
+  const heading = (t: string) => { newPageIf(40); doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(0); doc.text(t, M, y); y += 16; };
+  const para = (t: string, size = 9.5, color = 40) => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(size); doc.setTextColor(color);
+    (doc.splitTextToSize(t, CW) as string[]).forEach((l) => { newPageIf(13); doc.text(l, M, y); y += 13; });
+    doc.setTextColor(0);
+  };
+  const s = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+  // Title and range
+  doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+  doc.text(opts.kind === "renewal" ? "Safety program summary" : "Monthly program summary", M, y); y += 20;
+  para(`${fmtDay(p.from)} to ${fmtDay(p.to)} · ${s(opts.crew, "person", "people")} on the crew roster`, 10, 70);
+  para(`What ${co.name || "the company"} did to keep its crews safe in this period, counted from its own signed, dated records. Counts and rates only: no worker names, signatures or personal details are included.`, 9.5, 40);
+  y += 10;
+
+  // Key figures: six boxes, 3 across
+  const figs: [string, string, string][] = [
+    ["Weekly talks held", p.periodsEnded ? `${p.periodsWithTalk} of ${p.periodsEnded}` : "-", p.periodsMissed ? `${s(p.periodsMissed, "week")} with no talk` : p.periodsEnded ? "no missed weeks" : "no full weeks yet"],
+    ["Crew sign-in rate", pctText(p.signIn), p.onTime === null ? "" : `${pctText(p.onTime)} on time, rest made up`],
+    ["Toolbox talks given", String(p.talks), `${s(p.topics, "topic")}${p.makeups ? `, ${s(p.makeups, "makeup")}` : ""}`],
+    ["Daily pre-task plans", String(p.dailyDays), "days with a signed plan"],
+    ["Inspections logged", String(p.log.inspections + p.log.walkarounds), `${s(p.log.walkarounds, "walk-around")} included`],
+    ["Crew-raised issues fixed", `${p.issues.fixed} of ${p.issues.raised}`, p.issues.medianDaysToFix === null ? "" : `typically ${s(p.issues.medianDaysToFix, "day")} to fix`],
+  ];
+  const bw = (CW - 2 * 12) / 3, bh = 58;
+  figs.forEach(([label, value, note], i) => {
+    const x = M + (i % 3) * (bw + 12), top = y + Math.floor(i / 3) * (bh + 10);
+    doc.setDrawColor(200); doc.setLineWidth(0.6); doc.roundedRect(x, top, bw, bh, 4, 4, "S");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(GREY); doc.text(label.toUpperCase(), x + 10, top + 15);
+    doc.setFontSize(17); doc.setTextColor(0); doc.text(value, x + 10, top + 36);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(90); doc.text(doc.splitTextToSize(note, bw - 20)[0] ?? "", x + 10, top + 49);
+  });
+  y += 2 * bh + 10 + 22; doc.setTextColor(0);
+
+  if (p.missedKeys.length) {
+    doc.setTextColor(...RED); doc.setFont("helvetica", "bold"); doc.setFontSize(9.5);
+    newPageIf(14); doc.text("Weeks with no talk recorded", M, y); y += 13; doc.setTextColor(0);
+    para(p.missedKeys.map((k) => weekLabel(parseDay(k), "en-US")).join("  ·  "));
+    y += 8;
+  }
+
+  // Month by month
+  if (p.months.length) {
+    heading("Month by month");
+    const cols = [M, M + 150, M + 235, M + 300, M + 385, M + 470];
+    const head = ["Month", "Weeks held", "Missed", "Talks", "Sign-in rate", "On time"];
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY);
+    head.forEach((h, i) => doc.text(h.toUpperCase(), cols[i], y)); y += 6; doc.setDrawColor(210); doc.line(M, y, W - M, y); y += 12;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+    for (const m of p.months) {
+      newPageIf(16);
+      doc.setTextColor(0);
+      doc.text(fmtMonth(m.month), cols[0], y);
+      doc.text(m.periods ? `${m.periods - m.missed} of ${m.periods}` : "-", cols[1], y);
+      if (m.missed) doc.setTextColor(...RED);
+      doc.text(String(m.missed), cols[2], y); doc.setTextColor(0);
+      doc.text(String(m.talks), cols[3], y);
+      doc.text(pctText(m.signIn), cols[4], y);
+      doc.text(pctText(m.onTime), cols[5], y);
+      y += 15;
+    }
+    y += 6;
+    para("Sign-in rate: crew on the roster who signed each week's talk, on time or made up later, over weeks that are over. A makeup keeps its real date and counts as late.", 8.5, 90);
+    y += 6;
+  }
+
+  if (p.languages.length) {
+    const lang = (id: string) => LANGUAGES.find((l) => l.id === id)?.label ?? id;
+    para(`Languages the talks were given in: ${p.languages.map((l) => `${lang(l.language)} (${l.talks})`).join(", ")}.`);
+    y += 8;
+  }
+
+  // Safety log and issues
+  heading("Safety log and crew-raised issues");
+  const cit = p.log.citations.length ? ` ${s(p.log.citations.length, "citation")} (${p.log.citations.map((c) => c.status.replace("_", " ")).join(", ")}; read to crews as alleged until final).` : " No citations logged.";
+  para(`${s(p.log.inspections, "inspection")}, ${s(p.log.walkarounds, "walk-around")}, ${s(p.log.incidents, "incident")} and ${s(p.log.nearMisses, "near miss", "near misses")} logged.${cit} ${s(p.log.open, "entry", "entries")} still open.`);
+  para(`${s(p.issues.raised, "issue")} raised by crews at talks or from findings; ${p.issues.fixed} fixed${p.issues.medianDaysToFix === null ? "" : `, typically in ${s(p.issues.medianDaysToFix, "day")}`}. ${s(p.issues.open, "issue")} open now${p.issues.overdue ? `, ${p.issues.overdue} past due` : ""}.`);
+  y += 8;
+
+  // Self-reported
+  if (p.emr.length || p.documents.length) {
+    heading("Reported by the company");
+    if (p.emr.length) para(`Experience modification rate (EMR), self-reported from the company's rating worksheet: ${p.emr.map((e) => `${e.rating_year}: ${e.emr.toFixed(2)}`).join("  ·  ")}. Not computed or verified by the app.`);
+    if (p.documents.length) para(`Documents on file: ${p.documents.map((d) => d.title).join(", ")}.`);
+    y += 8;
+  }
+
+  // Program elements
+  heading(opts.florida ? "Safety program elements (Florida, s. 440.1025, F.S.)" : "Safety program elements");
+  para("Where the app's records show each element of the company's program. Whether a program qualifies for a premium credit is decided by the insurer.", 8.5, 90);
+  y += 4;
+  const statusWord = { records: "Shown by app records", some: "Partly shown by app records", outside: "Outside the app" } as const;
+  for (const e of p.elements) {
+    const lines = doc.splitTextToSize(e.evidence, CW - 170) as string[];
+    newPageIf(16 + lines.length * 12);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(0); doc.text(e.name, M, y);
+    if (e.status === "records") doc.setTextColor(...GREEN); else if (e.status === "outside") doc.setTextColor(GREY); else doc.setTextColor(150, 100, 0);
+    doc.setFontSize(8.5); doc.text(statusWord[e.status], W - M, y, { align: "right" });
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(60);
+    lines.forEach((l, i) => doc.text(l, M + 12, y + 12 + i * 12));
+    y += 18 + lines.length * 12;
+  }
+  doc.setTextColor(0);
+
+  y += 6;
+  para(`Generated ${stampParts((opts.generatedAt ?? new Date()).toISOString()).date} from records that can't be edited after they're saved. Individual signed records are available from the company on request.`, 8.5, 90);
   footer();
   return doc;
 }

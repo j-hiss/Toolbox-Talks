@@ -345,6 +345,21 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.screenshot({ path: `${OUT}/e-daily-record.png`, fullPage: true });
   await r.click("nav[aria-label=Main] >> text=Reports"); await r.waitForTimeout(1000);
   log("8 reports daily:", (await r.locator("summary:has-text('Daily pre-task plans')").innerText().catch(() => "none")).replace(/\s+/g, " "));
+  // Scenario 9: safety profile (company with example history). Add a self-reported EMR, check the honest missed-weeks
+  // count and program elements, then download the renewal packet through the preview's save prompt.
+  await q.goto(PAGE); await q.waitForTimeout(1200); // page q was left mid-talk by an earlier scenario
+  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1000);
+  await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  log("9 profile:", await q.locator("h1").textContent(), "| figures:", (await q.locator("main dl").innerText()).replace(/\s+/g, " ").slice(0, 160));
+  log("9 missed weeks notice:", (await q.locator("text=Weeks with no talk recorded").count()) > 0 ? "shown" : "none (no missed weeks)");
+  log("9 elements:", (await q.locator("main ul li b").allInnerTexts()).slice(0, 7).join(" | "));
+  await q.fill("#emr-year", "2026"); await q.fill("#emr-value", "0.87"); await q.click("button:has-text('Save EMR')"); await q.waitForTimeout(800);
+  log("9 emr:", (await q.locator("section[aria-label='Experience mod']").innerText()).includes("2026: 0.87"));
+  await q.screenshot({ path: `${OUT}/e-profile.png`, fullPage: true });
+  await q.evaluate(() => { window.__saved = null; });
+  await q.click("text=Download renewal packet"); await q.waitForTimeout(2500);
+  log("9 renewal pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  log("9 no compliance claim:", !/\bcompliant\b/i.test((await q.locator("main").innerText()).replace("doesn't certify compliance", "")));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

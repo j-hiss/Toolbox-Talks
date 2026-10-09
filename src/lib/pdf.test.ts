@@ -102,3 +102,27 @@ describe("PDF extras", () => {
     expect(withIssues).toContain("fix by 2026-10-13");
   });
 });
+
+describe("safety program summary PDF", () => {
+  it("lists missed weeks, labels EMR self-reported, carries no names, and never claims compliance", async () => {
+    const { buildCompliance } = await import("@/core/compliance");
+    const { buildProfile } = await import("@/core/profile");
+    const { buildProfilePdf, profilePdfFileName } = await import("./pdf");
+    const today = new Date("2026-10-08T12:00:00Z");
+    const people = [{ id: "a", name: "Ana Worker", teamId: null, createdAt: "2026-01-01T00:00:00Z", deactivatedAt: null }];
+    const records = [{ id: "r1", title: "t", heldAt: "2026-09-08T12:00:00Z", weekStart: "2026-09-07", makeupForWeek: null, makeupReason: null, teamName: "", presenterId: null, presenterSigned: false,
+      attendees: [{ personId: "a", name: "Ana Worker", status: "signed" as const }] }];
+    const compliance = buildCompliance({ people, records, weeks: ["2026-09-14", "2026-09-07"], makeupWeeks: 4, today });
+    const p = buildProfile({ compliance, records: [{ id: "r1", talk_id: "fall", language: "en", held_at: "2026-09-08T12:00:00Z", makeup_for_week: null }],
+      daily: [], events: [], issues: [], emr: [{ rating_year: 2026, emr: 0.88, note: "", entered_at: "2026-03-01T00:00:00Z" }], documents: [], from: "2026-09-01", to: "2026-10-08", today });
+    const out = buildProfilePdf(p, co, { kind: "renewal", florida: true, crew: 1, generatedAt: today }).output().replace(/\\([()\\])/g, "$1");
+    expect(out).toContain("Weeks with no talk recorded");
+    expect(out).toContain("1 of 2");
+    expect(out).toContain("self-reported");
+    expect(out).toContain("s. 440.1025");
+    expect(out).toContain(PDF_FOOTER);
+    expect(out).not.toContain("Ana Worker");
+    expect(out.toLowerCase()).not.toMatch(/\b(is|are|fully) compliant\b|meets osha/);
+    expect(profilePdfFileName("renewal", p, co)).toBe("Example Roofing Co - Safety Program Summary - 2026-09-01 to 2026-10-08.pdf");
+  });
+});

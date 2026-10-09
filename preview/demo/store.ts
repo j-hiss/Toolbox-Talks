@@ -16,6 +16,8 @@ export type DemoDb = {
   repeats?: { company_id: string; talk_id: string; from_week: string; every_months: 0 | 3 | 6 | 12 }[];
   events?: (import("@/lib/data/types").SafetyEvent & { company_id: string })[];
   eventFiles?: { company_id: string; event_id: string; name: string; path: string; data: string }[];
+  emr?: { company_id: string; rating_year: number; emr: number; note: string; entered_at: string }[];
+  companyDocs?: { id: string; company_id: string; kind: import("@/core/profile").DocumentKind; title: string; path: string; uploaded_at: string; data: string }[];
   issues: (import("@/lib/data/types").Issue & { company_id: string })[];
 };
 

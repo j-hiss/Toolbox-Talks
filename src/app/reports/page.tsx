@@ -152,6 +152,10 @@ function Reports({ m }: { m: Membership }) {
     <Shell>
       <Eyebrow>Reports · {co.name}</Eyebrow>
       <Title>{multi ? "Talk sign-ins" : "Weekly sign-ins"}</Title>
+      <Link href="/profile/" className="mt-3 flex min-h-11 items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+        <span><b className="block">Safety profile &amp; renewal packet</b><small className="text-muted">Show your carrier what your crews do to stay safe</small></span>
+        <span aria-hidden>→</span>
+      </Link>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <div className="grid w-full grid-cols-4 overflow-hidden rounded-lg border border-line sm:w-auto" role="group" aria-label="Date range">
