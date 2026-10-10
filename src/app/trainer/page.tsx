@@ -9,10 +9,11 @@ import Link from "next/link";
 import { groupRoster, sortSubmissions, SUBMISSION_LABEL, type RosterCompany, type Submission } from "@/core/trainers";
 import { certTypeName } from "@/content/certTypes";
 import { myTrainerRoster, mySubmissions, submitCert } from "@/lib/data/trainers";
+import { discardCard, flushCards, onCardOutboxChange, saveCard, waitingCards, type QueuedCard } from "@/lib/cardOutbox";
 import { useSession } from "@/lib/session";
 import { CardForm } from "@/components/CardForm";
 import { NotConfigured } from "@/components/Guard";
-import { Button, ErrorNotice, Eyebrow, GroupHeading, Loading, Notice, Sheet, Shell, Title } from "@/components/ui";
+import { Button, ConfirmButton, ErrorNotice, Eyebrow, GroupHeading, Loading, Notice, Sheet, Shell, Title } from "@/components/ui";
 import { toast } from "@/components/toast";
 
 const day = (iso: string | null) => (iso ? new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "");
@@ -24,10 +25,10 @@ export default function TrainerPage() {
   useEffect(() => { if (s.status === "signed-out") router.replace("/sign-in/"); }, [s.status, router]);
   if (s.status === "not-configured") return <NotConfigured message={s.error} />;
   if (s.status !== "signed-in") return <Shell tabs={false}><Loading /></Shell>;
-  return <Portal email={s.user?.email ?? ""} member={s.memberships.length > 0} partner={s.partner} signOut={s.signOut} />;
+  return <Portal userId={s.user?.id ?? null} email={s.user?.email ?? ""} member={s.memberships.length > 0} partner={s.partner} signOut={s.signOut} />;
 }
 
-function Portal({ email, member, partner, signOut }: { email: string; member: boolean; partner: boolean; signOut: () => Promise<void> }) {
+function Portal({ userId, email, member, partner, signOut }: { userId: string | null; email: string; member: boolean; partner: boolean; signOut: () => Promise<void> }) {
   const [roster, setRoster] = useState<RosterCompany[] | null>(null);
   const [sent, setSent] = useState<Submission[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,24 @@ function Portal({ email, member, partner, signOut }: { email: string; member: bo
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
   useEffect(load, [load]);
+
+  // Cards saved on this phone (no signal when they were sent). Sent again when the page opens and when signal returns.
+  const [waiting, setWaiting] = useState<QueuedCard[]>(() => waitingCards(userId));
+  const [sending, setSending] = useState(false);
+  const sendWaiting = useCallback(async () => {
+    setSending(true);
+    const r = await flushCards(userId, (c, file) => submitCert(c.companyId, c.trainerId, c.cert, file, c.clientId));
+    setSending(false);
+    if (r.sent) load();
+    return r;
+  }, [userId, load]);
+  useEffect(() => {
+    const off = onCardOutboxChange(() => setWaiting(waitingCards(userId)));
+    const first = setTimeout(() => { void sendWaiting(); }, 0);
+    const online = () => { void sendWaiting(); };
+    window.addEventListener("online", online);
+    return () => { off(); clearTimeout(first); window.removeEventListener("online", online); };
+  }, [userId, sendWaiting]);
 
   if (error) return <Shell tabs={false}><ErrorNotice what="Couldn't load the trainer portal." detail={error} onRetry={load} /></Shell>;
   if (!roster) return <Shell tabs={false}><Loading /></Shell>;
@@ -53,6 +72,23 @@ function Portal({ email, member, partner, signOut }: { email: string; member: bo
         {member && <Link href="/" className="underline">← Back to your company</Link>}
         {partner && <Link href="/partner/" className="underline">Partner portal</Link>}
       </div>
+
+      {waiting.length > 0 && (
+        <section aria-label="Saved on this phone" className="mt-4">
+          <Notice tone="caution">
+            <b>{waiting.length === 1 ? "1 card is" : `${waiting.length} cards are`} saved on this phone, waiting for signal.</b> They send by themselves when the connection is back.
+          </Notice>
+          <ul className="mt-2 flex flex-col gap-1.5">
+            {waiting.map((c) => (
+              <li key={c.clientId} className="flex items-center justify-between gap-2 rounded-lg bg-surface px-3 py-2 text-sm">
+                <span className="min-w-0"><b className="block truncate">{c.label}</b>{c.lastError && <small className="block text-warn-text">Last try: {c.lastError}</small>}</span>
+                <ConfirmButton label="Don't send" onConfirm={() => discardCard(c.clientId)} />
+              </li>
+            ))}
+          </ul>
+          <Button size="sm" variant="ghost" className="mt-2" disabled={sending} onClick={() => sendWaiting()}>{sending ? "Sending…" : "Send now"}</Button>
+        </section>
+      )}
 
       {roster.length === 0 && <div className="mt-4"><Notice>No company has invited {email || "this email"} as a trainer yet, or access was ended. Ask the company to invite this email in Admin → Training.</Notice></div>}
       {roster.map((co) => (
@@ -98,9 +134,12 @@ function Portal({ email, member, partner, signOut }: { email: string; member: bo
           <p className="text-sm text-muted">{open.co.companyName}{open.person.title ? ` · ${open.person.title}` : ""}</p>
           <p className="mt-2 text-sm">Type the dates printed on the card. The company sees it as waiting until they approve it.</p>
           <CardForm saveLabel="Send for approval" onSave={async (c, file) => {
-            await submitCert(open.co.companyId, open.co.trainerId, { personId: open.person.id, ...c }, file);
-            toast(`Sent to ${open.co.companyName} for approval`);
-            load();
+            // Saved on the phone first, so a dropped connection never loses it or sends it twice.
+            const saved = await saveCard({ companyId: open.co.companyId, trainerId: open.co.trainerId, userId, cert: { personId: open.person.id, ...c },
+              label: `${certTypeName(c.certType, c.customName)} for ${open.person.name}` }, file);
+            await sendWaiting();
+            const stillWaiting = waitingCards(userId).some((x) => x.clientId === saved.clientId);
+            toast(stillWaiting ? "Saved on this phone. It sends when there's signal." : `Sent to ${open.co.companyName} for approval`);
           }} />
         </Sheet>
       )}

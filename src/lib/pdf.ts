@@ -11,7 +11,7 @@ import { weekNumbers } from "@/core/plan";
 import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { normalizeTheme, printBrand, rgb } from "@/core/theme";
-import type { SafetyProfile } from "@/core/profile";
+import { DOCUMENT_KINDS, type SafetyProfile } from "@/core/profile";
 
 export const PDF_FOOTER = "Documents a safety meeting. Does not by itself certify OSHA compliance.";
 
@@ -413,7 +413,8 @@ export function buildProfilePdf(p: SafetyProfile, co: HeaderCompany, opts: { kin
   if (p.emr.length || p.documents.length) {
     heading("Reported by the company");
     if (p.emr.length) para(`Experience modification rate (EMR), self-reported from the company's rating worksheet: ${p.emr.map((e) => `${e.rating_year}: ${e.emr.toFixed(2)}`).join("  ·  ")}. Not computed or verified by the app.`);
-    if (p.documents.length) para(`Documents on file: ${p.documents.map((d) => d.title).join(", ")}.`);
+    // Kinds and dates, never titles (free text; this PDF goes to agents and carriers).
+    if (p.documents.length) para(`Documents on file: ${p.documents.map((d) => `${DOCUMENT_KINDS.find((k) => k.id === d.kind)?.name ?? "Document"} (${fmtDay(d.uploaded_at.slice(0, 10))})`).join(", ")}.`);
     y += 8;
   }
 

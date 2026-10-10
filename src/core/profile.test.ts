@@ -71,7 +71,8 @@ describe("company safety profile", () => {
     ]);
     expect(JSON.stringify(p.elements)).not.toMatch(/complian|meets|satisf|certif/i);
     const withDoc = buildProfile({ ...base, documents: [{ kind: "safety_program", title: "Safety manual 2026", uploaded_at: "2026-01-02T00:00:00Z" }] });
-    expect(withDoc.elements[0]).toMatchObject({ status: "records", evidence: "Attached: Safety manual 2026." });
+    expect(withDoc.elements[0]).toMatchObject({ status: "records", evidence: expect.stringMatching(/^Written program attached \(1 document, latest uploaded /) });
+    expect(withDoc.elements[0].evidence).not.toContain("Safety manual");
   });
   it("self-reported EMR: the latest entry per year", () => {
     expect(buildProfile(base).emr).toEqual([{ rating_year: 2026, emr: 0.88, note: "corrected", entered_at: "2026-03-01T00:00:00Z" }]);

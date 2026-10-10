@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   // Pin the project root so a stray package-lock.json in a parent folder (e.g. your home folder) is ignored.
   turbopack: { root: path.join(__dirname) },
+  // Baked in at build time (empty when unset), so a hidden pilot's screens are left out of the build, not just hidden.
+  env: { NEXT_PUBLIC_PARTNER_PORTAL: process.env.NEXT_PUBLIC_PARTNER_PORTAL ?? "" },
 };
 
 export default nextConfig;

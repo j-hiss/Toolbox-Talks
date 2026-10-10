@@ -79,8 +79,8 @@ export function ProfileSummary({ p, florida, shared = false }: { p: SafetyProfil
       {shared && p.documents.length > 0 && (
         <>
           <GroupHeading>Program documents on file</GroupHeading>
-          <ul className="mt-2 text-sm">{p.documents.map((d, i) => <li key={i}>{d.title} <span className="text-muted">({kindName(d.kind)})</span></li>)}</ul>
-          <p className="mt-1 text-xs text-muted">Titles only. Ask the company for a copy.</p>
+          <ul className="mt-2 text-sm">{p.documents.map((d, i) => <li key={i}>{kindName(d.kind)} <span className="text-muted">(uploaded {new Date(d.uploaded_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })})</span></li>)}</ul>
+          <p className="mt-1 text-xs text-muted">The kind of document only. Ask the company for a copy.</p>
         </>
       )}
     </>

@@ -74,10 +74,9 @@ export async function decideSubmission(companyId: string, id: string, approve: b
   if (!approve && !reason.trim()) throw new Error("Say why the card is declined.");
   s.decided_at = new Date().toISOString();
   if (approve) {
-    const name = trainers().find((t) => t.id === s.trainer_id)?.name ?? "";
     (db().certs ??= []).push({ id: uid(), company_id: companyId, person_id: s.person_id, cert_type: s.cert_type, custom_name: s.custom_name, issued_on: s.issued_on,
-      expires_on: s.expires_on, note: `${s.note ? s.note + " " : ""}(Sent by trainer ${name})`.slice(0, 300), card_path: s.card_path, entered_at: s.decided_at,
-      withdrawn_at: null, withdrawn_reason: "", data: s.data });
+      expires_on: s.expires_on, note: s.note, card_path: s.card_path, entered_at: s.decided_at,
+      withdrawn_at: null, withdrawn_reason: "", data: s.data, submission_id: s.id });
     s.status = "approved";
   } else { s.status = "declined"; s.decline_reason = reason.trim(); }
   save();

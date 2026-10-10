@@ -11,8 +11,9 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
-export type StoredCert = PersonCert & { note: string; card_path: string | null; withdrawn_reason: string };
-const COLUMNS = "id, person_id, cert_type, custom_name, issued_on, expires_on, note, card_path, entered_at, withdrawn_at, withdrawn_reason";
+/** submission_id: the trainer submission this card was approved from (migration 0028), or null when entered here. */
+export type StoredCert = PersonCert & { note: string; card_path: string | null; withdrawn_reason: string; submission_id: string | null };
+const COLUMNS = "id, person_id, cert_type, custom_name, issued_on, expires_on, note, card_path, entered_at, withdrawn_at, withdrawn_reason, submission_id";
 
 /** Admins and office get the company's cards; anyone else gets only their own (the database decides). */
 export async function listCerts(companyId: string): Promise<StoredCert[]> {

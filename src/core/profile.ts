@@ -82,6 +82,13 @@ export const PROGRAM_ELEMENTS = [
   { id: "records", name: "Necessary recordkeeping" },
 ] as const;
 
+/** "Written program attached (1 document, uploaded Mar 1, 2026)." Counts and dates, never titles. */
+export function programDocsEvidence(docs: Pick<CompanyDocument, "uploaded_at">[]): string {
+  const latest = docs.map((d) => d.uploaded_at.slice(0, 10)).sort().at(-1);
+  const when = latest ? parseDay(latest).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+  return `Written program attached (${docs.length} document${docs.length === 1 ? "" : "s"}${when ? `, latest uploaded ${when}` : ""}).`;
+}
+
 export function buildProfile(input: ProfileInput): SafetyProfile {
   const today = input.today ?? new Date();
   const { from, to } = input;
@@ -145,7 +152,8 @@ export function buildProfile(input: ProfileInput): SafetyProfile {
     : "";
   const elements: ProgramElement[] = [
     docs.some((d) => d.kind === "safety_program")
-      ? { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "records", evidence: `Attached: ${docs.filter((d) => d.kind === "safety_program").map((d) => d.title).join(", ")}.` }
+      // Never the document's title: titles are free text and summaries go to agents and carriers (review 2026-10-10).
+      ? { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "records", evidence: programDocsEvidence(docs.filter((d) => d.kind === "safety_program")) }
       : { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "outside", evidence: "Not attached to this summary. The company can attach its written program in the app." },
     log.inspections + log.walkarounds > 0
       ? { id: "inspections", name: PROGRAM_ELEMENTS[1].name, status: "records", evidence: `${s(log.inspections, "inspection")} and ${s(log.walkarounds, "walk-around")} logged in the safety log.` }

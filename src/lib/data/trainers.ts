@@ -41,9 +41,15 @@ export async function setTrainerPerson(companyId: string, trainerId: string, per
   else check(await supabase().from("company_trainer_people").delete().eq("company_id", companyId).eq("trainer_id", trainerId).eq("person_id", personId));
 }
 
+/** Every waiting card (never cut off: nothing waits unseen), plus the 100 most recently reviewed. */
 export async function listSubmissions(companyId: string): Promise<CompanySubmission[]> {
-  const rows = check(await supabase().from("cert_submissions").select(`${SUB_COLUMNS}, company_trainers(name)`).eq("company_id", companyId).order("submitted_at", { ascending: false }).limit(500)) as unknown as (Submission & { company_trainers: { name: string } | null })[];
-  return rows.map(({ company_trainers, ...s }) => ({ ...s, trainer_name: company_trainers?.name ?? "" }));
+  type Row = Submission & { company_trainers: { name: string } | null };
+  const cols = `${SUB_COLUMNS}, company_trainers(name)`;
+  const [waiting, reviewed] = await Promise.all([
+    supabase().from("cert_submissions").select(cols).eq("company_id", companyId).eq("status", "pending").order("submitted_at"),
+    supabase().from("cert_submissions").select(cols).eq("company_id", companyId).neq("status", "pending").order("decided_at", { ascending: false }).limit(100),
+  ]);
+  return [...(check(waiting) as unknown as Row[]), ...(check(reviewed) as unknown as Row[])].map(({ company_trainers, ...s }) => ({ ...s, trainer_name: company_trainers?.name ?? "" }));
 }
 
 /** Approve (adds the training card) or decline with a reason. Once. */

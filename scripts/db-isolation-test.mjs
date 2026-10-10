@@ -573,6 +573,8 @@ async function main() {
       check("A presenter can't make a share link", await fails(() => make(presenterA, coA)));
       check("B can't make a link for A's profile", await fails(() => make(userB, coA)));
       check("A link can't last more than 90 days", await fails(() => make(userA, coA, 365)));
+      check("A share link copy with a document title is refused", await fails(() => as(userA, "select public.create_profile_share($1, 'Agent', 30, '2025-10-01', '2026-09-30', $2::jsonb)",
+        [coA, JSON.stringify({ v: 1, profile: { from: "2025-10-01", to: "2026-09-30", documents: [{ kind: "other", title: "J. Smith", uploaded_at: "2026-01-01" }] } })])));
       check("B sees none of A's links or opens", (await as(userB, "select id from public.profile_shares")).rows.length === 0
         && (await as(userB, "select id from public.profile_share_views")).rows.length === 0);
       check("Admins can't read the stored fingerprint or copy directly", await fails(() => as(userA, "select token_hash from public.profile_shares")));
@@ -625,13 +627,22 @@ async function main() {
       check("A trainer can't read other trainers' or company cards", (await as(trainer, "select id from public.cert_submissions")).rows.length === 2);
       check("B sees none of A's trainers or submissions", (await as(userB, "select id from public.company_trainers")).rows.length === 0
         && (await as(userB, "select id from public.cert_submissions")).rows.length === 0);
+      const crowd = await as(trainer, `select count(public.submit_cert(jsonb_build_object('company_id', $1::uuid, 'person_id', $2::uuid, 'client_id', gen_random_uuid(), 'cert_type', 'osha10')))::int n from generate_series(1, 198)`, [coA, p1]).then(() => "ok", (e) => e.message);
+      check("A trainer can have up to 200 cards waiting", crowd === "ok");
+      check("The 201st waiting card is refused", await fails(() => sub(p1)));
+      // Each upload is its own request, as on a phone. One photo is already in the folder from above.
+      for (let g = 1; g < 100; g++) await as(trainer, "insert into storage.objects (bucket_id, name) values ('person-certs', $1)", [`${coA}/trainer/${tA}/bulk-${g}.jpg`]);
+      check("A trainer can't upload more than 100 card photos a day", await fails(() => as(trainer,
+        "insert into storage.objects (bucket_id, name) values ('person-certs', $1)", [`${coA}/trainer/${tA}/bulk-101.jpg`])));
       check("A pending card isn't a training card yet", (await as(userA, "select id from public.person_certs where person_id = $1 and note like '%Example Training Co%'", [p1])).rows.length === 0);
       check("A trainer can't approve their own card", await fails(() => as(trainer, "select public.decide_cert_submission($1, true)", [s1])));
       check("A presenter can't approve a card", await fails(() => as(presenterA, "select public.decide_cert_submission($1, true)", [s1])));
       check("A submission can't be edited directly", await fails(() => as(userA, "update public.cert_submissions set status = 'approved' where id = $1", [s1])));
       await as(userA, "select public.decide_cert_submission($1, true)", [s1]);
-      const made = (await as(userA, "select c.note, s.status from public.cert_submissions s join public.person_certs c on c.id = s.cert_id where s.id = $1", [s1])).rows[0];
-      check("Approving adds the training card, marked as sent by the trainer", made?.status === "approved" && made.note.includes("Example Training Co"));
+      const made = (await as(userA, "select c.submission_id, s.status from public.cert_submissions s join public.person_certs c on c.id = s.cert_id where s.id = $1", [s1])).rows[0];
+      check("Approving adds the training card, linked to the trainer's submission", made?.status === "approved" && made.submission_id === s1);
+      check("An admin can't link a card to a submission by hand", await fails(() => as(userA,
+        "insert into public.person_certs (company_id, person_id, cert_type, submission_id) values ($1, $2, 'osha10', $3)", [coA, p1, s2])));
       check("A card is reviewed only once", await fails(() => as(userA, "select public.decide_cert_submission($1, false, 'no')", [s1])));
       check("Declining needs a reason", await fails(() => as(userA, "select public.decide_cert_submission($1, false, '')", [s2])));
       await as(userA, "select public.decide_cert_submission($1, false, 'Photo unreadable')", [s2]);
@@ -639,13 +650,16 @@ async function main() {
       await as(userA, "select public.remove_trainer($1)", [tA]);
       check("A removed trainer sees nothing and can't send cards", (await as(trainer, "select * from public.trainer_roster()")).rows.length === 0
         && (await as(trainer, "select id from public.cert_submissions")).rows.length === 0 && await fails(() => sub(p1)));
-      check("A removed trainer's cards stay on file for the company", (await as(userA, "select id from public.cert_submissions where trainer_id = $1", [tA])).rows.length === 2);
+      check("A removed trainer's cards stay on file for the company", (await as(userA, "select id from public.cert_submissions where trainer_id = $1", [tA])).rows.length === 200);
     }
 
     // Insurance partner portal (migration 0027, pilot).
     {
       const agent = randomUUID();
       await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'agent@insure.example', now())", [agent]);
+      check("Without the pilot switch, a company can't invite an insurance partner", await fails(() => as(userA, "select public.invite_partner($1, 'agent@insure.example', 'Example Insurance Agency', 'agent')", [coA])));
+      check("An admin can't switch the partner pilot on", await fails(() => as(userA, "insert into private.partner_pilot (company_id) values ($1)", [coA])));
+      await db.query("insert into private.partner_pilot (company_id, note) values ($1, 'test')", [coA]);
       const pA = (await as(userA, "select public.invite_partner($1, 'agent@insure.example', 'Example Insurance Agency', 'agent') as id", [coA])).rows[0].id;
       check("A presenter can't invite an insurance partner", await fails(() => as(presenterA, "select public.invite_partner($1, 'x@y.example', 'X', 'agent')", [coA])));
       check("B can't invite a partner to A", await fails(() => as(userB, "select public.invite_partner($1, 'x@y.example', 'X', 'agent')", [coA])));
@@ -656,6 +670,13 @@ async function main() {
       const snap = JSON.stringify({ v: 1, kind: "renewal", company: { name: "Company A" }, profile: { from: "2025-10-01", to: "2026-09-30", signIn: 0.93 } });
       check("A presenter can't send a summary", await fails(() => as(presenterA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb)", [pA, snap])));
       check("B can't send a summary to A's partner", await fails(() => as(userB, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb)", [pA, snap])));
+      const bad = (extra) => JSON.stringify({ v: 1, kind: "renewal", company: { name: "Company A" }, profile: { from: "2025-10-01", to: "2026-09-30", ...extra } });
+      const sendBad = (body, from = "2025-10-01") => as(userA, "select public.send_partner_report($1, $3::date, '2026-09-30', $2::jsonb)", [pA, body, from]);
+      check("A summary with a document title is refused", await fails(() => sendBad(bad({ documents: [{ kind: "other", title: "Incident report J. Smith", uploaded_at: "2026-01-01" }] }))));
+      check("A summary with an EMR note is refused", await fails(() => sendBad(bad({ emr: [{ rating_year: 2026, emr: 0.9, note: "J. Smith", entered_at: "2026-01-01" }] }))));
+      check("A summary with fields it shouldn't carry is refused", await fails(() => sendBad(bad({ workers: ["A worker 1"] })))
+        && await fails(() => sendBad(JSON.stringify({ v: 1, profile: { from: "2025-10-01", to: "2026-09-30" }, people: ["x"] }))));
+      check("A summary whose dates don't match is refused", await fails(() => sendBad(snap, "2025-01-01")));
       const rep = (await as(userA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb) as id", [pA, snap])).rows[0].id;
       const inbox = (await as(agent, "select * from public.partner_inbox()")).rows;
       check("The partner sees the company's name and the summary it sent", inbox.length === 1 && inbox[0].company_name === "Company A" && inbox[0].report_id === rep);

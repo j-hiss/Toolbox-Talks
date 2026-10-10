@@ -39,7 +39,7 @@ export async function addCert(companyId: string, c: NewCert, card: File | null =
   certs().push({
     id: uid(), company_id: companyId, person_id: c.personId, cert_type: c.certType, custom_name: c.certType === "custom" ? c.customName.trim() : "",
     issued_on: c.issuedOn || null, expires_on: c.expiresOn || null, note: c.note.trim(), card_path, entered_at: new Date().toISOString(),
-    withdrawn_at: null, withdrawn_reason: "", data,
+    withdrawn_at: null, withdrawn_reason: "", data, submission_id: null,
   });
   save();
 }

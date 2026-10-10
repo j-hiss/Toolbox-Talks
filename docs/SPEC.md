@@ -477,7 +477,10 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   counts-only copy and PDF as a share link). The partner signs in with an email code and sees only the companies that
   sent them something and those summaries: no names, signatures, phone numbers or injury details, no live data. Every
   open is logged and shown to the company. The company can withdraw a summary (gone for the partner, kept on file) or
-  remove the partner (all access ends). Summaries are sent, not live, because the profile math runs in the app and a
+  remove the partner (all access ends). **Two switches:** the screens need `NEXT_PUBLIC_PARTNER_PORTAL=pilot` at build
+  time, and the database refuses invites and sends unless the company is in `private.partner_pilot` (set only by the
+  database owner, after counsel's review). **Never free text:** shared copies carry document kinds and dates, not
+  titles, and no EMR notes; the database rejects anything else (review 2026-10-10). Summaries are sent, not live, because the profile math runs in the app and a
   second copy in the database would drift; the company sends a fresh one when it wants (for example monthly).
 - **Reports → Safety profile & renewal packet** (admins): last 12 months, last month, or picked dates. Shows weekly
   talks held of weeks ended, crew sign-in rate and on-time rate, talks and topics, makeups, daily-plan days,
@@ -515,7 +518,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   reports, phone numbers or anyone else). They send a card (same form as the admin's); it waits as "Waiting for the
   company" until an owner or admin approves it (then it's a training card noted "Sent by trainer …") or declines it
   with a reason the trainer sees. Reviewed once; nothing deleted. Removing a trainer ends access at once; cards they
-  sent stay on file. Sending needs a connection (no offline queue for trainers yet).
+  sent stay on file. A card is saved on the trainer's phone first and sends when there's signal, never twice. A trainer
+  can have at most 200 cards waiting and upload 100 photos a day. All waiting cards always show to the company. An
+  approved card is tagged "Sent in by a trainer" (linked to the submission, not written into the note).
 - **Safety profile:** the training element adds "Training cards entered by the company, as of today: N current,
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 

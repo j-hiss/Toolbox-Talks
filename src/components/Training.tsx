@@ -116,7 +116,7 @@ function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, re
           <ul className="mt-3 flex flex-col gap-2">
             {history.map((c) => (
               <li key={c.id} className={`rounded-lg p-3 text-sm ${c.withdrawn_at ? "opacity-60" : "bg-surface shadow-card"}`}>
-                <b>{certTypeName(c.cert_type, c.custom_name)}</b>
+                <b>{certTypeName(c.cert_type, c.custom_name)}</b>{c.submission_id && <span className="ml-2 rounded bg-brand-soft px-1.5 py-0.5 text-xs font-semibold text-brand-text">Sent in by a trainer</span>}
                 <p className="text-muted">{[c.issued_on && `Issued ${day(c.issued_on)}`, c.expires_on ? `expires ${day(c.expires_on)}` : "no expiry", c.note].filter(Boolean).join(" · ")}</p>
                 {c.withdrawn_at && <p className="text-muted">Withdrawn: {c.withdrawn_reason}</p>}
                 <div className="mt-1 flex flex-wrap items-center gap-2">

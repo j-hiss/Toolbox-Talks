@@ -34,8 +34,9 @@ export function shareSnapshot(p: SafetyProfile, co: Omit<ShareCompany, "theme"> 
     log: { ...p.log, citations: p.log.citations.map(({ status }) => ({ status })) },
     issues: { ...p.issues },
     elements: p.elements.map((e) => ({ ...e })),
-    emr: p.emr.map(({ rating_year, emr, note, entered_at }) => ({ rating_year, emr, note, entered_at })),
-    documents: p.documents.map(({ kind, title, uploaded_at }) => ({ kind, title, uploaded_at })),
+    // Free text never leaves the company: no EMR notes, no document titles (they could name a person). Review 2026-10-10.
+    emr: p.emr.map(({ rating_year, emr, entered_at }) => ({ rating_year, emr, note: "", entered_at })),
+    documents: p.documents.map(({ kind, uploaded_at }) => ({ kind, title: "", uploaded_at })),
   } satisfies Record<keyof SafetyProfile, unknown>;
   const company: ShareCompany = {
     name: co.name, licenses: co.licenses ?? "", address: co.address ?? "", phone: co.phone ?? "", email: co.email ?? "",
