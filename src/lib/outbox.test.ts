@@ -9,7 +9,7 @@ vi.stubGlobal("localStorage", {
   removeItem: (k: string) => void store.delete(k),
 });
 
-const { enqueue, flush, pending } = await import("./outbox");
+const { enqueue, flush, pending, setOutboxUser } = await import("./outbox");
 const rec = (id: string, company = "c1") => ({ client_id: id, company_id: company }) as unknown as RecordPayload;
 
 describe("offline outbox", () => {
@@ -43,5 +43,21 @@ describe("offline outbox", () => {
     enqueue(rec("a", "c1"), []);
     enqueue(rec("b", "c2"), []);
     expect(pending("c2").map((i) => i.record.client_id)).toEqual(["b"]);
+  });
+
+  it("a talk saved on a shared phone only uploads under the account that saved it", async () => {
+    setOutboxUser("user-ana");
+    const before = pending().length;
+    enqueue({ company_id: "co-1", client_id: "shared-1" } as never, []);
+    expect(pending().length).toBe(before + 1);
+    setOutboxUser("user-ben");
+    expect(pending().some((i) => i.record.client_id === "shared-1")).toBe(false);
+    const sent: string[] = [];
+    await flush(async (r) => { sent.push(r.client_id); });
+    expect(sent).not.toContain("shared-1");
+    setOutboxUser("user-ana");
+    await flush(async (r) => { sent.push(r.client_id); });
+    expect(sent).toContain("shared-1");
+    setOutboxUser(null);
   });
 });

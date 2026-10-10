@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { myMemberships } from "@/lib/data/company";
 import { acceptInvites } from "@/lib/data/members";
+import { setOutboxUser } from "@/lib/outbox";
 import type { Membership } from "@/lib/data/types";
 
 type SessionState = {
@@ -48,6 +49,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const load = useCallback(async (u: User | null) => {
     setUser(u);
+    setOutboxUser(u?.id ?? null); // only this account's saved talks are listed and uploaded
     if (!u) {
       setMemberships([]);
       setStatus("signed-out");

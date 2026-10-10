@@ -485,6 +485,16 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Safety profile:** the training element adds "Training cards entered by the company, as of today: N current,
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 
+## Security review (2026-10-10, migration 0024)
+- Independent review before partner access: 1 critical, 2 high, 3 medium, 4 low. Fixed: talk records and attendance can
+  only be saved through the checked save (no forged "signed" rows or backdated records); invites can only be claimed by
+  an email-code account; email confirmation on; admins can't add arbitrary accounts or rewrite memberships; people
+  can't be deleted; who-did-it columns come from the signed-in user; issue history kept when an issue is reopened; a
+  shared phone only uploads the saved talks of the person signed in.
+- **Waiting for Joe:** make `client_id` unique per company (not across all companies) on records, issues and safety
+  events (a constraint swap). **Deferred:** a reviewed safety event can still be edited by admins.
+- **Hosted project:** turn on "Confirm email" in Supabase Auth settings before real use.
+
 ## Product name (placeholder, 2026-10-09)
 - **Working name: Tuvant** (Joe, 2026-10-09; Latin *tueri*, to watch over). Earlier working names: **Keel** (dropped:
   a pending "KEEL" trademark for document and workflow software, Osgood Advisory, class 42) and **Salvant** (dropped:

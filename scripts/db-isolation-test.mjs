@@ -32,7 +32,7 @@ do $$ begin
   if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
 end $$;
 create schema if not exists auth;
-create table if not exists auth.users (id uuid primary key, email text, email_confirmed_at timestamptz);
+create table if not exists auth.users (id uuid primary key, email text, email_confirmed_at timestamptz, encrypted_password text);
 create or replace function auth.uid() returns uuid language sql stable as
   $f$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $f$;
 grant usage on schema auth to anon, authenticated;
@@ -528,6 +528,36 @@ async function main() {
       check("B can't set A's title requirements", await fails(() => as(userB, "insert into public.title_cert_requirements (company_id, role_id, cert_type) values ($1, $2, 'osha10')", [coA, roleA])));
       check("Card photos: A can't upload into B's folder", await fails(() => as(userA, "insert into storage.objects (bucket_id, name) values ('person-certs', $1)", [`${coB}/x/card.jpg`])));
     }
+    // Security hardening (migration 0024, independent review 2026-10-10).
+    {
+      check("A presenter can't add attendees to a saved record directly", await fails(() => as(presenterA,
+        "insert into public.talk_attendees (company_id, record_id, name, status, position) values ($1, $2, 'Forged', 'not_signed', 9)", [coA, recA])));
+      check("A presenter can't write a record without the checked save", await fails(() => as(presenterA,
+        "insert into public.talk_records (company_id, client_id, talk_id, language, content, presenter_name, held_at, week_start) values ($1, $2, 'fall', 'en', '{}', 'P', now(), '2026-01-05')", [coA, randomUUID()])));
+      check("An owner can't add an account to the company without an invite", await fails(() => as(userA,
+        "insert into public.company_members (company_id, user_id, access, email) values ($1, $2, 'presenter', 'ceo@other.example')", [coA, userB])));
+      await as(userA, "update public.company_members set email = 'fake@x.example', user_id = $2 where company_id = $1 and user_id = $3", [coA, userB, presenterA]);
+      const pm = await db.query("select user_id, email from public.company_members where company_id = $1 and user_id = $2", [coA, presenterA]);
+      check("A membership's account and email can't be rewritten", pm.rows.length === 1 && pm.rows[0].email !== "fake@x.example");
+      check("People can't be deleted, only deactivated", await fails(() => as(userA, "delete from public.people where company_id = $1", [coA])));
+      const forged = randomUUID();
+      await as(presenterA, "insert into public.talk_issues (company_id, client_id, description, created_by) values ($1, $2, 'Loose ladder', $3)", [coA, forged, userA]);
+      const by = (await db.query("select created_by from public.talk_issues where client_id = $1", [forged])).rows[0].created_by;
+      check("Who raised an issue is the signed-in user, not what the phone says", by === presenterA);
+      const iss = (await db.query("select id from public.talk_issues where client_id = $1", [forged])).rows[0].id;
+      await as(userA, "update public.talk_issues set status = 'fixed', fixed_note = 'Tied off' where id = $1", [iss]);
+      await as(userA, "update public.talk_issues set status = 'open' where id = $1", [iss]);
+      const hist = (await as(userA, "select status, note from public.talk_issue_events where issue_id = $1 order by at, id", [iss])).rows;
+      check("Reopening an issue keeps the record that it was fixed", hist.length === 2 && hist[0].status === "fixed" && hist[0].note === "Tied off" && hist[1].status === "open");
+      check("B can't read A's issue history", (await as(userB, "select id from public.talk_issue_events")).rows.length === 0);
+      check("Issue history can't be edited", await fails(() => as(userA, "update public.talk_issue_events set note = 'x' where issue_id = $1", [iss])));
+      const pw = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at, encrypted_password) values ($1, 'grab@a.example', now(), 'hash')", [pw]);
+      await as(userA, "insert into public.company_invites (company_id, email, access) values ($1, 'grab@a.example', 'admin')", [coA]);
+      check("A password account can't claim an invite", (await as(pw, "select public.accept_invites() as n")).rows[0].n === 0
+        && (await as(pw, "select id from public.companies")).rows.length === 0);
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 

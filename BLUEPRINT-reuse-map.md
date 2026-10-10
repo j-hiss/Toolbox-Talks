@@ -88,6 +88,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `public.create_company` | `supabase/migrations/20261004000002_default_roles.sql` | The only way to create a company; makes the caller its owner and adds the default presenting roles |
 | `supabase()` | `src/lib/supabase.ts:7` | The one browser Supabase client. Public URL + anon key only |
 | company_emr · company_documents · company-docs bucket | `supabase/migrations/20261009000020_company_profile.sql` | Self-reported EMR and program documents: admins of the company read/insert only; no update or delete (a correction is a new row); path must sit in the company's folder |
+| security hardening · `private.pin_membership` · `private.stamp_actor` · talk_issue_events · `private.log_issue_status` | `supabase/migrations/20261010000024_security_hardening.sql` | Records and attendance only through `save_talk_record` (checks presenter access itself); invites only for email-code accounts; memberships made only by `create_company`/`accept_invites`, never rewritten; no deleting people; who-did-it columns stamped from the signed-in user; every issue open/fixed change kept. Use `stamp_actor` on any new who-did-it column |
 | company isolation test | `scripts/db-isolation-test.mjs` | Applies all migrations to a throwaway DB and proves one company can't read or write another's rows; self-checks by switching RLS off. **Extend it for every new company table** |
 
 ## App (screens and data access)
