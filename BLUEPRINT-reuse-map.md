@@ -62,6 +62,8 @@ point the row at the real file and keep the prototype line as its origin.
 | `isOwnTalk` · `newTalkKey` · `latestOwnTalks` · `ownTalkToTalk` · `ownTalkProblem` · `tidyTalkText` · `copyFromLibrary` | `src/core/ownTalks.ts` | **The** company-written talk rules: ids start `own-`; the latest version counts (retired drop out, kept for lookups); becomes a normal `Talk` with `industries: []` so it never joins the rotation by itself; plain-words "what's missing" check (Spanish must be whole) |
 | `cleanCode` · `formatCode` · `verifyLink` · `verifySummary` · `VerifiedRecord` | `src/core/verify.ts` | **The** record check code: 16 characters with no look-alikes, printed in fours, linked after `#` so it never reaches a server log; the plain counts line |
 | `OUTCOMES` · `KINDS` · `PRIVACY_REASONS` · `latestCases` · `latestSummary` · `caseProblem` · `logTotals` · `logRates` · `caseLabel` · `nameOnLog` · `postingWindow` · `countDays` | `src/core/oshaLog.ts` | **The** OSHA 300/300A rules (columns A–M checked against 29 CFR 1904.29/1904.32 and 1904.7): one box per case with matching days, 180-day cap, privacy cases print "Privacy case", totals (zeros with no cases), rates per 200,000 hours, posting Feb 1–Apr 30 |
+| `talkTopic` · `TOPICS` | `src/core/topics.ts` | **The** talk topic (12 kinds) from id and title, ordered rules; new library talks get one without tagging (test keeps "general" under 5%) |
+| `toCsv` · `csvCell` | `src/core/csv.ts` | **The** spreadsheet export: byte-order mark for accents in Excel, quoting, formula-injection guard. Reports uses it; any new export should |
 | `PARTNER_KINDS` · `partnerKindName` · `inboxByCompany` | `src/core/partners.ts` | Insurance partner portal (pilot): partner kinds, the company-side and partner-side shapes, a partner's inbox grouped by company, latest first |
 
 ## Content
@@ -135,6 +137,7 @@ point the row at the real file and keep the prototype line as its origin.
 | `verifyRecord` | `src/lib/data/verify.ts` (twin `preview/demo/verify.ts`) | Look up a check code (works signed out) |
 | `listInjuryCases` · `saveInjuryCase` · `removeInjuryCase` · `listInjurySummaries` · `saveInjurySummary` | `src/lib/data/injuries.ts` (twin `preview/demo/injuries.ts`) | OSHA log data, only the fields a person fills in |
 | `InjuryLog` | `src/components/InjuryLog.tsx` | Admin → Injury log: year, totals and rates, cases (update = new version, not recordable = off the log with a reason), add-a-case sheet in the form's own column letters, 300A details, the three PDFs |
+| `TopicIcon` · `TopicChip` | `src/components/TopicIcon.tsx` | Our own line icons per topic on the brand tint: picker rows, Home "Coming up", the talk header chip |
 | `drawQr` | `src/lib/qr.ts` | **The** QR code drawn into a PDF as vector squares. Jobsite sticker and the record PDF's "check this record" box |
 | Check a record page | `src/app/verify/page.tsx` | `/verify/#CODE` from the PDF's QR, or type the code: what was saved (counts, no names), a mistyped code finds nothing |
 | `OwnTalks` | `src/components/OwnTalks.tsx` | Admin → Talks → Your own talks: list (give it now / edit / retire), write a talk or start from a library talk, optional Spanish with English shown as the thing to translate, checked-by name; any wording change sets Spanish back to draft |

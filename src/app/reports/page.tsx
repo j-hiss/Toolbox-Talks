@@ -15,6 +15,7 @@ import { STATUS_LABEL } from "@/core/attendance";
 import { dailyTally } from "@/core/pretask";
 import { addDays, isoDay, mondayOf, parseDay, periodLabel } from "@/core/weeks";
 import { useTalkLookup } from "@/lib/library";
+import { toCsv } from "@/core/csv";
 import { reportPeople, reportRecords, listDailyPlans } from "@/lib/data/reports";
 import { listIssues } from "@/lib/data/issues";
 import { isOverdue } from "@/components/Issues";
@@ -133,7 +134,6 @@ function Reports({ m }: { m: Membership }) {
 
   const exportCsv = async () => {
     setCsvMsg(null);
-    const q = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
     const rows = [["Week of", "Week #", "Weeks in period", "Talk", "Person", "Team", "Status", "Signed on", "Makeup reason", "Record ID"]];
     for (const w of [...report.weeks].reverse()) {
       for (const p of w.people) {
@@ -142,7 +142,7 @@ function Reports({ m }: { m: Membership }) {
           p.signedOn ? isoDay(new Date(p.signedOn)) : "", p.reason ?? "", p.recordId ?? ""]);
       }
     }
-    const csv = rows.map((r) => r.map(q).join(",")).join("\r\n");
+    const csv = toCsv(rows);
     try {
       const res = await saveFile(`${multi ? "Talk" : "Weekly"} sign-ins ${data.from} to ${isoDay(today)}.csv`, new Blob([csv], { type: "text/csv" }));
       if (res === "canceled") setCsvMsg("Canceled.");
@@ -457,7 +457,7 @@ function Reports({ m }: { m: Membership }) {
       </Fold>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <Button size="sm" onClick={exportCsv}>Export CSV</Button>
+        <Button size="sm" onClick={exportCsv}>Download spreadsheet (CSV)</Button>
         {csvMsg && <span className="text-sm text-muted" role="status">{csvMsg}</span>}
       </div>
       <p className="mt-2 text-xs text-muted">One row per person per week, with status, the date signed and any makeup reason. Opens in Excel.</p>

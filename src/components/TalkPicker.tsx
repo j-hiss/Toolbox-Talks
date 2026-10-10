@@ -7,6 +7,7 @@
 import { useMemo, useState } from "react";
 import { useTalks } from "@/lib/library";
 import { isOwnTalk } from "@/core/ownTalks";
+import { TopicIcon } from "@/components/TopicIcon";
 import { INDUSTRIES, industryTags, type IndustryId } from "@/core/industries";
 import { isSeasonal, listFor, nextListWeek, talkListProblem, talksInPlan, type PlanInput, type TalkList } from "@/core/plan";
 import { talkFitsClimate, type Talk } from "@/core/talks";
@@ -115,6 +116,7 @@ export function TalkPicker({ companyId, industry, input, lists, reload, msg, set
                 <li key={t.id}>
                   <label className={`flex min-h-12 cursor-pointer items-start gap-3 rounded-lg border p-3 ${on ? "border-brand bg-surface" : "border-line bg-surface"}`}>
                     <input type="checkbox" className="mt-1 size-5 shrink-0 accent-[var(--brand)]" checked={on} onChange={() => toggle(t.id)} />
+                    <TopicIcon talk={t} size={30} />
                     <span className="min-w-0">
                       <span className="block font-semibold">{t.content.en.title}</span>
                       <span className="block text-xs text-muted">

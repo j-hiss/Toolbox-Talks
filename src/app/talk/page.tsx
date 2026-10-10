@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTalkLookup } from "@/lib/library";
+import { TopicChip } from "@/components/TopicIcon";
 import { crewText, signingStatement } from "@/content/ui";
 import { talkText, type Talk as TalkT } from "@/core/talks";
 import { MAKEUP_REASONS, makeupReasonText, makeupWeeks, stillNeeds } from "@/core/makeup";
@@ -410,7 +411,8 @@ function ReadTalk({ co, draft, update, org, talk }: { co: Company; draft: TalkDr
         )}
       </div>
 
-      <h1 id="line-0" className={`mt-5 font-display text-[36px] font-extrabold leading-[1.04] text-balance tracking-[-0.03em] ${hl(0)}`}>{text.title}</h1>
+      <div className="mt-5"><TopicChip talk={talk} /></div>
+      <h1 id="line-0" className={`mt-2 font-display text-[36px] font-extrabold leading-[1.04] text-balance tracking-[-0.03em] ${hl(0)}`}>{text.title}</h1>
       <SignatureRule className="mt-3" />
       <p className="mt-2 text-sm text-muted tabular-nums">{talk.code} · about {talk.minutes} min</p>
       {status && <p className="mt-2 text-sm text-muted" aria-live="polite">{status}</p>}

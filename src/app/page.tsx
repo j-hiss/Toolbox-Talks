@@ -3,6 +3,7 @@
 // Home: this week's talk from the company's own 52-week plan (locked for the week: every crew gives the same one),
 // plus a way to make up a missed week.
 import { useTalkLookup } from "@/lib/library";
+import { TopicChip, TopicIcon } from "@/components/TopicIcon";
 import { climateFor } from "@/core/climate";
 import { parseDay, periodLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
@@ -140,7 +141,8 @@ function Home({ m }: { m: Membership }) {
               </div>
             </div>
             <div className="px-5 pt-5">
-              <h1 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.03em] text-balance">{text.title}</h1>
+              <TopicChip talk={talk} />
+              <h1 className="mt-2 font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.03em] text-balance">{text.title}</h1>
               <SignatureRule className="mt-3" />
             </div>
             <div className="px-5 pt-4 pb-5">
@@ -195,6 +197,7 @@ function Home({ m }: { m: Membership }) {
                   <b className="block leading-snug">{t.content.en.title}</b>
                   <small className="text-muted"><span className="sr-only">{weekNumbers(w)}, </span>{periodLabel(w.monday, w.weeks)} · {t.code}</small>
                 </span>
+                <TopicIcon talk={t} size={32} />
               </li>
             ))}
           </ul>

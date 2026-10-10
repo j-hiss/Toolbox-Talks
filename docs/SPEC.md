@@ -591,6 +591,13 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   about 8-hour and 24-hour serious-injury reports (1904.39) but doesn't send them. Not yet: Form 301 incident
   reports, OSHA's electronic submission (ITA) file, several establishments per company.
 
+## Topic icons and spreadsheet export (built)
+- **Topic icons:** every talk shows a small icon for its topic (weather, falls, electrical, fire, chemicals and air,
+  vehicles, machines and tools, body and PPE, health, people and emergencies, digging and tight spaces), worked out
+  from the talk itself. On the talk picker, Home's "Coming up" list and as a chip above the talk's title.
+- **Spreadsheet:** Reports → "Download spreadsheet (CSV)": one row per person per week. Accents come through in Excel,
+  and nothing typed into a name can run as a spreadsheet formula.
+
 ## Security review (2026-10-10, migration 0024)
 - Independent review before partner access: 1 critical, 2 high, 3 medium, 4 low. Fixed: talk records and attendance can
   only be saved through the checked save (no forged "signed" rows or backdated records); invites can only be claimed by
