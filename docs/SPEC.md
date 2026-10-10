@@ -569,6 +569,28 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   reaches a web server. Typed codes accept any case, dashes or spaces. Every existing record got a code too.
 - **Honest:** flags show as saved. A mistyped code says no record has it and to check each character.
 
+## OSHA 300 log and 300A summary (built, migration 0031)
+- **Why:** competitors bundle injury recordkeeping; a company running talks here had to keep the OSHA log somewhere
+  else. Now the log, the yearly summary and the confidential privacy list come from the same app.
+- **Who:** owners and admins only. Injury details are health information: no presenter, office, employee, trainer or
+  partner sees them, and nothing goes into shared summaries (counts may join the safety profile later, after
+  counsel's privacy review).
+- **The log (Form 300 columns, checked against 29 CFR 1904.29, 1904.7 and 1904.32 on 2026-10-10):** case number,
+  name, job title, date, where, what happened; one box for the most serious outcome (death, days away, job transfer
+  or restriction, other recordable); days away and restricted (calendar days from the day after, capped at 180); type
+  (injury, skin, respiratory, poisoning, hearing loss, other illness). The database checks the days match the box.
+- **Privacy cases** (the six kinds in 1904.29(b)(7)) print "Privacy case"; names go on a separate confidential list.
+  Only an illness can be withheld at the person's request.
+- **Versions, never edits:** an update is a new version; "not recordable" takes a case off the log with a reason and
+  keeps its history. Case numbers count up per year and never change. Times come from the database clock.
+- **300A:** totals (zeros with no cases), establishment, industry and NAICS, annual average employees, hours worked,
+  certifier name, title and phone; the executive signs and dates the paper. Carries the employee access and falsifying
+  statements and the posting dates (Feb 1 to Apr 30). January to April, Admin reminds to post last year's.
+- **Rates:** recordable and days-away/restricted per 100 full-time workers (200,000 hours) once hours are entered.
+- **Honest limits:** the app keeps the log and builds the forms; deciding recordability is the company's. It reminds
+  about 8-hour and 24-hour serious-injury reports (1904.39) but doesn't send them. Not yet: Form 301 incident
+  reports, OSHA's electronic submission (ITA) file, several establishments per company.
+
 ## Security review (2026-10-10, migration 0024)
 - Independent review before partner access: 1 critical, 2 high, 3 medium, 4 low. Fixed: talk records and attendance can
   only be saved through the checked save (no forged "signed" rows or backdated records); invites can only be claimed by

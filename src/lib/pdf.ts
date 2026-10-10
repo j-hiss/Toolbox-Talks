@@ -13,6 +13,7 @@ import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { normalizeTheme, printBrand, rgb } from "@/core/theme";
 import { DOCUMENT_KINDS, type SafetyProfile } from "@/core/profile";
 import { formatCode, verifyLink } from "@/core/verify";
+import { EMPLOYEE_ACCESS, FALSIFYING, KINDS, OUTCOMES, caseLabel, logTotals, nameOnLog, postingWindow, type InjuryCase, type InjurySummary } from "@/core/oshaLog";
 import { drawQr } from "./qr";
 import { appWebAddress } from "./webAddress";
 
@@ -59,8 +60,8 @@ function sigLine(doc: jsPDF, co: Company, x: number, y: number, signed: boolean)
 /** The company fields a PDF header prints. A shared profile copy (src/core/share.ts) carries just these. */
 export type HeaderCompany = Pick<Company, "name" | "licenses" | "address" | "phone" | "email" | "theme">;
 
-function companyHeader(doc: jsPDF, co: HeaderCompany, label: string, top: number = PAGE.M): number {
-  const { W, M } = PAGE, CW = W - 2 * M;
+function companyHeader(doc: jsPDF, co: HeaderCompany, label: string, top: number = PAGE.M, W: number = PAGE.W, M: number = PAGE.M): number {
+  const CW = W - 2 * M;
   let y = top;
   doc.setFillColor(...rgb(printBrand(normalizeTheme(co.theme)))); doc.rect(0, 0, W, 8, "F");
   doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text(co.name || "Company name not set", M, y + 4);
@@ -467,5 +468,187 @@ export function buildProfilePdf(p: SafetyProfile, co: HeaderCompany, opts: { kin
   y += 6;
   para(`Generated ${stampParts((opts.generatedAt ?? new Date()).toISOString()).date} from records that can't be edited after they're saved. Individual signed records are available from the company on request.`, 8.5, 90);
   footer();
+  return doc;
+}
+
+// OSHA 300 log, 300A summary and the confidential privacy case list (src/core/oshaLog.ts) --------------------------
+const OSHA_FOOTER = "Built from the OSHA Form 300 and 300A columns. Shows what the company recorded; doesn't certify compliance.";
+const fileCo = (co: Pick<Company, "name">) => (co.name || "Company").replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim();
+export const oshaFileName = (co: Pick<Company, "name">, year: number, what: "300" | "300A" | "privacy") =>
+  `${fileCo(co)} - ${what === "300" ? "OSHA 300 Log" : what === "300A" ? "OSHA 300A Summary" : "Privacy Case List (confidential)"} - ${year}.pdf`;
+const longDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+/** The year's log, one line per case (latest versions, removed cases left off), page totals on every page. */
+export function buildOsha300Pdf(cases: InjuryCase[], co: HeaderCompany, year: number, sum: InjurySummary | null): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "letter", orientation: "landscape" });
+  const W = 792, H = 612, M = 36;
+  // A B C D E F | G H I J | K L | M1-M6
+  const cols: { key: string; w: number; head: string; align?: "center" }[] = [
+    { key: "A", w: 44, head: "(A) Case no." }, { key: "B", w: 92, head: "(B) Employee's name" }, { key: "C", w: 72, head: "(C) Job title" },
+    { key: "D", w: 50, head: "(D) Date of injury or onset of illness" }, { key: "E", w: 86, head: "(E) Where the event occurred" },
+    { key: "F", w: 132, head: "(F) Describe injury or illness, parts of body affected, and object/substance that directly injured or made person ill" },
+    ...OUTCOMES.map((o) => ({ key: o.col, w: 30, head: `(${o.col}) ${{ G: "Death", H: "Days away", I: "Transfer or restriction", J: "Other recordable" }[o.col]}`, align: "center" as const })),
+    { key: "K", w: 30, head: "(K) Days away", align: "center" }, { key: "L", w: 30, head: "(L) Days job transfer or restriction", align: "center" },
+    ...KINDS.map((k) => ({ key: `M${k.n}`, w: 12, head: `(${k.n})`, align: "center" as const })),
+  ];
+  const x: Record<string, number> = {}; let cx = M; for (const c of cols) { x[c.key] = cx; cx += c.w; }
+  const right = cx;
+  let page = 1;
+  const head = () => {
+    let y = companyHeader(doc, co, `OSHA 300 LOG · ${year}`, M, W, M) - 10;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text(`Log of Work-Related Injuries and Illnesses · ${year}`, M, y);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(80);
+    const est = [sum?.establishment, sum?.address].filter(Boolean).join(" · ");
+    if (est) doc.text(`Establishment: ${est}`, right, y, { align: "right" });
+    y += 11;
+    doc.text("This log holds employee health information. Protect the confidentiality of employees as far as possible while it is used for safety and health purposes. Privacy cases show \"Privacy case\" instead of a name.", M, y);
+    doc.setTextColor(0); y += 12;
+    // Column headings: group labels, then each column's own heading.
+    doc.setFont("helvetica", "bold"); doc.setFontSize(6.5); doc.setTextColor(GREY);
+    doc.text("IDENTIFY THE PERSON", x.A, y); doc.text("DESCRIBE THE CASE", x.D, y); doc.text("CLASSIFY (ONE BOX)", x.G, y);
+    doc.text("DAYS", x.K, y); doc.text("TYPE (M)", x.M1, y);
+    y += 4; doc.setDrawColor(30); doc.line(M, y, right, y); y += 8;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(6); doc.setTextColor(40);
+    let tall = 0;
+    for (const c of cols) {
+      const lines = doc.splitTextToSize(c.head, c.w - 3) as string[];
+      lines.forEach((l, i) => doc.text(l, c.align ? x[c.key] + c.w / 2 : x[c.key] + 1, y + i * 7, c.align ? { align: "center" } : undefined));
+      tall = Math.max(tall, lines.length);
+    }
+    doc.setTextColor(0); y += tall * 7; doc.line(M, y, right, y);
+    return y + 10;
+  };
+  const footer = () => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(GREY);
+    doc.text(`${co.name || ""} · OSHA 300 log ${year} · Page ${page}`, M, H - 20);
+    doc.text(OSHA_FOOTER, W - M, H - 20, { align: "right" }); doc.setTextColor(0);
+    page++;
+  };
+  const list = [...cases].sort((a, b) => a.case_no - b.case_no);
+  let y = head();
+  let pageCases: InjuryCase[] = [];
+  const pageTotals = (last: boolean) => {
+    const t = logTotals(pageCases);
+    doc.setDrawColor(30); doc.line(M, y - 6, right, y - 6);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.text(last ? "Page totals (carry the year's totals to the 300A summary)" : "Page totals", x.F + cols[5].w - 4, y + 4, { align: "right" });
+    const put = (k: string, v: number) => { const c = cols.find((cc) => cc.key === k)!; doc.text(String(v), x[k] + c.w / 2, y + 4, { align: "center" }); };
+    (["G", "H", "I", "J", "K", "L"] as const).forEach((k) => put(k, t[k]));
+    KINDS.forEach((k) => put(`M${k.n}`, t.M[k.n]));
+    y += 14;
+  };
+  if (list.length === 0) {
+    doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.text(`No recordable injuries or illnesses logged for ${year}.`, M, y + 4); y += 20;
+  }
+  for (const c of list) {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+    const cell = (k: string, t: string) => doc.splitTextToSize(t || "-", cols.find((cc) => cc.key === k)!.w - 4) as string[];
+    const parts: Record<string, string[]> = {
+      A: [caseLabel(c)], B: cell("B", nameOnLog(c)), C: cell("C", c.job_title), D: [longDay(c.injury_date)], E: cell("E", c.location), F: cell("F", c.description),
+    };
+    const rowH = Math.max(...Object.values(parts).map((l) => l.length)) * 8.5 + 6;
+    if (y + rowH > H - M - 40) { pageTotals(false); footer(); doc.addPage(); pageCases = []; y = head(); }
+    for (const [k, lines] of Object.entries(parts)) lines.forEach((l, i) => doc.text(l, x[k] + 1, y + i * 8.5));
+    const mark = (k: string) => { const cc = cols.find((q) => q.key === k)!; doc.setFont("helvetica", "bold"); doc.text("X", x[k] + cc.w / 2, y, { align: "center" }); doc.setFont("helvetica", "normal"); };
+    mark(OUTCOMES.find((o) => o.id === c.outcome)!.col);
+    mark(`M${KINDS.find((k) => k.id === c.kind)!.n}`);
+    const num = (k: string, v: number) => { const cc = cols.find((q) => q.key === k)!; doc.text(String(v), x[k] + cc.w / 2, y, { align: "center" }); };
+    num("K", c.days_away); num("L", c.days_restricted);
+    y += rowH; doc.setDrawColor(215); doc.line(M, y - 6, right, y - 6);
+    pageCases.push(c);
+  }
+  y += 6; pageTotals(true);
+  footer();
+  return doc;
+}
+
+/** The 300A for a year: totals of every column, establishment and employment information, certification lines. */
+export function buildOsha300APdf(cases: InjuryCase[], co: HeaderCompany, year: number, sum: InjurySummary | null): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const { W, H, M } = PAGE, CW = W - 2 * M;
+  const t = logTotals(cases);
+  let y = companyHeader(doc, co, `OSHA 300A SUMMARY · ${year}`);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.text(`Summary of Work-Related Injuries and Illnesses · ${year}`, M, y); y += 16;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(70);
+  doc.splitTextToSize("Every establishment covered by 29 CFR Part 1904 completes this summary, even with no recordable injuries or illnesses in the year. Review the log for completeness and accuracy first; the totals below come from it.", CW)
+    .forEach((l: string) => { doc.text(l, M, y); y += 11; });
+  doc.setTextColor(0); y += 12;
+  const box = (label: string, v: number | string, bx: number, bw: number) => {
+    doc.setDrawColor(190); doc.roundedRect(bx, y, bw, 52, 4, 4, "S");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.text(String(v), bx + bw / 2, y + 26, { align: "center" });
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(70);
+    (doc.splitTextToSize(label, bw - 8) as string[]).forEach((l, i) => doc.text(l, bx + bw / 2, y + 38 + i * 8, { align: "center" }));
+    doc.setTextColor(0);
+  };
+  const group = (title: string) => { doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(GREY); doc.text(title, M, y); doc.setTextColor(0); y += 8; };
+  group("NUMBER OF CASES");
+  const w4 = (CW - 3 * 8) / 4;
+  [["(G) Total deaths", t.G], ["(H) Cases with days away from work", t.H], ["(I) Cases with job transfer or restriction", t.I], ["(J) Other recordable cases", t.J]]
+    .forEach(([l, v], i) => box(l as string, v as number, M + i * (w4 + 8), w4));
+  y += 68; group("NUMBER OF DAYS");
+  const w2 = (CW - 8) / 2;
+  box("(K) Total days away from work", t.K, M, w2); box("(L) Total days of job transfer or restriction", t.L, M + w2 + 8, w2);
+  y += 68; group("INJURY AND ILLNESS TYPES (M)");
+  const w6 = (CW - 5 * 8) / 6;
+  KINDS.forEach((k, i) => box(`(${k.n}) ${k.label}`, t.M[k.n], M + i * (w6 + 8), w6));
+  y += 76;
+  const field = (k: string, v: string, fx: number, fw: number) => {
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(GREY); doc.text(k.toUpperCase(), fx, y); doc.setTextColor(0);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    const ls = (doc.splitTextToSize(v || "", fw) as string[]).slice(0, 2);
+    ls.forEach((l, i) => doc.text(l, fx, y + 13 + i * 12));
+    doc.setDrawColor(200); doc.line(fx, y + 17 + (Math.max(ls.length, 1) - 1) * 12, fx + fw, y + 17 + (Math.max(ls.length, 1) - 1) * 12);
+  };
+  const half = (CW - 24) / 2, x2 = M + half + 24;
+  group("ESTABLISHMENT INFORMATION"); y += 6;
+  field("Establishment name", sum?.establishment || co.name || "", M, half); field("Street, city, state, ZIP", sum?.address || co.address || "", x2, half); y += 38;
+  field("Industry description", sum?.industry || "", M, half); field("NAICS code, if known", sum?.naics || "", x2, half); y += 38;
+  group("EMPLOYMENT INFORMATION"); y += 6;
+  field("Annual average number of employees", sum?.avg_employees != null ? sum.avg_employees.toLocaleString("en-US") : "", M, half);
+  field("Total hours worked by all employees last year", sum?.hours_worked != null ? sum.hours_worked.toLocaleString("en-US") : "", x2, half); y += 42;
+  group("SIGN HERE"); y += 4;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+  doc.text(FALSIFYING, M, y); y += 13;
+  doc.splitTextToSize("I certify that I have examined this document and that to the best of my knowledge the entries are true, accurate, and complete.", CW)
+    .forEach((l: string) => { doc.text(l, M, y); y += 11; });
+  y += 14;
+  const q = (CW - 3 * 16) / 4;
+  field("Company executive (signature)", "", M, q * 1.6); field("Name", sum?.certifier_name || "", M + q * 1.6 + 16, q * 1.2);
+  field("Title", sum?.certifier_title || "", M + q * 2.8 + 32, q * 1.2 - 16); y += 34;
+  field("Phone", sum?.certifier_phone || "", M, q * 1.6); field("Date", "", M + q * 1.6 + 16, q * 1.2); y += 40;
+  const pw = postingWindow(year);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.text(`Post this summary from ${longDay(pw.from)} to ${longDay(pw.to)}.`, M, y); y += 13;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(60);
+  doc.splitTextToSize(EMPLOYEE_ACCESS, CW).forEach((l: string) => { doc.text(l, M, y); y += 10; });
+  doc.setTextColor(0);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
+  doc.text(`${co.name || ""} · OSHA 300A summary ${year}`, M, H - 30);
+  doc.text(OSHA_FOOTER, M, H - 20); doc.setTextColor(0); void W;
+  return doc;
+}
+
+/** The separate, confidential list of privacy case numbers and names (1904.29(b)(6)). Never posted or shared. */
+export function buildPrivacyListPdf(cases: InjuryCase[], co: HeaderCompany, year: number): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const { W, H, M } = PAGE, CW = W - 2 * M;
+  let y = companyHeader(doc, co, `PRIVACY CASE LIST · ${year}`);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor(...RED); doc.text("CONFIDENTIAL", M, y); doc.setTextColor(0); y += 18;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+  doc.splitTextToSize("Case numbers and names for the privacy cases on the OSHA 300 log. Keep this list separate from the log; don't post it or give it out with the log. It lets the company update these cases and answer a government request.", CW)
+    .forEach((l: string) => { doc.text(l, M, y); y += 11; });
+  y += 12;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY);
+  doc.text("CASE NO.", M, y); doc.text("NAME", M + 80, y); doc.text("DATE", M + 300, y); doc.text("JOB TITLE", M + 380, y);
+  doc.setTextColor(0); y += 6; doc.setDrawColor(30); doc.line(M, y, W - M, y); y += 14;
+  const list = cases.filter((c) => c.privacy).sort((a, b) => a.case_no - b.case_no);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+  for (const c of list) {
+    if (y > H - M - 40) { doc.addPage(); y = M; }
+    doc.text(caseLabel(c), M, y); doc.text(doc.splitTextToSize(c.employee_name, 210)[0] ?? "", M + 80, y); doc.text(longDay(c.injury_date), M + 300, y);
+    doc.text(doc.splitTextToSize(c.job_title || "-", CW - 380)[0] ?? "", M + 380, y); y += 18;
+  }
+  if (!list.length) { doc.setFont("helvetica", "italic"); doc.text("No privacy cases this year.", M, y); }
+  doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
+  doc.text(`${co.name || ""} · Privacy case list ${year} · Confidential`, M, H - 28); doc.setTextColor(0);
   return doc;
 }

@@ -37,6 +37,7 @@ import { RepeatPicker } from "@/components/RepeatPicker";
 import { saveFile } from "@/lib/download";
 import { appWebAddress, jobsiteSticker } from "@/lib/sticker";
 import { SafetyLog } from "@/components/SafetyLog";
+import { InjuryLog } from "@/components/InjuryLog";
 import { BrandEditor } from "@/components/BrandEditor";
 import { AppAccess } from "@/components/AppAccess";
 import { Training } from "@/components/Training";
@@ -51,10 +52,11 @@ const TABS = [
   { id: "talks", label: "Talks", group: "program" },
   { id: "plan", label: "Plan", group: "program" },
   { id: "safety", label: "Safety log", group: "program" },
+  { id: "injuries", label: "Injury log", group: "program" },
   { id: "company", label: "Company", group: "program" },
   { id: "brand", label: "Brand", group: "program" },
 ] as const;
-// Two short labelled rows instead of one wrapped block of eleven chips.
+// Two short labelled rows instead of one wrapped block of chips.
 const TAB_GROUPS = [
   { id: "people", label: "People and places" },
   { id: "program", label: "Program" },
@@ -175,6 +177,8 @@ function Admin({ m }: { m: Membership }) {
           <Training companyId={companyId} people={people} roles={roles} />
         ) : tab === "access" ? (
           <AppAccess companyId={companyId} myAccess={m.access} myUserId={s.user?.id ?? null} people={people} />
+        ) : tab === "injuries" ? (
+          <InjuryLog company={m.company} people={people} roles={roles} />
         ) : tab === "safety" ? (
           <SafetyLog company={m.company} state={climateFor(m.company.zip).state} jobsites={jobsites} people={people} />
         ) : (

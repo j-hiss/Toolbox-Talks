@@ -744,6 +744,41 @@ async function main() {
       check("Signed-out visitors still can't read records", await fails(() => as(null, "select verify_code from public.talk_records")));
     }
 
+    // OSHA 300 log (0031): owners and admins only, versions only, numbered per year, never across companies.
+    {
+      const k1 = randomUUID(), k2 = randomUUID();
+      const addCase = (user, co, key, version, extra = {}) => {
+        const c = { employee_name: "Example Worker", injury_date: "2026-03-02", description: "Sprained ankle", outcome: "days_away", days_away: 3, kind: "injury", year: 2026, ...extra };
+        const cols = Object.keys(c);
+        return as(user, `insert into public.injury_cases (company_id, case_key, version, ${cols.join(", ")}) values ($1, $2, $3, ${cols.map((_, i) => `$${i + 4}`).join(", ")}) returning case_no, created_by, created_at`,
+          [co, key, version, ...cols.map((k) => c[k])]);
+      };
+      const c1 = (await addCase(userA, coA, k1, 1, { created_at: "2001-01-01T00:00:00Z", case_no: 99 })).rows[0];
+      const c2 = (await addCase(userA, coA, k2, 1)).rows[0];
+      check("Cases are numbered per year by the database, stamped with who and when", c1.case_no === 1 && c2.case_no === 2 && c1.created_by === userA
+        && new Date(c1.created_at).getFullYear() > 2001);
+      check("A presenter can't read or add injury cases", (await as(presenterA, "select case_key from public.injury_cases")).rows.length === 0
+        && await fails(() => addCase(presenterA, coA, randomUUID(), 1)));
+      check("B can't read A's injury log or 300A", (await as(userB, "select case_key from public.injury_cases")).rows.length === 0
+        && (await as(userB, "select year from public.injury_summaries")).rows.length === 0);
+      check("B can't add to A's log", await fails(() => addCase(userB, coA, randomUUID(), 1)) && await fails(() => addCase(userB, coA, k1, 2)));
+      check("Signed-out visitors can't read the injury log", await fails(() => as(null, "select case_key from public.injury_cases")));
+      check("A case can't be edited or deleted, only versioned", await fails(() => as(userA, "update public.injury_cases set days_away = 9 where case_key = $1", [k1]))
+        && await fails(() => as(userA, "delete from public.injury_cases where case_key = $1", [k1])));
+      const v2 = (await addCase(userA, coA, k1, 2, { days_away: 5 })).rows[0];
+      check("A new version keeps the case number", v2.case_no === 1);
+      check("A case stays in its year", await fails(() => addCase(userA, coA, k1, 3, { injury_date: "2025-12-30", year: 2025 })));
+      check("The box checked matches the days", await fails(() => addCase(userA, coA, randomUUID(), 1, { outcome: "other", days_away: 2 }))
+        && await fails(() => addCase(userA, coA, randomUUID(), 1, { outcome: "restricted", days_away: 1, days_restricted: 2 }))
+        && await fails(() => addCase(userA, coA, randomUUID(), 1, { days_away: 181 })));
+      check("A privacy case needs its reason; only illnesses at the person's request", await fails(() => addCase(userA, coA, randomUUID(), 1, { privacy: true }))
+        && await fails(() => addCase(userA, coA, randomUUID(), 1, { privacy: true, privacy_reason: "employee_request" })));
+      check("Taking a case off the log needs a reason", await fails(() => addCase(userA, coA, k2, 2, { removed: true })));
+      await as(userA, "insert into public.injury_summaries (company_id, year, version, avg_employees, hours_worked) values ($1, 2026, 1, 24, 49920)", [coA]);
+      check("300A details go in versions, in order", await fails(() => as(userA, "insert into public.injury_summaries (company_id, year, version) values ($1, 2026, 1)", [coA]))
+        && await fails(() => as(presenterA, "insert into public.injury_summaries (company_id, year, version) values ($1, 2026, 2)", [coA])));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -762,7 +797,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 66;
+  const EXPECTED = 79;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

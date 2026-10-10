@@ -509,6 +509,35 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.fill("input[aria-label='Check code']", code.slice(0, -1) + (code.endsWith("2") ? "3" : "2")); await q.click("button:has-text('Check')"); await q.waitForTimeout(800);
   log("16 mistyped:", (await q.locator("main [role=status], main [role=alert]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" | "));
   await q.goto(PAGE); await q.waitForTimeout(800);
+  // Scenario 17: OSHA 300 log. Add a days-away case for someone on the list and a privacy case, see the totals and
+  // rates, fill the 300A details, download the log and the summary.
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Injury log')"); await q.waitForTimeout(700);
+  const isheet = q.locator("[role=dialog]");
+  await q.click("main button:has-text('Add a case')"); await q.waitForTimeout(300);
+  const firstPerson = await q.locator("#inj-person option").nth(1).getAttribute("value");
+  await q.selectOption("#inj-person", firstPerson);
+  await q.fill("#inj-date", `${new Date().getFullYear()}-03-02`); await q.fill("#inj-where", "Example Jobsite, north roof");
+  await q.fill("#inj-desc", "Sprained left ankle stepping off a ladder onto uneven decking");
+  await isheet.locator("label:has-text('(H) Days away from work')").click(); await q.fill("#inj-away", "0");
+  await isheet.locator("button:has-text('Add to the log')").click(); await q.waitForTimeout(200);
+  log("17 zero days:", (await isheet.locator("[role=alert]").allInnerTexts()).join(" | "));
+  await q.fill("#inj-away", "3"); await q.screenshot({ path: `${OUT}/e-injury-editor.png`, fullPage: false });
+  await isheet.locator("button:has-text('Add to the log')").click(); await q.waitForTimeout(800);
+  await q.click("main button:has-text('Add a case')"); await q.waitForTimeout(300);
+  await q.fill("#inj-name", "Example Private Person"); await q.fill("#inj-date", `${new Date().getFullYear()}-05-14`);
+  await q.fill("#inj-desc", "Skin rash on both hands from adhesive"); await q.selectOption("#inj-kind", "skin");
+  await isheet.locator("input[type=checkbox]").check(); await q.selectOption("#inj-why", "employee_request");
+  await isheet.locator("button:has-text('Add to the log')").click(); await q.waitForTimeout(800);
+  log("17 cases:", (await q.locator("main ul li b").allInnerTexts()).filter((t) => /^\d{4}-\d{3}/.test(t)).join(" | "));
+  await q.fill("#sum-avg", "24"); await q.fill("#sum-hours", "49920"); await q.fill("#sum-naics", "238160");
+  await q.click("main button:has-text('Save summary details')"); await q.waitForTimeout(800);
+  log("17 totals:", (await q.locator("main p:has-text('days away ·')").first().innerText()).replace(/\s+/g, " "));
+  await q.screenshot({ path: `${OUT}/e-injury-log.png`, fullPage: true });
+  for (const label of ["log (300) PDF", "summary (300A) PDF", "Privacy case list"]) {
+    await q.evaluate(() => { window.__saved = null; });
+    await q.locator(`main button:has-text("${label}")`).click(); await q.waitForTimeout(1500);
+    log(`17 ${label}:`, JSON.stringify(await q.evaluate(() => window.__saved)));
+  }
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

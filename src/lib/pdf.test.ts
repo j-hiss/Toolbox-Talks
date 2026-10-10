@@ -136,3 +136,37 @@ describe("safety program summary PDF", () => {
     expect(profilePdfFileName("renewal", p, co)).toBe("Example Roofing Co - Safety Program Summary - 2026-09-01 to 2026-10-08.pdf");
   });
 });
+
+describe("OSHA 300 log PDFs", () => {
+  const base = { version: 1, year: 2026, removed: false, removed_reason: "", person_id: null, created_at: "", job_title: "Roofer", location: "Example Jobsite", privacy: false, privacy_reason: null } as const;
+  const cases = [
+    { ...base, case_key: "a", case_no: 1, employee_name: "Example Worker One", injury_date: "2026-03-02", description: "Sprained ankle", outcome: "days_away", days_away: 3, days_restricted: 2, kind: "injury" },
+    { ...base, case_key: "b", case_no: 2, employee_name: "Example Private Person", injury_date: "2026-05-14", description: "Skin rash on hands", outcome: "restricted", days_away: 0, days_restricted: 6, kind: "skin", privacy: true, privacy_reason: "employee_request" },
+  ] as import("@/core/oshaLog").InjuryCase[];
+  const plain = (d: { output: () => string }) => d.output().replace(/\\([()\\])/g, "$1");
+  it("the log prints \"Privacy case\" instead of the name, and page totals", async () => {
+    const { buildOsha300Pdf } = await import("./pdf");
+    const pdf = plain(buildOsha300Pdf(cases, co, 2026, null));
+    expect(pdf).toContain("(Example Worker One) Tj");
+    expect(pdf).toContain("(Privacy case) Tj");
+    expect(pdf).not.toContain("Example Private Person");
+    expect(pdf).toContain("2026-002");
+    expect(pdf).not.toMatch(/\bcompliant\b/i);
+  });
+  it("the 300A totals the columns and carries the access, falsifying and posting lines", async () => {
+    const { buildOsha300APdf } = await import("./pdf");
+    const pdf = plain(buildOsha300APdf(cases, co, 2026, null));
+    expect(pdf).toContain("(J) Other recordable cases");
+    expect(pdf).toContain("Knowingly falsifying this document may result in a fine.");
+    expect(pdf).toContain("Post this summary from Feb 1, 2027 to Apr 30, 2027.");
+    expect(pdf).toContain("Employees, former employees, and their representatives have the right to review");
+    expect(pdf).not.toContain("Example Private Person");
+  });
+  it("the confidential list has the privacy names only", async () => {
+    const { buildPrivacyListPdf } = await import("./pdf");
+    const pdf = plain(buildPrivacyListPdf(cases, co, 2026));
+    expect(pdf).toContain("CONFIDENTIAL");
+    expect(pdf).toContain("(Example Private Person) Tj");
+    expect(pdf).not.toContain("Example Worker One");
+  });
+});
