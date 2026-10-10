@@ -20,7 +20,8 @@ import { buildPlan, periodEnd, talksInPlan, weekNumbers } from "@/core/plan";
 import { climateFor } from "@/core/climate";
 import { canChangeWeek } from "@/core/makeup";
 import { weekLabel, isoDay, mondayOf, parseDay, periodLabel } from "@/core/weeks";
-import { TALKS } from "@/content/talks";
+import { useTalkLookup, useTalks } from "@/lib/library";
+import { isOwnTalk } from "@/core/ownTalks";
 import { usePlan } from "@/lib/usePlan";
 import { clearOverride, setOverride } from "@/lib/data/plan";
 import { listRecordedWeeks } from "@/lib/data/records";
@@ -30,6 +31,7 @@ import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, S
 import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
 import { TalkPicker } from "@/components/TalkPicker";
+import { OwnTalks } from "@/components/OwnTalks";
 import { CadencePicker } from "@/components/CadencePicker";
 import { RepeatPicker } from "@/components/RepeatPicker";
 import { saveFile } from "@/lib/download";
@@ -578,8 +580,16 @@ function TalksTab({ m }: { m: Membership }) {
   const [msg, setMsg] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
   // A fresh picker whenever the saved lists change (loaded, saved, undone), so its checkboxes match what's saved.
   return (
-    <TalkPicker key={JSON.stringify(lists)} companyId={m.company.id} industry={m.company.industry} input={input} lists={lists}
-      reload={reload} msg={msg} setMsg={setMsg} />
+    <>
+      <OwnTalks companyId={m.company.id} />
+      <div className="mt-6">
+        <GroupHeading>Talks in your plan</GroupHeading>
+        <div className="mt-2">
+          <TalkPicker key={JSON.stringify(lists)} companyId={m.company.id} industry={m.company.industry} input={input} lists={lists}
+            reload={reload} msg={msg} setMsg={setMsg} />
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -588,6 +598,8 @@ function TalksTab({ m }: { m: Membership }) {
 function PlanTab({ m }: { m: Membership }) {
   const co = m.company;
   const { plan, week, input, cadences, repeats, reload } = usePlan(co);
+  const findTalk = useTalkLookup();
+  const ownTalks = useTalks().filter((t) => isOwnTalk(t.id));
   // What the plan itself gives each week, before any swap: picking that talk again removes the swap.
   const planned = useMemo(() => new Map(buildPlan({ ...input, overrides: {} }).map((w) => [w.key, w.talkId])), [input]);
   const [recorded, setRecorded] = useState<string[] | null>(null);
@@ -607,7 +619,14 @@ function PlanTab({ m }: { m: Membership }) {
     return () => { live = false; };
   }, [co.id, from, version]);
 
-  const title = (id: string) => TALKS.find((t) => t.id === id)?.content.en.title ?? id;
+  const title = (id: string) => findTalk(id)?.content.en.title ?? id;
+  // A week can take any talk in the plan, any of the company's own talks, or keep the one it has.
+  const choices = (key: string, current: string) => {
+    const inPlan = talksInPlan(input, key);
+    const own = ownTalks.filter((t) => !inPlan.some((x) => x.id === t.id));
+    const keep = [...inPlan, ...own].some((t) => t.id === current) ? [] : [{ id: current, title: title(current) }];
+    return { inPlan, own, keep };
+  };
   const weeks = plan.filter((w) => isoDay(periodEnd(w)) > thisMonday);
   const unit = plan.some((w) => w.weeks > 1) ? "talk period" : "week";
 
@@ -663,7 +682,17 @@ function PlanTab({ m }: { m: Membership }) {
                   disabled={busy !== null}
                   onChange={(e) => change(w.key, e.target.value, base)}
                 >
-                  {talksInPlan(input, w.key).map((t) => <option key={t.id} value={t.id}>{t.content.en.title}{t.id === base ? " (planned)" : ""}</option>)}
+                  {(() => {
+                    const c = choices(w.key, w.talkId);
+                    const opt = (t: { id: string; content: { en: { title: string } } }) => <option key={t.id} value={t.id}>{t.content.en.title}{t.id === base ? " (planned)" : ""}</option>;
+                    return (
+                      <>
+                        {c.keep.map((k) => <option key={k.id} value={k.id}>{k.title}</option>)}
+                        {c.own.length > 0 ? <optgroup label="In your plan">{c.inPlan.map(opt)}</optgroup> : c.inPlan.map(opt)}
+                        {c.own.length > 0 && <optgroup label="Your own talks">{c.own.map(opt)}</optgroup>}
+                      </>
+                    );
+                  })()}
                 </select>
               )}
             </li>

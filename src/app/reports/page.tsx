@@ -14,7 +14,7 @@ import { cycleStart, weekNumbers } from "@/core/plan";
 import { STATUS_LABEL } from "@/core/attendance";
 import { dailyTally } from "@/core/pretask";
 import { addDays, isoDay, mondayOf, parseDay, periodLabel } from "@/core/weeks";
-import { TALKS } from "@/content/talks";
+import { useTalkLookup } from "@/lib/library";
 import { reportPeople, reportRecords, listDailyPlans } from "@/lib/data/reports";
 import { listIssues } from "@/lib/data/issues";
 import { isOverdue } from "@/components/Issues";
@@ -54,6 +54,7 @@ const short = (d: Date | string) => (typeof d === "string" ? new Date(d) : d).to
 function Reports({ m }: { m: Membership }) {
   const co = m.company;
   const { input } = usePlan(co);
+  const findTalk = useTalkLookup();
   const [range, setRange] = useState<RangeId>("12");
   const [team, setTeam] = useState("all");
   const [onlyGaps, setOnlyGaps] = useState(false);
@@ -104,7 +105,7 @@ function Reports({ m }: { m: Membership }) {
   const plan = (key: string) => planWeekAt(input, parseDay(key));
   const talkTitle = (key: string) => {
     const id = plan(key)?.talkId;
-    return TALKS.find((t) => t.id === id)?.content.en.title ?? "";
+    return findTalk(id)?.content.en.title ?? "";
   };
   const t = report.total;
   const current = report.weeks.find((w) => w.key <= isoDay(mondayOf(today)) && isoDay(addDays(parseDay(w.key), 7 * w.weeks)) > isoDay(mondayOf(today)));

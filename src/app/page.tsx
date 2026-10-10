@@ -2,7 +2,7 @@
 
 // Home: this week's talk from the company's own 52-week plan (locked for the week: every crew gives the same one),
 // plus a way to make up a missed week.
-import { TALKS } from "@/content/talks";
+import { useTalkLookup } from "@/lib/library";
 import { climateFor } from "@/core/climate";
 import { parseDay, periodLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
@@ -39,15 +39,16 @@ function Home({ m }: { m: Membership }) {
   const co = m.company;
   const climate = climateFor(co.zip);
   const { plan, week, input } = usePlan(co);
-  const talk = week ? TALKS.find((t) => t.id === week.talkId) : undefined;
+  const findTalk = useTalkLookup();
+  const talk = findTalk(week?.talkId);
   const text = talk ? talkText(talk, "en").text : undefined;
   const nextIdx = week ? plan.indexOf(week) + 1 : 0;
-  const upcoming = plan.slice(nextIdx, nextIdx + 4).map((w) => ({ w, t: TALKS.find((t) => t.id === w.talkId)! }));
+  const upcoming = plan.slice(nextIdx, nextIdx + 4).flatMap((w) => { const t = findTalk(w.talkId); return t ? [{ w, t }] : []; });
   const industry = INDUSTRIES.find((i) => i.id === co.industry)?.name;
   const router = useRouter();
   const draft = useDraft(co.id);
   const outbox = useOutbox(co.id);
-  const draftTitle = draft?.kind === "daily" ? "Daily pre-task plan" : draft?.talkId ? TALKS.find((t) => t.id === draft.talkId)?.content.en.title : null;
+  const draftTitle = draft?.kind === "daily" ? "Daily pre-task plan" : draft?.talkId ? findTalk(draft.talkId)?.content.en.title : null;
   const st = useHomeStatus(co, input, outbox.items.length);
   const [site, setSite] = useState<Jobsite | null>(null);
   const isAdmin = canAdmin(m.access);
@@ -62,7 +63,7 @@ function Home({ m }: { m: Membership }) {
     void applyReminders(planReminders({
       today: new Date(),
       thisWeekTitle: talk?.content.en.title ?? null,
-      nextWeekTitle: nextWeek ? TALKS.find((t) => t.id === nextWeek.talkId)?.content.en.title ?? null : null,
+      nextWeekTitle: findTalk(nextWeek?.talkId)?.content.en.title ?? null,
       crewName: lastCrew ?? null,
       crewDone: !!crewGrid && crewGrid.expected > 0 && crewGrid.on_time >= crewGrid.expected,
       expiringSoon: st.expiringSoon,

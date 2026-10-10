@@ -539,6 +539,24 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Safety profile:** the training element adds "Training cards entered by the company, as of today: N current,
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 
+## Your own talks (built, migration 0029)
+- **Why:** the library can't know a client's site rules, a machine only one company runs, or last week's near miss.
+  Competitors that win on library size still can't cover these; a company writing its own closes that gap without a
+  bigger library for its own sake.
+- **Where:** Admin → Talks → Your own talks (owners and admins). Write a talk (title, opening line, sections with
+  points, a question for the crew, minutes, optional rule or reference) or start from a library talk and make it fit.
+- **Versions, never edits:** each save is a new version; records keep the exact words that were read, as with every
+  talk. Retiring is a version marked retired: it stops being offered, records keep their text, and a week already
+  planned with it still shows it.
+- **Using it:** "Give it now" starts it like any talk; it can be ticked into the rotation (Talks in your plan) or
+  swapped into a week (Plan, "Your own talks" group). It never joins the rotation by itself, so adding one never
+  shifts planned weeks.
+- **Spanish:** optional. It starts blank with the English shown in each box as the thing to translate, must be whole
+  to save, and shows with the "not yet checked" warning until someone who reads Spanish checks it and is named on
+  that version. Changing any words sets it back to draft.
+- **No signal:** the company's talks are kept on the phone, so a planned company talk still opens offline. A phone
+  that never loaded them says so instead of breaking.
+
 ## Security review (2026-10-10, migration 0024)
 - Independent review before partner access: 1 critical, 2 high, 3 medium, 4 low. Fixed: talk records and attendance can
   only be saved through the checked save (no forged "signed" rows or backdated records); invites can only be claimed by

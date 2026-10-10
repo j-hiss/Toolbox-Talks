@@ -6,9 +6,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { TALKS } from "@/content/talks";
+import { useTalkLookup } from "@/lib/library";
 import { crewText, signingStatement } from "@/content/ui";
-import { talkText } from "@/core/talks";
+import { talkText, type Talk as TalkT } from "@/core/talks";
 import { MAKEUP_REASONS, makeupReasonText, makeupWeeks, stillNeeds } from "@/core/makeup";
 import { parseDay, periodLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
@@ -160,6 +160,7 @@ const Steps = ({ n, label }: { n: 1 | 2 | 3; label: string }) => <SharedSteps n=
 function MakeupPick({ weeks, draft, update, open }: {
   weeks: ReturnType<typeof makeupWeeks>; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; open: OpenMakeups | null;
 }) {
+  const findTalk = useTalkLookup();
   const [msg, setMsg] = useState<string | null>(null);
   const reason = makeupReasonText(draft.makeupPick, draft.makeupNote);
   const owed = (key: string) => open?.get(key) ?? [];
@@ -194,7 +195,7 @@ function MakeupPick({ weeks, draft, update, open }: {
       ) : (
         <div className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Week to make up">
           {weeks.map((w) => {
-            const t = TALKS.find((x) => x.id === w.talkId)!;
+            const t = findTalk(w.talkId);
             const on = draft.makeup?.weekStart === w.key;
             const people = owed(w.key);
             return (
@@ -205,9 +206,9 @@ function MakeupPick({ weeks, draft, update, open }: {
                 onClick={() => choose(w)}
                 className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left ${on ? "border-brand bg-surface shadow-[0_0_0_2px_var(--brand)]" : "border-line bg-surface"} ${open && !people.length && !on ? "opacity-60" : ""}`}
               >
-                <span className="mt-0.5 whitespace-nowrap rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{t.code}</span>
+                <span className="mt-0.5 whitespace-nowrap rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{t?.code ?? "Company talk"}</span>
                 <span className="min-w-0 flex-1">
-                  <b className="block">{t.content.en.title}</b>
+                  <b className="block">{t?.content.en.title ?? "A company talk"}</b>
                   <small className="text-muted">{weekNumbers(w)} · {periodLabel(w.monday, w.weeks)}</small>
                   {open && (
                     <small className={`block ${people.length ? "font-semibold" : "text-muted"}`}>
@@ -267,8 +268,14 @@ function MakeupPick({ weeks, draft, update, open }: {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; org: Org }) {
-  const talk = TALKS.find((t) => t.id === draft.talkId)!;
+function Read(props: { co: Company; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; org: Org }) {
+  const talk = useTalkLookup()(props.draft.talkId);
+  // A company talk this phone hasn't loaded yet (a new phone with no signal): say so rather than break.
+  if (!talk) return <Notice tone="caution">This talk hasn&apos;t loaded on this phone yet. Connect once to load your company&apos;s talks, then come back.</Notice>;
+  return <ReadTalk {...props} talk={talk} />;
+}
+
+function ReadTalk({ co, draft, update, org, talk }: { co: Company; draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; org: Org; talk: TalkT }) {
   const { text } = talkText(talk, draft.lang);
   // Only languages this talk can be read in; the rest are one "coming" line, not a row of greyed chips.
   const langs = LANGUAGES.filter((l) => l.ready && !!talk.content[l.id]);
@@ -639,6 +646,7 @@ function Sign({
   week: { number: number; start: string; scheduledTalkId: string; weeks?: number } | null; onSaved: (d: Done) => void;
 }) {
   const ui = crewText(draft.lang);
+  const findTalk = useTalkLookup();
   const presenter = org.people.find((p) => p.id === draft.presenterId);
   const presenterRole = org.roles.find((r) => r.id === presenter?.role_id)?.name ?? (presenter && org.teams.some((t) => t.lead_person_id === presenter.id) ? "Team lead" : "");
   const roster = rosterFor(org, draft);
@@ -672,7 +680,8 @@ function Sign({
     setError(null);
     try {
       const daily = draft.kind === "daily" && !!draft.pretask;
-      const talk = daily ? null : TALKS.find((t) => t.id === draft.talkId)!;
+      const talk = daily ? null : findTalk(draft.talkId) ?? null;
+      if (!daily && !talk) throw new Error("This talk hasn't loaded on this phone yet. Connect once, then save again.");
       const { text, lang } = talk ? talkText(talk, draft.lang) : { text: pretaskContent(draft.pretask!), lang: draft.lang };
       const team = org.teams.find((t) => t.id === draft.teamId);
       const lead = team ? org.people.find((p) => p.id === team.lead_person_id) : undefined;
@@ -819,7 +828,7 @@ function Sign({
   };
   const talkTitle = (() => {
     if (draft.kind === "daily") return draft.lang === "es" ? "Plan de trabajo del día" : "Today's pre-task plan";
-    const tk = TALKS.find((x) => x.id === draft.talkId); return tk ? talkText(tk, draft.lang).text.title : "";
+    const tk = findTalk(draft.talkId); return tk ? talkText(tk, draft.lang).text.title : "";
   })();
   const nextName = (() => { const n = nextOpen(idx); return n < turns.length ? turns[n].name : null; })();
   return (

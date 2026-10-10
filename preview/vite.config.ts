@@ -2,7 +2,7 @@
 // stored on the viewer's phone. Same components as the real app; only these swap out:
 //   next/link, next/navigation   -> tiny in-page router (preview/shims)
 //   @/lib/supabase               -> demo sign-in (code 123456)
-//   @/lib/data/company, records, plan, reports, issues, safety, profile, members, certs, shares, trainers, partners -> demo data saved in the browser
+//   @/lib/data/company, records, plan, reports, issues, safety, profile, members, certs, shares, trainers, partners, ownTalks -> demo data saved in the browser
 //   @/lib/location               -> explains GPS isn't available in the preview
 //   @/lib/download               -> the preview page's own save-file prompt
 //   @/lib/weather                -> an example forecast (the preview can't reach the weather service)
@@ -36,6 +36,7 @@ export default defineConfig({
       { find: /^@\/lib\/data\/shares$/, replacement: here("demo/shares.ts") },
       { find: /^@\/lib\/data\/trainers$/, replacement: here("demo/trainers.ts") },
       { find: /^@\/lib\/data\/partners$/, replacement: here("demo/partners.ts") },
+      { find: /^@\/lib\/data\/ownTalks$/, replacement: here("demo/ownTalks.ts") },
       { find: /^@\/lib\/weather$/, replacement: here("demo/weather.ts") },
       { find: /^@\/lib\/location$/, replacement: here("demo/location.ts") },
       { find: /^@\/lib\/download$/, replacement: here("demo/download.ts") },

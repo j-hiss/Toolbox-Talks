@@ -3,9 +3,9 @@
 // The company's plan with its cadence, picked talk lists and the admin's week swaps applied. Both are kept on the phone too, so the right talk shows
 // with no signal. Plan logic itself lives in src/core/plan.ts and src/core/makeup.ts; this only loads them.
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TALKS } from "@/content/talks";
 import { climateFor } from "@/core/climate";
 import { buildPlan, thisWeek, type CadenceSetting, type PlanInput, type RepeatSetting, type TalkList } from "@/core/plan";
+import { useTalks } from "@/lib/library";
 import { listCadences, listOverrides, listRepeats, listTalkLists } from "@/lib/data/plan";
 import type { Company } from "@/lib/data/types";
 
@@ -24,6 +24,7 @@ export function usePlan(co: Company, today: Date = new Date()) {
   const [lists, setLists] = useState<TalkList[]>(() => readCached(listsKey(co.id), []));
   const [cadences, setCadences] = useState<CadenceSetting[]>(() => readCached(cadenceKey(co.id), []));
   const [repeats, setRepeats] = useState<RepeatSetting[]>(() => readCached(repeatsKey(co.id), []));
+  const talks = useTalks(); // the library plus the company's own talks
   const [version, setVersion] = useState(0);
   const reload = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -63,8 +64,8 @@ export function usePlan(co: Company, today: Date = new Date()) {
 
   const day = today.toDateString();
   const input: Omit<PlanInput, "today"> = useMemo(
-    () => ({ talks: TALKS, industry: co.industry, climate: climateFor(co.zip), programStart: co.program_start, overrides, lists, cadences, repeats }),
-    [co.industry, co.zip, co.program_start, overrides, lists, cadences, repeats],
+    () => ({ talks, industry: co.industry, climate: climateFor(co.zip), programStart: co.program_start, overrides, lists, cadences, repeats }),
+    [talks, co.industry, co.zip, co.program_start, overrides, lists, cadences, repeats],
   );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const plan = useMemo(() => buildPlan({ ...input, today }), [input, day]);

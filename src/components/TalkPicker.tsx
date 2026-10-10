@@ -5,7 +5,8 @@
 // runs trucks). A new list starts next Monday, so weeks already planned keep their talks; the database enforces it.
 // The plan rules themselves live in src/core/plan.ts (talksInPlan, nextListWeek, talkListProblem).
 import { useMemo, useState } from "react";
-import { TALKS } from "@/content/talks";
+import { useTalks } from "@/lib/library";
+import { isOwnTalk } from "@/core/ownTalks";
 import { INDUSTRIES, industryTags, type IndustryId } from "@/core/industries";
 import { isSeasonal, listFor, nextListWeek, talkListProblem, talksInPlan, type PlanInput, type TalkList } from "@/core/plan";
 import { talkFitsClimate, type Talk } from "@/core/talks";
@@ -32,20 +33,22 @@ export function TalkPicker({ companyId, industry, input, lists, reload, msg, set
   const [query, setQuery] = useState("");
   const [show, setShow] = useState<"mine" | "all" | IndustryId>("mine");
   const [busy, setBusy] = useState(false);
+  const TALKS = useTalks(); // the library plus the company's own talks
 
   const tags = industryTags(industry);
   const mine = (t: Talk) => t.industries.includes("all") || tags.some((i) => t.industries.includes(i));
   const usable = TALKS.filter((t) => talkFitsClimate(t, input.climate));
   const q = query.trim().toLowerCase();
   const shown = usable.filter((t) => {
-    if (show === "mine" && !mine(t) && !picked.has(t.id)) return false;
-    if (show !== "mine" && show !== "all" && !t.industries.includes(show)) return false;
+    if (show === "mine" && !mine(t) && !picked.has(t.id) && !isOwnTalk(t.id)) return false;
+    if (show !== "mine" && show !== "all" && !t.industries.includes(show) && !isOwnTalk(t.id)) return false;
     return !q || `${t.content.en.title} ${t.code}`.toLowerCase().includes(q);
   });
   const groups: { label: string; talks: Talk[] }[] = [
+    { label: "Your own talks", talks: shown.filter((t) => isOwnTalk(t.id)) },
     { label: "Every job", talks: shown.filter((t) => t.industries.includes("all")) },
     { label: industryName(industry), talks: shown.filter((t) => !t.industries.includes("all") && mine(t)) },
-    { label: "Other industries", talks: shown.filter((t) => !mine(t)) },
+    { label: "Other industries", talks: shown.filter((t) => !mine(t) && !isOwnTalk(t.id)) },
   ].filter((g) => g.talks.length > 0);
 
   const changed = picked.size !== current.size || [...picked].some((id) => !current.has(id));
@@ -98,7 +101,7 @@ export function TalkPicker({ companyId, industry, input, lists, reload, msg, set
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
         <span className="font-semibold">{picked.size} picked · {rotation} take turns</span>
-        <Button size="sm" variant="ghost" type="button" onClick={() => setPicked(new Set(usable.filter(mine).map((t) => t.id)))}>Use my industry&apos;s talks</Button>
+        <Button size="sm" variant="ghost" type="button" onClick={() => setPicked(new Set(usable.filter((t) => mine(t) || (isOwnTalk(t.id) && picked.has(t.id))).map((t) => t.id)))}>Use my industry&apos;s talks</Button>
       </div>
 
       {groups.length === 0 && <p className="mt-4 text-sm text-muted">No talks match.</p>}
@@ -118,7 +121,7 @@ export function TalkPicker({ companyId, industry, input, lists, reload, msg, set
                         {t.code} · {t.minutes} min{isSeasonal(t.id) ? " · by season" : ""}
                         {t.content.es ? ` · Spanish ${t.translationStatus.es === "reviewed" ? "reviewed" : "draft"}` : ""}
                       </span>
-                      {!t.industries.includes("all") && (
+                      {!t.industries.includes("all") && !isOwnTalk(t.id) && (
                         <span className="mt-0.5 block text-xs text-muted">{t.industries.map((i) => industryName(i)).join(", ")}</span>
                       )}
                     </span>

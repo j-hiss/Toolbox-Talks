@@ -700,6 +700,35 @@ async function main() {
       check("A removed partner can't be sent anything", await fails(() => as(userA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb)", [pA, snap])));
     }
 
+    // Your own talks (0029): versions only, admins write, staff read, never across companies.
+    {
+      const empT = randomUUID();
+      await db.query("insert into auth.users (id) values ($1)", [empT]);
+      await db.query("insert into public.company_members (company_id, user_id, access) values ($1, $2, 'employee')", [coA, empT]);
+      const content = JSON.stringify({ en: { title: "Pool decks", hook: "Wet decks are slick.", sections: [{ heading: "Before", items: ["Dry it"] }], ask: "Where?" } });
+      const addTalk = (user, co, key, version, extra = "") => as(user,
+        `insert into public.company_talks (company_id, talk_key, version, title, content${extra ? ", " + extra.split("=")[0] : ""}) values ($1, $2, $3, 'Pool decks', $4::jsonb${extra ? ", " + extra.split("=")[1] : ""}) returning id, created_by`,
+        [co, key, version, content]);
+      const first = (await addTalk(userA, coA, "own-abcdef123456", 1)).rows[0];
+      check("An owner saves a company talk, stamped with who saved it", !!first.id && first.created_by === userA);
+      check("A presenter can read company talks but not write them", (await as(presenterA, "select id from public.company_talks")).rows.length === 1
+        && await fails(() => addTalk(presenterA, coA, "own-abcdef123457", 1)));
+      check("An employee account can't read company talks", (await as(empT, "select id from public.company_talks")).rows.length === 0);
+      check("B can't read A's talks", (await as(userB, "select id from public.company_talks")).rows.length === 0);
+      check("B can't add a talk to A", await fails(() => addTalk(userB, coA, "own-bbbbbbbbbbbb", 1)));
+      check("B can't add a version to A's talk", await fails(() => addTalk(userB, coA, "own-abcdef123456", 2)));
+      check("A talk can't be edited or deleted, only versioned", await fails(() => as(userA, "update public.company_talks set title = 'x' where id = $1", [first.id]))
+        && await fails(() => as(userA, "delete from public.company_talks where id = $1", [first.id])));
+      check("Versions go in order: no skips, no repeats", await fails(() => addTalk(userA, coA, "own-abcdef123456", 3))
+        && await fails(() => addTalk(userA, coA, "own-abcdef123456", 1)));
+      check("Reviewed Spanish needs a named reviewer", await fails(() => addTalk(userA, coA, "own-abcdef123456", 2, "es_status='reviewed'")));
+      check("A talk id must look like a company talk", await fails(() => addTalk(userA, coA, "fall", 1)));
+      await addTalk(userA, coA, "own-abcdef123456", 2, "retired=true");
+      check("A retired talk stays retired", await fails(() => addTalk(userA, coA, "own-abcdef123456", 3)));
+      check("B can use the same talk id without touching A's", !!(await addTalk(userB, coB, "own-abcdef123456", 1)).rows[0].id
+        && (await as(userA, "select id from public.company_talks where company_id = $1", [coB])).rows.length === 0);
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -718,7 +747,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 53;
+  const EXPECTED = 60;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

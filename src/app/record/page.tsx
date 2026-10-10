@@ -11,7 +11,7 @@ import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { isOverdue } from "@/components/Issues";
 import type { Membership, TalkRecord } from "@/lib/data/types";
 import { countStatuses, signedSummary, STATUS_LABEL } from "@/core/attendance";
-import { TALKS } from "@/content/talks";
+import { useTalkLookup } from "@/lib/library";
 import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { weekNumbers } from "@/core/plan";
@@ -28,6 +28,7 @@ const useHashId = () => useSyncExternalStore(subscribe, () => window.location.ha
 
 function RecordView({ m }: { m: Membership }) {
   const id = useHashId();
+  const findTalk = useTalkLookup();
   const [rec, setRec] = useState<TalkRecord | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -63,7 +64,7 @@ function RecordView({ m }: { m: Membership }) {
 
   const c = countStatuses(rec.attendees);
   const flagged = c.flagged + (rec.presenter_signature ? 0 : 1);
-  const scheduled = rec.scheduled_talk_id && rec.scheduled_talk_id !== rec.talk_id ? TALKS.find((t) => t.id === rec.scheduled_talk_id)?.content.en.title : null;
+  const scheduled = rec.scheduled_talk_id && rec.scheduled_talk_id !== rec.talk_id ? findTalk(rec.scheduled_talk_id)?.content.en.title : null;
   const when = new Date(rec.held_at).toLocaleString([], { weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
   const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "");
   const details: [string, string][] = [

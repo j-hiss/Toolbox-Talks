@@ -8,6 +8,7 @@ import { myMemberships } from "@/lib/data/company";
 import { acceptInvites } from "@/lib/data/members";
 import { amTrainer } from "@/lib/data/trainers";
 import { amPartner } from "@/lib/data/partners";
+import { loadOwnTalks } from "@/lib/library";
 import { setOutboxUser } from "@/lib/outbox";
 import type { Membership } from "@/lib/data/types";
 
@@ -92,6 +93,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     });
     return () => sub.subscription.unsubscribe();
   }, [load, configError]);
+
+  // The company's own talks join the library for every screen (src/lib/library.ts).
+  useEffect(() => { void loadOwnTalks(status === "signed-in" ? currentId : null); }, [status, currentId]);
 
   const value = useMemo<SessionState>(
     () => ({
