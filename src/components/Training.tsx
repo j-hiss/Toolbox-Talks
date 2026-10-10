@@ -6,13 +6,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { EXPIRING_DAYS, personTraining, trainingSummary, type CertState, type TrainingRow } from "@/core/certs";
 import { CERT_TYPES, certTypeName } from "@/content/certTypes";
-import { repeatNoteText } from "@/content/repeats";
 import { titleOf } from "@/core/presenters";
 import { addCert, cardUrl, listCerts, listRequirements, setRequirement, withdrawCert, type StoredCert } from "@/lib/data/certs";
 import type { CertRequirement } from "@/core/certs";
 import type { Person, Role } from "@/lib/data/types";
-import { Button, ConfirmButton, Field, FileButton, GroupHeading, Loading, Notice, Sheet, inputClass } from "./ui";
+import { Button, ConfirmButton, GroupHeading, Loading, Notice, Sheet, inputClass } from "./ui";
 import { toast } from "./toast";
+import { CardForm } from "./CardForm";
+import { TrainersSection } from "./Trainers";
 
 export const CERT_CHIP: Record<CertState, { label: string; tone: string }> = {
   current: { label: "Current", tone: "bg-ok-bg text-ok-text" },
@@ -73,6 +74,7 @@ export function Training({ companyId, people, roles }: { companyId: string; peop
       {shown.length === 0 && <p className="mt-3 text-sm text-muted">{onlyAttention ? "Everyone's cards are current." : "Add people first."}</p>}
 
       <TitleNeeds companyId={companyId} roles={roles} reqs={reqs} reload={reload} />
+      <TrainersSection companyId={companyId} people={people} roles={roles} onApproved={reload} />
       {open && <PersonSheet companyId={companyId} person={open} roles={roles} certs={certs} reqs={reqs} today={today} onClose={() => setOpen(null)} reload={reload} />}
     </>
   );
@@ -83,35 +85,9 @@ function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, re
 }) {
   const rows = personTraining(person.id, person.role_id, certs, reqs, today);
   const history = certs.filter((c) => c.person_id === person.id);
-  const [type, setType] = useState(rows.find((r) => r.state === "missing")?.cert_type ?? CERT_TYPES[0].id);
-  const [custom, setCustom] = useState("");
-  const [issued, setIssued] = useState("");
-  const [expires, setExpires] = useState("");
-  const [note, setNote] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [why, setWhy] = useState<Record<string, string>>({});
-  const info = CERT_TYPES.find((c) => c.id === type);
-  const bad = (type === "custom" && !custom.trim()) || (!!issued && !!expires && expires < issued);
-
-  const save = async () => {
-    setBusy(true); setMsg(null);
-    try {
-      await addCert(companyId, { personId: person.id, certType: type, customName: custom, issuedOn: issued || null, expiresOn: expires || null, note }, file);
-      toast(`${certTypeName(type, custom)} added for ${person.full_name}`);
-      setIssued(""); setExpires(""); setNote(""); setFile(null); setCustom("");
-      reload();
-    } catch (e) { setMsg(e instanceof Error ? e.message : String(e)); }
-    setBusy(false);
-  };
   const open = async (path: string) => { try { window.open(await cardUrl(path), "_blank", "noopener"); } catch (e) { setMsg(e instanceof Error ? e.message : String(e)); } };
-  const suggest = () => {
-    if (!info?.suggestMonths || !issued) return;
-    const d = new Date(`${issued}T12:00:00`); d.setMonth(d.getMonth() + info.suggestMonths);
-    setExpires(d.toISOString().slice(0, 10));
-  };
-
   return (
     <Sheet title={person.full_name} open onClose={onClose}>
       <p className="text-sm text-muted">{titleOf(person, roles)}</p>
@@ -127,25 +103,12 @@ function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, re
       </ul>
 
       <GroupHeading>Add a card</GroupHeading>
-      <div className="mt-3 flex flex-col gap-3">
-        <Field label="Training" id="ct-type">
-          <select id="ct-type" className={inputClass} value={type} onChange={(e) => setType(e.target.value)}>
-            {CERT_TYPES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            <option value="custom">Other (type a name)</option>
-          </select>
-        </Field>
-        {type === "custom" && <Field label="Name" id="ct-custom"><input id="ct-custom" maxLength={100} className={inputClass} value={custom} onChange={(e) => setCustom(e.target.value)} /></Field>}
-        {info?.note && <Notice tone="caution">{repeatNoteText(info.note).replace(/ This talk.*$/, "")}</Notice>}
-        <div className="grid grid-cols-2 gap-2">
-          <Field label="Issued" id="ct-issued"><input id="ct-issued" type="date" className={inputClass} value={issued} onChange={(e) => setIssued(e.target.value)} onBlur={() => !expires && suggest()} /></Field>
-          <Field label="Expires" id="ct-expires" hint="from the card"><input id="ct-expires" type="date" className={inputClass} value={expires} min={issued || undefined} onChange={(e) => setExpires(e.target.value)} /></Field>
-        </div>
-        {info?.suggestMonths && issued && !expires && <button className="text-left text-sm font-semibold text-brand-text underline" onClick={suggest}>Use {info.suggestMonths / 12} years from the issue date</button>}
-        <Field label="Note (optional)" id="ct-note"><input id="ct-note" maxLength={300} className={inputClass} placeholder="Trainer, card number last 4, equipment" value={note} onChange={(e) => setNote(e.target.value)} /></Field>
-        <FileButton label="Photo of the card (optional)" accept="application/pdf,image/jpeg,image/png,image/webp" disabled={busy} chosen={file?.name} onFile={setFile} />
-        <Button size="sm" disabled={busy || bad} onClick={save}>Save card</Button>
-        {msg && <Notice tone="error">{msg}</Notice>}
-      </div>
+      <CardForm initialType={rows.find((r) => r.state === "missing")?.cert_type} onSave={async (c, file) => {
+        await addCert(companyId, { personId: person.id, ...c }, file);
+        toast(`${certTypeName(c.certType, c.customName)} added for ${person.full_name}`);
+        reload();
+      }} />
+      {msg && <div className="mt-2"><Notice tone="error">{msg}</Notice></div>}
 
       {history.length > 0 && (
         <>

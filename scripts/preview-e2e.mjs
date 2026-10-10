@@ -418,6 +418,26 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("12 list:", (await row.innerText()).replace(/\s+/g, " "));
   await row.locator("button:has-text('Switch off')").click(); await row.locator("button:has-text('Tap again')").click(); await q.waitForTimeout(800);
   log("12 after switch off:", (await q.locator("ul[aria-label=\"Links you've made\"] li").first().innerText()).replace(/\s+/g, " "));
+  // Scenario 13: trainer portal. Invite a trainer, view as the trainer, send a card, then approve it as the owner.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(800);
+  await q.fill("#tr-name", "Example Training Co"); await q.fill("#tr-email", "coach@training.example"); await q.click("button:has-text('Invite trainer')"); await q.waitForTimeout(700);
+  log("13 invited:", (await q.locator("section[aria-label=Trainers] ul li").first().innerText()).replace(/\s+/g, " ").slice(0, 120));
+  await q.screenshot({ path: `${OUT}/e-trainers-admin.png`, fullPage: true });
+  await viewAs("trainer"); await q.waitForTimeout(800);
+  log("13 trainer portal:", await q.locator("h1").first().textContent(), "| people:", await q.locator("button[aria-label^='Send a card for']").count(), "| tabs:", await q.locator("nav[aria-label=Main] a").count());
+  const who = (await q.locator("button[aria-label^='Send a card for'] b").first().innerText()).trim();
+  await q.locator("button[aria-label^='Send a card for']").first().click(); await q.waitForTimeout(400);
+  await q.selectOption("#ct-type", "first_aid").catch(() => q.selectOption("#ct-type", { index: 2 }));
+  await q.fill("#ct-issued", "2026-09-01"); await q.fill("#ct-expires", "2028-09-01"); await q.click("button:has-text('Send for approval')"); await q.waitForTimeout(800);
+  await q.click("[role=dialog] button[aria-label=Close]"); await q.waitForTimeout(300);
+  log("13 sent:", (await q.locator("section[aria-label='Cards you sent'] li").first().innerText()).replace(/\s+/g, " "));
+  await q.screenshot({ path: `${OUT}/e-trainer-portal.png`, fullPage: true });
+  await viewAs("owner"); await q.waitForTimeout(600);
+  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(900);
+  log("13 waiting for owner:", (await q.locator("ul[aria-label='Cards waiting for approval'] li").first().innerText()).replace(/\s+/g, " ").slice(0, 160));
+  await q.click("ul[aria-label='Cards waiting for approval'] button:has-text('Approve')"); await q.waitForTimeout(900);
+  log("13 after approve: waiting", await q.locator("ul[aria-label='Cards waiting for approval'] li").count(), "| card on file:", (await q.locator(`button[aria-label='Training for ${who}']`).innerText()).replace(/\s+/g, " "));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

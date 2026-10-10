@@ -14,6 +14,7 @@ import RecordPage from "@/app/record/page";
 import ReportsPage from "@/app/reports/page";
 import ProfilePage from "@/app/profile/page";
 import SharePage from "@/app/share/page";
+import TrainerPage from "@/app/trainer/page";
 import { usePreviewPath } from "./shims/router";
 import { DEMO_CODE } from "./demo/supabase";
 import { resetDemo } from "./demo/store";
@@ -32,6 +33,7 @@ const ROUTES: Record<string, () => React.ReactElement> = {
   "/reports/": () => <ReportsPage />,
   "/profile/": () => <ProfilePage />,
   "/share/": () => <SharePage />,
+  "/trainer/": () => <TrainerPage />,
 };
 
 function Banner() {
@@ -61,7 +63,7 @@ function Banner() {
             onChange={(e) => { const msg = viewAs(e.target.value as Parameters<typeof viewAs>[0]); if (msg === "ok") window.location.reload(); else setSeedMsg(msg); }}>
             <option value="" disabled>View as…</option>
             <option value="owner">Owner</option><option value="admin">Admin</option><option value="presenter">Presenter</option>
-            <option value="office">Office</option><option value="employee">Employee</option>
+            <option value="office">Office</option><option value="employee">Employee</option><option value="trainer">Trainer</option>
           </select>
           <button
             className="rounded border border-line px-2 py-1 font-semibold"

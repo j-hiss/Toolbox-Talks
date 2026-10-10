@@ -2,7 +2,8 @@
 // swapped in memory. A trailing #fragment (like /admin/#jobsites) still goes to location.hash for the admin tabs.
 import { useSyncExternalStore } from "react";
 
-let path = "/";
+// The preview can ask to open on a page after a reload (preview "View as → Trainer").
+let path = (() => { try { const p = sessionStorage.getItem("tt-preview-start"); sessionStorage.removeItem("tt-preview-start"); return p || "/"; } catch { return "/"; } })();
 const listeners = new Set<() => void>();
 
 export function currentPath() { return path; }

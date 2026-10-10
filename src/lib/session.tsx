@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { myMemberships } from "@/lib/data/company";
 import { acceptInvites } from "@/lib/data/members";
+import { amTrainer } from "@/lib/data/trainers";
 import { setOutboxUser } from "@/lib/outbox";
 import type { Membership } from "@/lib/data/types";
 
@@ -13,6 +14,8 @@ type SessionState = {
   status: "loading" | "signed-out" | "signed-in" | "not-configured";
   user: User | null;
   memberships: Membership[];
+  /** Trainer for at least one company (trainer portal, migration 0026). A trainer isn't a member. */
+  trainer: boolean;
   current: Membership | null;
   error: string | null;
   setCurrent: (companyId: string) => void;
@@ -44,6 +47,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<SessionState["status"]>(configError ? "not-configured" : "loading");
   const [user, setUser] = useState<User | null>(null);
   const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [trainer, setTrainer] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,14 +56,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setOutboxUser(u?.id ?? null); // only this account's saved talks are listed and uploaded
     if (!u) {
       setMemberships([]);
+      setTrainer(false);
       setStatus("signed-out");
       return;
     }
     try {
       // Join any company that invited this email (Admin → App access). Never blocks signing in.
       try { await acceptInvites(); } catch { /* offline or not yet migrated: try again next sign-in */ }
-      const ms = await myMemberships(u.id);
+      const [ms, tr] = await Promise.all([myMemberships(u.id), amTrainer(u.id).catch(() => false)]); // no 0026 yet: not a trainer
       setMemberships(ms);
+      setTrainer(tr);
       setError(null);
       const saved = readCurrentId();
       setCurrentId(ms.find((m) => m.company.id === saved)?.company.id ?? ms[0]?.company.id ?? null);
@@ -85,6 +91,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       status,
       user,
       memberships,
+      trainer,
       current: memberships.find((m) => m.company.id === currentId) ?? null,
       error: configError ?? error,
       setCurrent: (id) => {
@@ -99,7 +106,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         await supabase().auth.signOut();
       },
     }),
-    [status, user, memberships, currentId, error, configError, load],
+    [status, user, memberships, trainer, currentId, error, configError, load],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

@@ -97,13 +97,33 @@ export function seedExample(): string {
 
 /** Preview only: switch the demo account's app role, to see each role's screens on one phone. For "employee" the
  *  account is linked to a roster person who has talk history (Add example history first), like an accepted invite. */
-export function viewAs(access: "owner" | "admin" | "presenter" | "office" | "employee"): string {
+/**
+ * "Trainer": the preview can't sign in as a second person, so the demo account becomes the trainer of its own company
+ * (an "Example trainer" given three people) and opens the trainer portal. Its company access goes back to owner.
+ */
+export function viewAs(access: "owner" | "admin" | "presenter" | "office" | "employee" | "trainer"): string {
   const d = db();
   const user = d.session?.user.id;
   let current: string | null = null;
   try { current = localStorage.getItem("tt-current-company"); } catch { /* none */ }
   const member = d.members.find((m) => m.user_id === user && m.company_id === current) ?? d.members.find((m) => m.user_id === user);
   if (!member) return "Create a company first.";
+  if (access === "trainer") {
+    type T = { id: string; company_id: string; email: string; name: string; invited_at: string; accepted_at: string | null; removed_at: string | null; user_id: string | null };
+    const x = d as unknown as { trainers?: T[]; trainerPeople?: { company_id: string; trainer_id: string; person_id: string }[] };
+    const list = (x.trainers ??= []), links = (x.trainerPeople ??= []);
+    let t = list.find((y) => y.company_id === member.company_id && !y.removed_at);
+    if (!t) { t = { id: uid(), company_id: member.company_id, email: d.session?.user.email ?? "trainer@example.com", name: "Example trainer", invited_at: new Date().toISOString(), accepted_at: null, removed_at: null, user_id: null }; list.push(t); }
+    t.user_id = user ?? null; t.accepted_at ??= new Date().toISOString();
+    if (!links.some((l) => l.trainer_id === t!.id)) {
+      const crew = (d.people as { id: string; company_id: string; active?: boolean }[]).filter((p) => p.company_id === member.company_id && p.active !== false).slice(0, 3);
+      for (const p of crew) links.push({ company_id: member.company_id, trainer_id: t.id, person_id: p.id });
+    }
+    member.access = "owner";
+    save();
+    try { sessionStorage.setItem("tt-preview-start", "/trainer/"); } catch { /* opens on Home instead */ }
+    return "ok";
+  }
   const people = d.people as { id: string; company_id: string; active?: boolean; user_id?: string | null }[];
   for (const p of people) if (p.company_id === member.company_id && p.user_id === user) p.user_id = null;
   if (access === "employee") {

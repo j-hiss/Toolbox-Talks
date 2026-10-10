@@ -24,8 +24,8 @@ export function RequireCompany({ admin = false, need, children }: { admin?: bool
 
   useEffect(() => {
     if (s.status === "signed-out") { holdScan(); router.replace("/sign-in/"); }
-    else if (s.status === "signed-in" && !s.error && s.memberships.length === 0) router.replace("/setup/");
-  }, [s.status, s.error, s.memberships.length, router]);
+    else if (s.status === "signed-in" && !s.error && s.memberships.length === 0) router.replace(s.trainer ? "/trainer/" : "/setup/");
+  }, [s.status, s.error, s.memberships.length, s.trainer, router]);
 
   if (s.status === "not-configured") return <NotConfigured message={s.error} />;
   if (s.status === "signed-in" && s.error) {

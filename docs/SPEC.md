@@ -488,6 +488,13 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   first aid, confined space and RRP have no note until their rule is checked.
 - **Who sees cards:** owners, admins and office see the company's; employees see only their own on their home screen;
   presenters see none. Photos of cards: admins only.
+- **Trainer portal (built, migration 0026):** Admin → Training → Trainers. An owner or admin invites an outside trainer
+  or training company by email and ticks which people the trainer may see. The trainer signs in on the website with an
+  email code and sees only each inviting company's name and those people's names and job titles (no records, talks,
+  reports, phone numbers or anyone else). They send a card (same form as the admin's); it waits as "Waiting for the
+  company" until an owner or admin approves it (then it's a training card noted "Sent by trainer …") or declines it
+  with a reason the trainer sees. Reviewed once; nothing deleted. Removing a trainer ends access at once; cards they
+  sent stay on file. Sending needs a connection (no offline queue for trainers yet).
 - **Safety profile:** the training element adds "Training cards entered by the company, as of today: N current,
   N expired, N missing" (labelled as company-entered; expired and missing said plainly).
 

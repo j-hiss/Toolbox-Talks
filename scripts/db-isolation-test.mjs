@@ -590,6 +590,58 @@ async function main() {
       check("An expired link opens nothing", (await as(null, "select public.shared_profile($1) as s", [secret2])).rows[0].s === null);
     }
 
+    // Trainer portal (migration 0026).
+    {
+      const trainer = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'coach@training.example', now())", [trainer]);
+      const tA = (await as(userA, "select public.invite_trainer($1, 'Coach@Training.example', 'Example Training Co') as id", [coA])).rows[0].id;
+      check("A presenter can't invite a trainer", await fails(() => as(presenterA, "select public.invite_trainer($1, 'x@y.example', 'X')", [coA])));
+      check("B can't invite a trainer to A", await fails(() => as(userB, "select public.invite_trainer($1, 'x@y.example', 'X')", [coA])));
+      check("The same trainer can't be invited twice", await fails(() => as(userA, "select public.invite_trainer($1, 'coach@training.example', 'Again')", [coA])));
+      check("A trainer claims their invite on sign-in", (await as(trainer, "select public.accept_invites() as n")).rows[0].n === 1);
+      check("A trainer is not a company member", (await as(trainer, "select id from public.companies")).rows.length === 0
+        && (await as(trainer, "select id from public.people")).rows.length === 0
+        && (await as(trainer, "select id from public.talk_records")).rows.length === 0
+        && (await as(trainer, "select id from public.person_certs")).rows.length === 0);
+      check("Before people are given, the trainer sees the company and no one", (await as(trainer, "select company_name, person_id from public.trainer_roster()")).rows.every((r) => r.person_id === null));
+      const [p1, p2] = (await as(userA, "select id from public.people where company_id = $1 and deactivated_at is null order by full_name limit 2", [coA])).rows.map((r) => r.id);
+      await as(userA, "insert into public.company_trainer_people (company_id, trainer_id, person_id) values ($1, $2, $3)", [coA, tA, p1]);
+      check("B can't give A's people to a trainer", await fails(() => as(userB, "insert into public.company_trainer_people (company_id, trainer_id, person_id) values ($1, $2, $3)", [coA, tA, p2])));
+      const roster = (await as(trainer, "select * from public.trainer_roster()")).rows;
+      check("A trainer sees only the people they were given: name and job title", roster.length === 1 && roster[0].person_id === p1
+        && Object.keys(roster[0]).sort().join() === "company_id,company_name,full_name,job_title,person_id,trainer_id");
+      const sub = (person, extra = {}) => as(trainer, "select public.submit_cert($1::jsonb) as id",
+        [JSON.stringify({ company_id: coA, person_id: person, client_id: randomUUID(), cert_type: "forklift", issued_on: "2026-09-01", expires_on: "2029-09-01", ...extra })]);
+      const cl = randomUUID();
+      const s1 = (await sub(p1, { client_id: cl })).rows[0].id;
+      check("Sending the same card twice keeps one", (await sub(p1, { client_id: cl })).rows[0].id === s1);
+      check("A trainer can't send a card for someone they weren't given", await fails(() => sub(p2)));
+      check("A trainer can't send a card to a company that didn't invite them", await fails(() => as(trainer, "select public.submit_cert($1::jsonb)",
+        [JSON.stringify({ company_id: coB, person_id: p1, client_id: randomUUID(), cert_type: "forklift" })])));
+      check("A card photo must be in the trainer's own folder", await fails(() => as(trainer, "insert into storage.objects (bucket_id, name) values ('person-certs', $1)", [`${coA}/${p1}/x.jpg`])));
+      const photo = `${coA}/trainer/${tA}/card.jpg`;
+      await as(trainer, "insert into storage.objects (bucket_id, name) values ('person-certs', $1)", [photo]);
+      const s2 = (await sub(p1, { card_path: photo, cert_type: "osha10" })).rows[0].id;
+      check("A trainer can't read other trainers' or company cards", (await as(trainer, "select id from public.cert_submissions")).rows.length === 2);
+      check("B sees none of A's trainers or submissions", (await as(userB, "select id from public.company_trainers")).rows.length === 0
+        && (await as(userB, "select id from public.cert_submissions")).rows.length === 0);
+      check("A pending card isn't a training card yet", (await as(userA, "select id from public.person_certs where person_id = $1 and note like '%Example Training Co%'", [p1])).rows.length === 0);
+      check("A trainer can't approve their own card", await fails(() => as(trainer, "select public.decide_cert_submission($1, true)", [s1])));
+      check("A presenter can't approve a card", await fails(() => as(presenterA, "select public.decide_cert_submission($1, true)", [s1])));
+      check("A submission can't be edited directly", await fails(() => as(userA, "update public.cert_submissions set status = 'approved' where id = $1", [s1])));
+      await as(userA, "select public.decide_cert_submission($1, true)", [s1]);
+      const made = (await as(userA, "select c.note, s.status from public.cert_submissions s join public.person_certs c on c.id = s.cert_id where s.id = $1", [s1])).rows[0];
+      check("Approving adds the training card, marked as sent by the trainer", made?.status === "approved" && made.note.includes("Example Training Co"));
+      check("A card is reviewed only once", await fails(() => as(userA, "select public.decide_cert_submission($1, false, 'no')", [s1])));
+      check("Declining needs a reason", await fails(() => as(userA, "select public.decide_cert_submission($1, false, '')", [s2])));
+      await as(userA, "select public.decide_cert_submission($1, false, 'Photo unreadable')", [s2]);
+      check("The trainer sees why a card was declined", (await as(trainer, "select decline_reason from public.cert_submissions where id = $1", [s2])).rows[0]?.decline_reason === "Photo unreadable");
+      await as(userA, "select public.remove_trainer($1)", [tA]);
+      check("A removed trainer sees nothing and can't send cards", (await as(trainer, "select * from public.trainer_roster()")).rows.length === 0
+        && (await as(trainer, "select id from public.cert_submissions")).rows.length === 0 && await fails(() => sub(p1)));
+      check("A removed trainer's cards stay on file for the company", (await as(userA, "select id from public.cert_submissions where trainer_id = $1", [tA])).rows.length === 2);
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 

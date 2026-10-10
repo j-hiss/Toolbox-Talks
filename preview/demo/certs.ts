@@ -55,7 +55,9 @@ export async function withdrawCert(companyId: string, id: string, reason: string
 
 export async function cardUrl(path: string): Promise<string> {
   await tick();
-  const c = certs().find((x) => x.card_path === path);
+  // Cards a trainer sent and are still waiting live with the submissions (./trainers.ts).
+  const sent = ((db() as unknown as { certSubs?: { card_path: string | null; data: string | null }[] }).certSubs ?? []).find((x) => x.card_path === path);
+  const c = certs().find((x) => x.card_path === path) ?? sent;
   if (!c?.data) throw new Error("Couldn't open the card.");
   return c.data;
 }
