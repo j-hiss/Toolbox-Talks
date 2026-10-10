@@ -12,6 +12,9 @@ import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { normalizeTheme, printBrand, rgb } from "@/core/theme";
 import { DOCUMENT_KINDS, type SafetyProfile } from "@/core/profile";
+import { formatCode, verifyLink } from "@/core/verify";
+import { drawQr } from "./qr";
+import { appWebAddress } from "./webAddress";
 
 export const PDF_FOOTER = "Documents a safety meeting. Does not by itself certify OSHA compliance.";
 
@@ -69,7 +72,11 @@ function companyHeader(doc: jsPDF, co: HeaderCompany, label: string, top: number
   return y;
 }
 
-export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = []): jsPDF {
+/**
+ * `origin` is the app's web address for the "check this record" QR code (defaults to appWebAddress()). A record not
+ * uploaded yet has no code, so its PDF says so instead.
+ */
+export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [], origin: string | null = appWebAddress()): jsPDF {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const W = 612, H = 792, M = 48, CW = W - 2 * M;
   let y = M;
@@ -78,6 +85,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   const footer = () => {
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(GREY);
     doc.text(`${co.name ? co.name + " · " : ""}Record ${r.id} · Page ${page}`, M, H - 28);
+    if (r.verify_code) doc.text(`Check code ${formatCode(r.verify_code)}${origin ? ` at ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify` : ""}`, M, H - 18);
     doc.text(PDF_FOOTER, W - M, H - 28, { align: "right" });
     doc.setTextColor(0);
     page++;
@@ -281,6 +289,27 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [])
   }
   sigLine(doc, co, COL.sig, y + 36, !!r.presenter_signature);
   stampCell(r.presenter_signed_at, y - 4);
+
+  // Check this record ------------------------------------------------------------------------------------------------
+  // Anyone holding this paper can scan the code and see what was saved, straight from the database (counts, no names).
+  y += 52; newPageIf(110);
+  doc.setDrawColor(200); doc.roundedRect(M, y, CW, 96, 6, 6, "S");
+  const QR = 80;
+  if (r.verify_code && origin) drawQr(doc, verifyLink(origin, r.verify_code), M + 8, y + 8, QR);
+  const tx = r.verify_code && origin ? M + QR + 20 : M + 14;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY); doc.text("CHECK THIS RECORD", tx, y + 22); doc.setTextColor(0);
+  if (r.verify_code) {
+    doc.setFont("courier", "bold"); doc.setFontSize(15); doc.text(formatCode(r.verify_code), tx, y + 42);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5);
+    doc.text(doc.splitTextToSize(
+      `${origin ? "Scan the code, or open " + origin.replace(/^https?:\/\//, "").replace(/\/+$/, "") + "/verify and type the code. " : "Type this code on the app's verify page. "}`
+      + "It shows what was saved for this talk: company, talk, date and how many signed, didn't sign or were absent. No names.",
+      CW - (tx - M) - 12), tx, y + 58);
+  } else {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+    doc.text(doc.splitTextToSize("This record hasn't uploaded yet. Its check code appears on the PDF once it does.", CW - 28), tx, y + 40);
+  }
+  y += 56; // the photo block below adds its own space
 
   // Crew photo and paper sign-in sheet (both optional) --------------------------------------------------------------
   const photoBlock = (img: string, label: string, takenAt: string | null | undefined, maxH: number, note?: string) => {

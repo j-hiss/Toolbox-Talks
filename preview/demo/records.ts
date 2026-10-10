@@ -6,6 +6,17 @@ import type { TalkRecord, TalkRecordSummary } from "@/lib/data/types";
 import { signedFor } from "@/core/makeup";
 import { db, save, tick, uid } from "./store";
 
+// Like private.new_verify_code(): 16 characters, no look-alikes. Records made before codes existed get one when read.
+const ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+export function demoVerifyCode(): string {
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(b, (x) => ALPHABET[x % 31]).join("");
+}
+export function withCode(r: { verify_code?: string }): string {
+  if (!r.verify_code) { r.verify_code = demoVerifyCode(); save(); }
+  return r.verify_code;
+}
+
 type Stored = RecordPayload & { id: string; attendees: AttendeeRow[] };
 const all = () => db().records as unknown as Stored[];
 
@@ -22,7 +33,7 @@ export async function saveTalkRecord(record: RecordPayload, attendees: AttendeeR
   if (existing) return existing.id;
   for (const a of attendees) if ((a.status === "signed") !== !!a.signature) throw new Error("Signed status needs a signature.");
   const id = uid();
-  all().push({ ...record, id, attendees });
+  all().push({ ...record, id, attendees, verify_code: demoVerifyCode() } as Stored);
   const list = (db().issues ??= []);
   for (const x of issues) {
     if (list.some((i) => i.client_id === x.client_id)) continue;
@@ -56,6 +67,7 @@ export async function getRecord(companyId: string, id: string): Promise<TalkReco
     photo: r.photo ?? null, photo_taken_at: r.photo_taken_at ?? null,
     sheet: r.sheet ?? null, sheet_taken_at: r.sheet_taken_at ?? null,
     pretask: r.pretask ?? null,
+    verify_code: withCode(r as { verify_code?: string }),
   };
 }
 

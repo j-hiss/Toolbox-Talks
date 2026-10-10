@@ -557,6 +557,18 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **No signal:** the company's talks are kept on the phone, so a planned company talk still opens offline. A phone
   that never loaded them says so instead of breaking.
 
+## Check a record from its PDF (built, migration 0030)
+- **Why:** a paper sign-in sheet can be filled in after the fact; nobody can tell. Every record PDF now carries a check
+  code and QR code. An inspector, insurer or general contractor scans it and sees what was saved, straight from the
+  database, so the paper can be trusted without an account.
+- **What it shows:** company, talk (and its English title), when it was held and saved, the plan week or makeup week,
+  and how many were on the roster, signed, didn't sign and were absent, plus whether the presenter signed. No names,
+  signatures, places, photos or ids: the paper has those; the check shows the paper matches.
+- **The code:** 16 characters with no look-alikes (no 0/O, 1/I/L), about 79 random bits, printed in groups of four in
+  the PDF's "check this record" box and every page footer. The QR opens `/verify/#CODE`; the code after `#` never
+  reaches a web server. Typed codes accept any case, dashes or spaces. Every existing record got a code too.
+- **Honest:** flags show as saved. A mistyped code says no record has it and to check each character.
+
 ## Security review (2026-10-10, migration 0024)
 - Independent review before partner access: 1 critical, 2 high, 3 medium, 4 low. Fixed: talk records and attendance can
   only be saved through the checked save (no forged "signed" rows or backdated records); invites can only be claimed by

@@ -12,6 +12,7 @@ import { isOverdue } from "@/components/Issues";
 import type { Membership, TalkRecord } from "@/lib/data/types";
 import { countStatuses, signedSummary, STATUS_LABEL } from "@/core/attendance";
 import { useTalkLookup } from "@/lib/library";
+import { formatCode } from "@/core/verify";
 import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { weekNumbers } from "@/core/plan";
@@ -73,6 +74,8 @@ function RecordView({ m }: { m: Membership }) {
     ["Team", rec.team_name ? `${rec.team_name}${rec.team_lead_name ? ` (lead: ${rec.team_lead_name})` : ""}` : "Not set"],
     ["Presented by", `${rec.presenter_name}${rec.presenter_role ? `, ${rec.presenter_role}` : ""}`],
     ["Language", LANGUAGES.find((l) => l.id === rec.language)?.label ?? rec.language],
+    // Printed on the PDF with a QR code; anyone holding the paper can check it at /verify.
+    ...(rec.verify_code ? [["Check code", formatCode(rec.verify_code)] as [string, string]] : []),
   ];
 
   return (

@@ -493,6 +493,22 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.locator("main li:has-text('Client site rules') button:has-text('Give it now')").click(); await q.waitForTimeout(1200);
   log("15 giving:", await q.locator("main h1, main h2").first().textContent(), "| sections:", (await q.locator("main").innerText()).includes("Sign in at the dock office"));
   await q.screenshot({ path: `${OUT}/e-own-talk-give.png`, fullPage: false });
+  // Scenario 16: check a record from its PDF. The record shows its check code; the QR link opens /verify with counts
+  // and no names; a mistyped code finds nothing.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Records"); await q.waitForTimeout(800);
+  await q.locator("main a[href*='record']").first().click(); await q.waitForTimeout(1200);
+  const code = (await q.locator("dt:has-text('Check code') + dd").innerText()).trim();
+  log("16 record code:", /^[2-9A-HJKMNP-Z]{4}(-[2-9A-HJKMNP-Z]{4}){3}$/.test(code));
+  await q.evaluate((c) => { sessionStorage.setItem("tt-preview-start", "/verify/"); location.hash = c.replace(/-/g, ""); }, code);
+  await q.reload(); await q.waitForTimeout(1500);
+  const vtext = await q.locator("main").innerText();
+  log("16 verify:", await q.locator("h1").first().textContent(), "| found:", vtext.includes("on file"), "|", (await q.locator("section[aria-label='What was saved'] p.text-sm").first().innerText()),
+    "| no worker names:", !/Alvarez|Brooks|Diaz|Example Lead|Example Worker/.test(vtext), "| no compliance claim:", !/\bcompliant\b/i.test(vtext));
+  await q.screenshot({ path: `${OUT}/e-verify.png`, fullPage: true });
+  await q.fill("input[aria-label='Check code']", code.slice(0, -1) + (code.endsWith("2") ? "3" : "2")); await q.click("button:has-text('Check')"); await q.waitForTimeout(800);
+  log("16 mistyped:", (await q.locator("main [role=status], main [role=alert]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" | "));
+  await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

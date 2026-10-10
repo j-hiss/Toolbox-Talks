@@ -30,6 +30,16 @@ const text = (r: TalkRecord) => buildRecordPdf(r, co).output().replace(/\\([()\\
 const JPEG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAADAAQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCOiiivmj7A/9k=";
 
 describe("PDF record", () => {
+  it("carries a check code and QR when the record has one, and says so when it doesn't yet", () => {
+    const withCode = buildRecordPdf(rec({ verify_code: "7KQ2M9TX4HPAZC3N" }), co, [], "https://app.example.com").output().replace(/\\([()\\])/g, "$1");
+    expect(withCode).toContain("CHECK THIS RECORD");
+    expect(withCode).toContain("(7KQ2-M9TX-4HPA-ZC3N) Tj");
+    expect(withCode).toContain("Check code 7KQ2-M9TX-4HPA-ZC3N"); // in every page footer
+    expect(withCode).toContain("app.example.com/verify");
+    const before = text(rec({ verify_code: null }));
+    expect(before).toContain("hasn't uploaded yet");
+    expect(before).not.toContain("Check code");
+  });
   it("names a walk-in's company and includes the crew photo with when it was taken", () => {
     const r = rec({
       photo: JPEG, photo_taken_at: "2026-10-06T11:21:00Z",

@@ -124,6 +124,8 @@ export type TalkRecord = TalkRecordSummary & {
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
   /** The statement crew members tapped before signing (null on records from before it existed). */
   signing_statement?: { text: string; en: string; language: string; version: number } | null;
+  /** Printed on the PDF with a QR code; anyone can check it at /verify (migration 0030). Absent before upload. */
+  verify_code?: string | null;
   attendees: AttendanceRow[];
   /** Optional crew photo (image loaded from private storage) and when it was taken. */
   photo?: string | null;

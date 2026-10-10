@@ -729,6 +729,21 @@ async function main() {
         && (await as(userA, "select id from public.company_talks where company_id = $1", [coB])).rows.length === 0);
     }
 
+    // Check a record from its PDF (0030): a code on every record; anyone with it sees counts, never names.
+    {
+      const codes = (await db.query("select verify_code from public.talk_records")).rows.map((r) => r.verify_code);
+      check("Every record has its own check code", codes.length > 0 && codes.every((c) => /^[2-9A-HJKMNP-Z]{16}$/.test(c)) && new Set(codes).size === codes.length);
+      const one = (await db.query("select r.id, r.verify_code, (select count(*) from public.talk_attendees a where a.record_id = r.id)::int as n from public.talk_records r where r.company_id = $1 order by n desc limit 1", [coA])).rows[0];
+      const seen = (await as(null, "select public.verify_record($1) as v", [one.verify_code.toLowerCase().replace(/(.{4})/g, "$1-")])).rows[0].v;
+      check("Anyone with the code sees what was saved, typed any way", !!seen && seen.company === "Company A" && seen.roster === one.n);
+      check("A check shows counts only: no names, signatures, places or ids", Object.keys(seen).sort().join() ===
+        "absent,company,held_at,kind,language,makeup_for_week,not_signed,presenter_signed,roster,saved_at,signed,title,title_en,week_number,week_start");
+      check("A wrong or broken code finds nothing", (await as(null, "select public.verify_record('23456789ABCDEFGH') as v")).rows[0].v === null
+        && (await as(null, "select public.verify_record('nope') as v")).rows[0].v === null);
+      check("A check code can't be changed", await fails(() => as(userA, "update public.talk_records set verify_code = '23456789ABCDEFGH' where id = $1", [one.id])));
+      check("Signed-out visitors still can't read records", await fails(() => as(null, "select verify_code from public.talk_records")));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -747,7 +762,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 60;
+  const EXPECTED = 66;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);
