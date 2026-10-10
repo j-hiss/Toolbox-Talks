@@ -779,6 +779,26 @@ async function main() {
         && await fails(() => as(presenterA, "insert into public.injury_summaries (company_id, year, version) values ($1, 2026, 2)", [coA])));
     }
 
+    // Review fixes (0032): database clock on talk versions, talk content shape, combined 180 days, no future dates,
+    // and the injury log closed to office and employee accounts.
+    {
+      const officeT = randomUUID(), empT2 = randomUUID();
+      await db.query("insert into auth.users (id) values ($1), ($2)", [officeT, empT2]);
+      await db.query("insert into public.company_members (company_id, user_id, access) values ($1, $2, 'office'), ($1, $3, 'employee')", [coA, officeT, empT2]);
+      check("Office and employee accounts can't read the injury log or 300A", (await as(officeT, "select case_key from public.injury_cases")).rows.length === 0
+        && (await as(empT2, "select case_key from public.injury_cases")).rows.length === 0
+        && (await as(officeT, "select year from public.injury_summaries")).rows.length === 0);
+      const good = JSON.stringify({ en: { title: "T", hook: "H", sections: [{ heading: "S", items: ["i"] }], ask: "A" } });
+      const t = (await as(userA, "insert into public.company_talks (company_id, talk_key, version, title, content, created_at) values ($1, 'own-reviewfix0001', 1, 'T', $2::jsonb, '2001-01-01') returning created_at", [coA, good])).rows[0];
+      check("A talk version's time is the database's clock", new Date(t.created_at).getFullYear() > 2001);
+      check("Badly shaped talk content is refused", await fails(() => as(userA, "insert into public.company_talks (company_id, talk_key, version, title, content) values ($1, 'own-reviewfix0002', 1, 'T', '{\"en\":{\"sections\":\"boom\"}}'::jsonb)", [coA])));
+      const inj = (extra) => as(userA, `insert into public.injury_cases (company_id, case_key, version, employee_name, injury_date, description, outcome, days_away, days_restricted, kind, year) values ($1, $2, 1, 'Example Worker', $3, 'x', 'days_away', $4, $5, 'injury', $6)`,
+        [coA, randomUUID(), extra.date, extra.away, extra.restricted, Number(extra.date.slice(0, 4))]);
+      check("Days away and restricted together stop at 180", await fails(() => inj({ date: "2026-01-05", away: 180, restricted: 180 })));
+      const future = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+      check("An injury date can't be in the future", await fails(() => inj({ date: future, away: 1, restricted: 0 })));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -797,7 +817,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 79;
+  const EXPECTED = 84;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

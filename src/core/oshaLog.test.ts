@@ -18,6 +18,7 @@ describe("OSHA 300 log", () => {
     expect(caseProblem(draft({ outcome: "restricted", days_away: 2, days_restricted: 4 }), today)).toMatch(/Days away from work/);
     expect(caseProblem(draft({ outcome: "other", days_away: 0, days_restricted: 1 }), today)).toMatch(/matching box/);
     expect(caseProblem(draft({ days_away: 181 }), today)).toMatch(/180/);
+    expect(caseProblem(draft({ days_away: 120, days_restricted: 61 }), today)).toMatch(/together/);
     expect(caseProblem(draft({ injury_date: "2026-10-11" }), today)).toMatch(/future/);
   });
   it("privacy cases: a reason, the name off the log, and only illnesses at the person's request", () => {

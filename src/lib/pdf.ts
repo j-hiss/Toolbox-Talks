@@ -641,14 +641,19 @@ export function buildPrivacyListPdf(cases: InjuryCase[], co: HeaderCompany, year
   doc.text("CASE NO.", M, y); doc.text("NAME", M + 80, y); doc.text("DATE", M + 300, y); doc.text("JOB TITLE", M + 380, y);
   doc.setTextColor(0); y += 6; doc.setDrawColor(30); doc.line(M, y, W - M, y); y += 14;
   const list = cases.filter((c) => c.privacy).sort((a, b) => a.case_no - b.case_no);
+  // Every page says confidential, not just the last.
+  const foot = () => { doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY); doc.text(`${co.name || ""} · Privacy case list ${year} · Confidential`, M, H - 28); doc.setTextColor(0); doc.setFontSize(10); };
   doc.setFont("helvetica", "normal"); doc.setFontSize(10);
   for (const c of list) {
-    if (y > H - M - 40) { doc.addPage(); y = M; }
+    if (y > H - M - 40) {
+      foot(); doc.addPage(); y = M;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...RED); doc.text(`CONFIDENTIAL · PRIVACY CASE LIST ${year} (continued)`, M, y); doc.setTextColor(0); y += 24;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    }
     doc.text(caseLabel(c), M, y); doc.text(doc.splitTextToSize(c.employee_name, 210)[0] ?? "", M + 80, y); doc.text(longDay(c.injury_date), M + 300, y);
     doc.text(doc.splitTextToSize(c.job_title || "-", CW - 380)[0] ?? "", M + 380, y); y += 18;
   }
   if (!list.length) { doc.setFont("helvetica", "italic"); doc.text("No privacy cases this year.", M, y); }
-  doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
-  doc.text(`${co.name || ""} · Privacy case list ${year} · Confidential`, M, H - 28); doc.setTextColor(0);
+  foot();
   return doc;
 }

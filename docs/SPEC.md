@@ -577,7 +577,7 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   counsel's privacy review).
 - **The log (Form 300 columns, checked against 29 CFR 1904.29, 1904.7 and 1904.32 on 2026-10-10):** case number,
   name, job title, date, where, what happened; one box for the most serious outcome (death, days away, job transfer
-  or restriction, other recordable); days away and restricted (calendar days from the day after, capped at 180); type
+  or restriction, other recordable); days away and restricted (calendar days from the day after, capped at 180, days away and restricted together); type
   (injury, skin, respiratory, poisoning, hearing loss, other illness). The database checks the days match the box.
 - **Privacy cases** (the six kinds in 1904.29(b)(7)) print "Privacy case"; names go on a separate confidential list.
   Only an illness can be withheld at the person's request.
@@ -587,6 +587,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   certifier name, title and phone; the executive signs and dates the paper. Carries the employee access and falsifying
   statements and the posting dates (Feb 1 to Apr 30). January to April, Admin reminds to post last year's.
 - **Rates:** recordable and days-away/restricted per 100 full-time workers (200,000 hours) once hours are entered.
+- **Review (2026-10-10, migration 0032):** an independent review found no critical or high issues; fixed: database clock
+  on talk versions, talk content shape checked, combined 180-day cap, no future injury dates, confidential label on
+  every privacy-list page.
 - **Honest limits:** the app keeps the log and builds the forms; deciding recordability is the company's. It reminds
   about 8-hour and 24-hour serious-injury reports (1904.39) but doesn't send them. Not yet: Form 301 incident
   reports, OSHA's electronic submission (ITA) file, several establishments per company.

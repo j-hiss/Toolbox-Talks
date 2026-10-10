@@ -8,7 +8,7 @@
 //   Days: (K) away from work, (L) on job transfer or restriction. (M) type: (1) injury, (2) skin disorder,
 //   (3) respiratory condition, (4) poisoning, (5) hearing loss, (6) all other illnesses.
 // - Days are calendar days starting the day after the injury, whether or not the person was scheduled to work, and
-//   may be capped at 180 (1904.7(b)(3)-(4)).
+//   may be capped at 180, days away and restricted together (1904.7(b)(3)-(4)).
 // - Privacy concern cases (1904.29(b)(7)) show "Privacy case" instead of the name; the names go on a separate,
 //   confidential list (1904.29(b)(6)).
 // - Record a case within 7 calendar days of learning of it (1904.29(b)(3)).
@@ -82,6 +82,7 @@ export function caseProblem(c: CaseDraft, today: Date = new Date()): string | nu
   if (c.injury_date > isoToday(today)) return "The date can't be in the future.";
   if (!c.description.trim()) return "Describe the injury or illness, the part of the body, and what caused it.";
   for (const d of [c.days_away, c.days_restricted]) if (!Number.isInteger(d) || d < 0 || d > MAX_DAYS) return `Days are whole numbers from 0 to ${MAX_DAYS}. Enter ${MAX_DAYS} when it ran longer.`;
+  if (c.days_away + c.days_restricted > MAX_DAYS) return `Days away and restricted together stop at ${MAX_DAYS}.`;
   if (c.outcome === "days_away" && c.days_away < 1) return "A days-away case needs at least 1 day away.";
   if (c.outcome === "restricted" && c.days_restricted < 1) return "A restriction case needs at least 1 day of restriction or transfer.";
   if (c.outcome === "restricted" && c.days_away > 0) return "There were days away, so choose \"Days away from work\".";
