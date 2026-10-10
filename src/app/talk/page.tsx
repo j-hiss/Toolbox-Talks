@@ -35,6 +35,7 @@ import { enqueue, flush, pending } from "@/lib/outbox";
 import { CrewPhoto } from "@/components/CrewPhoto";
 import { PretaskPlanStep } from "@/components/PretaskPlanStep";
 import { SignatureRule } from "@/components/Logo";
+import { Steps as SharedSteps } from "@/components/Steps";
 import { DAILY_STATEMENT, DAILY_STATEMENT_VERSION, PRETASK_TALK_ID, pretaskContent, tidyPlan } from "@/core/pretask";
 import { getLocation } from "@/lib/location";
 import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
@@ -152,29 +153,8 @@ function Talk({ m }: { m: Membership }) {
   );
 }
 
-// The three steps of giving a talk, named, so the presenter always sees what's next. A real sequence, so numbered.
-const STEP_NAMES = ["Read", "Who's here", "Sign"] as const;
-function Steps({ n, label }: { n: 1 | 2 | 3; label: string }) {
-  return (
-    <div className="mb-4">
-      <p className="sr-only">Step {n} of 3: {label}</p>
-      <ol className="flex gap-1.5" aria-hidden>
-        {STEP_NAMES.map((name, j) => {
-          const i = j + 1;
-          return (
-            <li key={name} className="flex-1">
-              <span className={`block h-1.5 rounded-full ${i <= n ? "bg-brand" : "bg-line"}`} />
-              <span className={`mt-1.5 flex items-center gap-1.5 text-[13px] ${i === n ? "font-semibold text-fg" : i < n ? "text-brand-text" : "text-muted"}`}>
-                <span className={`flex h-[18px] w-[18px] items-center justify-center rounded-full text-[11px] font-bold tabular-nums ${i < n ? "bg-brand text-brand-ink" : i === n ? "bg-fg text-bg" : "bg-line text-muted"}`}>{i < n ? "✓" : i}</span>
-                {name}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
-  );
-}
+const TALK_STEPS = ["Read", "Who's here", "Sign"] as const;
+const Steps = ({ n, label }: { n: 1 | 2 | 3; label: string }) => <SharedSteps n={n} label={label} names={TALK_STEPS} />;
 
 // ---------------------------------------------------------------------------------------------------------------
 function MakeupPick({ weeks, draft, update, open }: {
@@ -845,7 +825,7 @@ function Sign({
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-muted tabular-nums">Step 3 of 3 · Signing {idx + 1} of {turns.length}</p>
+        <p className="text-sm text-muted tabular-nums"><b className="text-fg">Sign</b> · person {idx + 1} of {turns.length}</p>
         <button className="min-h-11 text-sm font-semibold text-brand-text underline underline-offset-2" onClick={() => go(turns.length)}>Review all</button>
       </div>
       <div className="mt-2 flex gap-1" aria-hidden>
@@ -863,7 +843,7 @@ function Sign({
         </div>
       </div>
       {/* Each person sees what they're signing for, in their language. */}
-      <p className="mt-4 rounded-xl bg-surface px-4 py-2.5 text-sm shadow-card">{ui.forTalk}: <b>{talkTitle}</b> <span className="text-muted">· {new Date().toLocaleDateString(draft.lang, { month: "short", day: "numeric" })}</span></p>
+      <p className="mt-4 rounded-xl bg-surface px-4 py-2.5 text-sm shadow-card">{ui.forTalk}: <b>{talkTitle}</b> <span className="whitespace-nowrap text-muted">· {new Date().toLocaleDateString(draft.lang, { month: "short", day: "numeric" })}</span></p>
       {!t.presenter && (
         // The signing statement: a deliberate tap before the pad takes ink, saved with the record (src/content/ui.ts).
         <button
@@ -1014,9 +994,9 @@ function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
   return (
     <>
       <div className="mt-2 flex flex-col items-center text-center">
-        <svg viewBox="0 0 96 96" className={`h-24 w-24 ${everyone ? "" : "opacity-80"}`} aria-hidden>
-          <circle cx="48" cy="48" r="42" fill="none" stroke={everyone ? "var(--ok)" : "var(--line)"} strokeWidth="8" className="done-ring" />
-          <path d="M30 49 l12 12 l24 -26" fill="none" stroke={everyone ? "var(--ok)" : "var(--muted)"} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" className="done-check" />
+        <svg viewBox="0 0 96 96" className={`h-24 w-24 ${everyone ? "" : "opacity-60"}`} aria-hidden>
+          <circle cx="48" cy="48" r="42" fill="none" stroke={everyone ? "var(--ok)" : "var(--brand)"} strokeWidth="8" className="done-ring" />
+          <path d="M30 49 l12 12 l24 -26" fill="none" stroke={everyone ? "var(--ok)" : "var(--brand)"} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" className="done-check" />
         </svg>
         {everyone && <p className="mt-3 font-display text-[26px] font-extrabold leading-tight tracking-[-0.03em]" role="status">Everyone signed</p>}
         {everyone && <p className="text-sm text-muted">{c.signed} of {c.total} on the roster, plus the presenter.</p>}
@@ -1042,8 +1022,8 @@ function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
       <div className="mt-6 flex flex-col gap-2">
         {/* Several crews a week is normal: the same talk again, with a fresh roster and signatures. */}
         {!done.makeupLabel && <Button onClick={onAnother}>Give it to another team</Button>}
-        <Link href="/records/" className="flex min-h-14 items-center justify-center rounded-lg bg-surface shadow-card px-4 text-center font-semibold">See records</Link>
-        <Link href="/" className="flex min-h-14 items-center justify-center rounded-lg border border-line px-4 text-center font-semibold">Home</Link>
+        <Link href="/records/" className="flex min-h-[54px] items-center justify-center rounded-full bg-brand-soft px-5 text-center text-[17px] font-semibold tracking-[-0.02em] text-brand-text">See records</Link>
+        <Link href="/" className="flex min-h-[54px] items-center justify-center rounded-full bg-fg/[0.06] px-5 text-center text-[17px] font-semibold tracking-[-0.02em]">Home</Link>
       </div>
     </>
   );

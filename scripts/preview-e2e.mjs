@@ -12,7 +12,7 @@ const PAGE = "file://" + path.join(__dirname, "..", "preview", "dist", "index.ht
 const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: ["--no-sandbox"] });
 (async () => {
   const b = await launch();
-  const p = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: false, colorScheme: process.env.SCHEME || "light" });
+  const p = await b.newPage({ viewport: { width: Number(process.env.VW) || 390, height: Number(process.env.VH) || 844 }, deviceScaleFactor: 2, hasTouch: false, colorScheme: process.env.SCHEME || "light" });
   const errs = []; p.on("pageerror", (e) => errs.push(e.message)); p.on("console", (m) => m.type() === "error" && errs.push(m.text()));
   const log = (...a) => console.log(...a);
   const shot = async (n) => { await p.waitForTimeout(350); await p.screenshot({ path: `${OUT}/e-${n}.png` }); };
@@ -40,7 +40,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await p.click("button:has-text('Undo')"); await p.waitForTimeout(500);
   log("after undo:", (await p.locator("ul li b").allTextContents()).join(","));
   // home -> start talk
-  await p.click("nav[aria-label=Main] >> text=Home"); await p.waitForTimeout(700); await shot("home");
+  await p.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await p.waitForTimeout(700); await shot("home");
   log("getting started:", (await p.locator("text=Getting started").count()) ? await p.locator("section:has-text('Getting started') ol").innerText() : "none");
   await p.click("text=Start this talk"); await p.waitForTimeout(500);
   await p.click("button[aria-label='Bigger text']"); await shot("read");
@@ -69,15 +69,15 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await p.click("button:has-text('Save')"); await p.waitForTimeout(1200);
   log("saved:", await p.locator("h1").textContent(), "|", await p.locator("[role=alert]").allInnerTexts()); await shot("after-save");
   log("absent toast gone after save:", await p.locator("text=marked absent").count() === 0, "| another crew:", await p.locator("button:has-text('Give it to another team')").count());
-  await p.click("nav[aria-label=Main] >> text=Home"); await p.waitForTimeout(900); await shot("home-after");
+  await p.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await p.waitForTimeout(900); await shot("home-after");
   log("week card:", (await p.locator("section:has-text('Signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " "));
   log("last setup:", await p.locator("text=Set up like last time").textContent().catch(() => "none"));
-  await p.click("nav[aria-label=Main] >> text=Records"); await p.waitForTimeout(800); await shot("records");
+  await p.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Records"); await p.waitForTimeout(800); await shot("records");
   log("records:", (await p.locator("main h3").allInnerTexts()).join(" | "));
-  await p.click("nav[aria-label=Main] >> text=Reports"); await p.waitForTimeout(1000); await shot("reports");
+  await p.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await p.waitForTimeout(1000); await shot("reports");
   log("tabs:", (await p.locator("nav[aria-label=Main] a").allInnerTexts()).join(","), "| current:", await p.locator("nav[aria-label=Main] a[aria-current=page]").innerText());
   // Scenario 2: example history -> makeup with "still needs" roster -> record PDF through the preview's save prompt.
-  const q = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  const q = await b.newPage({ viewport: { width: Number(process.env.VW) || 390, height: Number(process.env.VH) || 844 }, deviceScaleFactor: 2, colorScheme: process.env.SCHEME || "light" });
   q.on("pageerror", (e) => errs.push(e.message));
   await q.addInitScript(() => { window.__saved = null; window.claude = { use: async (n) => n === "downloads" ? { save: async ({ filename, data }) => { window.__saved = { filename, size: data.size }; return { status: "saved" }; } } : null }; });
   await q.goto(PAGE); await q.waitForTimeout(800);
@@ -116,7 +116,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("text=Download PDF"); await q.waitForTimeout(2500);
   log("2 pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
   // Jobsite QR sticker, then "scanning" it: opening the app with ?site=<id> picks that jobsite.
-  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Jobsites')"); await q.waitForTimeout(400);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Jobsites')"); await q.waitForTimeout(400);
   await q.locator("button:has-text('QR sticker')").first().click(); await q.waitForTimeout(1500);
   log("2 qr sticker:", JSON.stringify(await q.evaluate(() => window.__saved)));
   const siteId = await q.evaluate(() => { const d = JSON.parse(localStorage.getItem("tt-preview-db")); return d.jobsites.find((j) => j.active !== false)?.id; });
@@ -125,7 +125,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("2 scanned:", await q.locator("text=Jobsite set from the QR sticker").innerText().catch(() => "not set"), "| url cleaned:", !q.url().includes("site="));
   await q.goto(PAGE + "?site=99999999-2222-4333-8444-555555555555"); await q.waitForTimeout(1200);
   log("2 other company's sticker:", await q.locator("text=doesn't have").count() > 0);
-  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1200);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(1200);
   log("2 reports score:", await q.locator("p:has-text('Sign-in rate') + p").first().textContent());
   log("2 needs-makeup cards:", (await q.locator("li:has(button:has-text('Give this makeup now'))").allInnerTexts()).map((t) => t.replace(/\s+/g, " ").slice(0, 120)).join(" || "));
   log("2 reports folded sections:", await q.locator("main details").count(), "| open:", await q.locator("main details[open]").count());
@@ -138,7 +138,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("text=Done reading"); await q.waitForTimeout(400);
   log("2 roster ready:", await q.locator("#team").inputValue(), "|", (await q.locator("main ul li b").allTextContents()).join(", "));
   // Scenario 3: spreadsheet import -> talk with site notes, heat reminder and a raised issue -> issue fixed.
-  const r = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  const r = await b.newPage({ viewport: { width: Number(process.env.VW) || 390, height: Number(process.env.VH) || 844 }, deviceScaleFactor: 2, colorScheme: process.env.SCHEME || "light" });
   r.on("pageerror", (e) => errs.push(e.message));
   await r.goto(PAGE); await r.waitForTimeout(800);
   await r.fill("#co-name", "Demo 3"); await r.click("text=Create company"); await r.waitForTimeout(800);
@@ -152,7 +152,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("3 after import:", (await r.locator("main ul li b").allTextContents()).join(", "), "| groups:", (await r.locator("main h2").allTextContents()).join(","));
   await r.click("[role=tab]:has-text('Jobsites')"); await r.fill("#js-name", "Example Jobsite");
   await r.click("form button:has-text('Add')"); await r.waitForTimeout(500);
-  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(900);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await r.waitForTimeout(900);
   await r.click("text=Check the weather here").catch(() => {}); await r.waitForTimeout(600);
   log("3 home heat:", (await r.locator("main [role=alert], main [role=status]").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).find((t) => /Heat index/.test(t)) ?? "none");
   await r.screenshot({ path: `${OUT}/e-home-heat.png`, fullPage: true });
@@ -190,7 +190,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("3 record walk-in + photo:", (await r.locator("main").innerText()).split("\n").filter((t) => /Example Electric/.test(t)).join(" | "), "| photo:", await r.locator('img[alt="Team photo taken at this talk"]').count());
   await r.screenshot({ path: `${OUT}/e-record-photo.png`, fullPage: true });
   log("3 record on site:", (await r.locator("main").innerText()).split("\n").filter((t) => /site|Heat index|ladder/i.test(t)).join(" | "));
-  await r.click("nav[aria-label=Main] >> text=Records"); await r.waitForTimeout(600);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Records"); await r.waitForTimeout(600);
   await r.click("[role=tab]:has-text('Issues')"); await r.waitForTimeout(700);
   log("3 issues:", (await r.locator("main ul li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).join(" || "));
   await r.locator("main ul li button").first().click(); await r.waitForTimeout(300);
@@ -200,7 +200,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   // Scenario 4: Admin -> Brand. Colors change live, save, survive a reload, and go back to default.
   const brandVar = (pg) => pg.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brand").trim());
   const markBg = (pg) => pg.evaluate(() => getComputedStyle(document.querySelector("header a span")).backgroundColor);
-  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await r.waitForTimeout(500);
   await r.click("[role=tab]:has-text('Brand')"); await r.waitForTimeout(400);
   log("4 brand start:", await brandVar(r), "| checks:", await r.locator("main [role=status]").last().innerText());
   await r.screenshot({ path: `${OUT}/e-brand.png`, fullPage: true });
@@ -213,9 +213,9 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.screenshot({ path: `${OUT}/e-brand-harbor.png`, fullPage: true });
   await r.reload(); await r.waitForTimeout(1200);
   log("4 after reload:", await brandVar(r));
-  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(700);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await r.waitForTimeout(700);
   await r.screenshot({ path: `${OUT}/e-home-harbor.png` });
-  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Brand')"); await r.waitForTimeout(300);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Brand')"); await r.waitForTimeout(300);
   await r.fill('input[aria-label="Brand hex code"]', "#000000"); await r.press('input[aria-label="Brand hex code"]', "Enter"); await r.waitForTimeout(200);
   await r.click("[role=tab]:has-text('People')"); await r.waitForTimeout(300);
   log("4 unsaved change dropped on leaving:", await brandVar(r));
@@ -248,9 +248,9 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("6 after save:", (await r.locator('section[aria-label="How often"]').innerText()).split("\n").filter((l) => /Now:|starts|Changing/.test(l)).join(" | "));
   await r.screenshot({ path: `${OUT}/e-cadence.png`, fullPage: false });
   log("6 plan after:", (await r.locator("main li b").allTextContents()).slice(0, 3).join(" | "));
-  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(700);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await r.waitForTimeout(700);
   log("6 home coming up:", (await r.locator("section:has-text('Coming up') li small").allTextContents()).slice(0, 3).join(" | "));
-  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Plan')"); await r.waitForTimeout(500);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Plan')"); await r.waitForTimeout(500);
   await r.locator('section[aria-label="How often"] label:has-text("Every week")').click();
   await r.locator('section[aria-label="How often"] button').click(); await r.waitForTimeout(700);
   log("6 after keep:", (await r.locator('section[aria-label="How often"]').innerText()).split("\n").filter((l) => /Now:|Staying/.test(l)).join(" | "));
@@ -284,7 +284,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await card.locator("button:has-text('Approve for talks')").click(); await r.waitForTimeout(800);
   log("7 approved:", (await r.locator("main li:has-text('Weekly scaffold check')").first().innerText()).includes("Approved for talks"));
   await r.screenshot({ path: `${OUT}/e-safetylog.png`, fullPage: false });
-  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(700);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await r.waitForTimeout(700);
   await r.click("button:has-text('Start this talk')"); await r.waitForTimeout(1200);
   log("7 talk section:", (await r.locator("main h3:has-text('Since last talk')").count()) === 1, "|", (await r.locator("main p.text-muted.font-semibold, main p.font-semibold.text-muted").allInnerTexts()).join(" | ").slice(0, 120));
   log("7 done reading blocked:", await r.locator("button:has-text('Check off')").innerText().catch(() => "not blocked"));
@@ -294,7 +294,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.click("text=Discard this talk"); await r.waitForTimeout(200);
   log("7 discard asks first:", await r.locator("button:has-text('Tap again')").innerText().catch(() => "no confirm"));
   await r.click("button:has-text('Tap again')"); await r.waitForTimeout(600);
-  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Safety log')"); await r.waitForTimeout(600);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Safety log')"); await r.waitForTimeout(600);
   const card2 = r.locator("main li:has-text('Weekly scaffold check')").first();
   await card2.locator("button[aria-expanded]").click(); await r.waitForTimeout(400);
   log("7 approved summary is read-only:", await card2.locator('textarea[aria-label="Team summary"]').count() === 0);
@@ -307,11 +307,11 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("7 finding on issues list:", issues.join(", "));
   // Scenario 8: daily pre-task plan. Turn it on, plan the day, crew signs, saved as its own record that never counts
   // toward the weekly talk.
-  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(800);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await r.waitForTimeout(800);
   const weekBefore = (await r.locator("section:has-text('signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " ");
-  await r.click("nav[aria-label=Main] >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Company')"); await r.waitForTimeout(400);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await r.waitForTimeout(500); await r.click("[role=tab]:has-text('Company')"); await r.waitForTimeout(400);
   await r.locator("label:has-text('Daily pre-task plans') input").check(); await r.waitForTimeout(600);
-  await r.click("nav[aria-label=Main] >> text=Home"); await r.waitForTimeout(800);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await r.waitForTimeout(800);
   await r.click("text=Start today's pre-task plan"); await r.waitForTimeout(600);
   log("8 plan step:", await r.locator("h1").textContent());
   await r.click("button:has-text(\"Who's here\")"); await r.waitForTimeout(200);
@@ -334,23 +334,23 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await r.click("text=Review all"); await r.waitForTimeout(300);
   await r.click("button:has-text('Save')"); await r.waitForTimeout(1200);
   log("8 saved:", await r.locator("h1").textContent());
-  await r.click("nav[aria-label=Main] >> text=Home").catch(() => {}); await r.waitForTimeout(800);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home").catch(() => {}); await r.waitForTimeout(800);
   if (!(await r.locator("nav[aria-label=Main]").count())) { await r.click("text=Home"); await r.waitForTimeout(800); }
   const weekAfter = (await r.locator("section:has-text('signed this week')").last().innerText().catch(() => "none")).replace(/\s+/g, " ");
   log("8 weekly count unchanged:", weekBefore === weekAfter, "|", weekAfter.slice(0, 60));
-  await r.click("nav[aria-label=Main] >> text=Records"); await r.waitForTimeout(700);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Records"); await r.waitForTimeout(700);
   log("8 records tag:", await r.locator("main li:has-text('Daily plan')").count() > 0);
   await r.locator("main li:has-text('Daily plan') a").first().click(); await r.waitForTimeout(900);
   log("8 record:", (await r.locator("main p").first().innerText()).replace(/\s+/g, " "), "|", (await r.locator("main").innerText()).includes("Equipment reminders"));
   await r.screenshot({ path: `${OUT}/e-daily-record.png`, fullPage: true });
-  await r.click("nav[aria-label=Main] >> text=Reports"); await r.waitForTimeout(1000);
+  await r.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await r.waitForTimeout(1000);
   log("8 reports daily:", (await r.locator("summary:has-text('Daily pre-task plans')").innerText().catch(() => "none")).replace(/\s+/g, " "));
   // Scenario 9: safety profile (company with example history). Add a self-reported EMR, check the honest missed-weeks
   // count and program elements, then download the renewal packet through the preview's save prompt.
   await q.goto(PAGE); await q.waitForTimeout(1200); // page q was left mid-talk by an earlier scenario
   log("9 home streak:", (await q.locator("section[aria-label^='This']").innerText().catch(() => "none")).replace(/\s+/g, " "));
   await q.screenshot({ path: `${OUT}/e-home-streak.png` });
-  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(1000);
   await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
   log("9 profile:", await q.locator("h1").textContent(), "| figures:", (await q.locator("main dl").innerText()).replace(/\s+/g, " ").slice(0, 160));
   log("9 missed weeks notice:", (await q.locator("text=Weeks with no talk recorded").count()) > 0 ? "shown" : "none (no missed weeks)");
@@ -364,7 +364,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("9 no compliance claim:", !/\bcompliant\b/i.test((await q.locator("main").innerText()).replace("doesn't certify compliance", "")));
   // Scenario 10: job titles, app access, and each app role's view (preview "View as").
   await q.goto(PAGE); await q.waitForTimeout(1000);
-  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Job titles')"); await q.waitForTimeout(400);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Job titles')"); await q.waitForTimeout(400);
   log("10 titles:", await q.locator("main ul li").count(), "| Laborer gives talks:", await q.locator('input[aria-label="Laborer gives talks"]').isChecked().catch(() => "missing"),
     "| Foreman gives talks:", await q.locator('input[aria-label="Foreman gives talks"]').isChecked().catch(() => "missing"), "| starter offer:", await q.locator("text=Starter titles for").count());
   await q.screenshot({ path: `${OUT}/e-job-titles.png`, fullPage: true });
@@ -376,7 +376,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   const viewAs = async (role) => { await q.click("button[aria-label='Show preview options']").catch(() => {}); await q.selectOption('select[aria-label="View as"]', role); await q.waitForTimeout(1500); };
   await viewAs("office");
   log("10 office tabs:", (await q.locator("nav[aria-label=Main] a").allInnerTexts()).join(","), "| start talk shown:", await q.locator("button:has-text('Start this talk')").count());
-  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(1000);
   log("10 office reports:", await q.locator("h1").first().textContent(), "| profile link:", await q.locator("a[href*='profile']").count(), "| makeup buttons:", await q.locator("button:has-text('Give this makeup now')").count());
   await viewAs("employee");
   log("10 employee tabs:", (await q.locator("nav[aria-label=Main] a").allInnerTexts()).join(","), "| home:", await q.locator("h1").first().textContent(), "| talks listed:", await q.locator("main ul li").count());
@@ -384,7 +384,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await viewAs("owner");
   log("10 back to owner tabs:", (await q.locator("nav[aria-label=Main] a").allInnerTexts()).join(","));
   // Scenario 11: training cards. Foreman needs a forklift card; add one expiring soon; Home and the profile show it.
-  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(600);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(600);
   await q.selectOption('section[aria-label="What each job title needs"] select', { label: "Foreman" }); await q.waitForTimeout(200);
   await q.locator('input[aria-label="Foreman needs Forklift operator evaluation"]').check(); await q.waitForTimeout(500);
   log("11 summary:", (await q.locator("main p.tabular-nums").first().innerText()).replace(/\s+/g, " "));
@@ -396,9 +396,9 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.screenshot({ path: `${OUT}/e-training-sheet.png`, fullPage: true });
   await q.click("[role=dialog] button[aria-label=Close]"); await q.waitForTimeout(300);
   await q.screenshot({ path: `${OUT}/e-training.png`, fullPage: true });
-  await q.click("nav[aria-label=Main] >> text=Home"); await q.waitForTimeout(1200);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Home"); await q.waitForTimeout(1200);
   log("11 home alert:", (await q.locator("text=Training cards:").first().locator("..").innerText().catch(() => "none")).replace(/\s+/g, " "));
-  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
   log("11 profile training:", (await q.locator("li:has-text('Safety training')").first().innerText()).replace(/\s+/g, " ").slice(0, 220));
   // Scenario 12: share with your agent. Make a 30-day link, check what the agent sees, switch it off.
   await q.fill("#share-label", "Example agent"); await q.click("button:has-text('Make private link')"); await q.waitForTimeout(800);
@@ -413,14 +413,14 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.click("button:has-text('Download PDF')"); await q.waitForTimeout(2500);
   log("12 shared pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
   await q.goBack().catch(() => {}); await q.goto(PAGE); await q.waitForTimeout(1000);
-  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
   const row = q.locator("ul[aria-label=\"Links you've made\"] li").first();
   log("12 list:", (await row.innerText()).replace(/\s+/g, " "));
   await row.locator("button:has-text('Switch off')").click(); await row.locator("button:has-text('Tap again')").click(); await q.waitForTimeout(800);
   log("12 after switch off:", (await q.locator("ul[aria-label=\"Links you've made\"] li").first().innerText()).replace(/\s+/g, " "));
   // Scenario 13: trainer portal. Invite a trainer, view as the trainer, send a card, then approve it as the owner.
   await q.goto(PAGE); await q.waitForTimeout(1000);
-  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(800);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(800);
   await q.fill("#tr-name", "Example Training Co"); await q.fill("#tr-email", "coach@training.example"); await q.click("button:has-text('Invite trainer')"); await q.waitForTimeout(700);
   log("13 invited:", (await q.locator("section[aria-label=Trainers] ul li").first().innerText()).replace(/\s+/g, " ").slice(0, 120));
   await q.screenshot({ path: `${OUT}/e-trainers-admin.png`, fullPage: true });
@@ -434,13 +434,13 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("13 sent:", (await q.locator("section[aria-label='Cards you sent'] li").first().innerText()).replace(/\s+/g, " "));
   await q.screenshot({ path: `${OUT}/e-trainer-portal.png`, fullPage: true });
   await viewAs("owner"); await q.waitForTimeout(600);
-  await q.click("nav[aria-label=Main] >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(900);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(900);
   log("13 waiting for owner:", (await q.locator("ul[aria-label='Cards waiting for approval'] li").first().innerText()).replace(/\s+/g, " ").slice(0, 160));
   await q.click("ul[aria-label='Cards waiting for approval'] button:has-text('Approve')"); await q.waitForTimeout(900);
   log("13 after approve: waiting", await q.locator("ul[aria-label='Cards waiting for approval'] li").count(), "| card on file:", (await q.locator(`button[aria-label='Training for ${who}']`).innerText()).replace(/\s+/g, " "));
   // Scenario 14: insurance partner portal (pilot). Invite an agent, send the summary, read it as the agent, see the
   // open logged, withdraw it.
-  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
   log("14 pilot label:", await q.locator("section[aria-label='Insurance partners'] >> text=Pilot").count() > 0);
   await q.fill("#pt-name", "Example Insurance Agency"); await q.fill("#pt-email", "agent@insure.example"); await q.selectOption("#pt-kind", "agent");
   await q.click("button:has-text('Invite partner')"); await q.waitForTimeout(700);
@@ -455,7 +455,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("14 partner report:", await q.locator("h1").first().textContent(), "| no worker names:", !/Alvarez|Brooks|Diaz/.test(ptext), "| no compliance claim:", !/\bcompliant\b/i.test(ptext.replace("doesn't certify compliance", "")));
   await q.screenshot({ path: `${OUT}/e-partner-report.png`, fullPage: true });
   await viewAs("owner"); await q.waitForTimeout(600);
-  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
   const sentRow = q.locator("ul[aria-label='Sent to Example Insurance Agency'] li").first();
   log("14 open logged:", (await sentRow.innerText()).replace(/\s+/g, " "));
   await sentRow.locator("button:has-text('Withdraw')").click(); await sentRow.locator("button:has-text('Tap again')").click(); await q.waitForTimeout(800);

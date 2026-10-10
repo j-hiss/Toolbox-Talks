@@ -10,7 +10,7 @@ import { titleOf } from "@/core/presenters";
 import { addCert, cardUrl, listCerts, listRequirements, setRequirement, withdrawCert, type StoredCert } from "@/lib/data/certs";
 import type { CertRequirement } from "@/core/certs";
 import type { Person, Role } from "@/lib/data/types";
-import { Button, ConfirmButton, GroupHeading, Loading, Notice, Sheet, inputClass } from "./ui";
+import { Avatar, Button, ConfirmButton, GroupHeading, Loading, Notice, Sheet, inputClass } from "./ui";
 import { toast } from "./toast";
 import { CardForm } from "./CardForm";
 import { TrainersSection } from "./Trainers";
@@ -59,12 +59,15 @@ export function Training({ companyId, people, roles }: { companyId: string; peop
           const rows = personTraining(p.id, p.role_id, certs, reqs, today);
           return (
             <li key={p.id}>
-              <button className="w-full rounded-lg bg-surface shadow-card p-3 text-left text-sm" onClick={() => setOpen(p)} aria-label={`Training for ${p.full_name}`}>
+              <button className="flex w-full gap-3 rounded-xl bg-surface shadow-card p-3 text-left text-sm" onClick={() => setOpen(p)} aria-label={`Training for ${p.full_name}`}>
+                <Avatar name={p.full_name} size={36} />
+                <span className="min-w-0 flex-1">
                 <span className="flex items-baseline justify-between gap-2"><b>{p.full_name}</b><small className="text-muted">{titleOf(p, roles)}</small></span>
                 <span className="mt-1.5 flex flex-wrap gap-1.5">
                   {rows.length === 0 ? <small className="text-muted">No cards on file</small> : rows.map((r) => (
                     <span key={`${r.cert_type}${r.cert?.id ?? ""}`} className={`rounded px-2 py-0.5 text-xs font-semibold ${CERT_CHIP[r.state].tone}`}>{rowName(r)}{r.state !== "current" ? ` · ${CERT_CHIP[r.state].label}` : ""}</span>
                   ))}
+                </span>
                 </span>
               </button>
             </li>

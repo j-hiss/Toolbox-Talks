@@ -59,7 +59,7 @@ export function BrandEditor({ saved, onSave }: Props) {
               >
                 <span aria-hidden className="flex">
                   {(["brand", "action", "done"] as const).map((r, i) => (
-                    <span key={r} className="h-5 w-5 rounded-full ring-2 ring-surface" style={{ background: p.theme[r], marginLeft: i ? -6 : 0 }} />
+                    <span key={r} className="h-5 w-5 rounded-full shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--fg)_22%,transparent)] ring-2 ring-surface" style={{ background: p.theme[r], marginLeft: i ? -6 : 0 }} />
                   ))}
                 </span>
                 {p.name}

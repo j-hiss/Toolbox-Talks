@@ -118,6 +118,8 @@ point the row at the real file and keep the prototype line as its origin.
 | Safety profile screen | `src/app/profile/page.tsx` | Reports → Safety profile & renewal packet: range picker, figures, missed weeks, months, program elements, EMR entry, document upload, PDF downloads |
 | `ProfileSummary` | `src/components/ProfileSummary.tsx` | **The** profile body (figures, missed weeks, months, languages, program elements; with `shared`, EMR and document titles). Used by the company's screen and the shared page, so both show the same |
 | `ShareSection` | `src/components/ShareSection.tsx` | "Share with your agent" on the profile screen: who it's for, 7/30/90 days, make link (shown once), copy/send, see what they'll see, list with opens, switch off |
+| `Steps` | `src/components/Steps.tsx` | **The** named three-step header for giving a talk (Read / Who's here / Sign) and the daily plan (Plan / Who's here / Sign) |
+| `Avatar` | `src/components/ui.tsx` | Initials badge for a person: roster, signing, record sign-in sheet, People and Training lists |
 | `CardForm` | `src/components/CardForm.tsx` | **The** "add a training card" form (type or typed name, issued/expiry from the card, rule note, crane suggestion, note, photo). Admin → Training adds; the trainer portal sends for approval |
 | `TrainersSection` | `src/components/Trainers.tsx` | Admin → Training → Trainers: cards waiting for approval (approve / decline with reason), invite a trainer, tick the people each may see, remove, recently reviewed |
 | `OutsideInvite` | `src/components/OutsideInvite.tsx` | **The** invite-by-email form for people outside the company (trainers, insurance partners), with a slot for extra fields |

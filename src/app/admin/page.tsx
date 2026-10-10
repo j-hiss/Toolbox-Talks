@@ -26,7 +26,7 @@ import { clearOverride, setOverride } from "@/lib/data/plan";
 import { listRecordedWeeks } from "@/lib/data/records";
 import { RequireCompany } from "@/components/Guard";
 import { CompanyForm } from "@/components/CompanyForm";
-import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, Sheet, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ConfirmButton, Eyebrow, Field, GroupHeading, Loading, Notice, Sheet, Shell, Title, inputClass, Avatar } from "@/components/ui";
 import { toast } from "@/components/toast";
 import { ImportPeople } from "@/components/ImportPeople";
 import { TalkPicker } from "@/components/TalkPicker";
@@ -264,6 +264,7 @@ function PeopleTab({ companyId, people, roles, teams, act }: { companyId: string
             {g.people.map((p) => (
               <li key={p.id}>
                 <button className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg" onClick={() => setEditing(p)}>
+                  <Avatar name={p.full_name} size={36} />
                   <span className="min-w-0 flex-1">
                     <b className="block truncate">{p.full_name}</b>
                     <small className="text-muted">{isLead(p) ? "Team lead · " : ""}{roleName(p)}</small>

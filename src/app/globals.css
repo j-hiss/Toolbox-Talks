@@ -115,6 +115,8 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
+  /* Checkboxes, radios and sliders in the brand color instead of the phone's default blue. */
+  accent-color: var(--brand);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   letter-spacing: -0.011em;

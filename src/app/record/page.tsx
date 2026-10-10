@@ -16,7 +16,7 @@ import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { weekNumbers } from "@/core/plan";
 import { RequireCompany } from "@/components/Guard";
-import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title } from "@/components/ui";
+import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title, Avatar } from "@/components/ui";
 
 export default function RecordPage() {
   return <RequireCompany need="staff">{(m) => <RecordView m={m} />}</RequireCompany>;
@@ -105,7 +105,8 @@ function RecordView({ m }: { m: Membership }) {
       <GroupHeading>Sign-in sheet</GroupHeading>
       <ul className="mt-3 flex flex-col gap-2">
         {rec.attendees.map((a, i) => (
-          <li key={i} className={`flex items-center gap-3 rounded-lg border p-3 ${a.status === "signed" ? "border-line bg-surface" : "border-warn bg-warn-bg"}`}>
+          <li key={i} className={`flex items-center gap-3 rounded-xl p-3 ${a.status === "signed" ? "bg-surface shadow-card" : "border border-warn bg-warn-bg"}`}>
+            <Avatar name={a.name} size={36} muted={a.status === "absent"} />
             <span className="min-w-0 flex-1">
               <b className="block">{a.name}</b>
               <small className="text-muted">{[a.role, a.team_name, a.company_name].filter(Boolean).join(" · ")}{a.signed_at ? ` · ${time(a.signed_at)}` : ""}</small>

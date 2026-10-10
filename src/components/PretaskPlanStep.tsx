@@ -3,6 +3,7 @@
 // Step 1 of a daily pre-task plan: today's tasks, hazards and controls, PPE, permits, equipment reminders, emergency
 // plan. Rules and content in src/core/pretask.ts; the rest of the flow (who's here, signatures, saving) is the same
 // as a weekly talk (src/app/talk/page.tsx).
+import { Steps } from "./Steps";
 import { useState } from "react";
 import { EQUIPMENT_PROMPTS, HAZARD_SUGGESTIONS, PERMIT_CHOICES, PPE_CHOICES, pretaskProblems, type EquipmentAnswer, type PretaskPlan } from "@/core/pretask";
 import { LANGUAGES, type LanguageId } from "@/core/languages";
@@ -32,10 +33,7 @@ export function PretaskPlanStep({ draft, update, jobsites }: Props) {
 
   return (
     <>
-      <div className="mb-3">
-        <div className="flex gap-1.5" aria-hidden>{[1, 2, 3].map((i) => <span key={i} className={`h-1.5 flex-1 rounded ${i <= 1 ? "bg-brand" : "bg-line"}`} />)}</div>
-        <p className="mt-3 text-sm font-semibold text-muted">Step 1 of 3 · Plan the day</p>
-      </div>
+      <Steps n={1} label="Plan the day" names={["Plan", "Who's here", "Sign"]} />
       <Eyebrow>Daily pre-task plan{site ? ` · ${site.name}` : ""}</Eyebrow>
       <Title>Plan today with the team</Title>
       <p className="mt-2 text-sm text-muted">Go over it together, then everyone signs. Separate from the weekly toolbox talk; it doesn&apos;t count toward it.</p>
