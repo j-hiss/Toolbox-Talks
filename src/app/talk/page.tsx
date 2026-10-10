@@ -34,6 +34,7 @@ import { clearDraft, newDailyDraft, newDraft, readDraft, useDraft, writeDraft, t
 import { enqueue, flush, pending } from "@/lib/outbox";
 import { CrewPhoto } from "@/components/CrewPhoto";
 import { PretaskPlanStep } from "@/components/PretaskPlanStep";
+import { SignatureRule } from "@/components/Logo";
 import { DAILY_STATEMENT, DAILY_STATEMENT_VERSION, PRETASK_TALK_ID, pretaskContent, tidyPlan } from "@/core/pretask";
 import { getLocation } from "@/lib/location";
 import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
@@ -151,13 +152,26 @@ function Talk({ m }: { m: Membership }) {
   );
 }
 
+// The three steps of giving a talk, named, so the presenter always sees what's next. A real sequence, so numbered.
+const STEP_NAMES = ["Read", "Who's here", "Sign"] as const;
 function Steps({ n, label }: { n: 1 | 2 | 3; label: string }) {
   return (
-    <div className="mb-3">
-      <div className="flex gap-1.5" aria-hidden>
-        {[1, 2, 3].map((i) => <span key={i} className={`h-1.5 flex-1 rounded ${i <= n ? "bg-brand" : "bg-line"}`} />)}
-      </div>
-      <p className="mt-3 text-sm font-semibold text-muted">Step {n} of 3 · {label}</p>
+    <div className="mb-4">
+      <p className="sr-only">Step {n} of 3: {label}</p>
+      <ol className="flex gap-1.5" aria-hidden>
+        {STEP_NAMES.map((name, j) => {
+          const i = j + 1;
+          return (
+            <li key={name} className="flex-1">
+              <span className={`block h-1.5 rounded-full ${i <= n ? "bg-brand" : "bg-line"}`} />
+              <span className={`mt-1.5 flex items-center gap-1.5 text-[13px] ${i === n ? "font-semibold text-fg" : i < n ? "text-brand-text" : "text-muted"}`}>
+                <span className={`flex h-[18px] w-[18px] items-center justify-center rounded-full text-[11px] font-bold tabular-nums ${i < n ? "bg-brand text-brand-ink" : i === n ? "bg-fg text-bg" : "bg-line text-muted"}`}>{i < n ? "✓" : i}</span>
+                {name}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
@@ -409,13 +423,15 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
         )}
       </div>
 
-      <h1 id="line-0" className={`mt-4 font-display text-4xl font-semibold leading-none text-balance tracking-tight ${hl(0)}`}>{text.title}</h1>
+      <h1 id="line-0" className={`mt-5 font-display text-[36px] font-extrabold leading-[1.04] text-balance tracking-[-0.03em] ${hl(0)}`}>{text.title}</h1>
+      <SignatureRule className="mt-3" />
+      <p className="mt-2 text-sm text-muted tabular-nums">{talk.code} · about {talk.minutes} min</p>
       {status && <p className="mt-2 text-sm text-muted" aria-live="polite">{status}</p>}
 
-      <div className={`mt-4 rounded-xl bg-surface shadow-card p-4 ${textSize}`}>
+      <div className={`mt-4 rounded-2xl bg-surface shadow-card px-5 py-5 leading-relaxed ${textSize}`}>
         {lines.slice(1).map((l, j) => {
           const i = j + 1;
-          if (l.kind === "hook") return <p key={i} id={`line-${i}`} className={`font-semibold ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "hook") return <p key={i} id={`line-${i}`} className={`font-display text-[1.15em] font-bold leading-snug tracking-[-0.01em] ${hl(i)}`}>{l.text}</p>;
           if (l.kind === "noteh" || l.kind === "heath") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-semibold ${l.kind === "heath" ? "text-warn-text" : ""} ${hl(i)}`}>{l.text}</h3>;
           if (l.kind === "note") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-fg bg-bg px-3 py-2 font-semibold ${hl(i)}`}>{l.text}</p>;
           if (l.kind === "heat") return <p key={i} id={`line-${i}`} className={`mt-1.5 border-l-4 border-warn pl-4 before:-ml-2 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
@@ -441,9 +457,12 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
               </div>
             );
           }
-          if (l.kind === "h" || l.kind === "askh") return <h3 key={i} id={`line-${i}`} className={`mt-4 font-display text-lg font-semibold ${hl(i)}`}>{l.text}</h3>;
-          if (l.kind === "ask") return <p key={i} id={`line-${i}`} className={`mt-1 rounded-r border-l-4 border-brand bg-bg px-3 py-2 ${hl(i)}`}>{l.text}</p>;
-          return <p key={i} id={`line-${i}`} className={`mt-1.5 pl-4 before:-ml-4 before:mr-2 before:content-['•'] ${hl(i)}`}>{l.text}</p>;
+          if (l.kind === "h") return <h3 key={i} id={`line-${i}`} className={`mt-6 border-t border-line pt-4 font-display text-[1.1em] font-extrabold tracking-[-0.01em] text-brand-text ${hl(i)}`}>{l.text}</h3>;
+          // The question for the crew closes the talk: set apart, so the presenter stops and asks it.
+          if (l.kind === "askh") return <h3 key={i} id={`line-${i}`} className={`mt-6 flex items-center gap-2 font-display text-[1.1em] font-extrabold tracking-[-0.01em] text-brand-text ${hl(i)}`}>
+            <svg aria-hidden viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v11H9l-5 4z" /></svg>{l.text}</h3>;
+          if (l.kind === "ask") return <p key={i} id={`line-${i}`} className={`mt-2 rounded-xl bg-brand-soft px-4 py-3 font-semibold leading-snug ${hl(i)}`}>{l.text}</p>;
+          return <p key={i} id={`line-${i}`} className={`relative mt-2 pl-5 before:absolute before:left-0.5 before:top-[0.62em] before:h-[7px] before:w-[7px] before:rounded-full before:bg-brand ${hl(i)}`}>{l.text}</p>;
         })}
       </div>
 
@@ -451,7 +470,12 @@ function Read({ co, draft, update, org }: { co: Company; draft: TalkDraft; updat
 
       {/* Always in reach while reading: play/stop and done. */}
       <div className="sticky bottom-0 -mx-4 mt-5 flex gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
-        <Button size="sm" onClick={toggle} className="shrink-0 bg-fg text-bg" aria-label={playing ? pui.stop : pui.play}>{playing ? `■ ${pui.stop}` : `▶ ${pui.play}`}</Button>
+        <Button size="sm" variant="soft" onClick={toggle} className="flex shrink-0 items-center gap-1.5" aria-label={playing ? pui.stop : pui.play}>
+          <svg aria-hidden viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            {playing ? <rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" /> : <><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5z" fill="currentColor" /><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" /></>}
+          </svg>
+          {playing ? pui.stop : pui.play}
+        </Button>
         <Button className="!py-3" disabled={unchecked > 0} onClick={() => {
           stopRef.current?.();
           update({ step: "crew", siteNotes: draft.siteNotes.trim(), heat: draft.heat ? { ...draft.heat, reminder_read: hot } : null });

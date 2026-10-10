@@ -220,6 +220,10 @@ customer #1, not a special case.
   lift; notices carry an icon for their kind (info, done, needs attention, error); the current tab sits on a soft pill;
   the streak is Done green (amber stays "needs attention"); "Coming up" shows week badges; profile rate tiles get a
   meter. Company colors drive all of it.
+  Second pass: giving a talk shows its three steps by name (Read, Who's here, Sign; done steps ticked); the talk text
+  reads like a card from a binder (larger hook, green section headings with a rule, round markers, the crew question
+  set apart at the end; code and minutes under the title); "Read it out loud" has a speaker icon. Records rows lead with
+  the day held as a date tile and show an attendance bar: signed, not signed and absent each in their own color.
 ## Jobsites and the office
 - Talks can happen on a jobsite **or at the office or shop**. Each place is marked Jobsite or Office or shop. Where a
   talk happened is recorded, never flagged: no place is "wrong".

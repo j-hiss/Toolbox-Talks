@@ -117,25 +117,36 @@ function Records({ m }: { m: Membership }) {
             const len = first.period_weeks ?? 1;
             return (
               <section key={k} className="mt-5">
-                <h3 className="sticky top-[3.6rem] z-10 -mx-4 bg-bg/95 px-4 py-1.5 text-sm font-semibold text-muted backdrop-blur">
-                  {wk ? `${weekNumbers({ n: wk, weeks: len })} · ` : ""}{periodLabel(monday, len)} <span className="font-sans font-normal normal-case tracking-normal">· {list.length} talk{list.length === 1 ? "" : "s"}</span>
+                <h3 className="sticky top-[3.6rem] z-10 -mx-4 flex items-baseline gap-2 bg-bg/95 px-4 py-2 backdrop-blur">
+                  {wk ? <b className="font-display text-[17px] font-extrabold tracking-[-0.01em]">{weekNumbers({ n: wk, weeks: len })}</b> : null}
+                  <span className="text-sm text-muted tabular-nums">{periodLabel(monday, len)}</span>
+                  <span className="ml-auto rounded-full bg-fg/[0.06] px-2.5 py-0.5 text-[13px] font-semibold tabular-nums text-muted">{list.length} talk{list.length === 1 ? "" : "s"}</span>
                 </h3>
                 <ul className="mt-1 flex flex-col gap-2">
                   {list.map((r) => {
                     const c = countStatuses(r.statuses.map((status) => ({ status })));
+                    const held = new Date(r.held_at);
                     return (
                       <li key={r.id}>
-                        <Link href={`/record/#${r.id}`} className="flex items-start justify-between gap-3 rounded-xl bg-surface shadow-card p-3 hover:ring-2 hover:ring-brand">
-                          <span className="min-w-0">
-                            <b className="block">{r.title}{r.kind === "daily" && <span className="ml-2 rounded bg-brand-soft px-1.5 py-0.5 align-middle text-xs font-semibold text-brand-text">Daily plan</span>}</b>
-                            {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}
-                            <small className="text-muted tabular-nums">
-                              {when(r.held_at)}{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}
-                            </small>
+                        <Link href={`/record/#${r.id}`} className="flex gap-3 rounded-xl bg-surface shadow-card p-3 hover:ring-2 hover:ring-brand">
+                          {/* The day it was held, like a page in the logbook. */}
+                          <span aria-hidden className="flex w-12 shrink-0 flex-col items-center justify-center self-start rounded-lg bg-brand-soft py-1.5 text-brand-text">
+                            <span className="text-[11px] font-semibold leading-none">{held.toLocaleDateString(undefined, { weekday: "short" })}</span>
+                            <b className="font-display text-[22px] font-extrabold leading-tight tabular-nums">{held.getDate()}</b>
+                            <span className="text-[11px] font-semibold leading-none">{held.toLocaleDateString(undefined, { month: "short" })}</span>
                           </span>
-                          <span className="flex shrink-0 flex-col items-end gap-1 text-sm tabular-nums">
-                            <span>{signedSummary(c)}</span>
-                            <FlagChip n={c.flagged + (r.presenter_signed ? 0 : 1)} />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-start justify-between gap-2">
+                              <b className="block leading-snug">{r.title}{r.kind === "daily" && <span className="ml-2 rounded bg-brand-soft px-1.5 py-0.5 align-middle text-xs font-semibold text-brand-text">Daily plan</span>}</b>
+                              <FlagChip n={c.flagged + (r.presenter_signed ? 0 : 1)} />
+                            </span>
+                            {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}
+                            <small className="block text-muted tabular-nums">
+                              <span className="sr-only">{when(r.held_at)} · </span>
+                              <span aria-hidden>{held.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}
+                            </small>
+                            <AttendanceBar c={c} />
+                            <small className="mt-1 block text-[13px] tabular-nums">{signedSummary(c)}</small>
                           </span>
                         </Link>
                       </li>
@@ -149,5 +160,17 @@ function Records({ m }: { m: Membership }) {
       )}
       </>)}
     </Shell>
+  );
+}
+
+/** Signed, not signed and absent as one bar: each status keeps its own color, so a gap is never hidden. */
+function AttendanceBar({ c }: { c: { signed: number; not_signed: number; absent: number; total: number } }) {
+  if (!c.total) return null;
+  return (
+    <span aria-hidden className="mt-2 flex h-1.5 gap-px overflow-hidden rounded-full bg-line">
+      {c.signed > 0 && <span className="bg-ok" style={{ flex: c.signed }} />}
+      {c.not_signed > 0 && <span className="bg-warn" style={{ flex: c.not_signed }} />}
+      {c.absent > 0 && <span className="bg-muted/45" style={{ flex: c.absent }} />}
+    </span>
   );
 }
