@@ -493,6 +493,15 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.locator("main li:has-text('Client site rules') button:has-text('Give it now')").click(); await q.waitForTimeout(1200);
   log("15 giving:", await q.locator("main h1, main h2").first().textContent(), "| sections:", (await q.locator("main").innerText()).includes("Sign in at the dock office"));
   await q.screenshot({ path: `${OUT}/e-own-talk-give.png`, fullPage: false });
+  // Scenario 15b: tailor a library talk with AI (the preview's example draft), check it, save it as AI-drafted.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Talks')"); await q.waitForTimeout(500);
+  const ai = q.locator("section[aria-label='Tailor with AI']");
+  await ai.locator("select").selectOption("ladder"); await ai.locator("textarea").fill("Two-story reroofs, ladders set on soft yards");
+  await ai.locator("button:has-text('Draft it')").click(); await q.waitForTimeout(1200);
+  log("15b ai notice:", (await q.locator("[role=dialog] [role=status]").first().innerText()).replace(/\s+/g, " ").slice(0, 90));
+  await q.locator("[role=dialog] button:has-text('Save talk')").click(); await q.waitForTimeout(800);
+  log("15b saved:", await q.locator("main li:has-text('example AI draft')").count());
   // Scenario 16: check a record from its PDF. The record shows its check code; the QR link opens /verify with counts
   // and no names; a mistyped code finds nothing.
   await q.goto(PAGE); await q.waitForTimeout(1000);

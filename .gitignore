@@ -47,3 +47,4 @@ next-env.d.ts
 /preview/dist/
 audio-out/
 __pycache__/
+supabase/functions/.env

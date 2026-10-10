@@ -40,6 +40,7 @@ export default defineConfig({
       { find: /^@\/lib\/data\/verify$/, replacement: here("demo/verify.ts") },
       { find: /^@\/lib\/data\/injuries$/, replacement: here("demo/injuries.ts") },
       { find: /^@\/lib\/data\/inspections$/, replacement: here("demo/inspections.ts") },
+      { find: /^@\/lib\/data\/ai$/, replacement: here("demo/ai.ts") },
       { find: /^@\/lib\/weather$/, replacement: here("demo/weather.ts") },
       { find: /^@\/lib\/location$/, replacement: here("demo/location.ts") },
       { find: /^@\/lib\/download$/, replacement: here("demo/download.ts") },
@@ -55,6 +56,7 @@ export default defineConfig({
     "process.env.NEXT_PUBLIC_APP_URL": JSON.stringify("https://app.example.com"),
     // The insurance partner portal is a pilot (needs counsel's privacy review); the preview shows it.
     "process.env.NEXT_PUBLIC_PARTNER_PORTAL": JSON.stringify("pilot"),
+    "process.env.NEXT_PUBLIC_AI_TAILORING": JSON.stringify("on"),
     __BUILT_AT__: JSON.stringify(
       new Date().toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
     ),

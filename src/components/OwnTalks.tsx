@@ -17,6 +17,12 @@ import { readChosenJobsite } from "@/components/JobsitePicker";
 import { refreshOwnTalks, useOwnTalkRows } from "@/lib/library";
 import { Button, ConfirmButton, Field, GroupHeading, Notice, Sheet, inputClass } from "@/components/ui";
 import { toast } from "@/components/toast";
+import { aiTailoring } from "@/lib/features";
+import { tailorTalk } from "@/lib/data/ai";
+import { INDUSTRIES } from "@/core/industries";
+import { WORK_SETTINGS, type WorkSetting } from "@/core/worksetting";
+import { MAX_NOTES } from "@/core/aiTailor";
+import type { Company } from "@/lib/data/types";
 
 const MINUTES = [3, 4, 5, 6, 8, 10, 15];
 const blank = (): TalkText => ({ title: "", hook: "", sections: [{ heading: "", items: [""] }], ask: "" });
@@ -31,29 +37,31 @@ type Edit = {
   code: string;
   reviewed: boolean;
   reviewer: string;
+  /** "ai" when this talk started as an AI draft; saved with each version so it's clear how it began. */
+  source: "written" | "ai";
 };
 
 function editFrom(row: OwnTalkRow): Edit {
   return {
     row, key: row.talk_key, basedOn: row.based_on, en: row.content.en, es: row.es_status !== "none" ? row.content.es ?? null : null,
-    minutes: row.minutes, code: row.code, reviewed: row.es_status === "reviewed", reviewer: row.es_reviewed_by,
+    minutes: row.minutes, code: row.code, reviewed: row.es_status === "reviewed", reviewer: row.es_reviewed_by, source: row.source ?? "written",
   };
 }
 
-export function OwnTalks({ companyId }: { companyId: string }) {
+export function OwnTalks({ companyId, company }: { companyId: string; company?: Pick<Company, "industry" | "work_setting"> }) {
   const rows = useOwnTalkRows();
   const talks = useMemo(() => latestOwnTalks(rows), [rows]);
   const [edit, setEdit] = useState<Edit | null>(null);
   const [from, setFrom] = useState("");
   const router = useRouter();
 
-  const startNew = () => setEdit({ row: null, key: newTalkKey(), basedOn: null, en: blank(), es: null, minutes: 5, code: "", reviewed: false, reviewer: "" });
+  const startNew = () => setEdit({ row: null, key: newTalkKey(), basedOn: null, en: blank(), es: null, minutes: 5, code: "", reviewed: false, reviewer: "", source: "written" });
   const startFrom = (id: string) => {
     const lib = LIBRARY.find((t) => t.id === id);
     if (!lib) return;
     const c = copyFromLibrary(lib);
     // A copied Spanish version starts as a draft: once the English changes, someone has to check it again.
-    setEdit({ row: null, key: newTalkKey(), basedOn: lib.id, en: c.en, es: c.es ?? null, minutes: lib.minutes, code: lib.code, reviewed: false, reviewer: "" });
+    setEdit({ row: null, key: newTalkKey(), basedOn: lib.id, en: c.en, es: c.es ?? null, minutes: lib.minutes, code: lib.code, reviewed: false, reviewer: "", source: "written" });
     setFrom("");
   };
   const give = (key: string) => {
@@ -106,6 +114,7 @@ export function OwnTalks({ companyId }: { companyId: string }) {
           {LIBRARY.map((t) => <option key={t.id} value={t.id}>{t.content.en.title}</option>)}
         </select>
       </div>
+      {aiTailoring() && company && <TailorWithAi companyId={companyId} company={company} onDraft={setEdit} />}
       {edit && <Editor companyId={companyId} edit={edit} setEdit={setEdit} onClose={() => setEdit(null)} />}
     </section>
   );
@@ -168,7 +177,7 @@ function Editor({ companyId, edit, setEdit, onClose }: { companyId: string; edit
       await saveOwnTalk(companyId, {
         talk_key: edit.key, version: (edit.row?.version ?? 0) + 1, title: en.title, minutes: edit.minutes, code: edit.code.trim(),
         content: es ? { en, es } : { en }, es_status: es ? (edit.reviewed ? "reviewed" : "draft") : "none",
-        es_reviewed_by: es && edit.reviewed ? edit.reviewer.trim() : "", based_on: edit.basedOn,
+        es_reviewed_by: es && edit.reviewed ? edit.reviewer.trim() : "", based_on: edit.basedOn, source: edit.source,
       });
       await refreshOwnTalks();
       toast(edit.row ? `Saved "${en.title}" as version ${edit.row.version + 1}.` : `Saved "${en.title}". Give it now, or add it to your plan below.`);
@@ -183,7 +192,10 @@ function Editor({ companyId, edit, setEdit, onClose }: { companyId: string; edit
   return (
     <Sheet title={edit.row ? "Edit your talk" : "Write a talk"} open onClose={onClose}>
       <div className="flex flex-col gap-4">
-        {edit.basedOn && <Notice>Started from the library talk &quot;{LIBRARY.find((t) => t.id === edit.basedOn)?.content.en.title ?? edit.basedOn}&quot;. Make it fit your work.</Notice>}
+        {edit.source === "ai" && !edit.row && (
+          <Notice tone="caution">An AI draft from the library talk. Read every line before saving: you&apos;re the one confirming the safety wording. It&apos;s saved as AI-drafted.</Notice>
+        )}
+        {edit.basedOn && edit.source !== "ai" && <Notice>Started from the library talk &quot;{LIBRARY.find((t) => t.id === edit.basedOn)?.content.en.title ?? edit.basedOn}&quot;. Make it fit your work.</Notice>}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Minutes" id="own-minutes">
             <select id="own-minutes" className={inputClass} value={edit.minutes} onChange={(e) => change({ minutes: Number(e.target.value) })}>
@@ -240,5 +252,44 @@ function Editor({ companyId, edit, setEdit, onClose }: { companyId: string; edit
         </div>
       </div>
     </Sheet>
+  );
+}
+
+/** Pick a library talk, say a little about the work, get a draft to check and save. Owners and admins; 20 a day. */
+function TailorWithAi({ companyId, company, onDraft }: { companyId: string; company: Pick<Company, "industry" | "work_setting">; onDraft: (e: Edit) => void }) {
+  const [base, setBase] = useState("");
+  const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const ind = INDUSTRIES.find((i) => i.id === company.industry);
+  const go = async () => {
+    const lib = LIBRARY.find((t) => t.id === base);
+    if (!lib) { setError("Pick a library talk first."); return; }
+    setBusy(true); setError(null);
+    try {
+      const draft = await tailorTalk({
+        companyId, baseId: lib.id, talk: lib.content.en, sources: lib.sources.map((s) => s.label),
+        industry: ind ? `${ind.name}: ${ind.sub}` : String(company.industry),
+        workSetting: WORK_SETTINGS.find((w) => w.id === (company.work_setting as WorkSetting | null))?.name ?? "Not set",
+        notes: notes.slice(0, MAX_NOTES),
+      });
+      onDraft({ row: null, key: newTalkKey(), basedOn: lib.id, en: draft, es: null, minutes: lib.minutes, code: lib.code, reviewed: false, reviewer: "", source: "ai" });
+    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+    setBusy(false);
+  };
+  return (
+    <section aria-label="Tailor with AI" className="mt-4 rounded-xl border border-line p-3">
+      <b className="block">Tailor a library talk with AI</b>
+      <p className="mt-1 text-sm text-muted">Get a draft that fits your work. It keeps the source talk&apos;s rules and adds none; you check it and save it as your own.</p>
+      <div className="mt-3 flex flex-col gap-2">
+        <select aria-label="Library talk to tailor" className={inputClass} value={base} onChange={(e) => setBase(e.target.value)}>
+          <option value="">Pick a library talk…</option>
+          {LIBRARY.map((t) => <option key={t.id} value={t.id}>{t.content.en.title}</option>)}
+        </select>
+        <textarea aria-label="About your work" rows={2} maxLength={MAX_NOTES} className={inputClass} placeholder="About your work (optional): equipment, sites, tasks" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        {error && <Notice tone="error">{error}</Notice>}
+        <Button type="button" variant="soft" disabled={busy || !base} onClick={go}>{busy ? "Drafting…" : "Draft it"}</Button>
+      </div>
+    </section>
   );
 }

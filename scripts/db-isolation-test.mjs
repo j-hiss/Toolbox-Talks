@@ -840,6 +840,20 @@ async function main() {
         && Object.keys(v).sort().join() === "company,failed,inspected_at,items,na,passed,rule,saved_at,title");
     }
 
+    // AI tailoring (0036): owners and admins only, 20 drafts a day per company, logged; AI-started talks marked.
+    {
+      check("An owner can start an AI draft; it's logged", !!(await as(userA, "select public.ai_tailor_start($1, 'ladder') as id", [coA])).rows[0].id
+        && (await as(userA, "select count(*)::int as n from public.ai_requests where company_id = $1", [coA])).rows[0].n === 1);
+      check("A presenter can't start an AI draft; B can't for A; signed-out can't", await fails(() => as(presenterA, "select public.ai_tailor_start($1, 'x')", [coA]))
+        && await fails(() => as(userB, "select public.ai_tailor_start($1, 'x')", [coA])) && await fails(() => as(null, "select public.ai_tailor_start($1, 'x')", [coA])));
+      check("B can't read A's AI usage log", (await as(userB, "select id from public.ai_requests")).rows.length === 0);
+      for (let i = 0; i < 19; i++) await as(userA, "select public.ai_tailor_start($1, 'ladder')", [coA]);
+      check("At most 20 AI drafts a day per company", await fails(() => as(userA, "select public.ai_tailor_start($1, 'ladder')", [coA])));
+      const good = JSON.stringify({ en: { title: "T", hook: "H", sections: [{ heading: "S", items: ["i"] }], ask: "A" } });
+      check("A company talk can be marked AI-drafted, and only 'written' or 'ai'", (await as(userA, "insert into public.company_talks (company_id, talk_key, version, title, content, source) values ($1, 'own-aidraft00001', 1, 'T', $2::jsonb, 'ai') returning source", [coA, good])).rows[0].source === "ai"
+        && await fails(() => as(userA, "insert into public.company_talks (company_id, talk_key, version, title, content, source) values ($1, 'own-aidraft00002', 1, 'T', $2::jsonb, 'robot')", [coA, good])));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -858,7 +872,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 96;
+  const EXPECTED = 101;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

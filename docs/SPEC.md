@@ -637,6 +637,21 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Honest:** every item ends pass, fail or not applicable; failures are never hidden. An inspection documents that
   someone looked; it doesn't certify a site.
 
+## Tailor with AI (built, migration 0036; off until set up)
+- **Why:** competitors draft talks with AI. Here AI only helps a company make a library talk fit its own work, and the
+  result is a draft a person checks, never a talk the app shows on its own.
+- **How:** Admin → Talks → "Tailor a library talk with AI": pick a talk, say a little about the work (equipment,
+  sites, tasks). A small server function (the app's only server code, approved by Joe) checks the caller is an owner
+  or admin of that company, keeps a usage log (20 drafts a day per company), and asks the AI for a version that keeps
+  every rule and number of the source and adds none. The app re-checks the answer: a draft that adds a number, drops a
+  rule reference or mentions compliance is refused. The draft opens in the company-talk editor with a notice to read
+  every line; saving makes it a company talk marked AI-drafted. Works the same for every industry (the prompt uses the
+  company's industry and where it works).
+- **Setup (Joe):** `supabase secrets set ANTHROPIC_API_KEY=…` in a terminal (never in chat or the repo),
+  `supabase functions deploy tailor-talk`, then `NEXT_PUBLIC_AI_TAILORING=on`. Until then the button doesn't show.
+- **Not yet:** AI translation (translations still need a person who reads the language), AI crew summaries for the
+  safety log.
+
 ## Security review (2026-10-10, migration 0024)
 - Independent review before partner access: 1 critical, 2 high, 3 medium, 4 low. Fixed: talk records and attendance can
   only be saved through the checked save (no forged "signed" rows or backdated records); invites can only be claimed by

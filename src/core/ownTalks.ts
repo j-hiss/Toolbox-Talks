@@ -15,6 +15,8 @@ export type OwnTalkRow = {
   talk_key: string; version: number; retired: boolean; title: string; minutes: number; code: string;
   content: { en: TalkText; es?: TalkText }; es_status: "none" | "draft" | "reviewed"; es_reviewed_by: string;
   based_on: string | null; created_at: string;
+  /** "ai" when an admin saved a version that started as an AI draft (migration 0036). Older rows have no value. */
+  source?: "written" | "ai";
 };
 
 /** A fresh id for a new company talk. */

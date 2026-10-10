@@ -8,7 +8,7 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
-const COLUMNS = "talk_key, version, retired, title, minutes, code, content, es_status, es_reviewed_by, based_on, created_at";
+const COLUMNS = "talk_key, version, retired, title, minutes, code, content, es_status, es_reviewed_by, based_on, created_at, source";
 
 /** Every version of every company talk (the latest per talk is worked out by latestOwnTalks). */
 export async function listOwnTalks(companyId: string): Promise<OwnTalkRow[]> {
