@@ -61,6 +61,19 @@ customer #1, not a special case.
   lines, nail guns, torch-down, silica, eye protection, hand tools, asbestos, housekeeping, kettles, hoists, sun.
   A Florida roofer's first year has no trenching or confined-space weeks. New talk: **Roof Brackets and Roof Jacks**
   (1926.452(h), 1926.451(b)(1) and (f)(3), residential fall protection guidance; Spanish draft).
+- **Library rule (Joe, 2026-10-10): no talk for the sake of a bigger library.** Each new talk covers something new and
+  ties back to a regulated item the app tracks (a training card, a yearly-rule reminder, a safety log entry). Overlap
+  between talks a crew sees is cut, not kept. Pass of 2026-10-10 (roofing and construction):
+  - New, each tied to a tracked card: **Rotten and Weak Roof Decking** (1926.501(a)(2); fall protection card),
+    **Telehandlers and Rough-Terrain Forklifts** (1926.602(c)-(d), 1910.178(l); forklift card), **Boom Trucks and
+    Crane Deliveries to the Roof** (1926.1400(c)(17), 1926.1419, 1926.1428; crane card), **Pre-1978 Homes: Lead-Safe
+    Work** (EPA 40 CFR 745 subparts E-F; EPA lead-safe renovator card; applies only when painted surfaces are
+    disturbed). Weeks 12-15 of a roofing plan. Spanish drafts.
+  - **Fall Protection** is now **Fall Protection and Guardrails** (the 6-foot rule plus 1926.502(b) guardrail specs);
+    its harness and hole-cover parts were already in the Harness and Skylights talks.
+  - **Debris Chutes** lost its "clean as you go" section (it was Housekeeping). **Temporary Power** is tagged for
+    electricians only; other crews get GFCIs and cords from "Electrical: GFCIs, Cords and Tools".
+  - With four more roofing talks, hearing protection and OSHA lead move to a roofing company's second year.
 - **Check licensing on every source.** Federal OSHA material is generally public domain. Many "free" talk libraries
   online are copyrighted and can't be repackaged.
 - **Industries (18):** Construction, plus the trades that also get every construction talk (Roofing, Electrical,

@@ -12,26 +12,21 @@ export const TALKS: Talk[] = [
       "con",
       "roof"
     ],
-    "code": "1926.501 / 1926.502",
-    "minutes": 6,
+    "code": "1926.501(b)(1) / 1926.502(b)",
+    "minutes": 5,
     "sources": [
       {
-        "label": "OSHA 1926.501(b)(1): unprotected sides and edges",
+        "label": "OSHA 1926.501(b)(1): unprotected sides and edges, 6 feet or more",
         "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501",
         "kind": "standard"
       },
       {
-        "label": "OSHA 1926.501(b)(4): holes, including skylights",
-        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501",
-        "kind": "standard"
-      },
-      {
-        "label": "OSHA 1926.502(d): personal fall arrest systems, incl. (d)(15) anchorages, (d)(19), (d)(21) inspection",
+        "label": "OSHA 1926.502(b)(1)-(6), (b)(9): guardrail height, midrails, strength, surfaces, no banding as rails",
         "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.502",
         "kind": "standard"
       },
       {
-        "label": "OSHA 1926.502(i): covers",
+        "label": "OSHA 1926.502(b)(10), (b)(13): hoist area openings; gates or offsets at access openings",
         "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.502",
         "kind": "standard"
       },
@@ -39,71 +34,84 @@ export const TALKS: Talk[] = [
         "label": "OSHA Stop Falls",
         "url": "https://www.osha.gov/stop-falls",
         "kind": "guidance"
-      },
-      {
-        "label": "OSHA Subpart M Appendix C: personal fall arrest systems",
-        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926SubpartMAppC",
-        "kind": "guidance"
       }
     ],
     "content": {
       "en": {
-        "title": "Fall Protection",
-        "hook": "Falls are the number one killer in construction. There's no such thing as \"just a quick trip to the edge.\"",
+        "title": "Fall Protection and Guardrails",
+        "hook": "Falls are the number one killer in construction. A guardrail is the one fall protection that works without anyone clipping in, so it has to be built right.",
         "sections": [
           {
             "heading": "The rule",
             "items": [
-              "If you're 6 feet or more above a lower level, you need fall protection. That's the federal construction line. Scaffolds and ladders have their own rules.",
+              "If you're 6 feet or more above a lower level at an open side or edge, you need fall protection. That's the federal construction line. Scaffolds and ladders have their own rules.",
               "That can be a guardrail, a safety net, or a personal fall arrest system. Your supervisor will tell you which one this job uses."
             ]
           },
           {
-            "heading": "Before you clip in",
+            "heading": "A guardrail done right",
             "items": [
-              "Inspect your harness every time: frayed webbing, cracked buckles, a deployed impact indicator. Any of those and it goes out of service today.",
-              "Your anchor has to hold 5,000 pounds for each person tied to it, or be part of a system a qualified person set up and oversees. A vent pipe is not an anchor.",
-              "Check your clearance. A 6-foot lanyard plus the shock pack stretch can drop you well past 6 feet. Make sure you won't hit the ground or anything below before it stops you."
+              "The top rail sits at 42 inches above where you stand, give or take 3 inches.",
+              "A midrail, when used, goes halfway between the top rail and the walking surface.",
+              "The top rail holds at least 200 pounds pushed out or down. A midrail holds at least 150 pounds.",
+              "Rails are at least a quarter inch thick and smooth enough not to cut you or snag clothes. Steel or plastic banding is never a rail."
             ]
           },
           {
-            "heading": "Holes and skylights",
+            "heading": "Openings in the rail",
             "items": [
-              "Any hole 2 inches or bigger gets a cover. Secure it so it can't move, and mark it HOLE or COVER or color-code it.",
-              "Skylights are holes. People fall through them every year."
+              "Where material comes up by hoist, a chain, gate, or removable section closes the gap when nobody is landing a load.",
+              "Where people climb through, like a ladderway, there's a gate or an offset so nobody can walk straight into the opening.",
+              "Need a section out for the work? Tell your supervisor first, and use other fall protection until it's back."
+            ]
+          },
+          {
+            "heading": "Check it",
+            "items": [
+              "Push on the rail when you get there. Loose posts, missing midrails, or sagging rails get fixed before anyone works at that edge.",
+              "Harness checks are in the harness talk. Holes and skylights have their own talk too."
             ]
           }
         ],
-        "ask": "Who knows where today's anchor points and edge protection are? Point them out before we start."
+        "ask": "Walk the edges with me: where would a guardrail fail the push test today, and where is a section out?"
       },
       "es": {
-        "title": "Protección contra caídas",
-        "hook": "Las caídas son la causa número uno de muertes en la construcción. No existe tal cosa como \"solo una vueltita rápida al borde\".",
+        "title": "Protección contra caídas y barandas",
+        "hook": "Las caídas son la causa número uno de muertes en la construcción. La baranda es la única protección que funciona sin que nadie tenga que engancharse, así que tiene que estar bien hecha.",
         "sections": [
           {
             "heading": "La regla",
             "items": [
-              "Si estás a 6 pies o más sobre un nivel más bajo, necesitas protección contra caídas. Esa es la regla federal para la construcción. Los andamios y las escaleras tienen sus propias reglas.",
+              "Si estás a 6 pies o más sobre un nivel más bajo en un lado o borde abierto, necesitas protección contra caídas. Esa es la línea federal para la construcción. Los andamios y las escaleras tienen sus propias reglas.",
               "Puede ser una baranda, una red de seguridad o un sistema personal de detención de caídas. Tu supervisor te dirá cuál se usa en este trabajo."
             ]
           },
           {
-            "heading": "Antes de engancharte",
+            "heading": "Una baranda bien hecha",
             "items": [
-              "Revisa tu arnés cada vez: correas deshilachadas, hebillas rotas o un indicador de impacto activado. Si tiene cualquiera de esas, se saca de servicio hoy.",
-              "Tu anclaje tiene que aguantar 5,000 libras por cada persona amarrada a él, o ser parte de un sistema que una persona calificada instaló y supervisa. Un tubo de ventilación no es un anclaje.",
-              "Revisa el espacio libre. Una línea de 6 pies más lo que se estira el amortiguador te puede dejar caer mucho más de 6 pies. Asegúrate de que no vas a pegar contra el suelo ni contra nada abajo antes de que te detenga."
+              "El riel de arriba queda a 42 pulgadas sobre donde estás parado, con 3 pulgadas de más o de menos.",
+              "El riel del medio, cuando se usa, va a la mitad entre el riel de arriba y la superficie donde caminas.",
+              "El riel de arriba aguanta por lo menos 200 libras empujando hacia afuera o hacia abajo. El riel del medio aguanta por lo menos 150 libras.",
+              "Los rieles tienen por lo menos un cuarto de pulgada de grueso y son lo bastante lisos para no cortarte ni agarrarte la ropa. La banda de acero o de plástico nunca sirve como riel."
             ]
           },
           {
-            "heading": "Huecos y tragaluces",
+            "heading": "Aberturas en la baranda",
             "items": [
-              "Todo hueco de 2 pulgadas o más lleva tapa. Asegúrala para que no se mueva, y márcala HOLE o COVER (hueco o tapa) o márcala con un color.",
-              "Los tragaluces son huecos. Cada año hay gente que se cae a través de ellos."
+              "Donde el material sube con montacargas, una cadena, puerta o sección removible cierra el hueco cuando nadie está recibiendo una carga.",
+              "Donde la gente pasa para subir, como en una escalera, hay una puerta o un desvío para que nadie camine directo a la abertura.",
+              "¿Necesitas quitar una sección para el trabajo? Avísale primero a tu supervisor y usa otra protección contra caídas hasta que la vuelvan a poner."
+            ]
+          },
+          {
+            "heading": "Revísala",
+            "items": [
+              "Empuja la baranda cuando llegues. Postes flojos, rieles del medio que faltan o rieles caídos se arreglan antes de que alguien trabaje en ese borde.",
+              "La revisión del arnés está en la charla del arnés. Los huecos y tragaluces también tienen su propia charla."
             ]
           }
         ],
-        "ask": "¿Quién sabe dónde están hoy los puntos de anclaje y la protección de bordes? Señálenlos antes de empezar."
+        "ask": "Caminen los bordes conmigo: ¿dónde fallaría hoy una baranda la prueba de empujar, y dónde falta una sección?"
       }
     },
     "translationStatus": {
@@ -1668,6 +1676,432 @@ export const TALKS: Talk[] = [
     }
   },
   {
+    "id": "roof-decking",
+    "industries": [
+      "roof",
+      "con",
+      "solar"
+    ],
+    "code": "1926.501(a)(2)",
+    "minutes": 4,
+    "sources": [
+      {
+        "label": "OSHA 1926.501(a)(2): the employer determines the surface has the strength and structural integrity to hold workers",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.501(b)(4): holes, including openings made in a roof",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.501",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA guidance: Fall Protection in Residential Construction",
+        "url": "https://www.osha.gov/residential-fall-protection/guidance",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Rotten and Weak Roof Decking",
+        "hook": "On a tear-off you don't know what's under the shingles until you're standing on it. Rotten decking turns into a hole with one step.",
+        "sections": [
+          {
+            "heading": "The rule",
+            "items": [
+              "Before anyone works on a roof, the company has to decide the surface is strong enough to hold people safely.",
+              "Nobody works on a surface until it's known to be strong enough. If you're not sure, it isn't known yet."
+            ]
+          },
+          {
+            "heading": "Find it before you step on it",
+            "items": [
+              "Look from the ground and the attic when you can: sagging lines, daylight through boards, water stains, soft spots.",
+              "On the roof, watch for spongy or dark wood, delaminated plywood, and boards that move when you step.",
+              "As the old roof comes off, look at each section of deck before you walk on it."
+            ]
+          },
+          {
+            "heading": "When you find it",
+            "items": [
+              "Stop, mark it, and tell your supervisor. Keep people off it until it's replaced or covered.",
+              "A rotten spot you cut out is a hole. It gets a secured, marked cover or a guardrail, or you work tied off, until new decking is down.",
+              "Bad decking doesn't change your fall protection. Stay tied off or behind the guardrail the whole time."
+            ]
+          }
+        ],
+        "ask": "Where on this roof would you expect rot, and how will we mark it so nobody steps there?"
+      },
+      "es": {
+        "title": "Entablado de techo podrido o débil",
+        "hook": "Cuando quitas el techo viejo no sabes qué hay debajo de las tejas hasta que estás parado encima. Un entablado podrido se vuelve un hueco con un solo paso.",
+        "sections": [
+          {
+            "heading": "La regla",
+            "items": [
+              "Antes de que alguien trabaje en un techo, la compañía tiene que decidir que la superficie es lo bastante fuerte para aguantar a la gente con seguridad.",
+              "Nadie trabaja en una superficie hasta que se sepa que es lo bastante fuerte. Si no estás seguro, todavía no se sabe."
+            ]
+          },
+          {
+            "heading": "Encuéntralo antes de pisarlo",
+            "items": [
+              "Mira desde el suelo y desde el ático cuando puedas: líneas hundidas, luz entre las tablas, manchas de agua, partes blandas.",
+              "En el techo, fíjate en madera esponjosa u oscura, plywood despegado y tablas que se mueven cuando pisas.",
+              "Mientras quitas el techo viejo, mira cada sección del entablado antes de caminar encima."
+            ]
+          },
+          {
+            "heading": "Cuando lo encuentres",
+            "items": [
+              "Para, márcalo y avísale a tu supervisor. Que nadie se suba ahí hasta que lo cambien o lo tapen.",
+              "Una parte podrida que cortas es un hueco. Lleva una tapa asegurada y marcada o una baranda, o trabajas amarrado, hasta que pongan entablado nuevo.",
+              "Un entablado malo no cambia tu protección contra caídas. Sigue amarrado o detrás de la baranda todo el tiempo."
+            ]
+          }
+        ],
+        "ask": "¿Dónde en este techo esperarías encontrar madera podrida, y cómo la vamos a marcar para que nadie la pise?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "telehandler",
+    "industries": [
+      "roof",
+      "con",
+      "site"
+    ],
+    "code": "1926.602(c) / 1926.602(d) / 1910.178(l)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1926.602(c)(1)(i)-(ii): rated capacity posted and never exceeded; no modifications or additions without the maker's written approval",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.602",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.602(d): operator training in construction is the same as 1910.178(l)",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.602",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1910.178(l)(1)(ii), (l)(4): trained and evaluated operators; refresher after an accident or near miss; evaluation at least every 3 years",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.178",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA letter of interpretation, April 14, 2004: no one stands or passes under the elevated portion of a truck (general industry rule 1910.178(m)(2))",
+        "url": "https://www.osha.gov/laws-regs/standardinterpretations/2004-04-14",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Telehandlers and Rough-Terrain Forklifts",
+        "hook": "The telehandler puts the bundles on the roof. Reach out too far with too much and it tips, with the load and the operator.",
+        "sections": [
+          {
+            "heading": "Who drives",
+            "items": [
+              "Only operators who have been trained and evaluated on this kind of machine drive it. Construction uses the same forklift training rule as warehouses.",
+              "Evaluations repeat at least every 3 years. A near miss, a tip, unsafe driving, or a different type of machine means refresher training first."
+            ]
+          },
+          {
+            "heading": "The load chart",
+            "items": [
+              "The rated capacity is posted in the cab. Never go over it.",
+              "The farther the boom reaches and the higher it goes, the less it can lift. Check the chart for this load at this reach before you lift.",
+              "Only use forks, buckets, or other attachments the maker approves. If something added changes what the machine can lift, the capacity plate has to be changed to match."
+            ]
+          },
+          {
+            "heading": "Set up and lift",
+            "items": [
+              "Set up on firm, level ground. Soft fill, slopes, and edges of excavations are how these machines go over.",
+              "Travel with the load low and the boom in. Raise and reach only when you're stopped and set.",
+              "Look up for power lines before you raise the boom."
+            ]
+          },
+          {
+            "heading": "Everyone else",
+            "items": [
+              "Stay out from under raised forks and loads. The general industry forklift rule says nobody stands or passes under them, and the same goes here.",
+              "On the roof, the person receiving the load stays clear until it's set down, and stays behind the guardrail or tied off at the edge."
+            ]
+          }
+        ],
+        "ask": "What does the chart say this machine can lift at the reach we need for this roof?"
+      },
+      "es": {
+        "title": "Telehandlers y montacargas todo terreno",
+        "hook": "El telehandler sube los paquetes al techo. Si estiras demasiado con demasiado peso, se voltea, con la carga y con el operador.",
+        "sections": [
+          {
+            "heading": "Quién maneja",
+            "items": [
+              "Solo manejan operadores entrenados y evaluados en este tipo de máquina. La construcción usa la misma regla de entrenamiento de montacargas que los almacenes.",
+              "Las evaluaciones se repiten por lo menos cada 3 años. Un casi accidente, una volcadura, manejar sin cuidado o una máquina de otro tipo significa entrenamiento de repaso primero."
+            ]
+          },
+          {
+            "heading": "La tabla de carga",
+            "items": [
+              "La capacidad está puesta en la cabina. Nunca te pases.",
+              "Mientras más lejos y más alto llega la pluma, menos puede levantar. Revisa la tabla para esta carga a esta distancia antes de levantar.",
+              "Usa solo horquillas, cucharones u otros accesorios que el fabricante aprueba. Si algo agregado cambia lo que la máquina puede levantar, la placa de capacidad se tiene que cambiar para que coincida."
+            ]
+          },
+          {
+            "heading": "Prepara y levanta",
+            "items": [
+              "Ponla en suelo firme y nivelado. El relleno blando, las pendientes y las orillas de las excavaciones es como estas máquinas se voltean.",
+              "Muévete con la carga baja y la pluma recogida. Sube y estira solo cuando estés parado y listo.",
+              "Mira arriba por cables eléctricos antes de subir la pluma."
+            ]
+          },
+          {
+            "heading": "Todos los demás",
+            "items": [
+              "No te pongas debajo de horquillas o cargas levantadas. La regla de montacargas de la industria general dice que nadie se para ni pasa por debajo, y aquí es igual.",
+              "En el techo, quien recibe la carga se queda lejos hasta que la bajen, y se queda detrás de la baranda o amarrado en el borde."
+            ]
+          }
+        ],
+        "ask": "¿Qué dice la tabla que esta máquina puede levantar a la distancia que necesitamos para este techo?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "roof-deliveries",
+    "industries": [
+      "roof",
+      "con"
+    ],
+    "code": "1926.1400(c)(17) / 1926.1419 / 1926.1428",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "OSHA 1926.1400(c)(17): knuckle-boom deliveries to the ground, or of sheet goods and packaged supplies onto a structure with a working overload device, are outside the crane rules; trusses, steel and holding material in place are not",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1400",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.1419(a), (h), (j): when a signal person is needed; one signal person at a time; anyone can signal stop",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1419",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA 1926.1428(a), (c): signal person qualification, documentation at the site",
+        "url": "https://www.osha.gov/laws-regs/regulations/standardnumber/1926/1926.1428",
+        "kind": "standard"
+      },
+      {
+        "label": "OSHA fact sheet: Signal Person Qualification",
+        "url": "https://www.osha.gov/Publications/cranes-signal-person-factsheet.pdf",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Boom Trucks and Crane Deliveries to the Roof",
+        "hook": "When the supply truck sets bundles on the roof, everyone wants to help. Knowing when the crane rules apply tells you who's allowed to.",
+        "sections": [
+          {
+            "heading": "When the crane rules apply",
+            "items": [
+              "A knuckle-boom truck that sets shingle bundles, felt, plywood, or other packaged materials on the roof with a fork or cradle is outside the crane rules, but only if its overload device works.",
+              "Setting roof trusses, steel, or any prefabricated piece is crane work. So is holding material in place while someone fastens it.",
+              "If the crane rules apply, the operator, the rigger, and the signal person all have to be qualified for it. Ask your supervisor before the truck arrives."
+            ]
+          },
+          {
+            "heading": "Signals",
+            "items": [
+              "A signal person is needed when the operator can't see where the load is going, or when the operator or the person handling the load decides one is needed.",
+              "On crane work, the signal person has to be qualified, with the paperwork at the site. If that isn't you, don't wave the load in.",
+              "Only one person gives signals at a time. Anyone who sees danger gives the stop signal, and the operator stops."
+            ]
+          },
+          {
+            "heading": "Stay clear",
+            "items": [
+              "Stay out from under the load and out of the path it swings through, on the ground and on the roof.",
+              "Wait until the bundles are set down before you walk up to them. Keep behind the guardrail or tied off at the roof edge.",
+              "Overhead power lines near the drop spot get called out before the boom goes up. The power line talk covers the distances."
+            ]
+          }
+        ],
+        "ask": "On today's delivery, is this crane work or a plain material drop, and who's the one person giving signals?"
+      },
+      "es": {
+        "title": "Camiones grúa y entregas con grúa al techo",
+        "hook": "Cuando el camión del proveedor pone los paquetes en el techo, todos quieren ayudar. Saber cuándo aplican las reglas de grúas te dice quién puede hacerlo.",
+        "sections": [
+          {
+            "heading": "Cuándo aplican las reglas de grúas",
+            "items": [
+              "Un camión con grúa articulada que pone paquetes de tejas, fieltro, plywood u otros materiales empacados en el techo con horquilla o canasta queda fuera de las reglas de grúas, pero solo si su dispositivo contra sobrecarga funciona.",
+              "Poner cerchas (trusses), acero o cualquier pieza prefabricada es trabajo de grúa. También lo es sostener material en su lugar mientras alguien lo sujeta.",
+              "Si aplican las reglas de grúas, el operador, el aparejador y el señalero todos tienen que estar calificados. Pregúntale a tu supervisor antes de que llegue el camión."
+            ]
+          },
+          {
+            "heading": "Señales",
+            "items": [
+              "Se necesita un señalero cuando el operador no puede ver a dónde va la carga, o cuando el operador o quien maneja la carga decide que hace falta.",
+              "En trabajo de grúa, el señalero tiene que estar calificado, con los papeles en el sitio. Si no eres tú, no le hagas señas a la carga.",
+              "Solo una persona da señales a la vez. Cualquiera que vea peligro da la señal de parar, y el operador para."
+            ]
+          },
+          {
+            "heading": "Mantente lejos",
+            "items": [
+              "No te pongas debajo de la carga ni en el camino por donde se mueve, en el suelo ni en el techo.",
+              "Espera a que bajen los paquetes antes de acercarte. Quédate detrás de la baranda o amarrado en el borde del techo.",
+              "Los cables eléctricos cerca de donde baja la carga se avisan antes de subir la pluma. La charla de cables eléctricos explica las distancias."
+            ]
+          }
+        ],
+        "ask": "En la entrega de hoy, ¿es trabajo de grúa o solo una descarga de material, y quién es la única persona que da señales?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
+    "id": "lead-rrp",
+    "industries": [
+      "roof",
+      "con",
+      "elec",
+      "plumb"
+    ],
+    "code": "EPA 40 CFR 745 (RRP)",
+    "minutes": 5,
+    "sources": [
+      {
+        "label": "EPA 40 CFR 745.83: renovation means disturbing painted surfaces; minor work is 20 square feet or less of exterior paint",
+        "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-E/section-745.83",
+        "kind": "standard"
+      },
+      {
+        "label": "EPA 40 CFR 745.103: target housing is housing built before 1978, with limited exceptions",
+        "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.103",
+        "kind": "standard"
+      },
+      {
+        "label": "EPA 40 CFR 745.85(a): signs, exterior containment, prohibited practices, waste, cleaning",
+        "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-E/section-745.85",
+        "kind": "standard"
+      },
+      {
+        "label": "EPA 40 CFR 745.90(b): the certified renovator trains workers, directs the work, and keeps certificates at the site",
+        "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-E/section-745.90",
+        "kind": "standard"
+      },
+      {
+        "label": "EPA: Does the RRP Rule apply to removing a roof that is not painted?",
+        "url": "https://www.epa.gov/lead/does-rrp-rule-apply-removing-roof-not-painted",
+        "kind": "guidance"
+      }
+    ],
+    "content": {
+      "en": {
+        "title": "Pre-1978 Homes: Lead-Safe Work (EPA)",
+        "hook": "Old paint on fascia, soffit, and trim can be lead. On homes built before 1978, disturbing it brings in EPA's lead-safe rules, even on a roofing job.",
+        "sections": [
+          {
+            "heading": "When it applies",
+            "items": [
+              "The rule covers work that disturbs painted surfaces on homes built before 1978, with a few exceptions. Tearing off a roof with no paint on it doesn't trigger it. Cutting, prying, or replacing painted fascia, soffit, or trim can.",
+              "Small exterior jobs that disturb 20 square feet of paint or less are minor, unless they use a banned method or tear out painted parts. Taking out a painted board counts its whole surface.",
+              "The job needs an EPA-certified firm and a certified renovator assigned to it. The renovator trains you on the steps you'll do and directs the work."
+            ]
+          },
+          {
+            "heading": "Set up",
+            "items": [
+              "Warning signs go up before the work starts, marking the work area and keeping others out.",
+              "Close doors and windows within 20 feet of the work.",
+              "Cover the ground with plastic at least 10 feet out from the work, or farther if debris will land past that."
+            ]
+          },
+          {
+            "heading": "Never on painted surfaces",
+            "items": [
+              "No torch or open flame on painted surfaces.",
+              "No sanding, grinding, or power planing on paint unless the tool has a shroud and a HEPA vacuum and no dust gets out.",
+              "Heat guns only below 1,100 degrees."
+            ]
+          },
+          {
+            "heading": "Clean up",
+            "items": [
+              "Keep debris contained during the work, and keep chutes covered.",
+              "At the end, pick up chips and debris without spreading them and seal them in heavy-duty bags. Mist, fold, and seal the plastic.",
+              "The certified renovator checks the area, including the ground, before the signs come down."
+            ]
+          }
+        ],
+        "ask": "Is this house older than 1978, and what painted wood are we going to touch today?"
+      },
+      "es": {
+        "title": "Casas de antes de 1978: trabajo seguro con plomo (EPA)",
+        "hook": "La pintura vieja en fascias, sofitos y molduras puede tener plomo. En casas construidas antes de 1978, tocarla trae las reglas de plomo de la EPA, aunque sea un trabajo de techo.",
+        "sections": [
+          {
+            "heading": "Cuándo aplica",
+            "items": [
+              "La regla cubre el trabajo que altera superficies pintadas en casas construidas antes de 1978, con algunas excepciones. Quitar un techo que no tiene pintura no la activa. Cortar, arrancar o cambiar fascias, sofitos o molduras pintadas sí puede.",
+              "Los trabajos pequeños por fuera que alteran 20 pies cuadrados de pintura o menos son menores, a menos que usen un método prohibido o arranquen partes pintadas. Quitar una tabla pintada cuenta toda su superficie.",
+              "El trabajo necesita una compañía certificada por la EPA y un renovador certificado asignado. El renovador te entrena en los pasos que vas a hacer y dirige el trabajo."
+            ]
+          },
+          {
+            "heading": "Preparación",
+            "items": [
+              "Los letreros de advertencia se ponen antes de empezar, marcando el área de trabajo y manteniendo afuera a los demás.",
+              "Cierra puertas y ventanas a menos de 20 pies del trabajo.",
+              "Cubre el suelo con plástico por lo menos 10 pies alrededor del trabajo, o más si los escombros van a caer más lejos."
+            ]
+          },
+          {
+            "heading": "Nunca en superficies pintadas",
+            "items": [
+              "Nada de soplete ni llama abierta en superficies pintadas.",
+              "Nada de lijar, esmerilar ni cepillar con máquina la pintura, a menos que la herramienta tenga cubierta y aspiradora HEPA y no salga polvo.",
+              "Pistolas de calor solo por debajo de 1,100 grados."
+            ]
+          },
+          {
+            "heading": "Limpieza",
+            "items": [
+              "Mantén los escombros contenidos durante el trabajo, y los conductos de escombros tapados.",
+              "Al final, recoge las astillas y escombros sin regarlos y ciérralos en bolsas gruesas. Rocía, dobla y cierra el plástico.",
+              "El renovador certificado revisa el área, incluyendo el suelo, antes de quitar los letreros."
+            ]
+          }
+        ],
+        "ask": "¿Esta casa es de antes de 1978, y qué madera pintada vamos a tocar hoy?"
+      }
+    },
+    "translationStatus": {
+      "en": "source",
+      "es": "draft"
+    }
+  },
+  {
     "id": "skylights",
     "industries": [
       "con",
@@ -2433,7 +2867,7 @@ export const TALKS: Talk[] = [
       "roof"
     ],
     "code": "1926.252 / 1926.25",
-    "minutes": 5,
+    "minutes": 4,
     "sources": [
       {
         "label": "OSHA 1926.252(a): enclosed chutes for drops over 20 feet",
@@ -2498,14 +2932,6 @@ export const TALKS: Talk[] = [
               "Secure your tools and materials up top so they can't fall on anyone below.",
               "Wear your hard hat anywhere something could fall from above."
             ]
-          },
-          {
-            "heading": "Keep it clean as you go",
-            "items": [
-              "Clear scrap and debris out of the work area as the work moves along. Don't let it pile up.",
-              "Keep walkways, passageways and stairs clear, especially of scrap lumber with nails sticking out.",
-              "Oily rags and solvent waste go in covered, fire-resistant containers until they leave the site."
-            ]
           }
         ],
         "ask": "Where is today's drop zone, and how are we keeping people out of it?"
@@ -2535,14 +2961,6 @@ export const TALKS: Talk[] = [
               "Donde esté bajando material, pon barricadas y letreros. Mantén a la gente fuera de la zona de caída.",
               "Asegura tus herramientas y materiales arriba para que no le caigan a nadie abajo.",
               "Usa tu casco en cualquier lugar donde algo pueda caer desde arriba."
-            ]
-          },
-          {
-            "heading": "Limpia mientras trabajas",
-            "items": [
-              "Saca los desperdicios y escombros del área de trabajo a medida que avanza el trabajo. No dejes que se amontonen.",
-              "Mantén libres los caminos, pasillos y escaleras, sobre todo de madera de desecho con clavos salidos.",
-              "Los trapos con aceite y los desechos de solventes van en recipientes tapados y resistentes al fuego hasta que salgan de la obra."
             ]
           }
         ],
@@ -10469,8 +10887,7 @@ export const TALKS: Talk[] = [
   {
     "id": "temp-power",
     "industries": [
-      "elec",
-      "con"
+      "elec"
     ],
     "code": "1926.405(a)(2) / 1926.405(b) / 1926.404(b)(1) / 1926.403(i)",
     "minutes": 5,

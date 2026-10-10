@@ -21,12 +21,13 @@ describe("talk sources and wording", () => {
     // An OSHA section or appendix page (1904 recordkeeping, 1910, 1926, 1928), or another agency's rule on eCFR (below).
     const osha = /^https:\/\/www\.osha\.gov\/laws-regs\/regulations\/standardnumber\/(1904|1910|1926|1928)\/(\1\.\d+(App[A-Z]\d*|TABLEZ[123])?|\1Subpart[A-Z]+App[A-Z]\d*)$/;
     // Non-OSHA rules a talk names plainly: EPA pesticides (part 170), EPA refrigerants (part 82 subpart F),
-    // DOT/FMCSA cargo securement and driving (parts 392-393).
+    // DOT/FMCSA cargo securement and driving (parts 392-393), EPA lead-safe renovation (part 745 subparts E-F).
     const ecfr = new RegExp(
       "^https://www\\.ecfr\\.gov/current/(" +
         "title-40/chapter-I/subchapter-E/part-170" +
         "|title-40/chapter-I/subchapter-C/part-82/subpart-F(/section-82\\.\\d+)?" +
         "|title-49/subtitle-B/chapter-III/subchapter-B/part-39[23](/subpart-[A-Z]+)?(/section-39[23]\\.\\d+)?" +
+        "|title-40/chapter-I/subchapter-R/part-745/subpart-[EF]/section-745\\.\\d+" +
         ")$",
     );
     for (const t of TALKS) {
