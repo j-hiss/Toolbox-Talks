@@ -20,7 +20,8 @@
     "seed": "tsx scripts/seed-local.ts",
     "icons": "tsx scripts/make-icons.ts",
     "voice:lines": "tsx scripts/voice/lines.ts",
-    "voice:upload": "tsx scripts/voice/upload.ts"
+    "voice:upload": "tsx scripts/voice/upload.ts",
+    "functions:sync": "tsx scripts/functions-sync.ts"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",

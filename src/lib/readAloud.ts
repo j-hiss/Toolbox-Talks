@@ -89,14 +89,18 @@ export function readAloud(
         const src = await playable(fileUrl(v!.voice, audioKey(lines[i].text, lang, v!.voice)));
         await new Promise<void>((res) => {
           const a = new Audio(src);
-          a.playbackRate = 1;
-          stopCurrent = () => { a.pause(); res(); };
-          a.onended = () => res();
-          a.onerror = () => { // a missing or broken file: read that line with the phone's voice instead
-            if (!speechAvailable()) return res();
-            const s = speakOne(lines[i].text, code, opts.rate); stopCurrent = s.stop; void s.done.then(res);
+          let fellBack = false;
+          const finish = () => { if (src.startsWith("blob:")) URL.revokeObjectURL(src); res(); };
+          // A missing or broken file: read that line with the phone's voice instead (once, whichever error comes first).
+          const fallBack = () => {
+            if (fellBack) return; fellBack = true;
+            if (!speechAvailable()) return finish();
+            const s = speakOne(lines[i].text, code, opts.rate); stopCurrent = s.stop; void s.done.then(finish);
           };
-          a.play().catch(() => a.onerror?.(new Event("error")));
+          stopCurrent = () => { a.pause(); finish(); };
+          a.onended = finish;
+          a.onerror = fallBack;
+          a.play().catch(fallBack);
         });
       } else if (speechAvailable()) {
         const s = speakOne(lines[i].text, code, opts.rate);

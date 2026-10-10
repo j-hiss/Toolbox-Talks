@@ -22,10 +22,17 @@ describe("AI tailoring", () => {
     const dropped = { ...ok, sections: [{ heading: "Set up", items: ["Use the 4 to 1 rule.", "Extend 3 feet above the landing."] }] };
     expect(checkTailored(JSON.stringify(dropped), source, [])).toMatchObject({ problem: expect.stringMatching(/rule reference/) });
     expect(checkTailored(JSON.stringify({ ...ok, ask: "Are we compliant?" }), source, [])).toMatchObject({ problem: expect.stringMatching(/compliance/) });
+    expect(checkTailored(JSON.stringify({ ...ok, ask: "Is this ladder OSHA-approved?" }), source, [])).toMatchObject({ problem: expect.stringMatching(/compliance/) });
+    const wordNumber = { ...ok, hook: "Ten feet up, most falls start on the ladder." };
+    expect(checkTailored(JSON.stringify(wordNumber), source, [])).toMatchObject({ problem: expect.stringMatching(/added numbers/) });
+    const lostNumber = { ...ok, sections: [{ heading: "Set up", items: ["Angle it right.", "Extend 3 feet (1926.1053(b)(1))."] }] };
+    expect(checkTailored(JSON.stringify(lostNumber), source, [])).toMatchObject({ problem: expect.stringMatching(/left out a number/) });
     expect(checkTailored("no json", source, [])).toMatchObject({ problem: expect.stringMatching(/readable/) });
     expect(checkTailored(JSON.stringify({ ...ok, sections: [] }), source, [])).toMatchObject({ problem: expect.stringMatching(/missing/) });
   });
   it("numbers are compared loosely", () => {
-    expect([...numbersIn("6 feet, 6-foot, 1,5 m")]).toEqual(["6", "1.5"]);
+    expect([...numbersIn("6 feet, 6-foot, 1,5 m, six")]).toEqual(["6", "1.5"]);
+    const fromNotes = { ...ok, hook: "On two-story homes, most falls start on the ladder." };
+    expect("talk" in checkTailored(JSON.stringify(fromNotes), source, [], "Two-story reroofs")).toBe(true);
   });
 });

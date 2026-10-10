@@ -1,9 +1,10 @@
 // "Tailor with AI": asks the tailor-talk server function for a draft (owners and admins; 20 a day per company).
 // The draft comes back already checked (src/core/aiTailor.ts) and is never saved here: the admin edits and saves it.
 import { supabase } from "@/lib/supabase";
-import type { TailorRequest, TalkTextLike } from "@/core/aiTailor";
+import type { TailorAsk, TalkTextLike } from "@/core/aiTailor";
 
-export async function tailorTalk(r: TailorRequest): Promise<TalkTextLike> {
+/** Only the company, the library talk id and the notes go up: the function looks up the talk and the company itself. */
+export async function tailorTalk(r: TailorAsk): Promise<TalkTextLike> {
   const { data, error } = await supabase().functions.invoke("tailor-talk", { body: r });
   if (error) {
     // The function answers with { error: "plain words" }; show that rather than a status code.

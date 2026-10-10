@@ -32,7 +32,7 @@ export const CHECKLISTS: Checklist[] = [
       { id: "clear", text: "Walkways, stairs and work areas clear of debris, cords, scrap and spills", rule: "1910.22(a)(1)-(3); 1926.25(a)" },
       { id: "hazards", text: "Holes, loose boards and damaged floors fixed, covered or guarded", rule: "1910.22(d)(2)" },
       { id: "exits", text: "Exit routes and doors unblocked and unlocked from the inside", rule: "1910.37(a)(3); 1910.36(d)(1)" },
-      { id: "signs", text: "Exit signs lit and readable", rule: "1910.37(b)(2)" },
+      { id: "signs", text: "Exit signs lit and readable", rule: "1910.37(b)(2), (b)(6)" },
     ],
   },
   {

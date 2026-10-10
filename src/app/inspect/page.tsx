@@ -46,6 +46,12 @@ function Inspect({ m }: { m: Membership }) {
   const waiting = useSyncExternalStore(queue.onChange, () => JSON.stringify(queue.waiting(userId, (q) => q.payload.company_id === co.id)), () => "[]");
   const waitingItems = useMemo(() => JSON.parse(waiting) as ReturnType<typeof queue.waiting>, [waiting]);
 
+  // Upload anything waiting as soon as the phone gets signal back.
+  useEffect(() => {
+    const retry = () => setVersion((v) => v + 1);
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, []);
   useEffect(() => {
     let live = true;
     void queue.flush(userId, (q) => saveInspection(q.payload, q.issues)).finally(() => {
@@ -74,7 +80,12 @@ function Inspect({ m }: { m: Membership }) {
       <Eyebrow>{co.name}</Eyebrow>
       <Title>Inspections</Title>
       <p className="mt-2 text-sm text-muted">Each checklist follows the rule that asks for it. Mark every item, explain anything that fails, sign, and it&apos;s saved, even with no signal.</p>
-      {waitingItems.length > 0 && <div className="mt-3"><Notice tone="caution">{waitingItems.length} inspection{waitingItems.length > 1 ? "s" : ""} saved on this phone, waiting to upload.</Notice></div>}
+      {waitingItems.length > 0 && (
+        <div className="mt-3"><Notice tone="caution">
+          {waitingItems.length} inspection{waitingItems.length > 1 ? "s" : ""} saved on this phone, waiting to upload.
+          {waitingItems.find((q) => q.lastError) && <> Last try: {waitingItems.find((q) => q.lastError)!.lastError}</>}
+        </Notice></div>
+      )}
       {error && <div className="mt-3"><ErrorNotice what="Couldn't load inspections." detail={error} onRetry={() => { setError(null); setVersion((v) => v + 1); }} /></div>}
       {due.length > 0 && (
         <>
@@ -147,17 +158,21 @@ function Run({ m, list, userId, onDone, back }: { m: Membership; list: Checklist
     return () => { live = false; };
   }, [co.id]);
 
-  const set = (i: number, p: Partial<Draft>) => setItems((xs) => xs.map((x, j) => (j === i ? { ...x, ...p } : x)));
+  const set = (i: number, p: Partial<Draft>) => { setError(null); setItems((xs) => xs.map((x, j) => (j === i ? { ...x, ...p } : x))); };
   const inspector = personId ? people.find((p) => p.id === personId)?.full_name ?? "" : name;
   const marked = items.filter((i) => i.result).length;
   const problem = inspectionProblem(items.map((d, i) => ({ ...d, text: list.items[i].text })), inspector, !!sig);
-  const allPass = () => setItems((xs) => xs.map((x) => (x.result ? x : { ...x, result: "pass" })));
+  const allPass = () => { setError(null); setItems((xs) => xs.map((x) => (x.result ? x : { ...x, result: "pass" }))); };
 
   const save = async () => {
     if (problem) { setError(problem); return; }
     setBusy(true); setError(null);
     const site = sites.find((s) => s.id === siteId);
-    const checked: CheckedItem[] = list.items.map((it, i) => ({ ...it, result: items[i].result!, note: items[i].note.trim(), photo: items[i].photo }));
+    // A note or photo belongs to a failed item; switching it back to pass or n/a drops them.
+    const checked: CheckedItem[] = list.items.map((it, i) => {
+      const fail = items[i].result === "fail";
+      return { ...it, result: items[i].result!, note: fail ? items[i].note.trim() : "", photo: fail ? items[i].photo : null };
+    });
     const payload: InspectionPayload = {
       company_id: co.id, client_id: clientId.current, checklist_id: list.id, checklist_version: list.version, title: list.title, rule: list.rule,
       items: checked, subject: subject.trim(), jobsite_id: site?.id ?? null, jobsite_name: site?.name ?? "",
@@ -170,8 +185,10 @@ function Run({ m, list, userId, onDone, back }: { m: Membership; list: Checklist
     } as IssuePayload] : []));
     try {
       queue.add(payload.client_id, userId, { payload, issues });
-      const r = await queue.flush(userId, (q) => saveInspection(q.payload, q.issues));
-      setSaved({ fails: checked.filter((c) => c.result === "fail").length, payload, uploaded: r.failed === 0 });
+      await queue.flush(userId, (q) => saveInspection(q.payload, q.issues));
+      // Uploaded only if it's no longer waiting (a flush already running may have started before this one was added).
+      const uploaded = !queue.waiting(userId).some((q) => q.id === payload.client_id);
+      setSaved({ fails: checked.filter((c) => c.result === "fail").length, payload, uploaded });
       onDone();
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
     setBusy(false);

@@ -854,6 +854,15 @@ async function main() {
         && await fails(() => as(userA, "insert into public.company_talks (company_id, talk_key, version, title, content, source) values ($1, 'own-aidraft00002', 1, 'T', $2::jsonb, 'robot')", [coA, good])));
     }
 
+    // Review fixes (0037): an issue stays linked to its inspection; AI drafts capped per person, not just per company.
+    {
+      const iss = (await as(userA, "select id, inspection_id from public.talk_issues where inspection_id is not null limit 1")).rows[0];
+      await as(userA, "update public.talk_issues set inspection_id = null, status = 'fixed' where id = $1", [iss.id]);
+      check("An issue's link to its inspection can't be changed", (await as(userA, "select inspection_id from public.talk_issues where id = $1", [iss.id])).rows[0].inspection_id === iss.inspection_id);
+      const coA2 = (await as(userA, "select public.create_company('Company A2', 'con', '33913') as id")).rows[0].id;
+      check("Making another company doesn't add AI drafts (20 a day per person)", await fails(() => as(userA, "select public.ai_tailor_start($1, 'ladder')", [coA2])));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -872,7 +881,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 101;
+  const EXPECTED = 103;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

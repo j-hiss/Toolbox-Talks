@@ -9,7 +9,7 @@ const sum: InjurySummary = {
   peak_employees: 31, establishment_type: 1,
 };
 const c = (over: Partial<InjuryCase> = {}): InjuryCase => ({
-  ...BLANK_301, case_key: "k", version: 1, year: 2026, case_no: 1, removed: false, removed_reason: "", person_id: null, employee_name: "Example Worker", job_title: "Roofer",
+  ...BLANK_301, case_key: "k", version: 1, year: 2026, case_no: 1, removed: false, removed_reason: "", person_id: null, employee_name: "Pat Rivera", job_title: "Roofer",
   injury_date: "2026-03-02", location: "Example Jobsite", description: "Sprained ankle", outcome: "days_away", days_away: 3, days_restricted: 0, kind: "injury",
   privacy: false, privacy_reason: null, created_at: "", birth_date: "1990-01-15", hire_date: "2024-05-01", er_visit: false, inpatient: false, time_of_event: "09:30:00",
   activity_before: "Carrying shingles down a ladder", what_happened: "Missed the last rung", injury_detail: "Sprained left ankle", object_substance: "Ladder", ...over,
@@ -54,14 +54,15 @@ describe("OSHA upload files", () => {
   it("case file leaves out the name and address; privacy cases send no name either", () => {
     const csv = itaCaseCsv(sum.establishment, [c({ employee_address: "9 Home Ln", provider_name: "Dr Example", privacy: true })], 2026);
     expect(csv.split("\r\n")[0]).toBe(ITA_CASE_HEADERS.join(","));
-    expect(csv).not.toMatch(/Example Worker|Home Ln|Dr Example/);
+    expect(csv).not.toMatch(/Pat Rivera|Rivera|Home Ln|Dr Example/);
     expect(csv).toContain("2026-001,Roofer,03/02/2026");
     expect(itaCaseProblems([c({ birth_date: null })])).toEqual(["2026-001: date of birth"]);
   });
   it("the 301 says what's missing and catches names in boxes 14-17", () => {
     expect(incidentGaps(c())).toEqual([]);
     expect(incidentGaps(c({ inpatient: null, time_of_event: null }))).toHaveLength(2);
-    expect(nameInNarrative(c({ what_happened: "Worker slipped" }))).toBe("worker");
+    expect(nameInNarrative(c({ what_happened: "Rivera slipped" }))).toBe("rivera");
+    expect(itaCaseProblems([c({ location: "Rivera's truck" })])[0]).toMatch(/job title, place or description/);
     expect(nameInNarrative(c())).toBeNull();
   });
 });

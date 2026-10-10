@@ -19,10 +19,7 @@ import { Button, ConfirmButton, Field, GroupHeading, Notice, Sheet, inputClass }
 import { toast } from "@/components/toast";
 import { aiTailoring } from "@/lib/features";
 import { tailorTalk } from "@/lib/data/ai";
-import { INDUSTRIES } from "@/core/industries";
-import { WORK_SETTINGS, type WorkSetting } from "@/core/worksetting";
 import { MAX_NOTES } from "@/core/aiTailor";
-import type { Company } from "@/lib/data/types";
 
 const MINUTES = [3, 4, 5, 6, 8, 10, 15];
 const blank = (): TalkText => ({ title: "", hook: "", sections: [{ heading: "", items: [""] }], ask: "" });
@@ -48,7 +45,7 @@ function editFrom(row: OwnTalkRow): Edit {
   };
 }
 
-export function OwnTalks({ companyId, company }: { companyId: string; company?: Pick<Company, "industry" | "work_setting"> }) {
+export function OwnTalks({ companyId }: { companyId: string }) {
   const rows = useOwnTalkRows();
   const talks = useMemo(() => latestOwnTalks(rows), [rows]);
   const [edit, setEdit] = useState<Edit | null>(null);
@@ -114,7 +111,7 @@ export function OwnTalks({ companyId, company }: { companyId: string; company?: 
           {LIBRARY.map((t) => <option key={t.id} value={t.id}>{t.content.en.title}</option>)}
         </select>
       </div>
-      {aiTailoring() && company && <TailorWithAi companyId={companyId} company={company} onDraft={setEdit} />}
+      {aiTailoring() && <TailorWithAi companyId={companyId} onDraft={setEdit} />}
       {edit && <Editor companyId={companyId} edit={edit} setEdit={setEdit} onClose={() => setEdit(null)} />}
     </section>
   );
@@ -256,23 +253,17 @@ function Editor({ companyId, edit, setEdit, onClose }: { companyId: string; edit
 }
 
 /** Pick a library talk, say a little about the work, get a draft to check and save. Owners and admins; 20 a day. */
-function TailorWithAi({ companyId, company, onDraft }: { companyId: string; company: Pick<Company, "industry" | "work_setting">; onDraft: (e: Edit) => void }) {
+function TailorWithAi({ companyId, onDraft }: { companyId: string; onDraft: (e: Edit) => void }) {
   const [base, setBase] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const ind = INDUSTRIES.find((i) => i.id === company.industry);
   const go = async () => {
     const lib = LIBRARY.find((t) => t.id === base);
     if (!lib) { setError("Pick a library talk first."); return; }
     setBusy(true); setError(null);
     try {
-      const draft = await tailorTalk({
-        companyId, baseId: lib.id, talk: lib.content.en, sources: lib.sources.map((s) => s.label),
-        industry: ind ? `${ind.name}: ${ind.sub}` : String(company.industry),
-        workSetting: WORK_SETTINGS.find((w) => w.id === (company.work_setting as WorkSetting | null))?.name ?? "Not set",
-        notes: notes.slice(0, MAX_NOTES),
-      });
+      const draft = await tailorTalk({ companyId, baseId: lib.id, notes: notes.slice(0, MAX_NOTES) });
       onDraft({ row: null, key: newTalkKey(), basedOn: lib.id, en: draft, es: null, minutes: lib.minutes, code: lib.code, reviewed: false, reviewer: "", source: "ai" });
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
     setBusy(false);

@@ -13,7 +13,6 @@
 //   the year counts as one employee (1904.41(b)(2)).
 // - OSHA's lists use 2012 NAICS codes, matched here by prefix. A newer code may need checking on OSHA's site.
 // This tells a company what the rule appears to ask of it. It isn't legal advice and never says it is compliant.
-import { csvCell } from "./csv";
 import { KINDS, OUTCOMES, caseLabel, logTotals, nameInNarrative, type InjuryCase, type InjurySummary } from "./oshaLog";
 
 /** Appendix A to Subpart B of Part 1904: partially exempt industries. */
@@ -68,7 +67,9 @@ export function sizeCode(peak: number): 1 | 21 | 22 | 3 {
 
 const mmddyyyy = (d: string | null) => (d ? `${d.slice(5, 7)}/${d.slice(8, 10)}/${d.slice(0, 4)}` : "");
 const hhmm = (t: string | null) => (t ? t.slice(0, 5) : "");
-const row = (cells: unknown[]) => cells.map(csvCell).join(",");
+// OSHA's upload takes values as written: quotes only where needed, no spreadsheet apostrophes added.
+const cell = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+const row = (cells: unknown[]) => cells.map(cell).join(",");
 
 export const ITA_SUMMARY_HEADERS = ["establishment_name", "ein_number", "company_name", "street_address", "city", "state", "zip", "naics_code", "industry_description", "size", "establishment_type", "year_filing_for", "annual_average_employees", "total_hours_worked", "no_injuries_illnesses", "total_deaths", "total_dafw_cases", "total_djtr_cases", "total_other_cases", "total_dafw_days", "total_djtr_days", "total_injuries", "total_skin_disorders", "total_respiratory_conditions", "total_poisonings", "total_hearing_loss", "total_other_illnesses", "change_reason"];
 
@@ -114,10 +115,12 @@ export function itaCaseProblems(cases: InjuryCase[]): string[] {
     if (!c.birth_date) miss.push("date of birth");
     if (!c.hire_date) miss.push("date hired");
     if (c.er_visit === null) miss.push("emergency room");
+    if (!c.time_of_event && !c.time_unknown) miss.push("time of event");
     if (c.inpatient === null) miss.push("hospitalized");
     if (!c.activity_before.trim() || !c.what_happened.trim() || !c.injury_detail.trim() || !c.object_substance.trim()) miss.push("boxes 14 to 17");
     if (c.outcome === "death" && !c.death_date) miss.push("date of death");
     if (nameInNarrative(c)) miss.push("a name in boxes 14 to 17 (take it out)");
+    if (nameInNarrative({ employee_name: c.employee_name, activity_before: c.job_title, what_happened: c.location, injury_detail: c.description, object_substance: "" })) miss.push("a name in the job title, place or description (take it out)");
     if (miss.length) out.push(`${caseLabel(c)}: ${miss.join(", ")}`);
   }
   return out;

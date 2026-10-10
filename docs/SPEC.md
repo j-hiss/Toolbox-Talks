@@ -647,6 +647,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   rule reference or mentions compliance is refused. The draft opens in the company-talk editor with a notice to read
   every line; saving makes it a company talk marked AI-drafted. Works the same for every industry (the prompt uses the
   company's industry and where it works).
+- **Limits (review, migration 0037):** 20 drafts a day per company and per person, 300 a day overall; the function
+  looks up the library talk itself, so it can't be used to send the AI anything else. The check also catches numbers
+  written as words, numbers the draft dropped, and "OSHA-approved" style wording.
 - **Setup (Joe):** `supabase secrets set ANTHROPIC_API_KEY=…` in a terminal (never in chat or the repo),
   `supabase functions deploy tailor-talk`, then `NEXT_PUBLIC_AI_TAILORING=on`. Until then the button doesn't show.
 - **Not yet:** AI translation (translations still need a person who reads the language), AI crew summaries for the

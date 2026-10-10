@@ -585,7 +585,7 @@ function TalksTab({ m }: { m: Membership }) {
   // A fresh picker whenever the saved lists change (loaded, saved, undone), so its checkboxes match what's saved.
   return (
     <>
-      <OwnTalks companyId={m.company.id} company={m.company} />
+      <OwnTalks companyId={m.company.id} />
       <div className="mt-6">
         <GroupHeading>Talks in your plan</GroupHeading>
         <div className="mt-2">
