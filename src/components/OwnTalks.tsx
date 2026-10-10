@@ -234,7 +234,7 @@ function Editor({ companyId, edit, setEdit, onClose }: { companyId: string; edit
         )}
 
         {error && <Notice tone="error">{error}</Notice>}
-        <div className="sticky bottom-0 -mb-[calc(1rem+env(safe-area-inset-bottom,0px))] grid grid-cols-[1fr_auto] gap-2 border-t border-line bg-bg pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-3">
+        <div className="sticky -bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] -mb-[calc(1rem+env(safe-area-inset-bottom,0px))] grid grid-cols-[1fr_auto] gap-2 border-t border-line bg-bg pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-3">
           <Button type="button" className="whitespace-nowrap" disabled={busy} onClick={save}>{busy ? "Saving…" : edit.row ? `Save as version ${edit.row.version + 1}` : "Save talk"}</Button>
           <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
         </div>

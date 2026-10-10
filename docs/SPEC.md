@@ -590,9 +590,17 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Review (2026-10-10, migration 0032):** an independent review found no critical or high issues; fixed: database clock
   on talk versions, talk content shape checked, combined 180-day cap, no future injury dates, confidential label on
   every privacy-list page.
+- **Form 301 (built, migration 0033):** each case carries its incident report, fields 2–18 in the form's order, with
+  what's still missing shown on the case and the PDF. Names typed into boxes 14–17 are caught (those boxes go to OSHA).
+- **Filing online (built):** from the NAICS code and everyone employed at any time in the year, the app says what the
+  rule appears to ask for any industry: keep the log or not (10 or fewer; partially exempt industries), file the 300A
+  online (20–249 in an Appendix A industry, or 250+), and the 300 and 301 too (100+ in an Appendix B industry), due
+  March 2. It builds OSHA's upload files in OSHA's exact column names; the case file never carries the name, address,
+  doctor or facility. Every industry in the app offers common NAICS codes as a starting point. OSHA's lists use 2012
+  NAICS codes; a newer code is matched by prefix and flagged to confirm on OSHA's site.
 - **Honest limits:** the app keeps the log and builds the forms; deciding recordability is the company's. It reminds
-  about 8-hour and 24-hour serious-injury reports (1904.39) but doesn't send them. Not yet: Form 301 incident
-  reports, OSHA's electronic submission (ITA) file, several establishments per company.
+  about 8-hour and 24-hour serious-injury reports (1904.39) but doesn't send them, and it doesn't submit to OSHA (the
+  company uploads the file). Not yet: several establishments per company.
 
 ## Topic icons and spreadsheet export (built)
 - **Topic icons:** every talk shows a small icon for its topic (weather, falls, electrical, fire, chemicals and air,

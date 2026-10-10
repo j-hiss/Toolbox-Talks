@@ -12,5 +12,5 @@ export function csvCell(v: unknown): string {
 }
 
 export function toCsv(rows: unknown[][]): string {
-  return "﻿" + rows.map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
+  return "\uFEFF" + rows.map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }

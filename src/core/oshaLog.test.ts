@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { caseLabel, caseProblem, countDays, latestCases, logRates, logTotals, nameOnLog, postingWindow, type CaseDraft, type InjuryCase } from "./oshaLog";
+import { BLANK_301, caseLabel, caseProblem, countDays, latestCases, logRates, logTotals, nameOnLog, postingWindow, type CaseDraft, type InjuryCase } from "./oshaLog";
 
 const draft = (over: Partial<CaseDraft> = {}): CaseDraft => ({
+  ...BLANK_301,
   person_id: null, employee_name: "Example Worker", job_title: "Roofer", injury_date: "2026-03-02", location: "Example Jobsite, roof",
   description: "Sprained left ankle stepping off a ladder", outcome: "days_away", days_away: 3, days_restricted: 0, kind: "injury",
   privacy: false, privacy_reason: null, ...over,

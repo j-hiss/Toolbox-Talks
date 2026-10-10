@@ -521,19 +521,29 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await isheet.locator("label:has-text('(H) Days away from work')").click(); await q.fill("#inj-away", "0");
   await isheet.locator("button:has-text('Add to the log')").click(); await q.waitForTimeout(200);
   log("17 zero days:", (await isheet.locator("[role=alert]").allInnerTexts()).join(" | "));
-  await q.fill("#inj-away", "3"); await q.screenshot({ path: `${OUT}/e-injury-editor.png`, fullPage: false });
+  await q.fill("#inj-away", "3");
+  await q.fill("#inj-dob", "1990-01-15"); await q.fill("#inj-hired", "2024-05-01");
+  await isheet.locator("fieldset:has-text('emergency room') label:has-text('No')").click(); await isheet.locator("fieldset:has-text('in-patient') label:has-text('No')").click();
+  await q.fill("#inj-time", "09:30"); await q.fill("#inj-activity_before", "Carrying a bundle of shingles down a ladder");
+  await q.fill("#inj-what_happened", "Example Diaz missed the last rung"); await q.fill("#inj-injury_detail", "Sprained left ankle"); await q.fill("#inj-object_substance", "Ladder rung");
+  log("17 name warning:", (await isheet.locator("[role=status]:has-text('Leave names out')").count()) > 0);
+  await q.fill("#inj-what_happened", "Missed the last rung and landed on uneven decking");
+  await q.screenshot({ path: `${OUT}/e-injury-editor.png`, fullPage: false });
   await isheet.locator("button:has-text('Add to the log')").click(); await q.waitForTimeout(800);
   await q.click("main button:has-text('Add a case')"); await q.waitForTimeout(300);
   await q.fill("#inj-name", "Example Private Person"); await q.fill("#inj-date", `${new Date().getFullYear()}-05-14`);
   await q.fill("#inj-desc", "Skin rash on both hands from adhesive"); await q.selectOption("#inj-kind", "skin");
-  await isheet.locator("input[type=checkbox]").check(); await q.selectOption("#inj-why", "employee_request");
+  await isheet.locator("label:has-text('Privacy case.') input[type=checkbox]").check(); await q.selectOption("#inj-why", "employee_request");
   await isheet.locator("button:has-text('Add to the log')").click(); await q.waitForTimeout(800);
   log("17 cases:", (await q.locator("main ul li b").allInnerTexts()).filter((t) => /^\d{4}-\d{3}/.test(t)).join(" | "));
   await q.fill("#sum-avg", "24"); await q.fill("#sum-hours", "49920"); await q.fill("#sum-naics", "238160");
+  await q.fill("#sum-street", "1 Example St"); await q.fill("#sum-city", "Fort Myers"); await q.fill("#sum-state", "FL"); await q.fill("#sum-zip", "33913");
+  await q.fill("#sum-ein", "123456789"); await q.fill("#sum-peak", "31");
   await q.click("main button:has-text('Save summary details')"); await q.waitForTimeout(800);
   log("17 totals:", (await q.locator("main p:has-text('days away ·')").first().innerText()).replace(/\s+/g, " "));
   await q.screenshot({ path: `${OUT}/e-injury-log.png`, fullPage: true });
-  for (const label of ["log (300) PDF", "summary (300A) PDF", "Privacy case list"]) {
+  log("17 filing:", (await q.locator("section[aria-label='Filing online with OSHA'] p.font-semibold").innerText()));
+  for (const label of ["log (300) PDF", "summary (300A) PDF", "Privacy case list", "300A file for OSHA"]) {
     await q.evaluate(() => { window.__saved = null; });
     await q.locator(`main button:has-text("${label}")`).click(); await q.waitForTimeout(1500);
     log(`17 ${label}:`, JSON.stringify(await q.evaluate(() => window.__saved)));

@@ -7,20 +7,22 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
-const CASE_COLS = "case_key, version, year, case_no, removed, removed_reason, person_id, employee_name, job_title, injury_date, location, description, outcome, days_away, days_restricted, kind, privacy, privacy_reason, created_at";
-const SUMMARY_COLS = "year, version, establishment, address, industry, naics, avg_employees, hours_worked, certifier_name, certifier_title, certifier_phone";
+const FIELDS_301 = ["employee_address", "birth_date", "hire_date", "sex", "provider_name", "provider_facility", "er_visit", "inpatient", "time_started", "time_of_event", "time_unknown", "activity_before", "what_happened", "injury_detail", "object_substance", "death_date", "completed_by", "completed_title", "completed_phone"] as const;
+const DRAFT_FIELDS = ["person_id", "employee_name", "job_title", "injury_date", "location", "description", "outcome", "days_away", "days_restricted", "kind", "privacy", "privacy_reason", ...FIELDS_301] as const;
+const CASE_COLS = ["case_key", "version", "year", "case_no", "removed", "removed_reason", ...DRAFT_FIELDS, "created_at"].join(", ");
+const SUMMARY_COLS = "year, version, establishment, address, industry, naics, avg_employees, hours_worked, certifier_name, certifier_title, certifier_phone, legal_name, ein, street, city, state, zip, peak_employees, establishment_type";
 
 /** Every version of every case for a year (the latest per case: latestCases). */
 export async function listInjuryCases(companyId: string, year: number): Promise<InjuryCase[]> {
-  return check(await supabase().from("injury_cases").select(CASE_COLS).eq("company_id", companyId).eq("year", year).order("version")) as InjuryCase[];
+  return check(await supabase().from("injury_cases").select(CASE_COLS).eq("company_id", companyId).eq("year", year).order("version")) as unknown as InjuryCase[];
 }
 
 /** Save a case: a new case (no `prev`) gets the next number; an edit is the next version of `prev`. */
 export async function saveInjuryCase(companyId: string, c: CaseDraft, prev: InjuryCase | null): Promise<void> {
   const year = Number(c.injury_date.slice(0, 4));
-  const { person_id, employee_name, job_title, injury_date, location, description, outcome, days_away, days_restricted, kind, privacy, privacy_reason } = c;
+  const fields = Object.fromEntries(DRAFT_FIELDS.map((k) => [k, c[k]])); // only what a person fills in
   check(await supabase().from("injury_cases").insert({
-    company_id: companyId, person_id, employee_name, job_title, injury_date, location, description, outcome, days_away, days_restricted, kind, privacy, privacy_reason, case_key: prev?.case_key ?? crypto.randomUUID(), version: (prev?.version ?? 0) + 1, year, removed: false, removed_reason: "",
+    company_id: companyId, ...fields, case_key: prev?.case_key ?? crypto.randomUUID(), version: (prev?.version ?? 0) + 1, year, removed: false, removed_reason: "",
   }).select("case_key"));
 }
 

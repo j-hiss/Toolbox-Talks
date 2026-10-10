@@ -799,6 +799,22 @@ async function main() {
       check("An injury date can't be in the future", await fails(() => inj({ date: future, away: 1, restricted: 0 })));
     }
 
+    // Form 301 and online-filing details (0033): dates in order, filing fields in OSHA's formats, still admins only.
+    {
+      const ins = (cols) => {
+        const c = { employee_name: "Example Worker", injury_date: "2026-03-02", description: "x", outcome: "days_away", days_away: 2, kind: "injury", year: 2026, ...cols };
+        const k = Object.keys(c);
+        return as(userA, `insert into public.injury_cases (company_id, case_key, version, ${k.join(", ")}) values ($1, $2, 1, ${k.map((_, i) => `$${i + 3}`).join(", ")}) returning case_key`, [coA, randomUUID(), ...k.map((x) => c[x])]);
+      };
+      check("A full 301 saves", (await ins({ birth_date: "1990-01-15", hire_date: "2024-05-01", er_visit: false, inpatient: true, time_of_event: "09:30", activity_before: "Carrying shingles", what_happened: "Slipped", injury_detail: "Ankle", object_substance: "Ladder" })).rows.length === 1);
+      check("301 dates stay in order", await fails(() => ins({ birth_date: "2026-04-01" })) && await fails(() => ins({ hire_date: "2026-04-01" }))
+        && await fails(() => ins({ death_date: "2026-03-05" })) && await fails(() => ins({ time_unknown: true, time_of_event: "09:00" })));
+      check("Filing details keep OSHA's formats", await fails(() => as(userA, "insert into public.injury_summaries (company_id, year, version, ein) values ($1, 2027, 1, '12-3456789')", [coA]))
+        && await fails(() => as(userA, "insert into public.injury_summaries (company_id, year, version, zip) values ($1, 2027, 1, '3391')", [coA]))
+        && (await as(userA, "insert into public.injury_summaries (company_id, year, version, ein, state, zip, peak_employees) values ($1, 2027, 1, '123456789', 'FL', '33913', 31) returning year", [coA])).rows.length === 1);
+      check("B still can't read A's 301 details", (await as(userB, "select birth_date from public.injury_cases")).rows.length === 0);
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -817,7 +833,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 84;
+  const EXPECTED = 88;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

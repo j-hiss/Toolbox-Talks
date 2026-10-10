@@ -170,3 +170,20 @@ describe("OSHA 300 log PDFs", () => {
     expect(pdf).not.toContain("Example Worker One");
   });
 });
+
+describe("OSHA 301 PDF", () => {
+  it("prints fields 1-18 in order and says what's still missing", async () => {
+    const { buildOsha301Pdf } = await import("./pdf");
+    const { BLANK_301 } = await import("@/core/oshaLog");
+    const c = { ...BLANK_301, case_key: "a", version: 1, year: 2026, case_no: 4, removed: false, removed_reason: "", person_id: null, created_at: "", employee_name: "Example Worker",
+      job_title: "Roofer", injury_date: "2026-03-02", location: "Example Jobsite", description: "Sprained ankle", outcome: "days_away", days_away: 3, days_restricted: 0, kind: "injury",
+      privacy: false, privacy_reason: null, inpatient: true, er_visit: true, time_of_event: "14:05:00", what_happened: "Missed the last rung" } as import("@/core/oshaLog").InjuryCase;
+    const pdf = buildOsha301Pdf(c, co).output().replace(/\\([()\\])/g, "$1");
+    expect(pdf).toContain("Injury and Illness Incident Report");
+    expect(pdf).toContain("(2026-004) Tj");
+    expect(pdf).toContain("(2:05 PM) Tj");
+    expect(pdf).toContain("(Missed the last rung) Tj");
+    expect(pdf).toContain("Still to fill in: date of birth (3)");
+    expect(pdf).not.toMatch(/\bcompliant\b/i);
+  });
+});

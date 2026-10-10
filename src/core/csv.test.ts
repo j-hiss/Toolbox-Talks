@@ -14,6 +14,6 @@ describe("CSV export", () => {
   });
   it("starts with a byte-order mark so Excel reads accents", () => {
     const out = toCsv([["Name"], ["Peña"]]);
-    expect(out.startsWith("﻿Name\r\nPeña")).toBe(true);
+    expect(out.startsWith("\uFEFFName\r\nPeña")).toBe(true);
   });
 });

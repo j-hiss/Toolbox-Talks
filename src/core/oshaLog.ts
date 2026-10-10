@@ -54,11 +54,58 @@ export type InjuryCase = {
   person_id: string | null; employee_name: string; job_title: string; injury_date: string; location: string; description: string;
   outcome: Outcome; days_away: number; days_restricted: number; kind: CaseKind; privacy: boolean; privacy_reason: PrivacyReason | null;
   created_at: string;
+} & Incident301;
+
+/** Form 301 (Rev. 04/2004), the incident report kept for each case. Fields 1, 10, 11 are the case's name, number, date. */
+export type Incident301 = {
+  employee_address: string; birth_date: string | null; hire_date: string | null; sex: "" | "M" | "F";      // 2-5
+  provider_name: string; provider_facility: string; er_visit: boolean | null; inpatient: boolean | null;  // 6-9
+  time_started: string | null; time_of_event: string | null; time_unknown: boolean;                       // 12-13
+  activity_before: string; what_happened: string; injury_detail: string; object_substance: string;        // 14-17
+  death_date: string | null;                                                                              // 18
+  completed_by: string; completed_title: string; completed_phone: string;
 };
+
+export const BLANK_301: Incident301 = {
+  employee_address: "", birth_date: null, hire_date: null, sex: "", provider_name: "", provider_facility: "", er_visit: null, inpatient: null,
+  time_started: null, time_of_event: null, time_unknown: false, activity_before: "", what_happened: "", injury_detail: "", object_substance: "",
+  death_date: null, completed_by: "", completed_title: "", completed_phone: "",
+};
+
+/**
+ * What's still missing from the incident report, in plain words (empty = complete). Boxes 14 to 17 must not carry
+ * names or other identifying details: OSHA's online filing receives them (it never receives the name, address,
+ * doctor or facility).
+ */
+export function incidentGaps(c: Pick<InjuryCase, "employee_name" | "outcome" | "injury_date"> & Incident301): string[] {
+  const gaps: string[] = [];
+  if (!c.birth_date) gaps.push("date of birth (3)");
+  if (!c.hire_date) gaps.push("date hired (4)");
+  if (c.er_visit === null) gaps.push("emergency room yes or no (8)");
+  if (c.inpatient === null) gaps.push("hospitalized overnight yes or no (9)");
+  if (!c.time_of_event && !c.time_unknown) gaps.push("time of event, or \"can't be determined\" (13)");
+  if (!c.activity_before.trim()) gaps.push("what they were doing just before (14)");
+  if (!c.what_happened.trim()) gaps.push("what happened (15)");
+  if (!c.injury_detail.trim()) gaps.push("the injury or illness (16)");
+  if (!c.object_substance.trim()) gaps.push("the object or substance (17)");
+  if (c.outcome === "death" && !c.death_date) gaps.push("date of death (18)");
+  return gaps;
+}
+
+/** A name in boxes 14 to 17 (which go to OSHA's online filing), or null. Checks each part of the person's name. */
+export function nameInNarrative(c: Pick<InjuryCase, "employee_name"> & Pick<Incident301, "activity_before" | "what_happened" | "injury_detail" | "object_substance">): string | null {
+  const text = ` ${[c.activity_before, c.what_happened, c.injury_detail, c.object_substance].join(" ").toLowerCase()} `;
+  for (const part of c.employee_name.toLowerCase().split(/\s+/).filter((p) => p.length >= 3)) {
+    if (new RegExp(`[^a-z]${part.replace(/[^a-z]/g, "")}[^a-z]`).test(text)) return part;
+  }
+  return null;
+}
 
 export type InjurySummary = {
   year: number; version: number; establishment: string; address: string; industry: string; naics: string;
   avg_employees: number | null; hours_worked: number | null; certifier_name: string; certifier_title: string; certifier_phone: string;
+  /** For OSHA's online filing (migration 0033). peak_employees = everyone employed at any time in the year. */
+  legal_name: string; ein: string; street: string; city: string; state: string; zip: string; peak_employees: number | null; establishment_type: 1 | 2 | 3;
 };
 
 /** The latest version of each case for a year, by case number. Removed cases drop out unless `withRemoved`. */
@@ -89,6 +136,11 @@ export function caseProblem(c: CaseDraft, today: Date = new Date()): string | nu
   if (c.outcome === "other" && (c.days_away > 0 || c.days_restricted > 0)) return "There were days away or restricted, so choose the matching box.";
   if (c.privacy && !c.privacy_reason) return "Choose why it's a privacy case.";
   if (c.privacy_reason === "employee_request" && c.kind === "injury") return "Only an illness can be kept private at the person's request.";
+  if (c.birth_date && c.birth_date >= c.injury_date) return "The date of birth has to be before the injury date.";
+  if (c.hire_date && c.hire_date > c.injury_date) return "The date hired can't be after the injury date.";
+  if (c.death_date && c.outcome !== "death") return "A date of death goes with the \"Death\" box.";
+  if (c.death_date && c.death_date < c.injury_date) return "The date of death can't be before the injury date.";
+  if (c.time_unknown && c.time_of_event) return "Clear the time of event, or untick \"can't be determined\".";
   return null;
 }
 
