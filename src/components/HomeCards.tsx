@@ -80,7 +80,8 @@ export function MomentumHero({ st }: { st: Status }) {
   const R = 50, C = 2 * Math.PI * R;
   const unit = st.periodWeeks > 1 ? "talk period" : "week";
   const left = Math.max(0, expected - signed);
-  const dotTone = { held: "bg-caution", now: "bg-caution", missed: "bg-warn", open: "border-2 border-dashed border-muted" } as const;
+  // Held weeks in Done green (amber means "needs attention" everywhere else); missed in red; this week dashed.
+  const dotTone = { held: "bg-ok", now: "bg-ok", missed: "bg-warn", open: "border-2 border-dashed border-muted" } as const;
   const dotLabel = { held: "talk held", now: "talk held", missed: "missed", open: "this period, not held yet" } as const;
   return (
     <section aria-label={`This ${unit}`} className="mt-4 rounded-2xl bg-surface p-5 shadow-card">
@@ -102,7 +103,7 @@ export function MomentumHero({ st }: { st: Status }) {
             {expected === 0 ? "No one on staff yet" : left === 0 ? "Everyone signed" : `${left} still to sign`}
           </p>
           <p className="mt-3 text-sm font-semibold text-muted">Streak</p>
-          <p className="font-display text-[22px] font-extrabold leading-tight tracking-[-0.02em] text-caution tabular-nums">
+          <p className={`font-display text-[22px] font-extrabold leading-tight tracking-[-0.02em] tabular-nums ${st.streak.count ? "text-ok-text" : ""}`}>
             {st.streak.count} {st.streak.count === 1 ? unit : `${unit}s`}
           </p>
           <p className="text-sm text-muted">in a row with a talk</p>

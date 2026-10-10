@@ -87,7 +87,7 @@ export function GroupHeading({ children, aside }: { children: React.ReactNode; a
   return (
     <div className="mt-9 flex items-baseline justify-between gap-3 px-1">
       <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em]">{children}</h2>
-      {aside && <span className="text-sm font-medium tabular-nums text-muted">{aside}</span>}
+      {aside && <span className="rounded-full bg-fg/[0.06] px-2.5 py-0.5 text-[13px] font-semibold tabular-nums text-muted">{aside}</span>}
     </div>
   );
 }
@@ -95,10 +95,20 @@ export function GroupHeading({ children, aside }: { children: React.ReactNode; a
 export function Notice({ tone = "info", children }: { tone?: "info" | "error" | "ok" | "caution"; children: React.ReactNode }) {
   // A colored rule on the left says the kind of message; the fill stays light so text reads the same everywhere.
   // A soft tinted panel; the tint says the kind of message.
+  // An icon says the kind at a glance (info, done, needs attention, error), so the tint never has to carry it alone.
   const tones = { info: "bg-brand-soft", error: "bg-warn-bg text-fg", ok: "bg-ok-bg", caution: "bg-caution-bg text-fg" }[tone];
+  const dot = { info: "bg-brand text-brand-ink", error: "bg-warn text-warn-ink", ok: "bg-ok text-ok-ink", caution: "bg-caution text-white" }[tone];
+  const glyph = {
+    info: <path d="M12 11v6M12 7.5v.01" />,
+    ok: <path d="m7.5 12.5 3 3 6-6.5" />,
+    caution: <path d="M12 7v6.5M12 17v.01" />,
+    error: <path d="m8.5 8.5 7 7M15.5 8.5l-7 7" />,
+  }[tone];
   return (
-    <div role={tone === "error" ? "alert" : "status"} className={`flex gap-2 rounded-lg px-4 py-3 text-[15px] leading-relaxed ${tones}`}>
-      {tone === "caution" && <span aria-hidden className="font-bold">!</span>}
+    <div role={tone === "error" ? "alert" : "status"} className={`flex gap-3 rounded-xl px-4 py-3 text-[15px] leading-relaxed ${tones}`}>
+      <span aria-hidden className={`mt-[3px] flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${dot}`}>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">{glyph}</svg>
+      </span>
       <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
@@ -225,7 +235,7 @@ function useActive() {
 
 function TabIcon({ icon, on, size = 22 }: { icon: string; on: boolean; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={on ? 2 : 1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={on ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       {ICONS[icon]}
     </svg>
   );
@@ -274,9 +284,10 @@ function TabBar() {
               <Link
                 href={t.href}
                 aria-current={on ? "page" : undefined}
-                className={`flex min-h-16 flex-col items-center justify-center gap-0.5 pt-1.5 pb-1.5 text-[11px] font-medium tracking-normal ${on ? "text-brand-text" : "text-muted"}`}
+                className={`flex min-h-16 flex-col items-center justify-center gap-0.5 pt-1.5 pb-1.5 text-[11px] tracking-normal ${on ? "font-semibold text-brand-text" : "font-medium text-muted"}`}
               >
-                <span className="flex h-7 items-center justify-center"><TabIcon icon={t.icon} on={on} /></span>
+                {/* The current tab sits on a soft pill, so it reads at a glance outdoors. */}
+                <span className={`flex h-7 w-14 items-center justify-center rounded-full transition-colors ${on ? "bg-brand-soft" : ""}`}><TabIcon icon={t.icon} on={on} /></span>
                 {t.label}
               </Link>
             </li>

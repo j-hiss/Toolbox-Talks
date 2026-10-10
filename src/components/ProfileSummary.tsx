@@ -22,12 +22,14 @@ export function ProfileSummary({ p, florida, shared = false }: { p: SafetyProfil
     <>
       <GroupHeading>What the records show</GroupHeading>
       <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <Fig label="Weekly talks held" value={p.periodsEnded ? `${p.periodsWithTalk} of ${p.periodsEnded}` : "–"} note={p.periodsMissed ? `${p.periodsMissed} with no talk` : p.periodsEnded ? "no missed weeks" : "no full weeks yet"} warn={p.periodsMissed > 0} />
-        <Fig label="Team sign-in rate" value={pct(p.signIn)} note={p.onTime === null ? "" : `${pct(p.onTime)} on time`} />
+        <Fig label="Weekly talks held" value={p.periodsEnded ? `${p.periodsWithTalk} of ${p.periodsEnded}` : "–"} note={p.periodsMissed ? `${p.periodsMissed} with no talk` : p.periodsEnded ? "no missed weeks" : "no full weeks yet"} warn={p.periodsMissed > 0}
+          meter={p.periodsEnded ? p.periodsWithTalk / p.periodsEnded : null} />
+        <Fig label="Team sign-in rate" value={pct(p.signIn)} note={p.onTime === null ? "" : `${pct(p.onTime)} on time`} meter={p.signIn} />
         <Fig label="Toolbox talks" value={String(p.talks)} note={`${p.topics} topics${p.makeups ? `, ${p.makeups} makeups` : ""}`} />
         <Fig label="Daily plans" value={String(p.dailyDays)} note="days with a signed plan" />
         <Fig label="Inspections" value={String(p.log.inspections + p.log.walkarounds)} note={`${p.log.walkarounds} walk-arounds`} />
-        <Fig label="Issues fixed" value={`${p.issues.fixed} of ${p.issues.raised}`} note={p.issues.medianDaysToFix === null ? "" : `typically ${p.issues.medianDaysToFix} days`} />
+        <Fig label="Issues fixed" value={`${p.issues.fixed} of ${p.issues.raised}`} note={p.issues.medianDaysToFix === null ? "" : `typically ${p.issues.medianDaysToFix} days`}
+          meter={p.issues.raised ? p.issues.fixed / p.issues.raised : null} />
       </dl>
 
       {p.missedKeys.length > 0 && (
@@ -87,12 +89,18 @@ export function ProfileSummary({ p, florida, shared = false }: { p: SafetyProfil
   );
 }
 
-function Fig({ label, value, note, warn }: { label: string; value: string; note: string; warn?: boolean }) {
+/** A figure tile. `meter` (0 to 1) draws how full a rate is; a shortfall shows in red only when `warn` says so. */
+function Fig({ label, value, note, warn, meter }: { label: string; value: string; note: string; warn?: boolean; meter?: number | null }) {
   return (
-    <div className="rounded-lg bg-surface shadow-card p-3">
+    <div className="flex flex-col rounded-xl bg-surface shadow-card p-3">
       <dt className="text-[13px] font-medium text-muted">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold tracking-[-0.01em] tabular-nums">{value}</dd>
-      {note && <dd className={`text-xs ${warn ? "font-semibold text-warn" : "text-muted"}`}>{note}</dd>}
+      <dd className="mt-1 font-display text-[26px] font-extrabold leading-tight tracking-[-0.02em] tabular-nums">{value}</dd>
+      {meter != null && (
+        <dd aria-hidden className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line">
+          <span className={`block h-full rounded-full ${warn ? "bg-warn" : "bg-ok"}`} style={{ width: `${Math.round(Math.max(0, Math.min(1, meter)) * 100)}%` }} />
+        </dd>
+      )}
+      {note && <dd className={`mt-1 text-xs ${warn ? "font-semibold text-warn" : "text-muted"}`}>{note}</dd>}
     </div>
   );
 }

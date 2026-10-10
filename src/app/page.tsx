@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useSession } from "@/lib/session";
 import { canAdmin, canPresent, canReport, type Membership } from "@/lib/data/types";
 import { EmployeeHome } from "@/components/EmployeeHome";
+import { SignatureRule } from "@/components/Logo";
 import { TrainingAlert } from "@/components/TrainingAlert";
 import { RequireCompany } from "@/components/Guard";
 import { JobsitePicker, readChosenJobsite } from "@/components/JobsitePicker";
@@ -115,34 +116,31 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
-      {canAdmin(m.access) && <TrainingAlert companyId={co.id} />}
-
-      {!co.zip && canAdmin(m.access) && (
-        <div className="mt-4">
-          <Notice>Add your ZIP code in <Link className="font-semibold text-brand-text underline underline-offset-2" href="/admin/#company">Admin</Link> so heat, cold and storm talks land in the right weeks.</Notice>
-        </div>
-      )}
-
       {/* One column on phones; on a big screen the week sits on the left and the jobsite, weather and what's coming on the right. */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
       <div>
-      {week && talk && text && st && <MomentumHero st={st} />}
-
       {week && talk && text ? (
-        <section className="mt-3">
-          <div className="overflow-hidden rounded-xl bg-surface shadow-card">
-            {/* The week as an entry in the year's record: where we are in the 52, then the talk's title. */}
-            <div className="border-b border-line px-5 pt-5 pb-4">
-              <p className="flex items-baseline justify-between gap-3 text-sm text-muted">
-                <span className="font-semibold text-brand-text">{weekNumbers(week)} <span className="font-normal text-muted">of 52</span></span>
-                <span className="tabular-nums">{periodLabel(week.monday, week.weeks)}</span>
+        <section className="mt-4">
+          {/* The one bold thing on Home: this week's talk, as an entry in the year's record. */}
+          <div className="overflow-hidden rounded-2xl bg-surface shadow-hero">
+            <div className="bg-band px-5 pt-4 pb-4 text-band-ink">
+              <p className="flex items-end justify-between gap-3">
+                <span className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-semibold opacity-80">{week.weeks > 1 ? "Weeks" : "Week"}</span>
+                  <b className="font-display text-[34px] font-extrabold leading-none tracking-[-0.03em] tabular-nums">{weekNumbers(week).replace(/^Weeks? /, "")}</b>
+                  <span className="text-sm font-semibold opacity-80">of 52</span>
+                </span>
+                <span className="pb-0.5 text-sm font-semibold tabular-nums opacity-90">{periodLabel(week.monday, week.weeks)}</span>
               </p>
-              <div className="mt-3 flex h-[3px] gap-px overflow-hidden rounded-full" aria-hidden>
-                <span className="bg-brand/45" style={{ flex: week.n - 1 }} />
-                <span className="bg-brand" style={{ flex: week.weeks }} />
-                <span className="bg-line" style={{ flex: 52 - (week.n - 1) - week.weeks }} />
+              <div className="mt-3 flex h-1 gap-px overflow-hidden rounded-full" aria-hidden>
+                <span className="bg-current opacity-50" style={{ flex: week.n - 1 }} />
+                <span className="bg-current" style={{ flex: week.weeks }} />
+                <span className="bg-current opacity-15" style={{ flex: 52 - (week.n - 1) - week.weeks }} />
               </div>
-              <h1 className="mt-4 font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.03em] text-balance">{text.title}</h1>
+            </div>
+            <div className="px-5 pt-5">
+              <h1 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.03em] text-balance">{text.title}</h1>
+              <SignatureRule className="mt-3" />
             </div>
             <div className="px-5 pt-4 pb-5">
               <p className="leading-relaxed">{text.hook}</p>
@@ -157,6 +155,7 @@ function Home({ m }: { m: Membership }) {
               </div>}
             </div>
           </div>
+          {st && <MomentumHero st={st} />}
           {st && <WeekStatusCard st={st} isAdmin={canReport(m.access)} onMakeup={canPresent(m.access) ? () => start(null) : undefined} />}
           {isAdmin && st && <GettingStarted st={st} />}
         </section>
@@ -166,6 +165,13 @@ function Home({ m }: { m: Membership }) {
           <Notice>
             Your 52-week plan starts the week of {parseDay(co.program_start).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}.
           </Notice>
+        </div>
+      )}
+
+      {canAdmin(m.access) && <TrainingAlert companyId={co.id} />}
+      {!co.zip && canAdmin(m.access) && (
+        <div className="mt-4">
+          <Notice>Add your ZIP code in <Link className="font-semibold text-brand-text underline underline-offset-2" href="/admin/#company">Admin</Link> so heat, cold and storm talks land in the right weeks.</Notice>
         </div>
       )}
 
@@ -179,12 +185,15 @@ function Home({ m }: { m: Membership }) {
           <GroupHeading>Coming up</GroupHeading>
           <ul className="mt-3 flex flex-col gap-2">
             {upcoming.map(({ w, t }) => (
-              <li key={w.key} className="flex items-center justify-between gap-3 rounded-xl bg-surface shadow-card px-4 py-3">
-                <span className="min-w-0">
-                  <b className="block">{t.content.en.title}</b>
-                  <small className="text-muted">{weekNumbers(w)} · {periodLabel(w.monday, w.weeks)}</small>
+              <li key={w.key} className="flex items-center gap-3 rounded-xl bg-surface shadow-card px-3 py-3">
+                <span aria-hidden className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-brand-soft text-brand-text">
+                  <span className="text-[10px] font-semibold leading-none">Week</span>
+                  <b className="font-display text-[19px] font-extrabold leading-tight tabular-nums">{w.n}</b>
                 </span>
-                <span className="whitespace-nowrap rounded bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand-text">{t.code}</span>
+                <span className="min-w-0 flex-1">
+                  <b className="block leading-snug">{t.content.en.title}</b>
+                  <small className="text-muted"><span className="sr-only">{weekNumbers(w)}, </span>{periodLabel(w.monday, w.weeks)} · {t.code}</small>
+                </span>
               </li>
             ))}
           </ul>

@@ -32,6 +32,9 @@
   --caution-text: color-mix(in srgb, var(--caution) 35%, var(--fg));
   --warn-bg: color-mix(in srgb, var(--warn) 13%, var(--surface));
   --warn-text: var(--warn);
+  /* Home's talk-of-the-week band: the brand color by day; a deep tint of it at night so it isn't glaring. */
+  --band: var(--brand);
+  --band-ink: var(--brand-ink);
 
   /* Charts (two series, gridlines, score bands) follow the brand: compliance in brand, on time in caution gold. */
   --series-1: var(--brand-text);
@@ -61,6 +64,8 @@
     --warn-ink: var(--t-dark-danger-ink, #14202e);
     --brand-text: var(--brand);
     --warn-text: color-mix(in srgb, var(--warn) 70%, #ffffff);
+    --band: color-mix(in srgb, var(--brand) 24%, var(--surface));
+    --band-ink: var(--fg);
     color-scheme: dark;
   }
 }
@@ -88,6 +93,8 @@
   --color-warn-ink: var(--warn-ink);
   --color-warn-bg: var(--warn-bg);
   --color-warn-text: var(--warn-text);
+  --color-band: var(--band);
+  --color-band-ink: var(--band-ink);
   /* Archivo for titles and big numbers (bundled); the phone font for everything else (Inter off Apple devices). */
   --font-display: "Archivo", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
@@ -97,8 +104,10 @@
   --radius-lg: 0.875rem;
   --radius-xl: 1.125rem;
   --radius-2xl: 1.375rem;
-  /* One soft shadow for cards; on the dark default a hairline highlight does the lifting. */
-  --shadow-card: 0 0 0 1px color-mix(in srgb, var(--fg) 6%, transparent), 2px 4px 12px rgba(0, 0, 0, 0.12);
+  /* Cards: a crisp hairline edge, a tight contact shadow and a soft lift, so they sit clearly on the paper. */
+  --shadow-card: 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent), 0 1px 2px color-mix(in srgb, var(--fg) 8%, transparent), 0 10px 24px -14px color-mix(in srgb, var(--fg) 30%, transparent);
+  /* The one raised element on a screen (Home's talk of the week). */
+  --shadow-hero: 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent), 0 2px 4px color-mix(in srgb, var(--fg) 8%, transparent), 0 22px 40px -22px color-mix(in srgb, var(--brand) 55%, transparent);
 }
 
 html,

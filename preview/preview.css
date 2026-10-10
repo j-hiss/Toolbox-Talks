@@ -26,6 +26,8 @@
   --warn-ink: var(--t-dark-danger-ink, #14202e);
   --brand-text: var(--brand);
   --warn-text: color-mix(in srgb, var(--warn) 70%, #ffffff);
+  --band: color-mix(in srgb, var(--brand) 24%, var(--surface));
+  --band-ink: var(--fg);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -44,6 +46,8 @@
     --warn-ink: var(--t-danger-ink, #ffffff);
     --brand-text: var(--brand);
     --warn-text: var(--warn);
+    --band: var(--brand);
+    --band-ink: var(--brand-ink);
     color-scheme: var(--t-scheme, light);
   }
 }

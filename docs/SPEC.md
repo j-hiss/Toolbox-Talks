@@ -214,6 +214,12 @@ customer #1, not a special case.
 - Saved colors are only the ones changed from the default, so a company that changed one color under Clarity now sees
   it on Momentum. Admin → Brand shows any readability warning that causes; picking a preset sets all eight.
 
+- **Polish pass (2026-10-10, "I like what we have, just want it better").** One bold element per screen: Home's talk of
+  the week leads, with a band in the brand color (a deep tint of it at night), the week number large, the year's
+  progress, the title and the signature line. Everything else quieter: cards get a crisp hairline edge and a soft
+  lift; notices carry an icon for their kind (info, done, needs attention, error); the current tab sits on a soft pill;
+  the streak is Done green (amber stays "needs attention"); "Coming up" shows week badges; profile rate tiles get a
+  meter. Company colors drive all of it.
 ## Jobsites and the office
 - Talks can happen on a jobsite **or at the office or shop**. Each place is marked Jobsite or Office or shop. Where a
   talk happened is recorded, never flagged: no place is "wrong".
