@@ -642,6 +642,43 @@ async function main() {
       check("A removed trainer's cards stay on file for the company", (await as(userA, "select id from public.cert_submissions where trainer_id = $1", [tA])).rows.length === 2);
     }
 
+    // Insurance partner portal (migration 0027, pilot).
+    {
+      const agent = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'agent@insure.example', now())", [agent]);
+      const pA = (await as(userA, "select public.invite_partner($1, 'agent@insure.example', 'Example Insurance Agency', 'agent') as id", [coA])).rows[0].id;
+      check("A presenter can't invite an insurance partner", await fails(() => as(presenterA, "select public.invite_partner($1, 'x@y.example', 'X', 'agent')", [coA])));
+      check("B can't invite a partner to A", await fails(() => as(userB, "select public.invite_partner($1, 'x@y.example', 'X', 'agent')", [coA])));
+      check("A partner claims their invite on sign-in", (await as(agent, "select public.accept_invites() as n")).rows[0].n === 1);
+      check("A partner is not a member: no companies, people, records, signatures or events", (await as(agent,
+        "select id from public.companies union all select id from public.people union all select id from public.talk_records union all select id from public.talk_attendees union all select id from public.safety_events")).rows.length === 0);
+      check("Before anything is sent, the partner's inbox is empty", (await as(agent, "select * from public.partner_inbox()")).rows.length === 0);
+      const snap = JSON.stringify({ v: 1, kind: "renewal", company: { name: "Company A" }, profile: { from: "2025-10-01", to: "2026-09-30", signIn: 0.93 } });
+      check("A presenter can't send a summary", await fails(() => as(presenterA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb)", [pA, snap])));
+      check("B can't send a summary to A's partner", await fails(() => as(userB, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb)", [pA, snap])));
+      const rep = (await as(userA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb) as id", [pA, snap])).rows[0].id;
+      const inbox = (await as(agent, "select * from public.partner_inbox()")).rows;
+      check("The partner sees the company's name and the summary it sent", inbox.length === 1 && inbox[0].company_name === "Company A" && inbox[0].report_id === rep);
+      check("A partner can't read summaries directly (only through the logged open)", await fails(() => as(agent, "select snapshot from public.partner_reports")));
+      const opened = (await as(agent, "select public.partner_report($1) as r", [rep])).rows[0].r;
+      check("The partner opens the summary", opened?.snapshot?.profile?.signIn === 0.93);
+      check("Every open is logged for the company", (await as(userA, "select count(*)::int n from public.partner_report_views where report_id = $1", [rep])).rows[0].n === 1);
+      check("Another account can't open the partner's summary", (await as(userB, "select public.partner_report($1) as r", [rep])).rows[0].r === null);
+      check("B sees none of A's partners, summaries or opens", (await as(userB, "select id from public.company_partners")).rows.length === 0
+        && (await as(userB, "select id from public.partner_reports")).rows.length === 0 && (await as(userB, "select id from public.partner_report_views")).rows.length === 0);
+      check("A sent summary can't be edited or deleted", await fails(() => as(userA, "update public.partner_reports set period_to = '2027-01-01' where id = $1", [rep]))
+        && await fails(() => as(userA, "delete from public.partner_reports where id = $1", [rep])));
+      await as(userA, "select public.withdraw_partner_report($1)", [rep]);
+      check("A withdrawn summary disappears for the partner and stays on file", (await as(agent, "select * from public.partner_inbox()")).rows.length === 0
+        && (await as(agent, "select public.partner_report($1) as r", [rep])).rows[0].r === null
+        && (await as(userA, "select withdrawn_at from public.partner_reports where id = $1", [rep])).rows[0].withdrawn_at !== null);
+      const rep2 = (await as(userA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb) as id", [pA, snap])).rows[0].id;
+      await as(userA, "select public.remove_partner($1)", [pA]);
+      check("A removed partner sees nothing", (await as(agent, "select * from public.partner_inbox()")).rows.length === 0
+        && (await as(agent, "select public.partner_report($1) as r", [rep2])).rows[0].r === null);
+      check("A removed partner can't be sent anything", await fails(() => as(userA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb)", [pA, snap])));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 

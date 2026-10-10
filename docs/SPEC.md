@@ -458,6 +458,14 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   switched off. The link is shown once (only its fingerprint is stored); the secret sits after "#" so it never reaches
   a web server's logs. Each open is logged and shown in the list (the company's own admins checking it aren't
   counted). Nothing is deleted. Links need the website address (`NEXT_PUBLIC_APP_URL`) once the site is live.
+- **Insurance partner portal (built as a PILOT, migration 0027; needs counsel's privacy review before real use).**
+  Hidden in the real app unless `NEXT_PUBLIC_PARTNER_PORTAL=pilot`; on in the preview. On the Safety profile, an owner
+  or admin invites an agent, broker or carrier by email and sends them the summary on screen (the same frozen,
+  counts-only copy and PDF as a share link). The partner signs in with an email code and sees only the companies that
+  sent them something and those summaries: no names, signatures, phone numbers or injury details, no live data. Every
+  open is logged and shown to the company. The company can withdraw a summary (gone for the partner, kept on file) or
+  remove the partner (all access ends). Summaries are sent, not live, because the profile math runs in the app and a
+  second copy in the database would drift; the company sends a fresh one when it wants (for example monthly).
 - **Reports → Safety profile & renewal packet** (admins): last 12 months, last month, or picked dates. Shows weekly
   talks held of weeks ended, crew sign-in rate and on-time rate, talks and topics, makeups, daily-plan days,
   inspections, crew-raised issues fixed and typical days to fix, a month table, languages.

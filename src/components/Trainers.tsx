@@ -11,7 +11,8 @@ import { certTypeName } from "@/content/certTypes";
 import { cardUrl } from "@/lib/data/certs";
 import { decideSubmission, inviteTrainer, listSubmissions, listTrainers, removeTrainer, setTrainerPerson, type CompanySubmission, type Trainer } from "@/lib/data/trainers";
 import type { Person, Role } from "@/lib/data/types";
-import { Button, ConfirmButton, Field, GroupHeading, Notice, inputClass } from "./ui";
+import { Button, ConfirmButton, GroupHeading, Notice, inputClass } from "./ui";
+import { OutsideInvite } from "./OutsideInvite";
 import { toast } from "./toast";
 
 const day = (iso: string | null) => (iso ? new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "");
@@ -42,7 +43,9 @@ export function TrainersSection({ companyId, people, roles, onApproved }: { comp
         </ul>
       )}
 
-      <Invite companyId={companyId} done={load} />
+      <OutsideInvite id="tr" nameLabel="Trainer or training company" namePlaceholder="Example Training Co" buttonLabel="Invite trainer"
+        onInvite={async (email, name) => { await inviteTrainer(companyId, email, name); load(); }}
+        after={(name, email) => `Invited. Ask ${name} to sign in on the website with ${email}. Then tick the people they may see.`} />
 
       {trainers.length > 0 && (
         <ul className="mt-3 flex flex-col gap-2">
@@ -88,30 +91,6 @@ function Waiting({ s, companyId, who, done }: { s: CompanySubmission; companyId:
       </div>
       {msg && <div className="mt-2"><Notice tone="error">{msg}</Notice></div>}
     </li>
-  );
-}
-
-function Invite({ companyId, done }: { companyId: string; done: () => void }) {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const send = async () => {
-    setBusy(true); setMsg(null);
-    try {
-      await inviteTrainer(companyId, email, name);
-      setMsg({ tone: "ok", text: `Invited. Ask ${name.trim()} to sign in on the website with ${email.trim().toLowerCase()}. Then tick the people they may see.` });
-      setEmail(""); setName(""); done();
-    } catch (e) { setMsg({ tone: "error", text: e instanceof Error ? e.message : String(e) }); }
-    setBusy(false);
-  };
-  return (
-    <div className="mt-3 flex flex-col gap-2">
-      <Field label="Trainer or training company" id="tr-name"><input id="tr-name" maxLength={120} className={inputClass} placeholder="Example Training Co" value={name} onChange={(e) => setName(e.target.value)} /></Field>
-      <Field label="Their email" id="tr-email"><input id="tr-email" type="email" inputMode="email" autoComplete="off" className={inputClass} placeholder="trainer@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-      <Button size="sm" disabled={busy || !name.trim() || !email.includes("@")} onClick={send}>Invite trainer</Button>
-      {msg && <Notice tone={msg.tone}>{msg.text}</Notice>}
-    </div>
   );
 }
 

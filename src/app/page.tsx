@@ -90,6 +90,7 @@ function Home({ m }: { m: Membership }) {
         <span className="rounded-md border border-line px-3 py-1 text-muted">{industry}</span>
         <span className="rounded-md border border-line px-3 py-1 text-muted">{climate.state ? climate.label : "No ZIP set"}</span>
         {s.trainer && <Link href="/trainer/" className="rounded-md border border-line px-3 py-1 font-semibold">Trainer portal ›</Link>}
+        {s.partner && <Link href="/partner/" className="rounded-md border border-line px-3 py-1 font-semibold">Partner portal ›</Link>}
       </div>
 
       {outbox.items.length > 0 && (

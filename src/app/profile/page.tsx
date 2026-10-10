@@ -25,6 +25,8 @@ import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
 import { ProfileSummary } from "@/components/ProfileSummary";
 import { ShareSection } from "@/components/ShareSection";
+import { PartnersSection } from "@/components/PartnersSection";
+import { partnerPortalPilot } from "@/lib/features";
 import { Button, ErrorNotice, Eyebrow, Field, FileButton, GroupHeading, Loading, Notice, Shell, Title, inputClass, segmentClass, segmentedClass } from "@/components/ui";
 
 export default function ProfilePage() {
@@ -106,6 +108,7 @@ function Profile({ m }: { m: Membership }) {
 
       <ProfileSummary p={p} florida={florida} />
       <ShareSection p={p} co={co} florida={florida} crew={crew} />
+      {partnerPortalPilot() && <PartnersSection p={p} co={co} florida={florida} crew={crew} />}
 
       <EmrSection companyId={co.id} emr={p.emr} reload={reload} />
       <DocumentsSection companyId={co.id} docs={data.documents} reload={reload} />

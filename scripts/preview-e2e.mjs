@@ -438,6 +438,28 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("13 waiting for owner:", (await q.locator("ul[aria-label='Cards waiting for approval'] li").first().innerText()).replace(/\s+/g, " ").slice(0, 160));
   await q.click("ul[aria-label='Cards waiting for approval'] button:has-text('Approve')"); await q.waitForTimeout(900);
   log("13 after approve: waiting", await q.locator("ul[aria-label='Cards waiting for approval'] li").count(), "| card on file:", (await q.locator(`button[aria-label='Training for ${who}']`).innerText()).replace(/\s+/g, " "));
+  // Scenario 14: insurance partner portal (pilot). Invite an agent, send the summary, read it as the agent, see the
+  // open logged, withdraw it.
+  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  log("14 pilot label:", await q.locator("section[aria-label='Insurance partners'] >> text=Pilot").count() > 0);
+  await q.fill("#pt-name", "Example Insurance Agency"); await q.fill("#pt-email", "agent@insure.example"); await q.selectOption("#pt-kind", "agent");
+  await q.click("button:has-text('Invite partner')"); await q.waitForTimeout(700);
+  await q.click("section[aria-label='Insurance partners'] button:has-text('Send this summary')"); await q.waitForTimeout(800);
+  log("14 sent:", (await q.locator("ul[aria-label='Sent to Example Insurance Agency'] li").first().innerText()).replace(/\s+/g, " "));
+  await q.screenshot({ path: `${OUT}/e-partners-company.png`, fullPage: true });
+  await viewAs("partner"); await q.waitForTimeout(800);
+  log("14 partner portal:", await q.locator("h1").first().textContent(), "| summaries:", await q.locator("button[aria-label^='Open summary']").count(), "| tabs:", await q.locator("nav[aria-label=Main] a").count());
+  await q.screenshot({ path: `${OUT}/e-partner-inbox.png`, fullPage: true });
+  await q.locator("button[aria-label^='Open summary']").first().click(); await q.waitForTimeout(1000);
+  const ptext = await q.locator("main").innerText();
+  log("14 partner report:", await q.locator("h1").first().textContent(), "| no worker names:", !/Alvarez|Brooks|Diaz/.test(ptext), "| no compliance claim:", !/\bcompliant\b/i.test(ptext.replace("doesn't certify compliance", "")));
+  await q.screenshot({ path: `${OUT}/e-partner-report.png`, fullPage: true });
+  await viewAs("owner"); await q.waitForTimeout(600);
+  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  const sentRow = q.locator("ul[aria-label='Sent to Example Insurance Agency'] li").first();
+  log("14 open logged:", (await sentRow.innerText()).replace(/\s+/g, " "));
+  await sentRow.locator("button:has-text('Withdraw')").click(); await sentRow.locator("button:has-text('Tap again')").click(); await q.waitForTimeout(800);
+  log("14 withdrawn:", (await q.locator("ul[aria-label='Sent to Example Insurance Agency'] li").first().innerText()).replace(/\s+/g, " "));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

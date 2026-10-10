@@ -24,10 +24,10 @@ export default function TrainerPage() {
   useEffect(() => { if (s.status === "signed-out") router.replace("/sign-in/"); }, [s.status, router]);
   if (s.status === "not-configured") return <NotConfigured message={s.error} />;
   if (s.status !== "signed-in") return <Shell tabs={false}><Loading /></Shell>;
-  return <Portal email={s.user?.email ?? ""} member={s.memberships.length > 0} signOut={s.signOut} />;
+  return <Portal email={s.user?.email ?? ""} member={s.memberships.length > 0} partner={s.partner} signOut={s.signOut} />;
 }
 
-function Portal({ email, member, signOut }: { email: string; member: boolean; signOut: () => Promise<void> }) {
+function Portal({ email, member, partner, signOut }: { email: string; member: boolean; partner: boolean; signOut: () => Promise<void> }) {
   const [roster, setRoster] = useState<RosterCompany[] | null>(null);
   const [sent, setSent] = useState<Submission[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +49,10 @@ function Portal({ email, member, signOut }: { email: string; member: boolean; si
       <Eyebrow>Trainer · {email}</Eyebrow>
       <Title>Trainer portal</Title>
       <p className="mt-1 text-sm text-muted">Send in training cards for the people each company shared with you. A card counts once the company approves it.</p>
-      {member && <p className="mt-2"><Link href="/" className="text-sm font-semibold underline">← Back to your company</Link></p>}
+      <div className="mt-2 flex flex-wrap gap-3 text-sm font-semibold">
+        {member && <Link href="/" className="underline">← Back to your company</Link>}
+        {partner && <Link href="/partner/" className="underline">Partner portal</Link>}
+      </div>
 
       {roster.length === 0 && <div className="mt-4"><Notice>No company has invited {email || "this email"} as a trainer yet, or access was ended. Ask the company to invite this email in Admin → Training.</Notice></div>}
       {roster.map((co) => (

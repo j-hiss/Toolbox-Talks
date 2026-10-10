@@ -98,16 +98,28 @@ export function seedExample(): string {
 /** Preview only: switch the demo account's app role, to see each role's screens on one phone. For "employee" the
  *  account is linked to a roster person who has talk history (Add example history first), like an accepted invite. */
 /**
- * "Trainer": the preview can't sign in as a second person, so the demo account becomes the trainer of its own company
+ * "Trainer" / "Insurance partner": the preview can't sign in as a second person, so the demo account becomes the trainer of its own company
  * (an "Example trainer" given three people) and opens the trainer portal. Its company access goes back to owner.
  */
-export function viewAs(access: "owner" | "admin" | "presenter" | "office" | "employee" | "trainer"): string {
+export function viewAs(access: "owner" | "admin" | "presenter" | "office" | "employee" | "trainer" | "partner"): string {
   const d = db();
   const user = d.session?.user.id;
   let current: string | null = null;
   try { current = localStorage.getItem("tt-current-company"); } catch { /* none */ }
   const member = d.members.find((m) => m.user_id === user && m.company_id === current) ?? d.members.find((m) => m.user_id === user);
   if (!member) return "Create a company first.";
+  if (access === "partner") {
+    type P = { id: string; company_id: string; email: string; name: string; kind: string; invited_at: string; accepted_at: string | null; removed_at: string | null; user_id: string | null };
+    const x = d as unknown as { partners?: P[] };
+    const list = (x.partners ??= []);
+    let p = list.find((y) => y.company_id === member.company_id && !y.removed_at);
+    if (!p) { p = { id: uid(), company_id: member.company_id, email: d.session?.user.email ?? "agent@example.com", name: "Example Insurance Agency", kind: "agent", invited_at: new Date().toISOString(), accepted_at: null, removed_at: null, user_id: null }; list.push(p); }
+    p.user_id = user ?? null; p.accepted_at ??= new Date().toISOString();
+    member.access = "owner";
+    save();
+    try { sessionStorage.setItem("tt-preview-start", "/partner/"); } catch { /* opens on Home instead */ }
+    return "ok";
+  }
   if (access === "trainer") {
     type T = { id: string; company_id: string; email: string; name: string; invited_at: string; accepted_at: string | null; removed_at: string | null; user_id: string | null };
     const x = d as unknown as { trainers?: T[]; trainerPeople?: { company_id: string; trainer_id: string; person_id: string }[] };
