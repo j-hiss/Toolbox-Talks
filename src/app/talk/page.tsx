@@ -41,7 +41,7 @@ import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
 import { RequireCompany } from "@/components/Guard";
 import { SignaturePad } from "@/components/SignaturePad";
 import { readChosenJobsite } from "@/components/JobsitePicker";
-import { Button, ConfirmButton, ErrorNotice, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass } from "@/components/ui";
+import { Button, ConfirmButton, ErrorNotice, Eyebrow, Field, GroupHeading, Loading, NavLink, Notice, Shell, Title, inputClass, Avatar } from "@/components/ui";
 
 export default function TalkPage() {
   return <RequireCompany need="present">{(m) => <Talk m={m} />}</RequireCompany>;
@@ -588,10 +588,11 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
             const isHere = draft.present[r.key] !== false;
             return (
               <li key={r.key}>
-                <label className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 ${isHere ? "border-line bg-surface" : "border-warn bg-warn-bg"}`}>
-                  <input type="checkbox" className="h-6 w-6 accent-[var(--brand)]" checked={isHere} onChange={(e) => update({ present: { ...draft.present, [r.key]: e.target.checked } })} />
+                <label className={`flex cursor-pointer items-center gap-3 rounded-xl p-3 ${isHere ? "bg-surface shadow-card" : "border border-warn bg-warn-bg"}`}>
+                  <Avatar name={r.name} muted={!isHere} />
                   <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.personId ? [r.role, r.teamName].filter(Boolean).join(" · ") : ["Walk-in", r.company].filter(Boolean).join(" · ")}</small></span>
                   {!isHere && <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">Absent</span>}
+                  <input type="checkbox" aria-label={`${r.name} is here`} className="h-6 w-6 shrink-0 accent-[var(--brand)]" checked={isHere} onChange={(e) => update({ present: { ...draft.present, [r.key]: e.target.checked } })} />
                 </label>
               </li>
             );
@@ -853,11 +854,16 @@ function Sign({
         ))}
       </div>
       <MakeupBanner draft={draft} />
-      <p className="mt-5 text-sm text-muted">{t.presenter ? "Presenter signs first" : "Pass the phone to"}</p>
-      <h1 className="font-display text-5xl font-semibold leading-none text-balance tracking-tight">{t.name}</h1>
-      <p className="mt-1 text-muted">{t.sub}</p>
+      <div className="mt-5 flex items-center gap-4">
+        <Avatar name={t.name} size={64} />
+        <div className="min-w-0">
+          <p className="text-sm text-muted">{t.presenter ? "Presenter signs first" : "Pass the phone to"}</p>
+          <h1 className="font-display text-[40px] font-extrabold leading-[1.02] text-balance tracking-[-0.03em]">{t.name}</h1>
+          <p className="mt-0.5 text-muted">{t.sub}</p>
+        </div>
+      </div>
       {/* Each person sees what they're signing for, in their language. */}
-      <p className="mt-2 text-sm">{ui.forTalk}: <b>{talkTitle}</b> · {new Date().toLocaleDateString(draft.lang, { month: "short", day: "numeric" })}</p>
+      <p className="mt-4 rounded-xl bg-surface px-4 py-2.5 text-sm shadow-card">{ui.forTalk}: <b>{talkTitle}</b> <span className="text-muted">· {new Date().toLocaleDateString(draft.lang, { month: "short", day: "numeric" })}</span></p>
       {!t.presenter && (
         // The signing statement: a deliberate tap before the pad takes ink, saved with the record (src/content/ui.ts).
         <button

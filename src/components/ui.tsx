@@ -319,6 +319,18 @@ export function Loading({ label = "Loading…", rows = 3 }: { label?: string; ro
 }
 
 /** Red count of flagged people (not signed or absent, plus an unsigned presenter). Shows nothing at zero. */
+/** A person's initials in a circle: helps someone find their own name fast when the phone is passed around. */
+export function Avatar({ name, size = 40, muted = false }: { name: string; size?: number; muted?: boolean }) {
+  const parts = name.trim().split(/\s+/).filter((w) => /\p{L}/u.test(w));
+  const initials = ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
+  return (
+    <span aria-hidden className={`flex shrink-0 items-center justify-center rounded-full font-display font-extrabold tracking-[-0.02em] ${muted ? "bg-fg/[0.08] text-muted" : "bg-brand-soft text-brand-text"}`}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.38) }}>
+      {initials}
+    </span>
+  );
+}
+
 export function FlagChip({ n }: { n: number }) {
   return n > 0 ? <span className="whitespace-nowrap rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">{n} flagged</span> : null;
 }

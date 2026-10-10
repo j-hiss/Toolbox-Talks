@@ -126,7 +126,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.goto(PAGE + "?site=99999999-2222-4333-8444-555555555555"); await q.waitForTimeout(1200);
   log("2 other company's sticker:", await q.locator("text=doesn't have").count() > 0);
   await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(1200);
-  log("2 reports score:", await q.locator("p.text-6xl").textContent());
+  log("2 reports score:", await q.locator("p:has-text('Sign-in rate') + p").first().textContent());
   log("2 needs-makeup cards:", (await q.locator("li:has(button:has-text('Give this makeup now'))").allInnerTexts()).map((t) => t.replace(/\s+/g, " ").slice(0, 120)).join(" || "));
   log("2 reports folded sections:", await q.locator("main details").count(), "| open:", await q.locator("main details[open]").count());
   await q.locator("summary:has-text('By person')").click(); await q.waitForTimeout(200);

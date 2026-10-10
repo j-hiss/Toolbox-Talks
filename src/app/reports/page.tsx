@@ -153,9 +153,12 @@ function Reports({ m }: { m: Membership }) {
       <Eyebrow>Reports · {co.name}</Eyebrow>
       <Title>{multi ? "Talk sign-ins" : "Weekly sign-ins"}</Title>
       {canAdmin(m.access) && (
-        <Link href="/profile/" className="mt-3 flex min-h-11 items-center justify-between gap-2 rounded-lg bg-surface shadow-card px-3 py-2 text-sm">
-          <span><b className="block">Safety profile &amp; renewal packet</b><small className="text-muted">Show your carrier what your teams do to stay safe</small></span>
-          <span aria-hidden>→</span>
+        <Link href="/profile/" className="mt-4 flex min-h-11 items-center gap-3 rounded-xl bg-surface shadow-card px-3 py-3 text-sm hover:ring-2 hover:ring-brand">
+          <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand-text">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3 4.5 6v5.5c0 4.5 3.2 8.3 7.5 9.5 4.3-1.2 7.5-5 7.5-9.5V6z" /><path d="m8.8 12.2 2.3 2.3 4.3-4.6" /></svg>
+          </span>
+          <span className="min-w-0 flex-1"><b className="block text-[15px]">Safety profile &amp; renewal packet</b><small className="text-muted">Show your carrier what your teams do to stay safe</small></span>
+          <svg aria-hidden viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="text-muted"><path d="m9 6 6 6-6 6" /></svg>
         </Link>
       )}
 
@@ -176,6 +179,53 @@ function Reports({ m }: { m: Membership }) {
       </div>
       <p className="mt-2 text-sm text-muted tabular-nums">Week of {short(parseDay(data.from))} to today{team !== "all" ? " · team as of today" : ""}</p>
 
+      {/* Score ------------------------------------------------------------------------------------------------------- */}
+      <section className="mt-5 rounded-2xl bg-surface shadow-hero p-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-muted">Sign-in rate</p>
+            <p className="mt-1 font-display text-[64px] font-extrabold leading-none tabular-nums tracking-[-0.04em]">{pct(score(t))}</p>
+          </div>
+          {t.expected === 0 ? (
+            <p className="max-w-[16rem] text-sm text-muted">Scores start once your first full week is over.</p>
+          ) : (
+            <p className="text-sm tabular-nums">
+              <b>{pct(onTimeRate(t))}</b> on time<br />
+              <span className="text-muted">{t.on_time + t.made_up} of {t.expected} weekly sign-ins done</span>
+            </p>
+          )}
+        </div>
+        {change && (
+          <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums">
+            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-semibold ${change.points > 0 ? "bg-ok-bg text-ok-text" : change.points < 0 ? "bg-warn-bg text-warn-text" : "bg-fg/[0.06] text-muted"}`}>
+              <span aria-hidden>{change.points > 0 ? "▲" : change.points < 0 ? "▼" : "■"}</span>
+              {change.points > 0 ? `Up ${change.points}` : change.points < 0 ? `Down ${-change.points}` : "No change"}{change.points ? " points" : ""}
+            </span>
+            <span className="text-muted">last {span} weeks ({pct(change.now)}) vs the {span} before ({pct(change.before)})</span>
+          </p>
+        )}
+        <StatusBar tally={t} big />
+        <Legend tally={t} />
+        <p className="mt-3 text-xs text-muted">
+          Each person on staff signs each week&apos;s talk. A makeup closes the week but stays marked as made up. Weeks that
+          are over count; this week shows below but isn&apos;t scored until it ends.
+        </p>
+      </section>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {current && (
+          <div className="rounded-xl bg-surface shadow-card p-4 text-sm tabular-nums">
+            <p className="text-[13px] font-medium text-muted">{current.weeks > 1 ? "This talk period so far" : "This week so far"}</p>
+            <p className="mt-1"><b className="font-display text-[28px] font-extrabold tracking-[-0.02em]">{current.tally.on_time}</b> of {current.tally.expected} signed</p>
+          </div>
+        )}
+        <div className={`rounded-xl bg-surface p-4 text-sm tabular-nums shadow-card ${t.open ? "ring-2 ring-brand/40" : ""}`}>
+          <p className="text-[13px] font-medium text-muted">Can still be made up</p>
+          <p className="mt-1"><b className="font-display text-[28px] font-extrabold tracking-[-0.02em]">{t.open}</b> missed sign-ins{t.missed ? <> · <b className="text-warn-text">{t.missed}</b> missed for good</> : null}</p>
+          {t.open > 0 && <Link href="/" className="text-sm font-semibold text-brand-text underline underline-offset-2">Make up from Home</Link>}
+        </div>
+      </div>
+
       {/* Who owes a makeup: one card per week, one tap to start it ------------------------------------------------- */}
       <GroupHeading aside={owed.length ? `${owed.length}` : undefined}>Needs a makeup</GroupHeading>
       {owedWeeks.length === 0 ? (
@@ -186,15 +236,15 @@ function Reports({ m }: { m: Membership }) {
             const pw = plan(g.week);
             const urgent = g.daysLeft <= 7;
             return (
-              <li key={g.week} className={`rounded-lg border p-3 ${urgent ? "border-caution bg-caution-bg" : "border-line bg-surface"}`}>
+              <li key={g.week} className={`rounded-xl p-4 shadow-card ${urgent ? "bg-caution-bg" : "bg-surface"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <span className="min-w-0">
                     <b className="block">{pw ? `${weekNumbers(pw)} · ` : ""}{talkTitle(g.week)}</b>
                     <small className="text-muted">{periodName({ key: g.week, weeks: pw?.weeks ?? 1 })}</small>
                   </span>
-                  <span className="shrink-0 text-right text-sm tabular-nums">
-                    <b className="block">{g.daysLeft === 0 ? "Last day" : `${g.daysLeft} day${g.daysLeft === 1 ? "" : "s"} left`}</b>
-                    <small className="text-muted">by {short(g.deadline)}</small>
+                  <span className="flex shrink-0 flex-col items-end text-sm tabular-nums">
+                    <b className={`whitespace-nowrap rounded-full px-2.5 py-0.5 ${urgent ? "bg-caution text-white" : "bg-fg/[0.06]"}`}>{g.daysLeft === 0 ? "Last day" : `${g.daysLeft} day${g.daysLeft === 1 ? "" : "s"} left`}</b>
+                    <small className="mt-1 text-muted">by {short(g.deadline)}</small>
                   </span>
                 </div>
                 <p className="mt-2 text-sm"><b>{g.people.length} still need it:</b> {g.people.map((p) => names.get(p)?.name).join(", ")}</p>
@@ -209,53 +259,6 @@ function Reports({ m }: { m: Membership }) {
         </ul>
       )}
 
-      {/* Score ------------------------------------------------------------------------------------------------------- */}
-      <section className="mt-5 rounded-xl bg-surface shadow-card p-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-muted">Sign-in rate</p>
-            <p className="text-6xl font-semibold leading-none tabular-nums tracking-tight">{pct(score(t))}</p>
-          </div>
-          {t.expected === 0 ? (
-            <p className="max-w-[16rem] text-sm text-muted">Scores start once your first full week is over.</p>
-          ) : (
-            <p className="text-sm tabular-nums">
-              <b>{pct(onTimeRate(t))}</b> on time<br />
-              <span className="text-muted">{t.on_time + t.made_up} of {t.expected} weekly sign-ins done</span>
-            </p>
-          )}
-        </div>
-        {change && (
-          <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5 text-sm tabular-nums">
-            <span aria-hidden className={change.points > 0 ? "text-ok-text" : change.points < 0 ? "text-warn-text" : "text-muted"}>
-              {change.points > 0 ? "▲" : change.points < 0 ? "▼" : "■"}
-            </span>
-            <b>{change.points > 0 ? `Up ${change.points}` : change.points < 0 ? `Down ${-change.points}` : "No change,"}{change.points ? " points" : ""}</b>
-            <span className="text-muted">last {span} weeks ({pct(change.now)}) vs the {span} before ({pct(change.before)})</span>
-          </p>
-        )}
-        <StatusBar tally={t} big />
-        <Legend tally={t} />
-        <p className="mt-3 text-xs text-muted">
-          Each person on staff signs each week&apos;s talk. A makeup closes the week but stays marked as made up. Weeks that
-          are over count; this week shows below but isn&apos;t scored until it ends.
-        </p>
-      </section>
-
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {current && (
-          <div className="rounded-xl bg-surface shadow-card p-3 text-sm tabular-nums">
-            <p className="text-xs font-semibold text-muted">{current.weeks > 1 ? "This talk period so far" : "This week so far"}</p>
-            <p className="mt-1"><b className="text-2xl">{current.tally.on_time}</b> of {current.tally.expected} signed</p>
-          </div>
-        )}
-        <div className={`rounded-lg border p-3 text-sm tabular-nums ${t.open ? "border-brand bg-surface" : "border-line bg-surface"}`}>
-          <p className="text-xs font-semibold text-muted">Can still be made up</p>
-          <p className="mt-1"><b className="text-2xl">{t.open}</b> missed sign-ins{t.missed ? <> · <b className="text-warn-text">{t.missed}</b> missed for good</> : null}</p>
-          {t.open > 0 && <Link href="/" className="text-sm font-semibold text-brand-text underline underline-offset-2">Make up from Home</Link>}
-        </div>
-      </div>
-
       {/* Everything below folds away so the page stays short on a phone. ---------------------------------------- */}
       {/* Trend ------------------------------------------------------------------------------------------------------- */}
       <Fold title="Trend">
@@ -268,7 +271,7 @@ function Reports({ m }: { m: Membership }) {
               ? "One finished week so far. The lines fill in as more weeks finish."
               : "Each finished week. The shaded gap between the lines is makeups: people who signed late."}
           </p>
-          <div className="mt-3 rounded-xl bg-surface shadow-card p-3"><TrendChart points={points} /></div>
+          <div className="mt-3"><TrendChart points={points} /></div>
         </>
       )}
       </Fold>
@@ -287,7 +290,7 @@ function Reports({ m }: { m: Membership }) {
           <p className="mt-1 text-sm text-muted">
             Missed sign-ins closed by a makeup, by reason.{made.avgDaysLate !== null ? ` On average ${made.avgDaysLate} day${made.avgDaysLate === 1 ? "" : "s"} after the week ended.` : ""}
           </p>
-          <div className="mt-3 rounded-xl bg-surface shadow-card p-3">
+          <div className="mt-3">
             <HBars items={made.reasons.map((r) => ({ label: r.reason, n: r.n }))} unit={(n) => String(n)} />
           </div>
         </Fold>
@@ -305,9 +308,9 @@ function Reports({ m }: { m: Membership }) {
         return (
           <Fold title="Issues the team raised" aside={open.length ? `${open.length} open` : undefined}>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
-              <div className="rounded-xl bg-surface shadow-card p-2"><b className="block text-2xl">{raised.length}</b><small className="text-muted">raised in range</small></div>
+              <div className="rounded-xl bg-fg/[0.04] p-2"><b className="block text-2xl">{raised.length}</b><small className="text-muted">raised in range</small></div>
               <div className={`rounded-lg border p-2 ${late ? "border-warn bg-warn-bg" : "border-line bg-surface"}`}><b className="block text-2xl">{open.length}</b><small className="text-muted">open{late ? ` · ${late} overdue` : ""}</small></div>
-              <div className="rounded-xl bg-surface shadow-card p-2"><b className="block text-2xl">{avg ?? "–"}</b><small className="text-muted">avg days to fix</small></div>
+              <div className="rounded-xl bg-fg/[0.04] p-2"><b className="block text-2xl">{avg ?? "–"}</b><small className="text-muted">avg days to fix</small></div>
             </div>
             <Link href="/records/#issues" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-text underline underline-offset-2">See all issues</Link>
           </Fold>
@@ -323,7 +326,7 @@ function Reports({ m }: { m: Membership }) {
           const expanded = openWeek === w.key;
           const by = (s: WeekState) => w.people.filter((p) => p.state === s);
           return (
-            <li key={w.key} className="rounded-xl bg-surface shadow-card">
+            <li key={w.key} className="rounded-xl bg-fg/[0.04]">
               <button className="w-full p-3 text-left" aria-expanded={expanded} onClick={() => setOpenWeek(expanded ? null : w.key)}>
                 <span className="flex items-start justify-between gap-3">
                   <span className="min-w-0">
@@ -383,7 +386,7 @@ function Reports({ m }: { m: Membership }) {
             <p className="mt-1 text-sm text-muted">Days with a daily plan recorded, by team. Separate from the weekly talk and the sign-in rate. The app doesn&apos;t know which days were worked, so this is a count, not a rate.</p>
             {tally.length === 0 ? <p className="mt-2 text-sm text-muted">No daily plans in this range.</p> : (
               <ul className="mt-2 flex flex-col gap-1.5 text-sm tabular-nums">
-                {tally.map((t) => <li key={t.crew} className="flex justify-between rounded-xl bg-surface shadow-card px-3 py-2"><b>{t.crew}</b><span>{t.days} {t.days === 1 ? "day" : "days"}</span></li>)}
+                {tally.map((t) => <li key={t.crew} className="flex justify-between rounded-xl bg-fg/[0.04] px-3 py-2"><b>{t.crew}</b><span>{t.days} {t.days === 1 ? "day" : "days"}</span></li>)}
               </ul>
             )}
           </Fold>
@@ -399,7 +402,7 @@ function Reports({ m }: { m: Membership }) {
       {/* Phones: one card per person. Wider screens: the table. */}
       <ul className="mt-3 flex flex-col gap-2 sm:hidden">
         {people.length === 0 ? <li className="text-sm text-muted">No one to show.</li> : people.map(({ person, tally }) => (
-          <li key={person.id} className={`rounded-xl p-3 text-sm tabular-nums ${tally.open + tally.missed ? "bg-warn-bg" : "bg-surface shadow-card"}`}>
+          <li key={person.id} className={`rounded-xl p-3 text-sm tabular-nums ${tally.open + tally.missed ? "bg-warn-bg" : "bg-fg/[0.04]"}`}>
             <div className="flex items-baseline justify-between gap-3">
               <span className="min-w-0"><b>{person.name}</b>{person.deactivatedAt && <small className="ml-1 text-muted">inactive</small>}<small className="block text-muted">{teamName(person.teamId)}</small></span>
               <b className="text-xl">{pct(score(tally))}</b>
@@ -410,7 +413,7 @@ function Reports({ m }: { m: Membership }) {
           </li>
         ))}
       </ul>
-      <div className="mt-3 hidden overflow-x-auto rounded-xl bg-surface shadow-card sm:block">
+      <div className="mt-3 hidden overflow-x-auto rounded-xl bg-fg/[0.04] sm:block">
         <table className="w-full text-sm tabular-nums">
           <thead className="text-left text-xs text-muted">
             <tr><th className="p-2">Name</th><th className="p-2 text-right">On time</th><th className="p-2 text-right">Made up</th><th className="p-2 text-right">Open</th><th className="p-2 text-right">Missed</th><th className="p-2 text-right">Score</th></tr>
@@ -442,7 +445,7 @@ function Reports({ m }: { m: Membership }) {
         <ul className="mt-3 flex flex-col gap-1.5">
           {flags.slice(0, 20).map(({ r, a }, i) => (
             <li key={`${r.id}-${i}`}>
-              <Link href={`/record/#${r.id}`} className="flex items-center justify-between gap-2 rounded-xl bg-surface shadow-card px-3 py-2 text-sm">
+              <Link href={`/record/#${r.id}`} className="flex items-center justify-between gap-2 rounded-xl bg-fg/[0.04] px-3 py-2 text-sm">
                 <span className="min-w-0"><b>{a.name}</b> <small className="text-muted">{short(r.heldAt)} · {r.title}{r.teamName ? ` · ${r.teamName}` : ""}</small></span>
                 <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">{STATUS_LABEL[a.status]}</span>
               </Link>
@@ -463,10 +466,10 @@ function Reports({ m }: { m: Membership }) {
 }
 
 function StatusBar({ tally, big }: { tally: Tally; big?: boolean }) {
-  if (tally.expected === 0) return <div className={`mt-2 rounded bg-line ${big ? "h-4" : "h-2"}`} />;
+  if (tally.expected === 0) return <div className={`mt-3 rounded-full bg-line ${big ? "h-3.5" : "h-2"}`} />;
   const label = SEGMENTS.filter((s) => tally[s.state]).map((s) => `${WEEK_STATE_LABEL[s.state]} ${tally[s.state]}`).join(", ");
   return (
-    <div role="img" aria-label={label} title={label} className={`mt-2 flex gap-[2px] overflow-hidden rounded ${big ? "h-4" : "h-2"}`}>
+    <div role="img" aria-label={label} title={label} className={`mt-3 flex gap-[2px] overflow-hidden rounded-full ${big ? "h-3.5" : "h-2"}`}>
       {SEGMENTS.filter((s) => tally[s.state] > 0).map((s) => (
         <span key={s.state} style={{ flexGrow: tally[s.state], background: fill(s) }} />
       ))}
@@ -509,12 +512,12 @@ function PeopleList({ title, tone, rows, names, note, detail }: {
 /** A report section that folds away. Closed by default so the page is short on a phone; tap the heading to open. */
 function Fold({ title, aside, children }: { title: string; aside?: string; children: React.ReactNode }) {
   return (
-    <details className="group mt-6 rounded-xl border border-line px-3 pb-1">
-      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        <h2 className="text-base font-semibold">{title}</h2>
+    <details className="group mt-3 rounded-xl bg-surface px-4 pb-1 shadow-card">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+        <h2 className="font-display text-[17px] font-bold tracking-[-0.01em]">{title}</h2>
         <span className="flex items-center gap-2 text-sm font-semibold text-muted">
-          {aside}
-          <span aria-hidden className="transition group-open:rotate-180">▾</span>
+          {aside && <span className="rounded-full bg-fg/[0.06] px-2.5 py-0.5 tabular-nums">{aside}</span>}
+          <svg aria-hidden viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="transition group-open:rotate-180"><path d="m6 9 6 6 6-6" /></svg>
         </span>
       </summary>
       <div className="pb-3">{children}</div>

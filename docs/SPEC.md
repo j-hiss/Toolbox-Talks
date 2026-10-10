@@ -224,6 +224,11 @@ customer #1, not a special case.
   reads like a card from a binder (larger hook, green section headings with a rule, round markers, the crew question
   set apart at the end; code and minutes under the title); "Read it out loud" has a speaker icon. Records rows lead with
   the day held as a date tile and show an attendance bar: signed, not signed and absent each in their own color.
+  Third pass: people show an initials badge on the roster and the signing screen ("Pass the phone to" with a large
+  badge, so a crew member finds their own name fast); what they're signing for sits in its own panel. Reports leads with
+  the sign-in rate as the headline card (large number, change as a green or red pill, rounder status bar), then the
+  makeups (time left as a pill, amber when 7 days or fewer); the profile link has an icon; the folded sections are
+  cards with a chevron and the charts inside them sit flat.
 ## Jobsites and the office
 - Talks can happen on a jobsite **or at the office or shop**. Each place is marked Jobsite or Office or shop. Where a
   talk happened is recorded, never flagged: no place is "wrong".
