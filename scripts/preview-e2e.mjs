@@ -400,6 +400,24 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("11 home alert:", (await q.locator("text=Training cards:").first().locator("..").innerText().catch(() => "none")).replace(/\s+/g, " "));
   await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
   log("11 profile training:", (await q.locator("li:has-text('Safety training')").first().innerText()).replace(/\s+/g, " ").slice(0, 220));
+  // Scenario 12: share with your agent. Make a 30-day link, check what the agent sees, switch it off.
+  await q.fill("#share-label", "Example agent"); await q.click("button:has-text('Make private link')"); await q.waitForTimeout(800);
+  const link = (await q.locator("p.font-mono").innerText()).trim();
+  log("12 link:", link.replace(/#.*/, "#<secret>"), "| secret after #:", /\/share\/#[0-9a-f]{64}$/.test(link));
+  await q.screenshot({ path: `${OUT}/e-share-made.png`, fullPage: true });
+  await q.click("text=See what they'll see"); await q.waitForTimeout(1500);
+  const shared = await q.locator("main").innerText();
+  log("12 shared page:", await q.locator("h1").textContent(), "| prepared for:", shared.includes("Prepared for Example agent"), "| no worker names:", !/Alvarez|Example Lead/.test(shared), "| no compliance claim:", !/\bcompliant\b/i.test(shared.replace("doesn't certify compliance", "")));
+  await q.screenshot({ path: `${OUT}/e-share-page.png`, fullPage: true });
+  await q.evaluate(() => { window.__saved = null; });
+  await q.click("button:has-text('Download PDF')"); await q.waitForTimeout(2500);
+  log("12 shared pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  await q.goBack().catch(() => {}); await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav[aria-label=Main] >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  const row = q.locator("ul[aria-label=\"Links you've made\"] li").first();
+  log("12 list:", (await row.innerText()).replace(/\s+/g, " "));
+  await row.locator("button:has-text('Switch off')").click(); await row.locator("button:has-text('Tap again')").click(); await q.waitForTimeout(800);
+  log("12 after switch off:", (await q.locator("ul[aria-label=\"Links you've made\"] li").first().innerText()).replace(/\s+/g, " "));
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

@@ -1,8 +1,8 @@
 "use client";
 
 // Reports → Safety profile: the company's own summary of its safety program, built from its signed records, and the
-// two PDFs it can hand to its agent or carrier (12-month renewal packet, monthly summary). Company first: nothing here
-// is shared with anyone; the company downloads and sends it when it chooses. Math: src/core/profile.ts. PDF:
+// two PDFs it can hand to its agent or carrier (12-month renewal packet, monthly summary). Company first: nothing is
+// shared until the company sends a PDF or makes a private, expiring link (ShareSection, src/components/ShareSection.tsx). Math: src/core/profile.ts. PDF:
 // buildProfilePdf in src/lib/pdf.ts. Self-reported pieces (EMR, documents): src/lib/data/profile.ts.
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -10,8 +10,7 @@ import { buildCompliance, type ReportPerson, type ReportRecord } from "@/core/co
 import { periodKeys } from "@/core/makeup";
 import { buildProfile, profileRange, DOCUMENT_KINDS, type DocumentKind, type EmrEntry, type ProfileEvent, type ProfileIssue, type ProfileRecord } from "@/core/profile";
 import { climateFor } from "@/core/climate";
-import { isoDay, mondayOf, parseDay, weekLabel } from "@/core/weeks";
-import { LANGUAGES } from "@/core/languages";
+import { isoDay, mondayOf, parseDay } from "@/core/weeks";
 import { reportPeople, reportRecords, listDailyPlans } from "@/lib/data/reports";
 import { listRecords } from "@/lib/data/records";
 import { listEvents } from "@/lib/data/safety";
@@ -24,6 +23,8 @@ import type { Membership } from "@/lib/data/types";
 import { usePlan } from "@/lib/usePlan";
 import { saveFile } from "@/lib/download";
 import { RequireCompany } from "@/components/Guard";
+import { ProfileSummary } from "@/components/ProfileSummary";
+import { ShareSection } from "@/components/ShareSection";
 import { Button, ErrorNotice, Eyebrow, Field, FileButton, GroupHeading, Loading, Notice, Shell, Title, inputClass, segmentClass, segmentedClass } from "@/components/ui";
 
 export default function ProfilePage() {
@@ -36,11 +37,7 @@ type Data = {
   events: ProfileEvent[]; issues: ProfileIssue[]; emr: EmrEntry[]; documents: StoredDocument[];
   training?: { current: number; expiring: number; expired: number; missing: number };
 };
-const pct = (v: number | null) => (v === null ? "–" : `${Math.round(v * 100)}%`);
 const fmtDay = (iso: string) => parseDay(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-const fmtMonth = (ym: string) => parseDay(`${ym}-01`).toLocaleDateString(undefined, { month: "short", year: "numeric" });
-const STATUS = { records: "Shown by app records", some: "Partly shown", outside: "Outside the app" } as const;
-const STATUS_TONE = { records: "text-ok", some: "text-caution", outside: "text-muted" } as const;
 
 function Profile({ m }: { m: Membership }) {
   const co = m.company;
@@ -83,13 +80,12 @@ function Profile({ m }: { m: Membership }) {
   const p = profile;
   const crew = data.people.filter((x) => !x.deactivatedAt).length;
   const florida = climateFor(co.zip).state === "FL";
-  const lang = (id: string) => LANGUAGES.find((l) => l.id === id)?.label ?? id;
 
   return (
     <Shell>
       <Eyebrow>Reports · {co.name}</Eyebrow>
       <Title>Safety profile</Title>
-      <p className="mt-1 text-sm text-muted">Your safety program, counted from your own signed records. It stays private to your company until you download it and send it to your agent or carrier.</p>
+      <p className="mt-1 text-sm text-muted">Your safety program, counted from your own signed records. It stays private to your company until you send the PDF or a private link to your agent or carrier.</p>
       <p className="mt-2"><Link href="/reports/" className="text-sm font-semibold underline">← Back to reports</Link></p>
 
       <div className={`mt-4 grid-cols-3 ${segmentedClass}`} role="group" aria-label="Profile range">
@@ -108,69 +104,13 @@ function Profile({ m }: { m: Membership }) {
 
       <Downloads p={p} co={co} florida={florida} crew={crew} />
 
-      <GroupHeading>What the records show</GroupHeading>
-      <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <Fig label="Weekly talks held" value={p.periodsEnded ? `${p.periodsWithTalk} of ${p.periodsEnded}` : "–"} note={p.periodsMissed ? `${p.periodsMissed} with no talk` : p.periodsEnded ? "no missed weeks" : "no full weeks yet"} warn={p.periodsMissed > 0} />
-        <Fig label="Team sign-in rate" value={pct(p.signIn)} note={p.onTime === null ? "" : `${pct(p.onTime)} on time`} />
-        <Fig label="Toolbox talks" value={String(p.talks)} note={`${p.topics} topics${p.makeups ? `, ${p.makeups} makeups` : ""}`} />
-        <Fig label="Daily plans" value={String(p.dailyDays)} note="days with a signed plan" />
-        <Fig label="Inspections" value={String(p.log.inspections + p.log.walkarounds)} note={`${p.log.walkarounds} walk-arounds`} />
-        <Fig label="Issues fixed" value={`${p.issues.fixed} of ${p.issues.raised}`} note={p.issues.medianDaysToFix === null ? "" : `typically ${p.issues.medianDaysToFix} days`} />
-      </dl>
-
-      {p.missedKeys.length > 0 && (
-        <div className="mt-3"><Notice tone="caution">
-          <b>Weeks with no talk recorded ({p.missedKeys.length}):</b> {p.missedKeys.map((k) => weekLabel(parseDay(k))).join(", ")}. These are listed in the PDF too. A makeup talk for a week shows it was covered late.
-        </Notice></div>
-      )}
-
-      {p.months.length > 0 && (
-        <>
-          <GroupHeading>Month by month</GroupHeading>
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-sm tabular-nums">
-              <thead><tr className="text-left text-xs font-medium text-muted"><th className="py-1 pr-2">Month</th><th className="pr-2">Weeks held</th><th className="pr-2">Talks</th><th className="pr-2">Sign-in</th><th>On time</th></tr></thead>
-              <tbody>
-                {p.months.map((r) => (
-                  <tr key={r.month} className="border-t border-line">
-                    <td className="py-1.5 pr-2">{fmtMonth(r.month)}</td>
-                    <td className={`pr-2 ${r.missed ? "font-semibold text-warn" : ""}`}>{r.periods ? `${r.periods - r.missed} of ${r.periods}` : "–"}</td>
-                    <td className="pr-2">{r.talks}</td><td className="pr-2">{pct(r.signIn)}</td><td>{pct(r.onTime)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-      {p.languages.length > 0 && <p className="mt-2 text-sm text-muted">Talks given in {p.languages.map((l) => `${lang(l.language)} (${l.talks})`).join(", ")}.</p>}
-
-      <GroupHeading>{florida ? "Program elements (Florida, s. 440.1025)" : "Program elements"}</GroupHeading>
-      <p className="mt-1 text-sm text-muted">Where your records show each part of a safety program. Your insurer decides whether a program earns a premium credit.</p>
-      <ul className="mt-3 flex flex-col gap-2">
-        {p.elements.map((e) => (
-          <li key={e.id} className="rounded-lg bg-surface shadow-card p-3 text-sm">
-            <div className="flex items-start justify-between gap-2"><b>{e.name}</b><span className={`shrink-0 text-xs font-semibold ${STATUS_TONE[e.status]}`}>{STATUS[e.status]}</span></div>
-            <p className="mt-1 text-muted">{e.evidence}</p>
-            {e.id === "policy" && e.status === "outside" && <p className="mt-1 text-xs">Attach your written program below to show it here.</p>}
-          </li>
-        ))}
-      </ul>
+      <ProfileSummary p={p} florida={florida} />
+      <ShareSection p={p} co={co} florida={florida} crew={crew} />
 
       <EmrSection companyId={co.id} emr={p.emr} reload={reload} />
       <DocumentsSection companyId={co.id} docs={data.documents} reload={reload} />
       <p className="mt-6 text-xs text-muted">Counts and rates only. Worker names, signatures, phone numbers and injury details never go in these summaries. This app documents safety meetings; it doesn&apos;t certify compliance.</p>
     </Shell>
-  );
-}
-
-function Fig({ label, value, note, warn }: { label: string; value: string; note: string; warn?: boolean }) {
-  return (
-    <div className="rounded-lg bg-surface shadow-card p-3">
-      <dt className="text-[13px] font-medium text-muted">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold tracking-[-0.01em] tabular-nums">{value}</dd>
-      {note && <dd className={`text-xs ${warn ? "font-semibold text-warn" : "text-muted"}`}>{note}</dd>}
-    </div>
   );
 }
 

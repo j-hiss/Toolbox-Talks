@@ -558,6 +558,38 @@ async function main() {
         && (await as(pw, "select id from public.companies")).rows.length === 0);
     }
 
+    // "Share with your agent" links (migration 0025).
+    {
+      const snap = JSON.stringify({ v: 1, kind: "renewal", company: { name: "Company A" }, profile: { from: "2025-10-01", to: "2026-09-30", talks: 40 } });
+      const make = (user, co, days = 30) => as(user, "select public.create_profile_share($1, 'Agent', $2, '2025-10-01', '2026-09-30', $3::jsonb) as t", [co, days, snap]);
+      const secret = (await make(userA, coA)).rows[0].t;
+      check("A share link's secret is long and random", /^[0-9a-f]{64}$/.test(secret));
+      const stored = (await db.query("select token_hash from public.profile_shares where company_id = $1", [coA])).rows[0].token_hash;
+      check("Only the link's fingerprint is stored, never the secret", stored !== secret && /^[0-9a-f]{64}$/.test(stored));
+      const opened = (await as(null, "select public.shared_profile($1) as s", [secret])).rows[0].s;
+      check("Anyone with a live link opens the shared copy, no account needed", opened?.snapshot?.profile?.talks === 40 && opened.label === "Agent");
+      check("A wrong secret opens nothing", (await as(null, "select public.shared_profile($1) as s", ["0".repeat(64)])).rows[0].s === null);
+      check("Signed-out visitors can't list share links", await fails(() => as(null, "select id from public.profile_shares")));
+      check("A presenter can't make a share link", await fails(() => make(presenterA, coA)));
+      check("B can't make a link for A's profile", await fails(() => make(userB, coA)));
+      check("A link can't last more than 90 days", await fails(() => make(userA, coA, 365)));
+      check("B sees none of A's links or opens", (await as(userB, "select id from public.profile_shares")).rows.length === 0
+        && (await as(userB, "select id from public.profile_share_views")).rows.length === 0);
+      check("Admins can't read the stored fingerprint or copy directly", await fails(() => as(userA, "select token_hash from public.profile_shares")));
+      const share = (await as(userA, "select id from public.profile_shares")).rows[0].id;
+      await as(userA, "select public.shared_profile($1)", [secret]);
+      check("Every open is logged for the company (not its own admin checking)", (await as(userA, "select count(*)::int n from public.profile_share_views where share_id = $1", [share])).rows[0].n === 1);
+      check("A link can't be edited or deleted directly", await fails(() => as(userA, "update public.profile_shares set expires_at = now() + interval '5 years' where id = $1", [share]))
+        && await fails(() => as(userA, "delete from public.profile_shares where id = $1", [share])));
+      check("B can't switch off A's link", await fails(() => as(userB, "select public.revoke_profile_share($1)", [share])));
+      await as(userA, "select public.revoke_profile_share($1)", [share]);
+      check("A switched-off link opens nothing", (await as(null, "select public.shared_profile($1) as s", [secret])).rows[0].s === null);
+      check("A switched-off link stays on file", (await as(userA, "select revoked_at from public.profile_shares where id = $1", [share])).rows[0].revoked_at !== null);
+      const secret2 = (await make(userA, coA, 7)).rows[0].t;
+      await db.query("update public.profile_shares set expires_at = now() - interval '1 minute' where revoked_at is null and company_id = $1", [coA]);
+      check("An expired link opens nothing", (await as(null, "select public.shared_profile($1) as s", [secret2])).rows[0].s === null);
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 

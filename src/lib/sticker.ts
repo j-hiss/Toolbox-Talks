@@ -6,17 +6,8 @@ import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
 import { jobsiteLink } from "@/core/sitelink";
 
-/**
- * Where the app lives on the web. A sticker needs a real web address: the phone apps run from an app-only address
- * that a camera can't open. Set NEXT_PUBLIC_APP_URL once the website is live; until then the website's own address
- * is used when it's a normal https address.
- */
-export function appWebAddress(): string | null {
-  const set = process.env.NEXT_PUBLIC_APP_URL;
-  if (set && /^https?:\/\//.test(set)) return set;
-  if (typeof location !== "undefined" && /^https?:$/.test(location.protocol) && location.origin !== "null") return location.origin;
-  return null;
-}
+/** Where the app lives on the web (moved to webAddress.ts so other links can share it). */
+export { appWebAddress } from "./webAddress";
 
 export async function jobsiteSticker(site: { id: string; name: string; address: string }, companyName: string, origin: string): Promise<Blob> {
   const link = jobsiteLink(origin, site.id);

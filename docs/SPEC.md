@@ -450,8 +450,14 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 
 ## Safety profile and renewal packet (built, migration 0020; partner portal phase 1)
 - **Company first, privacy first.** The profile is the company's own summary of its safety effort. Nothing is shared
-  with an agent, carrier or consultant; the company downloads the PDF and sends it when it chooses. Partner access
-  (phase 2) needs counsel's privacy review and the company's approval per partner.
+  until the company sends the PDF or makes a private link (below). Partner access (phase 2) needs counsel's privacy
+  review and the company's approval per partner.
+- **Share with your agent (built, migration 0025):** owners and admins make a private link for the dates on screen,
+  say who it's for, and pick 7, 30 or 90 days. The link shows a copy frozen when it was made (counts and rates only,
+  the same view and PDF as the company's screen), needs no account to open, and stops working when it expires or is
+  switched off. The link is shown once (only its fingerprint is stored); the secret sits after "#" so it never reaches
+  a web server's logs. Each open is logged and shown in the list (the company's own admins checking it aren't
+  counted). Nothing is deleted. Links need the website address (`NEXT_PUBLIC_APP_URL`) once the site is live.
 - **Reports → Safety profile & renewal packet** (admins): last 12 months, last month, or picked dates. Shows weekly
   talks held of weeks ended, crew sign-in rate and on-time rate, talks and topics, makeups, daily-plan days,
   inspections, crew-raised issues fixed and typical days to fix, a month table, languages.

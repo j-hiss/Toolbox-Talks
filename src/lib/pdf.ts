@@ -53,7 +53,10 @@ function sigLine(doc: jsPDF, co: Company, x: number, y: number, signed: boolean)
   if (signed) { doc.setFillColor(...rgb(printBrand(normalizeTheme(co.theme)))); doc.circle(x + 155, y, 1.8, "F"); }
 }
 
-function companyHeader(doc: jsPDF, co: Company, label: string, top: number = PAGE.M): number {
+/** The company fields a PDF header prints. A shared profile copy (src/core/share.ts) carries just these. */
+export type HeaderCompany = Pick<Company, "name" | "licenses" | "address" | "phone" | "email" | "theme">;
+
+function companyHeader(doc: jsPDF, co: HeaderCompany, label: string, top: number = PAGE.M): number {
   const { W, M } = PAGE, CW = W - 2 * M;
   let y = top;
   doc.setFillColor(...rgb(printBrand(normalizeTheme(co.theme)))); doc.rect(0, 0, W, 8, "F");
@@ -314,7 +317,7 @@ export function profilePdfFileName(kind: "renewal" | "monthly", p: Pick<SafetyPr
   return `${name} - ${kind === "renewal" ? "Safety Program Summary" : "Monthly Program Summary"} - ${p.from} to ${p.to}.pdf`;
 }
 
-export function buildProfilePdf(p: SafetyProfile, co: Company, opts: { kind: "renewal" | "monthly"; florida: boolean; crew: number; generatedAt?: Date }): jsPDF {
+export function buildProfilePdf(p: SafetyProfile, co: HeaderCompany, opts: { kind: "renewal" | "monthly"; florida: boolean; crew: number; generatedAt?: Date }): jsPDF {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const { W, H, M } = PAGE, CW = W - 2 * M;
   let page = 1;
