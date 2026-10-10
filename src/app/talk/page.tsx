@@ -39,7 +39,9 @@ import { SignatureRule } from "@/components/Logo";
 import { Steps as SharedSteps } from "@/components/Steps";
 import { DAILY_STATEMENT, DAILY_STATEMENT_VERSION, PRETASK_TALK_ID, pretaskContent, tidyPlan } from "@/core/pretask";
 import { getLocation } from "@/lib/location";
-import { speakLines, speechAvailable, stopSpeaking } from "@/lib/speech";
+import { stopSpeaking } from "@/lib/speech";
+import { canReadAloud, keepAudio, readAloud } from "@/lib/readAloud";
+import { recordableLines } from "@/core/voice";
 import { RequireCompany } from "@/components/Guard";
 import { SignaturePad } from "@/components/SignaturePad";
 import { readChosenJobsite } from "@/components/JobsitePicker";
@@ -340,12 +342,16 @@ function ReadTalk({ co, draft, update, org, talk }: { co: Company; draft: TalkDr
   }, [text, ui.ask, notes, hot, reminder, draft.lang, draft.heat, since]);
 
   const voice = LANGUAGES.find((l) => l.id === draft.lang)!.voice;
+  // Keep this talk's recorded lines on the phone while there's signal, so read-aloud works with none.
+  // Recorded Spanish only once the translation is reviewed (safety wording is not guessed).
+  const recordable = draft.lang === "en" || talk.translationStatus[draft.lang] === "reviewed";
+  useEffect(() => { if (recordable) void keepAudio(recordableLines(text, ui.ask), draft.lang); }, [text, ui.ask, draft.lang, recordable]);
   const playing = line !== null;
   const toggle = () => {
     if (playing) { stopRef.current?.(); setLine(null); setStatus(null); return; }
-    if (!speechAvailable()) { setStatus(pui.noVoice); return; }
+    if (!canReadAloud(draft.lang)) { setStatus(pui.noVoice); return; }
     setStatus(pui.reading);
-    stopRef.current = speakLines(lines, voice, {
+    stopRef.current = readAloud(lines, draft.lang, voice, {
       onLine: (i) => { setLine(i); document.getElementById(`line-${i}`)?.scrollIntoView({ block: "center", behavior: "smooth" }); },
       onDone: () => { setLine(null); setStatus(null); },
       onError: () => { setLine(null); setStatus(pui.noVoice); },

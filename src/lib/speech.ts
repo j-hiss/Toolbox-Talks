@@ -59,3 +59,15 @@ export function speakLines(
   next();
   return () => { stopped = true; window.speechSynthesis.cancel(); };
 }
+
+/** Say one line with the phone's voice. Resolves when it finishes (or fails, so reading never gets stuck). */
+export function speakOne(text: string, code: string, rate = 0.95): { done: Promise<void>; stop: () => void } {
+  if (!speechAvailable()) return { done: Promise.resolve(), stop: () => {} };
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = code; u.rate = rate;
+  const voice = bestVoice(code);
+  if (voice) u.voice = voice;
+  const done = new Promise<void>((res) => { u.onend = () => res(); u.onerror = () => res(); });
+  window.speechSynthesis.speak(u);
+  return { done, stop: () => window.speechSynthesis.cancel() };
+}

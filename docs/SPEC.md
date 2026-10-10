@@ -155,6 +155,14 @@ customer #1, not a special case.
 - Upgrade the main English and Spanish voices to a paid service (e.g. ElevenLabs) once there's revenue. Only the audio
   files change, not the app.
 - The phone's built-in voice stays as the offline fallback.
+- **Built (migration 0035, 2026-10-10):** recordings are made per line, named by a fingerprint of the exact words, the
+  language and the voice, so rewording a talk only needs its changed lines recorded and nothing stale can play. The
+  talk screen plays a recording when there is one and the phone's voice for anything else (site notes, today's heat
+  index, "Since last talk", draft translations), with the same line highlighting. Opening a talk with signal saves its
+  recordings on the phone for later. Recordings are made on a computer (`scripts/voice/README.md`: list, record with
+  Kokoro, upload); the tools refuse any voice not marked "Yes" in `docs/voice-licenses.md`. English uses af_heart;
+  Spanish ef_dora, recorded only for reviewed translations. The library audio lives in a public, read-only bucket
+  (no company data in it). Company-written talks use the phone's voice.
 - **Every voice is license-checked first.** See `docs/voice-licenses.md`.
 
 ## Company admin

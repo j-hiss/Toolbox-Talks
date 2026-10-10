@@ -18,7 +18,9 @@
     "preview:build": "vite build --config preview/vite.config.ts && node preview/to-artifact.mjs",
     "test:preview": "npm run preview:build && node scripts/preview-e2e.mjs",
     "seed": "tsx scripts/seed-local.ts",
-    "icons": "tsx scripts/make-icons.ts"
+    "icons": "tsx scripts/make-icons.ts",
+    "voice:lines": "tsx scripts/voice/lines.ts",
+    "voice:upload": "tsx scripts/voice/upload.ts"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
