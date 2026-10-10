@@ -731,3 +731,101 @@ export function buildOsha301Pdf(c: InjuryCase, co: HeaderCompany): jsPDF {
   doc.text(OSHA_FOOTER, M, H - 20); doc.setTextColor(0);
   return doc;
 }
+
+/**
+ * An inspection's PDF, built only from the saved inspection: every item with its result and note, photos of what
+ * failed, the inspector's signature and a check code. Documents that someone looked; not a certification.
+ */
+export function buildInspectionPdf(r: InspectionPdfInput, co: HeaderCompany, origin: string | null = appWebAddress()): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const { W, H, M } = PAGE, CW = W - 2 * M;
+  let page = 1;
+  const footer = () => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
+    doc.text(`${co.name ? co.name + " · " : ""}Inspection ${r.id} · Page ${page}`, M, H - 28);
+    if (r.verify_code) doc.text(`Check code ${formatCode(r.verify_code)}${origin ? ` at ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify` : ""}`, M, H - 18);
+    doc.text("Documents an inspection. Does not by itself certify OSHA compliance.", W - M, H - 28, { align: "right" });
+    doc.setTextColor(0); page++;
+  };
+  let y = companyHeader(doc, co, "INSPECTION RECORD");
+  const next = (h: number) => { if (y + h > H - M - 30) { footer(); doc.addPage(); y = M; return true; } return false; };
+  doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.text(r.title, M, y); y += 16;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(80);
+  doc.splitTextToSize(`Rule: ${r.rule}`, CW).forEach((l: string) => { doc.text(l, M, y); y += 11; });
+  doc.setTextColor(0); y += 8;
+  const held = stampParts(r.inspected_at);
+  const pairs: [string, string][] = [["Date and time", `${held.date}, ${held.time}`], ["What was inspected", r.subject || "-"], ["Where", r.jobsite_name || "-"], ["Inspected by", r.inspector_name]];
+  doc.setFontSize(8);
+  pairs.forEach(([k, v], i) => {
+    const x = i % 2 ? M + CW / 2 : M; if (i % 2 === 0 && i) y += 30;
+    doc.setFont("helvetica", "bold"); doc.setTextColor(GREY); doc.text(k.toUpperCase(), x, y); doc.setTextColor(0);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.text(doc.splitTextToSize(v, CW / 2 - 12)[0] ?? "", x, y + 13); doc.setFontSize(8);
+  });
+  y += 40;
+  const fails = r.items.filter((i) => i.result === "fail").length, nas = r.items.filter((i) => i.result === "na").length;
+  doc.setFillColor(...(fails ? ([251, 230, 228] as [number, number, number]) : ([228, 243, 234] as [number, number, number]))); doc.rect(M - 6, y - 12, CW + 12, 20, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+  doc.text(`${r.items.length - fails - nas} pass  ·  ${fails} fail  ·  ${nas} not applicable`, M, y + 2);
+  if (fails) { doc.setTextColor(...RED); doc.text(`${fails} TO FIX`, W - M, y + 2, { align: "right" }); doc.setTextColor(0); }
+  y += 28;
+  const RES = { pass: ["PASS", GREEN], fail: ["FAIL", RED], na: ["N/A", [110, 110, 110]] } as const;
+  r.items.forEach((it, n) => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+    const text = doc.splitTextToSize(it.text, CW - 110) as string[];
+    const note = it.note ? (doc.splitTextToSize(`Note: ${it.note}`, CW - 110) as string[]) : [];
+    const rule = it.rule ? (doc.splitTextToSize(it.rule, CW - 110) as string[]) : [];
+    const h = (text.length + note.length) * 12 + rule.length * 9 + 10;
+    next(h);
+    if (it.result === "fail") { doc.setFillColor(251, 230, 228); doc.rect(M - 6, y - 10, CW + 12, h, "F"); }
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.text(String(n + 1), M, y);
+    doc.setFontSize(9.5); text.forEach((l, i) => doc.text(l, M + 20, y + i * 12));
+    let yy = y + text.length * 12;
+    if (rule.length) { doc.setFontSize(7.5); doc.setTextColor(120); rule.forEach((l, i) => doc.text(l, M + 20, yy + i * 9 - 2)); doc.setTextColor(0); yy += rule.length * 9; }
+    if (note.length) { doc.setFont("helvetica", "italic"); doc.setFontSize(9); note.forEach((l, i) => doc.text(l, M + 20, yy + i * 12)); doc.setFont("helvetica", "normal"); }
+    const [label, color] = RES[it.result];
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...(color as [number, number, number])); doc.text(label, W - M, y, { align: "right" }); doc.setTextColor(0);
+    y += h; doc.setDrawColor(225); doc.line(M, y - 8, W - M, y - 8);
+  });
+  if (r.notes) { next(40); doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY); doc.text("NOTES", M, y + 4); doc.setTextColor(0); y += 16; doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.splitTextToSize(r.notes, CW).forEach((l: string) => { next(12); doc.text(l, M, y); y += 12; }); }
+  // Photos of failed items.
+  for (const [n, it] of r.items.entries()) {
+    if (!it.photo) continue;
+    try {
+      const p = doc.getImageProperties(it.photo); const scale = Math.min(CW / 2 / p.width, 200 / p.height);
+      next(p.height * scale + 30); y += 10;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY); doc.text(`PHOTO · ITEM ${n + 1}`, M, y); doc.setTextColor(0); y += 6;
+      doc.addImage(it.photo, /^data:image\/png/i.test(it.photo) ? "PNG" : "JPEG", M, y, p.width * scale, p.height * scale); y += p.height * scale + 8;
+    } catch { /* an unreadable photo never blocks the record */ }
+  }
+  next(120); y += 14;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY); doc.text("INSPECTED BY", M, y); doc.setTextColor(0); y += 14;
+  doc.setFontSize(11); doc.text(r.inspector_name, M, y + 16);
+  if (r.signature) { try { doc.addImage(r.signature, "PNG", M + 230, y - 4, 150, 38); } catch { /* keep going */ } }
+  else { doc.setFontSize(9); doc.setTextColor(...RED); doc.text("NOT SIGNED", M + 233, y + 22); doc.setTextColor(0); }
+  doc.setDrawColor(120); doc.line(M + 230, y + 36, M + 380, y + 36);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.text(`${held.date} ${held.time}`, W - M, y + 22, { align: "right" });
+  y += 60;
+  if (r.verify_code && origin) {
+    next(100); doc.setDrawColor(200); doc.roundedRect(M, y, CW, 92, 6, 6, "S");
+    drawQr(doc, verifyLink(origin, r.verify_code), M + 8, y + 6, 80);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY); doc.text("CHECK THIS RECORD", M + 100, y + 22); doc.setTextColor(0);
+    doc.setFont("courier", "bold"); doc.setFontSize(15); doc.text(formatCode(r.verify_code), M + 100, y + 42);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5);
+    doc.text(doc.splitTextToSize(`Scan the code, or open ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify and type it, to see what was saved: the checklist, date and how many items passed and failed. No names.`, CW - 112), M + 100, y + 58);
+  }
+  footer();
+  return doc;
+}
+
+export type InspectionPdfInput = {
+  id: string; title: string; rule: string; subject: string; jobsite_name: string; inspector_name: string; inspected_at: string; notes: string;
+  signature: string | null; verify_code: string | null;
+  items: { text: string; rule?: string; result: "pass" | "fail" | "na"; note?: string; photo?: string | null }[];
+};
+
+export function inspectionPdfFileName(r: Pick<InspectionPdfInput, "title" | "subject" | "inspected_at">): string {
+  const d = new Date(r.inspected_at);
+  const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const clean = (s: string) => s.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim();
+  return `Inspection - ${clean(r.title)}${r.subject ? ` - ${clean(r.subject)}` : ""} - ${iso}.pdf`;
+}

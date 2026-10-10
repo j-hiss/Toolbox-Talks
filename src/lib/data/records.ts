@@ -14,7 +14,7 @@ async function dataUrlToBlob(image: string): Promise<Blob> {
 }
 
 /** Upload one signature or photo into the company's private folder. Already there (a retry) counts as done. */
-async function uploadFile(f: TalkFile): Promise<void> {
+export async function uploadFile(f: Pick<TalkFile, "path" | "image" | "contentType">): Promise<void> {
   const { error } = await supabase().storage.from(TALK_FILES_BUCKET).upload(f.path, await dataUrlToBlob(f.image), { contentType: f.contentType, upsert: false });
   if (error && !/exists|duplicate|409/i.test(`${error.message} ${(error as { statusCode?: string }).statusCode ?? ""}`)) throw new Error(error.message);
 }
@@ -30,7 +30,7 @@ export async function saveTalkRecord(record: RecordPayload, attendees: AttendeeR
 }
 
 /** Files → images the screen and PDF can show. Short-lived signed URLs (one minute), read once, never stored. */
-async function loadImages(paths: string[]): Promise<Map<string, string>> {
+export async function loadImages(paths: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   if (!paths.length) return out;
   const { data, error } = await supabase().storage.from(TALK_FILES_BUCKET).createSignedUrls(paths, 60);

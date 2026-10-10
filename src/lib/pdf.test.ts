@@ -187,3 +187,17 @@ describe("OSHA 301 PDF", () => {
     expect(pdf).not.toMatch(/\bcompliant\b/i);
   });
 });
+
+describe("Inspection PDF", () => {
+  it("prints every item with its result, the failure note and the check code; never a compliance claim", async () => {
+    const { buildInspectionPdf } = await import("./pdf");
+    const pdf = buildInspectionPdf({ id: "i1", title: "Ladders", rule: "OSHA 1910.23(b)(9)", subject: "24 ft ladder", jobsite_name: "Example Jobsite", inspector_name: "Example Lead",
+      inspected_at: "2026-10-10T12:00:00Z", notes: "", signature: null, verify_code: "7KQ2M9TX4HPAZC3N",
+      items: [{ text: "Rails straight", result: "fail", note: "Cracked rail" }, { text: "Feet work", result: "pass" }, { text: "Near lines", result: "na" }] }, co, "https://app.example.com").output().replace(/\\([()\\])/g, "$1");
+    expect(pdf).toContain("(1 pass  ·  1 fail  ·  1 not applicable) Tj");
+    expect(pdf).toContain("(Note: Cracked rail) Tj");
+    expect(pdf).toContain("(7KQ2-M9TX-4HPA-ZC3N) Tj");
+    expect(pdf).toContain("NOT SIGNED");
+    expect(pdf).not.toMatch(/\bis compliant\b|\bpassed OSHA\b/i);
+  });
+});

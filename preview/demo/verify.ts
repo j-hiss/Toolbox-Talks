@@ -22,5 +22,14 @@ export async function verifyRecord(code: string): Promise<VerifiedRecord | null>
   };
 }
 
-const _sameShape = { verifyRecord } satisfies Omit<typeof Real, never>;
+export async function verifyInspection(code: string): Promise<Real.VerifiedInspection | null> {
+  await tick();
+  type I = { company_id: string; title: string; rule: string; subject: string; inspected_at: string; created_at: string; verify_code: string; items: { result: string }[] };
+  const r = ((db() as unknown as { inspections?: I[] }).inspections ?? []).find((x) => x.verify_code === code);
+  if (!r) return null;
+  const n = (s: string) => r.items.filter((i) => i.result === s).length;
+  return { company: String(db().companies.find((c) => c.id === r.company_id)?.name ?? ""), title: r.title, rule: r.rule, inspected_at: r.inspected_at, saved_at: r.created_at, items: r.items.length, passed: n("pass"), failed: n("fail"), na: n("na") };
+}
+
+const _sameShape = { verifyRecord, verifyInspection } satisfies Omit<typeof Real, never>;
 void _sameShape;

@@ -548,6 +548,41 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     await q.locator(`main button:has-text("${label}")`).click(); await q.waitForTimeout(1500);
     log(`17 ${label}:`, JSON.stringify(await q.evaluate(() => window.__saved)));
   }
+  // Scenario 18: inspections. Home card, run the ladder checklist with one failure (note + issue), sign, save, see it in
+  // Recent, open it, download the PDF, then check it on /verify by its code.
+  await q.goto(PAGE); await q.waitForTimeout(1200);
+  log("18 home card:", (await q.locator("a[href*='inspect']").first().innerText()).replace(/\s+/g, " "));
+  await q.locator("a[href*='inspect']").first().click(); await q.waitForTimeout(1000);
+  log("18 lists:", await q.locator("main li:has(button[aria-label^='Start'])").count(), "| groups:", (await q.locator("main h2").allTextContents()).join(", "));
+  await q.screenshot({ path: `${OUT}/e-inspect-list.png`, fullPage: false });
+  await q.click("button[aria-label='Start Ladders']"); await q.waitForTimeout(700);
+  await q.fill("#insp-subject", "24 ft extension ladder");
+  await q.click("[aria-label='Result for item 1'] >> text=Fail");
+  await q.click("main button:has-text('Save inspection'), main button:has-text('Mark every item')"); await q.waitForTimeout(200);
+  log("18 blank:", (await q.locator("main [role=alert]").allInnerTexts()).join(" | "));
+  await q.click("main button:has-text('Mark the rest as pass')");
+  await q.fill("[aria-label=\"What's wrong with item 1\"]", "Cracked right rail near the third rung");
+  await q.selectOption("#insp-by", { index: 1 });
+  const pad = q.locator("canvas").first(); await pad.scrollIntoViewIfNeeded(); const box = await pad.boundingBox();
+  await q.mouse.move(box.x + 20, box.y + 40); await q.mouse.down(); await q.mouse.move(box.x + 160, box.y + 60, { steps: 8 }); await q.mouse.move(box.x + 60, box.y + 20, { steps: 8 }); await q.mouse.up();
+  await q.screenshot({ path: `${OUT}/e-inspect-run.png`, fullPage: false });
+  await q.click("main button:has-text('Save inspection')"); await q.waitForTimeout(1200);
+  log("18 save message:", (await q.locator("main [role=alert]").allInnerTexts()).join(" | ") || "none");
+  log("18 saved:", (await q.locator("main").innerText()).replace(/\s+/g, " ").slice(0, 160));
+  await q.click("main button:has-text('Back to inspections')"); await q.waitForTimeout(900);
+  const recent = q.locator("main button[aria-label^='Open Ladders']").first();
+  log("18 recent:", (await recent.innerText()).replace(/\s+/g, " "));
+  await recent.click(); await q.waitForTimeout(900);
+  await q.evaluate(() => { window.__saved = null; });
+  await q.click("main button:has-text('Download PDF')"); await q.waitForTimeout(1500);
+  log("18 pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  const inspCode = await q.evaluate(() => { const d = JSON.parse(localStorage.getItem("tt-preview-db") || "{}"); return (d.inspections ?? []).at(-1)?.verify_code ?? null; });
+  if (inspCode) {
+    await q.evaluate((c) => { sessionStorage.setItem("tt-preview-start", "/verify/"); location.hash = c; }, inspCode);
+    await q.reload(); await q.waitForTimeout(1500);
+    log("18 verify:", (await q.locator("section[aria-label='What was saved']").innerText()).replace(/\s+/g, " ").slice(0, 140));
+  } else log("18 verify: no code found in demo store");
+  await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

@@ -39,6 +39,7 @@ export default defineConfig({
       { find: /^@\/lib\/data\/ownTalks$/, replacement: here("demo/ownTalks.ts") },
       { find: /^@\/lib\/data\/verify$/, replacement: here("demo/verify.ts") },
       { find: /^@\/lib\/data\/injuries$/, replacement: here("demo/injuries.ts") },
+      { find: /^@\/lib\/data\/inspections$/, replacement: here("demo/inspections.ts") },
       { find: /^@\/lib\/weather$/, replacement: here("demo/weather.ts") },
       { find: /^@\/lib\/location$/, replacement: here("demo/location.ts") },
       { find: /^@\/lib\/download$/, replacement: here("demo/download.ts") },

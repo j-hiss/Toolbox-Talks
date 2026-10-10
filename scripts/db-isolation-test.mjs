@@ -815,6 +815,31 @@ async function main() {
       check("B still can't read A's 301 details", (await as(userB, "select birth_date from public.injury_cases")).rows.length === 0);
     }
 
+    // Inspections (0034): presenters save once through save_inspection, staff read, never across companies.
+    {
+      const cl = randomUUID();
+      const items = [{ id: "guard", text: "Guard in place", rule: "1910.215(a)(1)", result: "pass" }, { id: "rest", text: "Work rest", result: "fail", note: "Gap too wide" }, { id: "x", text: "N/A item", result: "na" }];
+      const insp = (over = {}) => JSON.stringify({ company_id: coA, client_id: cl, checklist_id: "grinders", checklist_version: 1, title: "Bench grinders", rule: "OSHA 1910.215",
+        items, subject: "Grinder 2", inspector_name: "Example Lead", inspected_at: "2026-10-10T12:00:00Z", ...over });
+      const issue = JSON.stringify([{ client_id: randomUUID(), description: "Bench grinders: Work rest. Gap too wide", raised_by_name: "Example Lead" }]);
+      const id = (await as(presenterA, "select public.save_inspection($1::jsonb, $2::jsonb) as id", [insp(), issue])).rows[0].id;
+      check("A presenter saves an inspection; a retry returns the same one", !!id && (await as(presenterA, "select public.save_inspection($1::jsonb, $2::jsonb) as id", [insp(), issue])).rows[0].id === id);
+      const row = (await as(userA, "select failed_count, created_by, verify_code from public.inspections where id = $1", [id])).rows[0];
+      check("Failures are counted by the database and the saver is stamped", row.failed_count === 1 && row.created_by === presenterA);
+      check("A failed item raised one crew issue linked to the inspection", (await as(userA, "select count(*)::int as n from public.talk_issues where inspection_id = $1", [id])).rows[0].n === 1);
+      check("B can't read A's inspections or save one for A", (await as(userB, "select id from public.inspections")).rows.length === 0
+        && await fails(() => as(userB, "select public.save_inspection($1::jsonb, '[]'::jsonb)", [insp({ client_id: randomUUID() })])));
+      check("An inspection can't be inserted, edited or deleted directly", await fails(() => as(userA, "update public.inspections set failed_count = 0 where id = $1", [id]))
+        && await fails(() => as(userA, "delete from public.inspections where id = $1", [id]))
+        && await fails(() => as(userA, "insert into public.inspections (company_id, client_id, checklist_id, checklist_version, title, items, inspector_name, inspected_at) values ($1, $2, 'x1', 1, 'x', '[]', 'x', now())", [coA, randomUUID()])));
+      check("Items must be marked pass, fail or n/a", await fails(() => as(presenterA, "select public.save_inspection($1::jsonb, '[]'::jsonb)", [insp({ client_id: randomUUID(), items: [{ id: "a", text: "x", result: "maybe" }] })])));
+      check("A photo must be uploaded into the inspection's own folder", await fails(() => as(presenterA, "select public.save_inspection($1::jsonb, '[]'::jsonb)", [insp({ client_id: randomUUID(), items: [{ id: "a", text: "x", result: "fail", note: "n", photo_path: `${coB}/x/item-0.jpg` }] })]))
+        && await fails(() => { const c2 = randomUUID(); return as(presenterA, "select public.save_inspection($1::jsonb, '[]'::jsonb)", [insp({ client_id: c2, items: [{ id: "a", text: "x", result: "fail", note: "n", photo_path: `${coA}/${c2}/item-0.jpg` }] })]); }));
+      const v = (await as(null, "select public.verify_inspection($1) as v", [row.verify_code])).rows[0].v;
+      check("Anyone with an inspection's code sees counts only", !!v && v.failed === 1 && v.passed === 1 && v.na === 1
+        && Object.keys(v).sort().join() === "company,failed,inspected_at,items,na,passed,rule,saved_at,title");
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -833,7 +858,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 88;
+  const EXPECTED = 96;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

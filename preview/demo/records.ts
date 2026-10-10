@@ -81,5 +81,9 @@ export async function listRecordedWeeks(companyId: string, fromWeek: string): Pr
   return [...new Set(all().filter((r) => r.company_id === companyId && !r.makeup_for_week && r.week_start && r.week_start >= fromWeek).map((r) => r.week_start!))];
 }
 
-const _sameShape = { saveTalkRecord, listRecords, getRecord, signedForWeek, listRecordedWeeks } satisfies Omit<typeof Real, never>;
+// The preview keeps images inside its demo records, so file upload and loading are no-ops here.
+export async function uploadFile(f: { path: string; image: string; contentType: string }): Promise<void> { void f; }
+export async function loadImages(paths: string[]): Promise<Map<string, string>> { void paths; return new Map(); }
+
+const _sameShape = { saveTalkRecord, listRecords, getRecord, signedForWeek, listRecordedWeeks, uploadFile, loadImages } satisfies Omit<typeof Real, never>;
 void _sameShape;

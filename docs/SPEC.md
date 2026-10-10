@@ -609,6 +609,26 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Spreadsheet:** Reports → "Download spreadsheet (CSV)": one row per person per week. Accents come through in Excel,
   and nothing typed into a name can run as a spreadsheet formula.
 
+## Inspections (built, migration 0034)
+- **Why:** inspections were the biggest feature competitors had that we didn't. Here they're tied to the rules that ask
+  for them, for every industry, and they feed the same issues list as talks.
+- **Checklists (content, not code):** an "Every job" set (fire extinguishers, walkways and exits, first aid, ladders,
+  cords and tools, chemical labels and safety data sheets) plus each industry's own: scaffolds, trenches, harnesses,
+  aerial lifts and rigging for construction; roof setup, brackets, kettles and hoists for roofing; temporary power and
+  lockout for electrical; forklifts, cranes, guards and grinders for plants and warehouses; the driver vehicle
+  inspection and cargo securement for trucking; tractors, PTO guards and grain bins for farms; bucket trucks and
+  climbing gear for utilities; sharps containers for healthcare; and so on. Each names how often its rule asks for it
+  and every item cites its paragraph. Every industry gets at least two of its own (a test enforces it).
+- **Running one:** pick a checklist (what's due comes first), say what's being inspected, mark each item pass, fail or
+  not applicable ("mark the rest as pass" for speed), a failed item needs a note and can take a photo and go on the
+  issues list, the inspector signs. Saved on the phone first, uploaded when there's signal, never edited after.
+- **Due:** from how often the rule asks (each shift, daily, monthly) and the last one saved. Only checklists the company
+  has started using count as due, so a roofer without a trench isn't told a trench check is due.
+- **After:** a failed inspection offers the related talk. The PDF lists every item, notes, photos, the signature and a
+  check code that /verify accepts (counts only, no names, places, photos or the free-text subject).
+- **Honest:** every item ends pass, fail or not applicable; failures are never hidden. An inspection documents that
+  someone looked; it doesn't certify a site.
+
 ## Security review (2026-10-10, migration 0024)
 - Independent review before partner access: 1 critical, 2 high, 3 medium, 4 low. Fixed: talk records and attendance can
   only be saved through the checked save (no forged "signed" rows or backdated records); invites can only be claimed by

@@ -4,6 +4,7 @@
 // plus a way to make up a missed week.
 import { useTalkLookup } from "@/lib/library";
 import { TopicChip, TopicIcon } from "@/components/TopicIcon";
+import { InspectionsCard } from "@/components/InspectionsCard";
 import { climateFor } from "@/core/climate";
 import { parseDay, periodLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
@@ -171,6 +172,7 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
+      <InspectionsCard companyId={co.id} industry={co.industry} />
       {canAdmin(m.access) && <TrainingAlert companyId={co.id} />}
       {!co.zip && canAdmin(m.access) && (
         <div className="mt-4">

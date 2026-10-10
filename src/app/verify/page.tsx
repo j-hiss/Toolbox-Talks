@@ -6,12 +6,12 @@
 // Code rules: src/core/verify.ts. Data: src/lib/data/verify.ts (migration 0030).
 import { useEffect, useState } from "react";
 import { cleanCode, formatCode, verifySummary, type VerifiedRecord } from "@/core/verify";
-import { verifyRecord } from "@/lib/data/verify";
+import { verifyInspection, verifyRecord, type VerifiedInspection } from "@/lib/data/verify";
 import { parseDay, weekLabel } from "@/core/weeks";
 import { Button, Eyebrow, Loading, Mark, Notice, Title, inputClass } from "@/components/ui";
 import { BRAND } from "@/content/brand";
 
-type State = { kind: "idle" } | { kind: "loading" } | { kind: "none"; code: string } | { kind: "error"; text: string } | { kind: "ok"; code: string; rec: VerifiedRecord };
+type State = { kind: "idle" } | { kind: "loading" } | { kind: "none"; code: string } | { kind: "error"; text: string } | { kind: "ok"; code: string; rec: VerifiedRecord } | { kind: "inspection"; code: string; insp: VerifiedInspection };
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -24,8 +24,13 @@ export default function VerifyPage() {
     const code = cleanCode(raw);
     if (!code) { setBad(true); return; }
     setBad(false); setState({ kind: "loading" });
+    // A talk record first, then an inspection: both PDFs carry the same kind of code.
     verifyRecord(code)
-      .then((rec) => setState(rec ? { kind: "ok", code, rec } : { kind: "none", code }))
+      .then(async (rec) => {
+        if (rec) return setState({ kind: "ok", code, rec });
+        const insp = await verifyInspection(code);
+        setState(insp ? { kind: "inspection", code, insp } : { kind: "none", code });
+      })
       .catch((e) => setState({ kind: "error", text: e instanceof Error ? e.message : String(e) }));
   };
 
@@ -63,6 +68,7 @@ export default function VerifyPage() {
           )}
           {state.kind === "error" && <Notice tone="error">Couldn&apos;t check right now. Check the connection and try again. ({state.text})</Notice>}
           {state.kind === "ok" && <Found code={state.code} r={state.rec} />}
+          {state.kind === "inspection" && <FoundInspection code={state.code} r={state.insp} />}
         </div>
         <p className="mt-8 text-xs text-muted">A record documents a safety meeting. It doesn&apos;t by itself certify OSHA compliance.</p>
       </main>
@@ -100,6 +106,28 @@ function Found({ code, r }: { code: string; r: VerifiedRecord }) {
       <p className="mt-3 text-sm">{verifySummary(r)}</p>
       {flagged > 0 && <p className="mt-1 text-sm text-muted">Flags are shown as saved; the app never hides them.</p>}
       <p className="mt-3 text-xs text-muted">If the paper shows different counts, a different date or a different talk, it doesn&apos;t match what was saved.</p>
+    </section>
+  );
+}
+
+function FoundInspection({ code, r }: { code: string; r: VerifiedInspection }) {
+  const rows: [string, string][] = [
+    ["Company", r.company], ["Inspection", r.title],
+    ["Done", when(r.inspected_at)], ["Saved", when(r.saved_at)], ["Rule", r.rule], ["Code", formatCode(code)],
+  ];
+  return (
+    <section aria-label="What was saved" className="rounded-2xl border border-line bg-surface p-4 shadow-[var(--shadow-card)]">
+      <p className="text-sm font-semibold text-ok">✓ An inspection with this code is on file</p>
+      <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[15px]">
+        {rows.map(([k, v]) => <div key={k} className="contents"><dt className="text-muted">{k}</dt><dd className="min-w-0 font-semibold">{v}</dd></div>)}
+      </dl>
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+        {([["Passed", r.passed, "text-ok"], ["Failed", r.failed, r.failed ? "text-warn" : ""], ["Not applicable", r.na, ""]] as const).map(([k, n, c]) => (
+          <div key={k} className="rounded-xl bg-fg/[0.04] p-2"><p className={`font-display text-2xl font-bold ${c}`}>{n}</p><p className="text-xs text-muted">{k}</p></div>
+        ))}
+      </div>
+      <p className="mt-3 text-sm">{r.items} items checked. Results show as saved; failed items are never hidden.</p>
+      <p className="mt-3 text-xs text-muted">If the paper shows different results, a different date or a different checklist, it doesn&apos;t match what was saved.</p>
     </section>
   );
 }
