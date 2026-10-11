@@ -23,7 +23,11 @@ export const WEEK_STATE_LABEL: Record<WeekState, string> = {
 };
 
 export type ReportPerson = { id: string; name: string; teamId: string | null; createdAt: string; deactivatedAt: string | null };
-export type ReportAttendee = { personId: string | null; name: string; status: "signed" | "not_signed" | "absent" };
+export type ReportAttendee = {
+  personId: string | null; name: string; status: "signed" | "not_signed" | "absent";
+  /** Signed on their own phone: its location flag (crew self check-in); null or absent otherwise. */
+  location?: "near" | "far" | "not_shared" | "unknown" | null;
+};
 export type ReportRecord = {
   id: string;
   title: string;
@@ -32,6 +36,8 @@ export type ReportRecord = {
   makeupForWeek: string | null;
   makeupReason: string | null;
   teamName: string;
+  /** Where the talk was held (empty when no jobsite was picked). */
+  jobsiteName?: string;
   /** The presenter covers the week too when they signed as presenter. */
   presenterId: string | null;
   presenterSigned: boolean;
@@ -178,6 +184,54 @@ export function teamGrid(c: Compliance) {
       return { key: w.key, tally: t };
     }),
   }));
+}
+
+/**
+ * Side by side, one row per team (team as of today): the same weeks and states as the rest of Reports, added up.
+ * Sorted by name, never ranked. "No team" last.
+ */
+export function teamTotals(c: Compliance, makeupWeeks: number, today: Date = new Date()) {
+  const owed = needsMakeup(c, makeupWeeks, today);
+  const teamOf = new Map(c.people.map((p) => [p.person.id, p.person.teamId]));
+  return teamGrid(c).map((g) => {
+    const tally = zero();
+    for (const w of g.weeks) for (const k of Object.keys(tally) as (keyof Tally)[]) tally[k] += w.tally[k];
+    return {
+      teamId: g.teamId,
+      people: c.people.filter((p) => p.person.teamId === g.teamId && !p.person.deactivatedAt).length,
+      tally,
+      closed: score(tally),
+      onTime: onTimeRate(tally),
+      owed: owed.filter((o) => teamOf.get(o.personId) === g.teamId).length,
+    };
+  });
+}
+
+/**
+ * Side by side, one row per jobsite, from the talks held there in range (weekly talks and makeups): talks, how many
+ * on the roster signed, didn't sign or were absent, the sign-in rate (signed of those there), phone signatures flagged
+ * for location, and open issues raised there. Talks with no jobsite are grouped as "No jobsite". Sorted by name.
+ */
+export function jobsiteTotals(records: ReportRecord[], issues: { jobsite_name: string; status: "open" | "fixed" }[]) {
+  const rows = new Map<string, { name: string; talks: number; signed: number; notSigned: number; absent: number; locationFlags: number; openIssues: number }>();
+  const row = (name: string) => {
+    const key = name.trim() || "";
+    if (!rows.has(key)) rows.set(key, { name: key, talks: 0, signed: 0, notSigned: 0, absent: 0, locationFlags: 0, openIssues: 0 });
+    return rows.get(key)!;
+  };
+  for (const r of records) {
+    const x = row(r.jobsiteName ?? "");
+    x.talks++;
+    for (const a of r.attendees) {
+      if (a.status === "signed") { x.signed++; if (a.location && a.location !== "near") x.locationFlags++; }
+      else if (a.status === "not_signed") x.notSigned++;
+      else x.absent++;
+    }
+  }
+  for (const i of issues) if (i.status === "open") row(i.jobsite_name).openIssues++; // open now, wherever raised
+  return [...rows.values()]
+    .map((x) => ({ ...x, signInRate: x.signed + x.notSigned ? x.signed / (x.signed + x.notSigned) : null }))
+    .sort((a, b) => (a.name === "" ? 1 : b.name === "" ? -1 : a.name.localeCompare(b.name)));
 }
 
 /** Everyone who still owes a week, soonest deadline first. */

@@ -449,6 +449,11 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   record ID.
 - Reports carry the same no-compliance-claim note as the PDF.
 
+- **Compare teams and jobsites (built):** Reports → "Compare teams and jobsites" adds up the same weeks and talks side
+  by side. Teams (as of today): people on staff, weeks closed, on time, missed, still to make up. Jobsites: talks held
+  there, sign-in rate (signed of those there; absent people don't count against it), not signed, phone signatures
+  flagged for location, open issues raised there. Sorted by name, never ranked; any gap is colored.
+
 ## Not yet decided
 - Pricing (per company per month vs per crew).
 - Whether RomanOS reads records from this app through an API (later, only if useful; no shared code).

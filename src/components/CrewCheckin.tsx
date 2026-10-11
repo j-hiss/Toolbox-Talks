@@ -122,7 +122,7 @@ export function CrewCheckin({ companyId, clientId, roster, present, signatures, 
             <li key={r.key} className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${signatures[r.key] ? "border-ok bg-ok-bg" : "border-line"}`}>
               <span aria-hidden className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${signatures[r.key] ? "bg-ok text-white" : "border-2 border-line"}`}>{signatures[r.key] ? "✓" : ""}</span>
               <span className="min-w-0 flex-1">{r.name}
-                {(() => { const n = locationNote(signatures[r.key]?.location, signatures[r.key]?.distanceM); return n?.flagged ? <small className="block font-semibold text-warn-ink">⚠ {n.text}</small> : null; })()}
+                {(() => { const n = locationNote(signatures[r.key]?.location, signatures[r.key]?.distanceM); return n?.flagged ? <small className="block font-semibold text-warn-text">⚠ {n.text}</small> : null; })()}
               </span>
               <small className="text-muted">{signatures[r.key] ? "Signed" : "Waiting"}</small>
             </li>

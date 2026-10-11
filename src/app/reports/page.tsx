@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onTimeRate, pct, periodChange, score, teamGrid, trend,
+  buildCompliance, jobsiteTotals, makeupDeadline, makeupSummary, needsMakeup, onTimeRate, pct, periodChange, score, teamGrid, teamTotals, trend,
   WEEK_STATE_LABEL, type Compliance, type ReportPerson, type ReportRecord, type Tally, type WeekState,
 } from "@/core/compliance";
 import { MAKEUP_REASONS, periodKeys, planWeekAt } from "@/core/makeup";
@@ -285,6 +285,51 @@ function Reports({ m }: { m: Membership }) {
         </Fold>
       )}
 
+      {/* Side by side: teams and jobsites (same weeks and records as above; by name, never ranked) ------------------ */}
+      {team === "all" && (
+        <Fold title="Compare teams and jobsites">
+          <p className="mt-1 text-sm text-muted">The same weeks and talks as above, added up side by side. Sorted by name; gaps are shown, never hidden.</p>
+          <h3 className="mt-3 text-sm font-semibold">Teams</h3>
+          <ul aria-label="Teams side by side" className="mt-2 grid gap-2 sm:grid-cols-2">
+            {teamTotals(report, co.makeup_weeks ?? 4, today)
+              .map((t) => ({ ...t, name: t.teamId ? teamName(t.teamId) || "Former team" : "No team" }))
+              .sort((a, b) => (a.name === "No team" ? 1 : b.name === "No team" ? -1 : a.name.localeCompare(b.name)))
+              .map((t) => (
+                <li key={t.teamId ?? "none"} className="rounded-xl border border-line p-3">
+                  <p className="flex items-baseline justify-between gap-2"><b>{t.name}</b><small className="text-muted">{t.people} on staff</small></p>
+                  <dl className="mt-2 grid grid-cols-4 gap-1 text-center text-sm tabular-nums">
+                    <Stat k="Closed" v={pct(t.closed)} />
+                    <Stat k="On time" v={pct(t.onTime)} />
+                    <Stat k="Missed" v={String(t.tally.missed)} warn={t.tally.missed > 0} />
+                    <Stat k="To make up" v={String(t.owed)} warn={t.owed > 0} />
+                  </dl>
+                </li>
+              ))}
+          </ul>
+          <h3 className="mt-4 text-sm font-semibold">Jobsites</h3>
+          {(() => {
+            const sites = jobsiteTotals(data.records, data.issues);
+            if (!sites.length) return <p className="mt-1 text-sm text-muted">No talks recorded at a jobsite in this range.</p>;
+            return (
+              <ul aria-label="Jobsites side by side" className="mt-2 grid gap-2 sm:grid-cols-2">
+                {sites.map((x) => (
+                  <li key={x.name || "none"} className="rounded-xl border border-line p-3">
+                    <p className="flex items-baseline justify-between gap-2"><b>{x.name || "No jobsite picked"}</b><small className="text-muted">{x.talks} {x.talks === 1 ? "talk" : "talks"}</small></p>
+                    <dl className="mt-2 grid grid-cols-4 gap-1 text-center text-sm tabular-nums">
+                      <Stat k="Signed in" v={pct(x.signInRate)} />
+                      <Stat k="Not signed" v={String(x.notSigned)} warn={x.notSigned > 0} />
+                      <Stat k="Phone flags" v={String(x.locationFlags)} warn={x.locationFlags > 0} />
+                      <Stat k="Open issues" v={String(x.openIssues)} warn={x.openIssues > 0} />
+                    </dl>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
+          <p className="mt-2 text-xs text-muted">Teams are as of today. &quot;Signed in&quot; is everyone on the roster who was there and signed; absent people aren&apos;t counted against it. Phone flags are crew who signed on their own phone away from the talk or without a location check.</p>
+        </Fold>
+      )}
+
       {/* Makeups ----------------------------------------------------------------------------------------------------- */}
       {made.total > 0 && (
         <Fold title="Why weeks were made up" aside={`${made.total}`}>
@@ -448,7 +493,7 @@ function Reports({ m }: { m: Membership }) {
             <li key={`${r.id}-${i}`}>
               <Link href={`/record/#${r.id}`} className="flex items-center justify-between gap-2 rounded-xl bg-fg/[0.04] px-3 py-2 text-sm">
                 <span className="min-w-0"><b>{a.name}</b> <small className="text-muted">{short(r.heldAt)} · {r.title}{r.teamName ? ` · ${r.teamName}` : ""}</small></span>
-                <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">{STATUS_LABEL[a.status]}</span>
+                <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-text">{STATUS_LABEL[a.status]}</span>
               </Link>
             </li>
           ))}
@@ -511,6 +556,16 @@ function PeopleList({ title, tone, rows, names, note, detail }: {
 }
 
 /** A report section that folds away. Closed by default so the page is short on a phone; tap the heading to open. */
+/** One number with its label, for the side-by-side cards. `warn` colors a gap so it's seen, never hidden. */
+function Stat({ k, v, warn = false }: { k: string; v: string; warn?: boolean }) {
+  return (
+    <div className="flex flex-col-reverse rounded-lg bg-fg/[0.04] px-1 py-1.5">
+      <dt className="text-[11px] leading-tight text-muted">{k}</dt>
+      <dd className={`font-semibold ${warn ? "text-warn-text" : ""}`}>{v}</dd>
+    </div>
+  );
+}
+
 function Fold({ title, aside, children }: { title: string; aside?: string; children: React.ReactNode }) {
   return (
     <details className="group mt-3 rounded-xl bg-surface px-4 pb-1 shadow-card">

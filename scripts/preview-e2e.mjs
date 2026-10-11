@@ -693,6 +693,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     await q.evaluate((rows) => { const d = JSON.parse(localStorage.getItem("tt-preview-db") || "{}"); d.checkinSigs = rows; localStorage.setItem("tt-preview-db", JSON.stringify(d)); }, sent);
     await q.waitForTimeout(4500);
     log("21 presenter sees it:", (await q.locator("ul[aria-label='Who has signed']").innerText()).replace(/\s+/g, " "));
+    await q.locator("ul[aria-label='Who has signed']").screenshot({ path: `${OUT}/e-checkin-flag.png` });
     await q.click("[role=dialog] button:has-text('Stop phone signing')"); await q.waitForTimeout(800);
     log("21 stopped, waiting deleted:", await q.evaluate(() => (JSON.parse(localStorage.getItem("tt-preview-db") || "{}").checkinSigs ?? []).length === 0));
     // Save the talk (others still unsigned are flagged as such) and check the phone signature's flag reached the record.
@@ -701,6 +702,14 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     const saved = await q.evaluate(() => { const d = JSON.parse(localStorage.getItem("tt-preview-db") || "{}"); const r = (d.records ?? []).at(-1); return (r?.attendees ?? []).map((a) => `${a.name}:${a.status}:${a.signed_on ?? "-"}:${a.location ?? "-"}`).join(" | "); });
     log("21 saved record:", saved);
   } else log("21: no talk to start on Home");
+  // Scenario 22: Reports, side by side: teams and jobsites (same weeks and talks, by name).
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(1200);
+  await q.click("summary:has-text('Compare teams and jobsites')"); await q.waitForTimeout(400);
+  log("22 teams:", (await q.locator("ul[aria-label='Teams side by side']").innerText()).replace(/\s+/g, " ").slice(0, 220));
+  log("22 jobsites:", (await q.locator("ul[aria-label='Jobsites side by side']").innerText().catch(() => "none")).replace(/\s+/g, " ").slice(0, 220));
+  await q.locator("summary:has-text('Compare teams and jobsites')").scrollIntoViewIfNeeded();
+  await q.screenshot({ path: `${OUT}/e-compare.png`, fullPage: false });
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();

@@ -6,9 +6,9 @@ import { db, tick } from "./store";
 type P = { id: string; company_id: string; full_name: string; team_id: string | null; created_at?: string; deactivated_at?: string | null };
 type R = {
   id: string; company_id: string; content: { title: string; en?: { title: string } }; held_at: string; week_start: string | null;
-  makeup_for_week?: string | null; makeup_reason?: string | null; team_name: string;
+  makeup_for_week?: string | null; makeup_reason?: string | null; team_name: string; jobsite_name?: string | null;
   presenter_person_id: string | null; presenter_signed_at: string | null;
-  attendees: { person_id: string | null; name: string; status: ReportRecord["attendees"][number]["status"] }[];
+  attendees: { person_id: string | null; name: string; status: ReportRecord["attendees"][number]["status"]; location?: ReportRecord["attendees"][number]["location"] }[];
 };
 
 export async function reportPeople(companyId: string): Promise<ReportPerson[]> {
@@ -31,8 +31,8 @@ export async function reportRecords(companyId: string, fromWeek: string): Promis
     .sort((a, b) => a.held_at.localeCompare(b.held_at))
     .map((r) => ({
       id: r.id, title: r.content.en?.title ?? r.content.title, heldAt: r.held_at, weekStart: r.week_start, makeupForWeek: r.makeup_for_week ?? null,
-      makeupReason: r.makeup_reason ?? null, teamName: r.team_name, presenterId: r.presenter_person_id, presenterSigned: !!r.presenter_signed_at,
-      attendees: r.attendees.map((a) => ({ personId: a.person_id, name: a.name, status: a.status })),
+      makeupReason: r.makeup_reason ?? null, teamName: r.team_name, jobsiteName: r.jobsite_name ?? "", presenterId: r.presenter_person_id, presenterSigned: !!r.presenter_signed_at,
+      attendees: r.attendees.map((a) => ({ personId: a.person_id, name: a.name, status: a.status, location: a.location ?? null })),
     }));
 }
 

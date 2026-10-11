@@ -100,7 +100,7 @@ function RecordView({ m }: { m: Membership }) {
       <div className={`mt-4 flex flex-wrap items-center gap-2 rounded-lg border px-4 py-3 text-sm tabular-nums ${flagged ? "border-warn bg-warn-bg" : "border-ok bg-surface"}`}>
         <span><b>{signedSummary(c)}</b> · {rec.presenter_signature ? "presenter signed" : "presenter not signed"}
           {(() => { const away = locationFlagCount(rec.attendees);
-            return away ? <> · <b className="text-warn-ink">{away} phone {away === 1 ? "signature" : "signatures"} flagged for location</b></> : null; })()}
+            return away ? <> · <b className="text-warn-text">{away} phone {away === 1 ? "signature" : "signatures"} flagged for location</b></> : null; })()}
         </span>
         <span className="ml-auto"><FlagChip n={flagged} /></span>
       </div>
@@ -118,7 +118,7 @@ function RecordView({ m }: { m: Membership }) {
             <span className="min-w-0 flex-1">
               <b className="block">{a.name}</b>
               <small className="text-muted">{[a.role, a.team_name, a.company_name].filter(Boolean).join(" · ")}{a.signed_at ? ` · ${time(a.signed_at)}` : ""}</small>
-              {(() => { const n = locationNote(a.location, a.distance_m); return n ? <small className={`block ${n.flagged ? "font-semibold text-warn-ink" : "text-muted"}`}>{n.flagged ? "⚠ " : ""}{n.text}</small> : null; })()}
+              {(() => { const n = locationNote(a.location, a.distance_m); return n ? <small className={`block ${n.flagged ? "font-semibold text-warn-text" : "text-muted"}`}>{n.flagged ? "⚠ " : ""}{n.text}</small> : null; })()}
             </span>
             {a.signature ? (
               // eslint-disable-next-line @next/next/no-img-element

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCompliance, makeupDeadline, makeupSummary, needsMakeup, onStaff, onTimeRate, pct, periodChange, score, talkStreak, teamGrid, trend, weekKeys, type ReportPerson, type ReportRecord } from "./compliance";
+import { buildCompliance, jobsiteTotals, makeupDeadline, makeupSummary, needsMakeup, onStaff, onTimeRate, pct, periodChange, score, talkStreak, teamGrid, teamTotals, trend, weekKeys, type ReportPerson, type ReportRecord } from "./compliance";
 import { isoDay } from "./weeks";
 
 const TODAY = new Date(2026, 9, 7); // Wed Oct 7 2026; this week = Oct 5
@@ -104,6 +104,31 @@ describe("report views", () => {
   ];
   const c = buildCompliance({ people, records, weeks: weekKeys("2026-08-31", TODAY), makeupWeeks: 2, today: TODAY });
 
+  it("team totals add up the same weeks and states, one row per team, with what's still owed", () => {
+    const t = Object.fromEntries(teamTotals(c, 2, TODAY).map((x) => [x.teamId, x]));
+    // a: every finished week on time; b: 9/07 missed, 9/21 made up, 9/28 open
+    expect(t.t1.people).toBe(1);
+    expect(t.t1.tally).toMatchObject({ on_time: 5, made_up: 0, missed: 0 });
+    expect(t.t2.tally).toMatchObject({ on_time: 2, made_up: 1, missed: 1, open: 1 });
+    expect(t.t2.owed).toBe(1);
+    expect(pct(t.t1.closed)).toBe("100%");
+    // same math as the company view: the two teams' tallies add up to the whole
+    const all = teamGrid(c).flatMap((g) => g.weeks).reduce((n, w) => n + w.tally.expected, 0);
+    expect(t.t1.tally.expected + t.t2.tally.expected).toBe(all);
+  });
+  it("jobsite totals count talks, sign-ins, not signed, absent, location flags and open issues per site", () => {
+    const rows = jobsiteTotals([
+      rec("2026-09-14", ["a"], { jobsiteName: "Example North Yard", attendees: [
+        { personId: "a", name: "A", status: "signed", location: "far" }, { personId: "b", name: "B", status: "not_signed" }, { personId: "c", name: "C", status: "absent" }] }),
+      rec("2026-09-21", ["a", "b"], { jobsiteName: "Example North Yard" }),
+      rec("2026-09-21", ["a"]),
+    ], [{ jobsite_name: "Example North Yard", status: "open" }, { jobsite_name: "Example North Yard", status: "fixed" }, { jobsite_name: "Example South Site", status: "open" }]);
+    expect(rows.map((r) => r.name)).toEqual(["Example North Yard", "Example South Site", ""]); // by name; "No jobsite" last
+    expect(rows[0]).toMatchObject({ talks: 2, signed: 3, notSigned: 1, absent: 1, locationFlags: 1, openIssues: 1 });
+    expect(rows[0].signInRate).toBeCloseTo(3 / 4);
+    expect(rows[1]).toMatchObject({ talks: 0, openIssues: 1, signInRate: null });
+    expect(rows[2]).toMatchObject({ talks: 1, signed: 1 });
+  });
   it("trend runs oldest to newest over finished weeks only", () => {
     expect(trend(c, TODAY).map((w) => [w.key, pct(w.score), pct(w.onTime)])).toEqual([
       ["2026-08-31", "100%", "100%"], ["2026-09-07", "50%", "50%"], ["2026-09-14", "100%", "100%"],

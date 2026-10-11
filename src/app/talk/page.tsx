@@ -592,7 +592,7 @@ function Crew({ org, draft, update, signedIds }: { org: Org; draft: TalkDraft; u
                 <label className={`flex cursor-pointer items-center gap-3 rounded-xl p-3 ${isHere ? "bg-surface shadow-card" : "border border-warn bg-warn-bg"}`}>
                   <Avatar name={r.name} muted={!isHere} />
                   <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.personId ? [r.role, r.teamName].filter(Boolean).join(" · ") : ["Walk-in", r.company].filter(Boolean).join(" · ")}</small></span>
-                  {!isHere && <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">Absent</span>}
+                  {!isHere && <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-text">Absent</span>}
                   <input type="checkbox" aria-label={`${r.name} is here`} className="h-6 w-6 shrink-0 accent-[var(--brand)]" checked={isHere} onChange={(e) => update({ present: { ...draft.present, [r.key]: e.target.checked } })} />
                 </label>
               </li>
@@ -824,7 +824,7 @@ function Sign({
                   {/* Signed rows turn green with a check, so the presenter sees at a glance who's left. */}
                   <span aria-hidden className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${sig ? "bg-ok text-white" : "border-2 border-warn"}`}>{sig ? "✓" : ""}</span>
                   <span className="min-w-0 flex-1"><b className="block">{t.name}</b><small className="text-muted">{t.sub}</small>
-                    {(() => { const n = locationNote(sig?.location, sig?.distanceM); return n ? <small className={`block ${n.flagged ? "font-semibold text-warn-ink" : "text-muted"}`}>{n.flagged ? "⚠ " : ""}{n.text}</small> : null; })()}
+                    {(() => { const n = locationNote(sig?.location, sig?.distanceM); return n ? <small className={`block ${n.flagged ? "font-semibold text-warn-text" : "text-muted"}`}>{n.flagged ? "⚠ " : ""}{n.text}</small> : null; })()}
                   </span>
                   {sig ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -840,7 +840,7 @@ function Sign({
             <li key={r.key} className="flex items-center gap-3 rounded-lg border border-warn bg-warn-bg p-3">
               <span className="min-w-0 flex-1"><b className="block">{r.name}</b><small className="text-muted">{r.role}</small></span>
               <button className="min-h-11 rounded-md border-2 border-brand bg-surface px-3 text-sm font-semibold text-brand-text" onClick={() => update({ present: { ...draft.present, [r.key]: true } })}>Mark here</button>
-              <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">Absent</span>
+              <span className="rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-text">Absent</span>
             </li>
           ))}
         </ul>
@@ -1091,7 +1091,7 @@ function Saved({ done, onAnother }: { done: Done; onAnother: () => void }) {
       <p className="mt-4 tabular-nums">
         {signedSummary(c)} · {done.presenterSigned ? "presenter signed" : "presenter not signed"}
         {(c.flagged > 0 || !done.presenterSigned) && (
-          <span className="ml-2 rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-ink">
+          <span className="ml-2 rounded bg-warn px-2 py-0.5 text-xs font-semibold text-warn-text">
             {c.flagged + (done.presenterSigned ? 0 : 1)} flagged
           </span>
         )}

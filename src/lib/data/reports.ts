@@ -18,9 +18,9 @@ export async function reportPeople(companyId: string): Promise<ReportPerson[]> {
 
 type Row = {
   id: string; title_en: string | null; title: string | null; held_at: string; week_start: string | null;
-  makeup_for_week: string | null; makeup_reason: string | null; team_name: string;
+  makeup_for_week: string | null; makeup_reason: string | null; team_name: string; jobsite_name: string | null;
   presenter_person_id: string | null; presenter_signed_at: string | null;
-  talk_attendees: { person_id: string | null; name: string; status: ReportRecord["attendees"][number]["status"] }[];
+  talk_attendees: { person_id: string | null; name: string; status: ReportRecord["attendees"][number]["status"]; location: ReportRecord["attendees"][number]["location"] }[];
 };
 
 /** Days with a daily pre-task plan from `fromDay` on (held time and crew only). Never part of the weekly math. */
@@ -35,14 +35,14 @@ export async function reportRecords(companyId: string, fromWeek: string): Promis
   const rows = check(
     await supabase()
       .from("talk_records")
-      .select("id, title_en:content->en->>title, title:content->>title, held_at, week_start, makeup_for_week, makeup_reason, team_name, presenter_person_id, presenter_signed_at, talk_attendees(person_id, name, status)")
+      .select("id, title_en:content->en->>title, title:content->>title, held_at, week_start, makeup_for_week, makeup_reason, team_name, jobsite_name, presenter_person_id, presenter_signed_at, talk_attendees(person_id, name, status, location)")
       .eq("company_id", companyId)
       .or(`week_start.gte.${fromWeek},makeup_for_week.gte.${fromWeek}`)
       .order("held_at"),
   ) as unknown as Row[];
   return rows.map((r) => ({
     id: r.id, title: r.title_en ?? r.title ?? "", heldAt: r.held_at, weekStart: r.week_start, makeupForWeek: r.makeup_for_week,
-    makeupReason: r.makeup_reason, teamName: r.team_name, presenterId: r.presenter_person_id, presenterSigned: !!r.presenter_signed_at,
-    attendees: r.talk_attendees.map((a) => ({ personId: a.person_id, name: a.name, status: a.status })),
+    makeupReason: r.makeup_reason, teamName: r.team_name, jobsiteName: r.jobsite_name ?? "", presenterId: r.presenter_person_id, presenterSigned: !!r.presenter_signed_at,
+    attendees: r.talk_attendees.map((a) => ({ personId: a.person_id, name: a.name, status: a.status, location: a.location ?? null })),
   }));
 }
