@@ -3,6 +3,8 @@
 // Giving a talk: (choose a missed week, for makeups) → read → who's here → sign → saved. This week's talk is locked:
 // every crew gives the same one. A makeup gives a missed week's talk, keeps today's real date and GPS, and says why. The talk in progress lives in a draft on the phone
 // (src/lib/draft.ts), and the finished record goes through the offline outbox (src/lib/outbox.ts).
+import { CrewCheckin, collectPhoneSignatures, endCheckin, type TakeSignatures } from "@/components/CrewCheckin";
+import { mergeCheckins, reopenTaken } from "@/core/checkin";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -121,14 +123,18 @@ function Talk({ m }: { m: Membership }) {
   }
   if (!org) return <Shell nav={nav} tabs={false}><Loading /></Shell>;
 
-  const update = (patch: Partial<TalkDraft>) => writeDraft({ ...draft, ...patch });
+  // Start from the latest saved draft, so an edit never undoes a phone signature that arrived since this render.
+  const update = (patch: Partial<TalkDraft>) => {
+    const cur = readDraft(co.id);
+    writeDraft({ ...(cur && cur.clientId === draft.clientId ? cur : draft), ...patch });
+  };
   // Discarding throws away everything collected, signatures included, so it takes a second tap.
   const nSigs = Object.keys(draft.signatures).length + (draft.presenterSignature ? 1 : 0);
   const cancel = (
     <ConfirmButton
       label="Discard this talk"
       confirmLabel={nSigs ? `Tap again to delete ${nSigs} ${nSigs === 1 ? "signature" : "signatures"}` : "Tap again to discard"}
-      onConfirm={() => { stopSpeaking(); dismissToast(); clearDraft(co.id); router.replace("/"); }}
+      onConfirm={() => { stopSpeaking(); dismissToast(); if (draft.phoneSigning) void endCheckin(co.id, draft.clientId); clearDraft(co.id); router.replace("/"); }}
     />
   );
 
@@ -683,9 +689,42 @@ function Sign({
     return turns.length; // review
   };
 
+  // Crew self check-in: what each phone shows (statement in the talk's language, with English under it) and the merge.
+  const checkinStatement = draft.kind === "daily"
+    ? [dailyStatement(draft.lang).text, draft.lang !== "en" ? DAILY_STATEMENT.en : ""].filter(Boolean).join("\n")
+    : [ui.signedBy, draft.lang !== "en" ? crewText("en").signedBy : ""].filter(Boolean).join("\n");
+  const checkinTitle = (() => {
+    if (draft.kind === "daily") return draft.lang === "es" ? "Plan de trabajo del día" : "Today's pre-task plan";
+    const tk = findTalk(draft.talkId); return tk ? talkText(tk, draft.lang).text.title : "";
+  })();
+  // Phone signatures are applied to the latest saved draft (never this screen's copy), once each.
+  const takePhone: TakeSignatures = (waiting) => {
+    const cur = readDraft(m.company.id);
+    if (!cur || cur.clientId !== draft.clientId) return [];
+    const r = mergeCheckins(rosterFor(org, cur).map((x) => x.key), cur.signatures, cur.present, waiting, cur.phoneTaken ?? []);
+    writeDraft({ ...cur, signatures: r.signatures, phoneTaken: r.taken });
+    return r.added;
+  };
+  const setPhoneSigning = (on: boolean) => { const cur = readDraft(m.company.id); if (cur && cur.clientId === draft.clientId) writeDraft({ ...cur, phoneSigning: on }); };
+  const reopenPhone = (keys: string[]) => { const cur = readDraft(m.company.id); if (cur && cur.clientId === draft.clientId) writeDraft({ ...cur, phoneTaken: reopenTaken(cur.phoneTaken ?? [], keys) }); };
+  const checkinProps = {
+    companyId: m.company.id, clientId: draft.clientId, roster, present: draft.present, signatures: draft.signatures,
+    statement: checkinStatement, title: checkinTitle, active: !!draft.phoneSigning, setActive: setPhoneSigning, take: takePhone, onOpened: reopenPhone,
+  };
+  const phoneSigning = <CrewCheckin {...checkinProps} />;
+
   const save = async () => {
     setSaving(true);
     setError(null);
+    // Phone signing on: take anything that just came in first. If someone else signed, show them before saving.
+    if (draft.phoneSigning && navigator.onLine !== false) {
+      const added = await collectPhoneSignatures(m.company.id, draft.clientId, takePhone).catch(() => [] as string[]);
+      if (added.length) {
+        setSaving(false);
+        toast(`${added.join(", ")} just signed on ${added.length === 1 ? "their phone" : "their phones"}. Check the list, then save.`);
+        return;
+      }
+    }
     try {
       const daily = draft.kind === "daily" && !!draft.pretask;
       const talk = daily ? null : findTalk(draft.talkId) ?? null;
@@ -737,6 +776,7 @@ function Sign({
       enqueue(record, attendees, issues);
       writeLastSetup(m.company.id, { presenterId: draft.presenterId, teamId: draft.teamId, jobsiteId: draft.jobsiteId });
       await flush(saveTalkRecord);
+      if (draft.phoneSigning) void endCheckin(m.company.id, draft.clientId);
       const uploaded = !pending(m.company.id).some((i) => i.record.client_id === draft.clientId);
       buzz(30);
       onSaved({
@@ -791,6 +831,7 @@ function Sign({
             </li>
           ))}
         </ul>
+        {phoneSigning}
         <LateArrival onAdd={(name, company) => {
           // Someone who showed up after signing started: added as a walk-in and taken straight to their turn.
           const key = `walkin:${draft.walkins.length}`;
@@ -829,7 +870,8 @@ function Sign({
     if (s && !t.presenter) s = { ...s, confirmedAt: confirmedAt ?? new Date().toISOString() };
     if (t.presenter) update({ presenterSignature: s });
     else {
-      const signatures = { ...draft.signatures };
+      const cur = readDraft(m.company.id);
+      const signatures = { ...(cur && cur.clientId === draft.clientId ? cur.signatures : draft.signatures) };
       if (s) signatures[t.key] = s; else delete signatures[t.key];
       update({ signatures });
     }
@@ -889,6 +931,9 @@ function Sign({
         <SignaturePad key={t.key} tall label={t.name} value={sig} onChange={setSig} hint={ui.signHere} tooShortText={ui.tooShort}
           locked={!t.presenter && !confirmedAt ? ui.tapFirst : null} />
       </div>
+      {/* On the presenter's own turn (below their pad, so crew screens keep the pad in view): let the crew sign on their
+          phones. On crew turns it keeps collecting without showing anything. */}
+      {t.presenter ? phoneSigning : <CrewCheckin {...checkinProps} hidden />}
 
       <div className="sticky bottom-0 -mx-4 mt-5 flex flex-col gap-2 border-t border-line bg-bg/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur">
         <Button onClick={() => go(nextOpen(idx))} disabled={!sig}>
@@ -898,8 +943,10 @@ function Sign({
             it, so a gloved slip can't record the wrong status. */}
         {!t.presenter && (
           <Button variant="ghost" onClick={() => {
-            const present = { ...draft.present, [t.key]: false };
-            const signatures = { ...draft.signatures };
+            const fresh = readDraft(m.company.id);
+            const base = fresh && fresh.clientId === draft.clientId ? fresh : draft;
+            const present = { ...base.present, [t.key]: false };
+            const signatures = { ...base.signatures };
             delete signatures[t.key];
             update({ present, signatures });
             const clientId = draft.clientId;

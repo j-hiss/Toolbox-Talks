@@ -49,6 +49,10 @@ export type TalkDraft = {
   sheet: { image: string; takenAt: string } | null;
   /** The "Since last talk" section (safety log), once loaded; undefined = not loaded or not used. */
   sinceLast?: SinceLastDraft;
+  /** Crew signing on their own phones is on for this talk (src/components/CrewCheckin.tsx). */
+  phoneSigning?: boolean;
+  /** Roster keys whose phone signature this talk already took (or turned away), so it never comes back. */
+  phoneTaken?: string[];
 };
 
 export type Walkin = { name: string; company: string };

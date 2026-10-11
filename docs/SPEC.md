@@ -683,6 +683,26 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   with or reveals another company's row. **Deferred:** a reviewed safety event can still be edited by admins.
 - **Hosted project:** turn on "Confirm email" in Supabase Auth settings before real use.
 
+## Crew signs on their own phones (built, migration 0043)
+- **Why:** the most common feature competitors had that we didn't (QR self sign-in). Speeds up big crews.
+- **How:** on the presenter's own signing turn, or the review screen, "Crew signs on their own phones" shows a QR code.
+  Each crew member scans it with their camera (no app, no account), picks their name from that talk's roster, taps the
+  signing statement (in the talk's language, with English under it) and signs. The signature appears on the presenter's
+  phone within seconds and goes into the talk; the presenter's screens skip anyone already signed. The talk then saves
+  exactly as before (same record, PDF and files).
+- **Limits:** only for that talk, only names on its roster who are marked here, once per name, while the presenter has
+  it open (1 hour at most; "Stop phone signing" ends it). Walk-ins and anyone marked absent sign on the presenter's
+  phone. Needs signal on both phones; without it, everyone signs on the presenter's phone as before. Marking someone
+  "Isn't here" after they signed by phone sticks. Right before saving, the app checks once more and shows anyone who
+  just signed before it saves.
+- **Privacy:** the code shows only the company name, talk title, statement and roster names. Only the code's fingerprint
+  is stored. Signatures wait in a private table only that company's presenters can read; each is deleted as soon as the
+  presenter's phone takes it, the rest when the talk is saved or discarded, and every check-in a day past expiry is
+  cleared. Only real PNG images under 200 KB are accepted. A paused company's code just looks closed.
+- **Honest limit:** anyone holding the code could sign for an unsigned name (the code could be texted off site). The
+  presenter sees each signature arrive and the code lasts an hour. The saved record doesn't yet say which signatures
+  came from a phone.
+
 ## Running many companies (built, migration 0042; decided with Joe 2026-10-11)
 - **Plans:** each company has a plan: Trial, Pilot, Paid or Complimentary, plus an optional trial end date. Labels only
   for now: no payment in the app (Joe: "plans only, no payment yet"). The operator sets the trial length for new

@@ -660,6 +660,43 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.screenshot({ path: `${OUT}/e-account.png`, fullPage: true });
   await q.click("main button:has-text('Keep the account')"); await q.waitForTimeout(800);
   log("20 kept:", await q.locator("main button:has-text('Ask to close the account')").count() === 1);
+  // Scenario 21: crew self check-in. Start a talk, show the sign-in code, a crew member signs on "their phone" (another
+  // tab, same demo store), and the signature drops into the talk on the presenter's phone.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  const startBtn = q.locator("main button:has-text('Start this talk'), main a:has-text('Start this talk'), main button:has-text('Give another talk')").first();
+  if (await startBtn.count()) {
+    await startBtn.click(); await q.waitForTimeout(600);
+    await q.click("text=Done reading").catch(() => {}); await q.waitForTimeout(300);
+    await q.selectOption("#presenter", { index: 1 }).catch(() => {}); await q.selectOption("#team", { label: "Example Crew A" }).catch(() => {}); await q.waitForTimeout(300);
+    await q.click("text=Collect signatures"); await q.waitForTimeout(400);
+    if (!(await q.locator("main button:has-text('Crew signs on their own phones')").count())) { await q.click("main button:has-text('Review all')"); await q.waitForTimeout(400); }
+    await q.click("main button:has-text('Crew signs on their own phones')"); await q.waitForTimeout(1200);
+    log("21 code shown:", await q.locator("[role=dialog] img[alt^='QR code']").count() === 1, "|", (await q.locator("ul[aria-label='Who has signed']").innerText()).replace(/\s+/g, " "));
+    await q.screenshot({ path: `${OUT}/e-checkin-code.png`, fullPage: false });
+    const secret = await q.evaluate(() => JSON.parse(localStorage.getItem("tt-preview-db") || "{}").checkins?.at(-1)?.secret ?? null);
+    // The crew member's phone: a separate browser holding a copy of the demo data (like the server both phones reach).
+    const crewCtx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: process.env.SCHEME || "light" });
+    const crew = await crewCtx.newPage();
+    crew.on("pageerror", (e) => errs.push(e.message));
+    const shared = await q.evaluate(() => localStorage.getItem("tt-preview-db"));
+    await crew.goto(PAGE); await crew.evaluate(([sec, dbJson]) => { localStorage.setItem("tt-preview-db", dbJson); sessionStorage.setItem("tt-preview-start", "/checkin/"); location.hash = sec; }, [secret, shared]);
+    await crew.reload(); await crew.waitForTimeout(1200);
+    log("21 crew phone:", (await crew.locator("main").innerText()).replace(/\s+/g, " ").slice(0, 140));
+    await crew.locator("section[aria-label='Pick your name'] li button").first().click(); await crew.waitForTimeout(300);
+    await crew.locator("[role=checkbox]").click();
+    const pad = await crew.locator("canvas").boundingBox(); await crew.mouse.move(pad.x + 30, pad.y + 80); await crew.mouse.down(); await crew.mouse.move(pad.x + 150, pad.y + 40, { steps: 5 }); await crew.mouse.move(pad.x + 250, pad.y + 90, { steps: 5 }); await crew.mouse.up();
+    await crew.screenshot({ path: `${OUT}/e-checkin-phone.png`, fullPage: false });
+    await crew.click("button:has-text('Send my signature')"); await crew.waitForTimeout(800);
+    log("21 crew sent:", (await crew.locator("main").innerText()).replace(/\s+/g, " ").slice(0, 120));
+    const sent = await crew.evaluate(() => JSON.parse(localStorage.getItem("tt-preview-db") || "{}").checkinSigs ?? []);
+    await crewCtx.close();
+    await q.evaluate((rows) => { const d = JSON.parse(localStorage.getItem("tt-preview-db") || "{}"); d.checkinSigs = rows; localStorage.setItem("tt-preview-db", JSON.stringify(d)); }, sent);
+    await q.waitForTimeout(4500);
+    log("21 presenter sees it:", (await q.locator("ul[aria-label='Who has signed']").innerText()).replace(/\s+/g, " "));
+    await q.click("[role=dialog] button:has-text('Stop phone signing')"); await q.waitForTimeout(800);
+    log("21 stopped, waiting deleted:", await q.evaluate(() => (JSON.parse(localStorage.getItem("tt-preview-db") || "{}").checkinSigs ?? []).length === 0));
+    await q.evaluate(() => localStorage.removeItem(Object.keys(localStorage).find((k) => k.startsWith("tt-draft-")) ?? "x"));
+  } else log("21: no talk to start on Home");
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();

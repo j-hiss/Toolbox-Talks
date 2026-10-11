@@ -1022,6 +1022,55 @@ async function main() {
       await db.query("update private.platform_settings set trial_days = null");
     }
 
+    // Crew self check-in (0043): a QR code for one talk; anyone with it signs once for one name on that roster.
+    {
+      const tc = randomUUID();
+      const png = "data:image/png;base64,iVBORw0KGgo=";
+      const roster = JSON.stringify([{ key: "p1", name: "Example Crew One" }, { key: "p2", name: "Example Crew Two" }]);
+      check("Only presenters open a check-in; another company and visitors can't", await fails(() => as(userB, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders')", [coA, tc, roster]))
+        && await fails(() => as(null, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders')", [coA, tc, roster])));
+      const secret = (await as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'By signing, I confirm I attended this talk.', 'Ladders') as s", [coA, tc, roster])).rows[0].s;
+      check("A check-in code is long and random; only its fingerprint is stored", /^[0-9a-f]{64}$/.test(secret)
+        && (await db.query("select token_hash from public.checkin_sessions where client_id = $1", [tc])).rows[0].token_hash !== secret);
+      const view = (await as(null, "select public.checkin_view($1) as v", [secret])).rows[0].v;
+      check("With the code, a phone sees the company, talk, statement and names only", view.company === "Company A" && view.title === "Ladders" && view.roster.length === 2
+        && Object.keys(view).sort().join() === "company,expires_at,roster,statement,title" && view.roster.every((r) => Object.keys(r).sort().join() === "key,name,signed"));
+      check("A wrong code shows nothing and signs nothing", (await as(null, "select public.checkin_view($1) as v", ["0".repeat(64)])).rows[0].v === null
+        && (await as(null, "select public.checkin_sign($1, 'p1', $2, now()) as ok", ["0".repeat(64), png])).rows[0].ok === false);
+      check("A crew member signs once for their own name, no account needed", (await as(null, "select public.checkin_sign($1, 'p1', $2, now()) as ok", [secret, png])).rows[0].ok === true
+        && (await as(null, "select public.checkin_sign($1, 'p1', $2, now()) as ok", [secret, png])).rows[0].ok === false);
+      check("Names not on the roster and non-images are refused", (await as(null, "select public.checkin_sign($1, 'p9', $2, now()) as ok", [secret, png])).rows[0].ok === false
+        && (await as(null, "select public.checkin_sign($1, 'p2', 'data:text/html,<script>', now()) as ok", [secret])).rows[0].ok === false);
+      check("The presenter's company sees waiting signatures; another company and visitors don't", (await as(presenterA, "select roster_key from public.checkin_signatures")).rows.map((r) => r.roster_key).join() === "p1"
+        && (await as(userB, "select id from public.checkin_signatures")).rows.length === 0 && await fails(() => as(null, "select id from public.checkin_signatures")));
+      check("Nobody reads the code's fingerprint, even the company", await fails(() => as(userA, "select token_hash from public.checkin_sessions")));
+      check("Nobody writes waiting signatures directly", await fails(() => as(userA, "insert into public.checkin_signatures (company_id, session_id, roster_key, name, image, confirmed_at) select company_id, id, 'p2', 'x', $2, now() from public.checkin_sessions where client_id = $1", [tc, png])));
+      check("B can't close A's check-in or take its signatures", await fails(() => as(userB, "select public.close_checkin($1, $2)", [coA, tc])) && await fails(() => as(userB, "select public.take_checkin_signatures($1, $2, array['p1'])", [coA, tc])));
+      check("Broken or fake images are refused, so nothing can stop the talk from uploading", (await as(null, "select public.checkin_sign($1, 'p2', 'data:image/png;base64,@@@!!', now()) as ok", [secret])).rows[0].ok === false
+        && (await as(null, "select public.checkin_sign($1, 'p2', 'data:image/png;base64,AAAA', now()) as ok", [secret])).rows[0].ok === false
+        && (await as(null, "select public.checkin_sign($1, 'p2', $2, now()) as ok", [secret, "data:image/png;base64,iVBORw0KGgo" + "A".repeat(200001)])).rows[0].ok === false);
+      check("A roster entry with no name is refused", await fails(() => as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'x')", [coA, randomUUID(), JSON.stringify([{ key: "p1" }])])));
+      const sRestart = (await as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders') as s", [coA, tc, roster])).rows[0].s;
+      check("Restarting the code keeps signatures already given, and the old code stops working", (await as(presenterA, "select roster_key from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc])).rows.map((r) => r.roster_key).join() === "p1"
+        && (await as(null, "select public.checkin_view($1) as v", [secret])).rows[0].v === null && (await as(null, "select public.checkin_view($1) as v", [sRestart])).rows[0].v.roster.find((r) => r.key === "p1").signed === false);
+      await as(presenterA, "select public.take_checkin_signatures($1, $2, array['p1'])", [coA, tc]);
+      check("Signatures the phone took are deleted from the waiting area", (await db.query("select count(*)::int as n from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc])).rows[0].n === 0);
+      await db.query("update public.company_accounts set paused_at = now() where company_id = $1", [coA]);
+      check("A paused company's code looks closed, like any wrong code (no hint that it's paused)", (await as(null, "select public.checkin_view($1) as v", [sRestart])).rows[0].v === null
+        && (await as(null, "select public.checkin_sign($1, 'p2', $2, now()) as ok", [sRestart, png])).rows[0].ok === false);
+      await db.query("update public.company_accounts set paused_at = null where company_id = $1", [coA]);
+      await as(null, "select public.checkin_sign($1, 'p2', $2, now())", [sRestart, png]);
+      await as(presenterA, "select public.close_checkin($1, $2)", [coA, tc]);
+      check("Closed, the code stops working and waiting signatures are deleted", (await as(null, "select public.checkin_view($1) as v", [sRestart])).rows[0].v === null
+        && (await db.query("select count(*)::int as n from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc])).rows[0].n === 0);
+      const s2 = (await as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders') as s", [coA, tc, roster])).rows[0].s;
+      await db.query("update public.checkin_sessions set expires_at = now() - interval '1 minute' where token_hash = encode(sha256(convert_to($1, 'UTF8')), 'hex')", [s2]);
+      check("An expired code stops working", (await as(null, "select public.checkin_sign($1, 'p2', $2, now()) as ok", [s2, png])).rows[0].ok === false);
+      await db.query("update public.checkin_sessions set expires_at = now() - interval '2 days' where token_hash = encode(sha256(convert_to($1, 'UTF8')), 'hex')", [s2]);
+      await as(null, "select public.checkin_view($1)", ["0".repeat(64)]);
+      check("Check-ins a day past expiry are cleared on any check-in call, for every company", (await db.query("select count(*)::int as n from public.checkin_sessions where token_hash = encode(sha256(convert_to($1, 'UTF8')), 'hex')", [s2])).rows[0].n === 0);
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -1040,7 +1089,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 161;
+  const EXPECTED = 180;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);
