@@ -2,6 +2,7 @@
 
 // Home: this week's talk from the company's own 52-week plan (locked for the week: every crew gives the same one),
 // plus a way to make up a missed week.
+import { PlatformLink } from "@/components/PlatformLink";
 import { useTalkLookup } from "@/lib/library";
 import { TopicChip, TopicIcon } from "@/components/TopicIcon";
 import { InspectionsCard, useTrackedChecks } from "@/components/InspectionsCard";
@@ -180,6 +181,7 @@ function Home({ m }: { m: Membership }) {
         <span><b className="block">My record</b><small className="text-muted">Your own talks, inspections and fixes</small></span>
         <span aria-hidden className="text-muted">›</span>
       </Link>
+      <PlatformLink />
       {canAdmin(m.access) && <TrainingAlert companyId={co.id} />}
       {!co.zip && canAdmin(m.access) && (
         <div className="mt-4">

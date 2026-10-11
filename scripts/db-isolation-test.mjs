@@ -923,6 +923,105 @@ async function main() {
       check("Making another company doesn't add AI drafts (20 a day per person)", await fails(() => as(userA, "select public.ai_tailor_start($1, 'ladder')", [coA2])));
     }
 
+    // Accounts, operator console, pause, export and purge (0042).
+    {
+      const ownerP = randomUUID(), presP = randomUUID(), op = randomUUID();
+      await db.query("insert into auth.users (id) values ($1), ($2), ($3)", [ownerP, presP, op]);
+      const coP = (await as(ownerP, "select public.create_company('Example Platform Co', 'con', '33901') as id")).rows[0].id;
+      await db.query("insert into public.company_members (company_id, user_id, access) values ($1, $2, 'presenter')", [coP, presP]);
+      await as(ownerP, "insert into public.people (company_id, full_name) values ($1, 'Example Person P')", [coP]);
+      const acct = (await as(ownerP, "select plan, trial_ends_at, paused_at from public.company_accounts where company_id = $1", [coP])).rows[0];
+      check("A new company gets a trial account its staff can read", acct?.plan === "trial" && acct.paused_at === null);
+      check("B can't read another company's account", (await as(userB, "select 1 from public.company_accounts where company_id = $1", [coP])).rows.length === 0);
+      check("A company can't change its own plan or unpause itself", await fails(() => as(ownerP, "update public.company_accounts set plan = 'paid' where company_id = $1", [coP])));
+      check("Only operators reach the console; companies and visitors can't", await fails(() => as(ownerP, "select * from public.platform_companies()"))
+        && await fails(() => as(null, "select * from public.platform_companies()")) && await fails(() => as(ownerP, "select public.platform_pause($1, 'x')", [coP]))
+        && (await as(ownerP, "select public.am_platform_admin() as a")).rows[0].a === false);
+      check("The operator list can't be read or joined through the API", await fails(() => as(ownerP, "select * from private.platform_admins"))
+        && await fails(() => as(ownerP, "insert into private.platform_admins (user_id) values ($1)", [ownerP])));
+      await db.query("insert into private.platform_admins (user_id) values ($1)", [op]);
+      const list = await as(op, "select * from public.platform_companies()");
+      const mine = list.rows.find((r) => r.id === coP);
+      check("An operator sees every company with counts only", list.rows.length >= 3 && mine?.people_active === 1 && mine?.members === 2
+        && list.fields.map((f) => f.name).join() === "id,name,industry,created_at,plan,trial_ends_at,paused_at,pause_reason,closure_requested_at,members,people_active,talks_total,talks_30d,last_talk_at,inspections_total");
+      check("An operator sets a plan; an unknown plan is refused", !!(await as(op, "select public.platform_set_plan($1, 'pilot', null)", [coP]))
+        && (await as(ownerP, "select plan from public.company_accounts where company_id = $1", [coP])).rows[0].plan === "pilot"
+        && await fails(() => as(op, "select public.platform_set_plan($1, 'gold', null)", [coP])));
+      check("A pause needs a reason", await fails(() => as(op, "select public.platform_pause($1, '  ')", [coP])));
+      await as(op, "select public.platform_pause($1, 'Example: invoice overdue')", [coP]);
+      check("Paused means read-only: nothing new is saved, and the message says why", await fails(() => as(ownerP, "insert into public.people (company_id, full_name) values ($1, 'Example New')", [coP]))
+        && await fails(() => as(ownerP, "update public.companies set phone = '1' where id = $1", [coP])));
+      // Read-only must never mean less safe or less reachable (review fixes).
+      const pSnap = JSON.stringify({ v: 1, kind: "renewal", company: { name: "Example Platform Co" }, profile: { from: "2025-10-01", to: "2026-09-30", talks: 3 } });
+      const shareSecret = await (async () => { await as(op, "select public.platform_resume($1)", [coP]);
+        const t = (await as(ownerP, "select public.create_profile_share($1, 'Agent', 30, '2025-10-01', '2026-09-30', $2::jsonb) as t", [coP, pSnap])).rows[0].t;
+        await as(op, "select public.platform_pause($1, 'Example: invoice overdue')", [coP]); return t; })();
+      check("Paused, a shared profile link still opens for the agent", (await as(null, "select public.shared_profile($1) as s", [shareSecret])).rows[0].s?.snapshot?.profile?.talks === 3);
+      const shareId = (await db.query("select id from public.profile_shares where company_id = $1", [coP])).rows[0].id;
+      check("Paused, the owner can still revoke a share link", (await as(ownerP, "select public.revoke_profile_share($1)", [shareId])).rows.length === 1
+        && (await db.query("select revoked_at from public.profile_shares where id = $1", [shareId])).rows[0].revoked_at !== null);
+      const pPerson = (await db.query("select id from public.people where company_id = $1 limit 1", [coP])).rows[0].id;
+      check("Paused, someone can still be taken off the roster, but not renamed", (await as(ownerP, "update public.people set active = false, deactivated_at = now() where id = $1 returning id", [pPerson])).rows.length === 1
+        && await fails(() => as(ownerP, "update public.people set full_name = 'Example Renamed' where id = $1", [pPerson])));
+      await db.query("update public.people set active = true, deactivated_at = null where id = $1", [pPerson]);
+      check("Paused, no files can be uploaded into the company's folders; other companies still upload", await fails(() => as(ownerP, "insert into storage.objects (bucket_id, name) values ('talk-files', $1)", [`${coP}/${randomUUID()}/x.png`]))
+        && (await as(userA, "insert into storage.objects (bucket_id, name) values ('talk-files', $1) returning id", [`${coA}/${randomUUID()}/x.png`])).rows.length === 1);
+      check("Paused, the company still reads and downloads everything", (await as(ownerP, "select id from public.people where company_id = $1", [coP])).rows.length === 1
+        && (await as(ownerP, "select public.export_company_rows($1, 'people') as r", [coP])).rows[0].r.length === 1);
+      check("Another company keeps working while one is paused", (await as(userA, "insert into public.people (company_id, full_name) values ($1, 'Example Still Works') returning id", [coA])).rows.length === 1);
+      await as(op, "select public.platform_resume($1)", [coP]);
+      check("Resumed, saving works again", (await as(ownerP, "insert into public.people (company_id, full_name) values ($1, 'Example After') returning id", [coP])).rows.length === 1);
+      // Support access: a reason every time, logged, shown to the company; injury details and images never included.
+      await as(ownerP, "insert into public.injury_cases (company_id, case_key, version, employee_name, injury_date, description, outcome, kind, year) values ($1, $2, 1, 'Example Injured Person', '2026-03-02', 'Example secret injury detail', 'other', 'injury', 2026)", [coP, randomUUID()]);
+      check("Support access needs a reason, and only operators have it", await fails(() => as(op, "select public.platform_support_view($1, '  ')", [coP]))
+        && await fails(() => as(ownerP, "select public.platform_support_view($1, 'Example reason here')", [coP])) && await fails(() => as(userB, "select public.platform_support_view($1, 'Example reason here')", [coP])));
+      const sv = (await as(op, "select public.platform_support_view($1, 'Example: owner asked why a talk is missing') as v", [coP])).rows[0].v;
+      const svText = JSON.stringify(sv);
+      check("Support sees the company's working records", sv.company.name === "Example Platform Co" && sv.people.some((p) => p.name === "Example Person P") && sv.members.length === 2);
+      check("Support never sees injury details, only counts", !svText.includes("Example Injured Person") && !svText.includes("Example secret injury detail") && sv.injury_log_counts["2026"] === 1);
+      check("Support never gets signature or photo files, phone numbers or employee IDs", !/signature_path|photo_path|card_path|"phone"|employee_id/.test(svText));
+      const seen = (await as(ownerP, "select reason from public.support_access_log($1)", [coP])).rows;
+      check("The company's owner sees each support look and why", seen.length === 1 && seen[0].reason.includes("talk is missing"));
+      check("A presenter or another company can't read the support log", await fails(() => as(presP, "select * from public.support_access_log($1)", [coP])) && await fails(() => as(userB, "select * from public.support_access_log($1)", [coP])));
+      const missing = (await db.query(`select c.table_name from information_schema.columns c join information_schema.tables t on t.table_schema = c.table_schema and t.table_name = c.table_name and t.table_type = 'BASE TABLE'
+        where c.table_schema = 'public' and c.column_name = 'company_id' and c.table_name <> 'company_accounts'
+        and not exists (select 1 from pg_trigger g where g.tgrelid = ('public.' || c.table_name)::regclass and g.tgname = 'block_when_paused')`)).rows.map((r) => r.table_name);
+      check("Every table holding company data obeys a pause (a new table without it fails here)", missing.length === 0, missing.join(", "));
+      const tables = (await as(ownerP, "select public.export_company_tables($1) as t", [coP])).rows[0].t;
+      let exportOk = true;
+      for (const t of tables) { try { await as(ownerP, "select public.export_company_rows($1, $2) as r", [coP, t]); } catch { exportOk = false; } }
+      check("Export covers every company table, and each one downloads", tables.includes("talk_records") && tables.includes("injury_cases") && tables.includes("inspections") && exportOk);
+      check("Export never includes another company's rows", (await as(userA, "select public.export_company_rows($1, 'people') as r", [coA])).rows[0].r.every((r) => r.company_id === coA));
+      check("A presenter, another company and visitors can't export", await fails(() => as(presP, "select public.export_company_tables($1)", [coP]))
+        && await fails(() => as(userB, "select public.export_company_rows($1, 'people')", [coP])) && await fails(() => as(null, "select public.export_company_tables($1)", [coP])));
+      check("Export refuses anything that isn't a company table", await fails(() => as(ownerP, "select public.export_company_rows($1, 'company_members; drop table x')", [coP])));
+      await as(op, "select public.platform_set_trial_days(14)");
+      const coT = (await as(userB, "select public.create_company('Example Trial Co', 'con', '33901') as id")).rows[0].id;
+      check("Trial length is the operator's setting", (await as(userB, "select (trial_ends_at - current_date) as d from public.company_accounts where company_id = $1", [coT])).rows[0].d === 14);
+      check("Only an owner can ask to close the account", await fails(() => as(presP, "select public.request_company_closure($1)", [coP])));
+      // A real company has history the plan guards protect (a cadence and a talk that already started); removal must still work.
+      await db.query("alter table public.company_cadences disable trigger company_cadences_lock");
+      await db.query("insert into public.company_cadences (company_id, from_week, weeks, set_by) values ($1, date_trunc('week', current_date - 70)::date, 2, $2)", [coP, ownerP]);
+      await db.query("alter table public.company_cadences enable trigger company_cadences_lock");
+      await as(ownerP, "select public.request_company_closure($1)", [coP]);
+      check("A company can't be removed until 30 days after closing was asked", await fails(() => as(op, "select public.platform_purge_company($1, 'Example Platform Co')", [coP])));
+      await db.query("update public.company_accounts set closure_requested_at = now() - interval '31 days' where company_id = $1", [coP]);
+      check("Removing a company needs its exact name", await fails(() => as(op, "select public.platform_purge_company($1, 'example platform co')", [coP])));
+      check("A company owner can't remove companies", await fails(() => as(ownerP, "select public.platform_purge_company($1, 'Example Platform Co')", [coP])));
+      const svc = async (claims) => { await db.query("begin"); try { await db.query("select set_config('request.jwt.claims', $1, true)", [claims]);
+        return (await db.query("select private.is_service_call() as s")).rows[0].s; } finally { await db.query("rollback"); } };
+      check("Only a service-key token counts as the removal script; a signed-in user's token doesn't", await svc('{"role":"service_role"}') === true
+        && await svc(`{"role":"authenticated","sub":"${ownerP}"}`) === false && await svc("") === false);
+      await as(op, "select public.platform_purge_company($1, 'Example Platform Co')", [coP]);
+      check("After removal, the company's rows are gone", (await db.query("select (select count(*) from public.people where company_id = $1) + (select count(*) from public.companies where id = $1) as n", [coP])).rows[0].n === "0");
+      const audit = (await as(op, "select action, company_name from public.platform_audit(50)")).rows;
+      check("The removal log keeps the company id, so its files can still be removed", (await as(op, "select company_id from public.platform_audit(50) where action = 'purge'")).rows.some((r) => r.company_id === coP));
+      check("Every operator action is logged, and the log outlives the company", audit.some((r) => r.action === "purge" && r.company_name === "Example Platform Co")
+        && audit.some((r) => r.action === "pause") && audit.some((r) => r.action === "closure_requested"));
+      check("Companies can't read the operator log", await fails(() => as(userA, "select * from public.platform_audit(10)")));
+      await db.query("update private.platform_settings set trial_days = null");
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -941,7 +1040,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 124;
+  const EXPECTED = 161;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

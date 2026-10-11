@@ -21,7 +21,8 @@
     "icons": "tsx scripts/make-icons.ts",
     "voice:lines": "tsx scripts/voice/lines.ts",
     "voice:upload": "tsx scripts/voice/upload.ts",
-    "functions:sync": "tsx scripts/functions-sync.ts"
+    "functions:sync": "tsx scripts/functions-sync.ts",
+    "ops:purge-company": "tsx scripts/ops/purge-company.ts"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
@@ -29,6 +30,7 @@
     "@fontsource/archivo": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@supabase/supabase-js": "^2.45.0",
+    "fflate": "^0.8.2",
     "jspdf": "^4.2.1",
     "next": "^16.3.8",
     "qrcode": "^1.5.4",

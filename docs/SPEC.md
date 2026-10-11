@@ -683,6 +683,35 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   with or reveals another company's row. **Deferred:** a reviewed safety event can still be edited by admins.
 - **Hosted project:** turn on "Confirm email" in Supabase Auth settings before real use.
 
+## Running many companies (built, migration 0042; decided with Joe 2026-10-11)
+- **Plans:** each company has a plan: Trial, Pilot, Paid or Complimentary, plus an optional trial end date. Labels only
+  for now: no payment in the app (Joe: "plans only, no payment yet"). The operator sets the trial length for new
+  companies (empty = trials don't end) and each company's plan in the console. Admins see a note in a trial's last
+  week and after it ends; a trial ending doesn't stop anything by itself. Crews never see billing notes.
+- **Pause = read-only:** the operator can pause a company with a reason. Everything stays viewable and downloadable (its
+  OSHA records must stay reachable); nothing new saves or uploads. Enforced in the database on every table holding
+  company data (a test fails if a new table misses it) and on file uploads. Read-only never means less safe: share
+  links keep opening, and switching access off (revoking a link, removing a trainer or partner, taking someone off the
+  roster, changing app access) still works. A banner on every screen says so: owners and admins see why. (The phone
+  preview shows the banner but doesn't block saves.)
+- **Service console (/platform/):** for the people running the service only (private.platform_admins, added by hand
+  in the SQL editor; a "Service console" link appears on their Home). Every company with counts: accounts, active
+  people, talks (30 days and total), inspections, last talk. Set plan, pause, resume, trial length, remove, and a log
+  of every operator action that outlives a removed company.
+- **Support access (Joe: full access, every look logged):** to help a company, the operator types what they asked for
+  and opens its working records: setup, accounts, people and teams, latest talks with who signed, issues, inspections,
+  safety log, training cards. Never: the injury log's details (counts per year only), incident titles, signature or
+  photo images, phone numbers or employee IDs. Issue text is shown as the crew typed it. Read-only. Each look is logged with the reason and listed for the company's owners
+  and admins under Admin → Company → Support access.
+- **Download all your data:** owners and admins download a ZIP of every row the company has (each table as CSV and
+  JSON) and, optionally, every file. Works while paused or closing. The table list comes from the database, so a new
+  table is never left out; share-link secrets are left out.
+- **Closing (30-day grace):** an owner types the company name and asks to close. For 30 days the data stays and an owner
+  can cancel. After that the operator removes it: on their Mac, `npm run ops:purge-company -- "Name" --confirm` (dry
+  run without `--confirm`) removes the rows (the database re-checks the 30 days and the exact name, and logs it), then
+  every file. The console can remove rows too; `--files-only <id>` finishes the files.
+- **Not built:** payment (Stripe or invoices) and per-plan limits. Before the first paying customer.
+
 ## Product name (placeholder, 2026-10-09)
 - **Working name: Tuvant** (Joe, 2026-10-09; Latin *tueri*, to watch over). Earlier working names: **Keel** (dropped:
   a pending "KEEL" trademark for document and workflow software, Osgood Advisory, class 42) and **Salvant** (dropped:

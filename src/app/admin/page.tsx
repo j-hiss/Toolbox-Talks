@@ -41,6 +41,7 @@ import { InjuryLog } from "@/components/InjuryLog";
 import { BrandEditor } from "@/components/BrandEditor";
 import { AppAccess } from "@/components/AppAccess";
 import { Training } from "@/components/Training";
+import { AccountPanel } from "@/components/Account";
 
 const TABS = [
   { id: "people", label: "People", group: "people" },
@@ -164,6 +165,7 @@ function Admin({ m }: { m: Membership }) {
               onSubmit={async (c) => { await updateCompany(companyId, c); await s.refresh(); }}
             />
             <DailyToggle companyId={companyId} on={!!m.company.daily_enabled} refresh={s.refresh} />
+            <AccountPanel m={m} />
           </>
         ) : !roles || !teams || !people || !jobsites ? (
           <Loading />

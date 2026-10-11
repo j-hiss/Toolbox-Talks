@@ -1,6 +1,7 @@
 "use client";
 
 // Small shared UI pieces, styled from the prototype's tokens (globals.css). Phone-first: big tap targets.
+import { AccountBanner } from "./AccountBanner";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -179,7 +180,7 @@ export function Shell({ children, nav, tabs = true, lockHeader = false, wide = f
             {nav && <nav className="flex gap-1.5">{nav}</nav>}
           </div>
         </header>
-        <main className="page-in pt-6">{children}</main>
+        <main className="page-in pt-6">{s.current && !lockHeader && <AccountBanner m={s.current} />}{children}</main>
       </div>
       {tabs && <TabBar />}
     </div>
