@@ -9,6 +9,7 @@ import { createOrg, inviteOrgMember, linkOrgMembers, myOrgs, myReferralCode, myR
 import { Button, ConfirmButton, Field, GroupHeading, inputClass } from "./ui";
 import { toast } from "./toast";
 import { appWebAddress } from "@/lib/webAddress";
+import { REFERRAL_FREE_MONTHS } from "@/core/plans";
 
 const err = (e: unknown) => toast(e instanceof Error ? e.message : String(e), { tone: "error" });
 
@@ -95,7 +96,7 @@ export function InviteLinkPanel({ kind, defaultName, orgs }: { kind: OrgKind; de
   return (
     <section aria-label="Invite link" className="mt-6">
       <GroupHeading>Invite your clients</GroupHeading>
-      <p className="mt-1 text-sm text-muted">Send this link to clients who don&apos;t use the app yet. It opens sign-up with your name on it, and suggests they {kind === "training" ? "add you as their trainer" : "send you their safety summary"}. Nothing is shared until they choose to. The app is free for you.</p>
+      <p className="mt-1 text-sm text-muted">Send this link to clients who don&apos;t use the app yet. It opens sign-up with your name on it, and suggests they {kind === "training" ? "add you as their trainer" : "send you their safety summary"}. Nothing is shared until they choose to. Every company that signs up with your link and starts paying earns you {REFERRAL_FREE_MONTHS} free months.</p>
       {link ? (
         <div className="mt-2 flex flex-col gap-2">
           <p className="break-all rounded-lg bg-surface p-2 font-mono text-sm" aria-label="Your invite link">{link}</p>

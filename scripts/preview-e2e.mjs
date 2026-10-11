@@ -781,6 +781,50 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("26 plans:", (await q.locator("[role=dialog] ul[aria-label=Plans]").innerText()).replace(/\s+/g, " ").slice(0, 260));
   log("26 fair:", (await q.locator("[role=dialog] section[aria-label='Why the price is fair'] li").count()), "points |", (await q.locator("[role=dialog]").innerText()).includes("covers you"));
   await q.screenshot({ path: `${OUT}/e-plans.png`, fullPage: false });
+  // Scenario 27: the trainer's own sections. Run a class (sign in, pass/not pass, close), see the card the company
+  // approves become a certificate with a check code, check it at /verify, and see the plan.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await viewAs("trainer"); await q.waitForTimeout(800);
+  log("27 sections:", (await q.locator("[role=tablist][aria-label='Trainer sections']").innerText()).replace(/\s+/g, " "));
+  await q.click("[role=tab]:has-text('Classes')"); await q.waitForTimeout(500);
+  await q.click("button:has-text('New class')"); await q.waitForTimeout(300);
+  await q.selectOption("#cl-type", "forklift"); await q.fill("#cl-place", "Example yard");
+  await q.click("[role=dialog] button:has-text('Everyone')"); await q.click("[role=dialog] button:has-text('Start class')"); await q.waitForTimeout(900);
+  const rows = q.locator("ul[aria-label='Class sign-in'] li");
+  log("27 class people:", await rows.count());
+  await rows.first().locator("button:has-text('Sign in')").click(); await q.waitForTimeout(300);
+  { const pad = rows.first().locator("canvas").first(); const b = await pad.boundingBox();
+    await q.mouse.move(b.x + 20, b.y + b.height / 2); await q.mouse.down(); for (let i = 1; i <= 12; i++) await q.mouse.move(b.x + 20 + i * 18, b.y + b.height / 2 + (i % 2 ? 14 : -14)); await q.mouse.up(); }
+  await rows.first().locator("button:has-text('Save signature')").click(); await q.waitForTimeout(700);
+  await rows.first().locator("button:text-is('Passed')").click(); await q.waitForTimeout(400);
+  for (let i = 1; i < await rows.count(); i++) { await rows.nth(i).locator("button:has-text('Not passed')").click(); await q.waitForTimeout(300); }
+  await q.click("[role=dialog] button:has-text('Close class and send cards')"); await q.click("[role=dialog] button:has-text('Tap again')"); await q.waitForTimeout(900);
+  log("27 closed:", (await q.locator("[role=dialog]").innerText()).replace(/\s+/g, " ").slice(0, 200));
+  await q.screenshot({ path: `${OUT}/e-trainer-class.png`, fullPage: false });
+  await q.keyboard.press("Escape"); await q.waitForTimeout(300);
+  await q.click("[role=tab]:has-text('Find companies')"); await q.waitForTimeout(600);
+  log("27 find:", (await q.locator("section[aria-label='Find companies']").innerText()).replace(/\s+/g, " ").slice(0, 160));
+  await q.click("[role=tab]:has-text('Your account')"); await q.waitForTimeout(600);
+  log("27 plan:", (await q.locator("section[aria-label='Your plan']").innerText()).replace(/\s+/g, " ").slice(0, 200));
+  await viewAs("owner"); await q.waitForTimeout(600);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(900);
+  log("27 owner sees class card:", (await q.locator("ul[aria-label='Cards waiting for approval'] li").first().innerText()).replace(/\s+/g, " ").slice(0, 160));
+  await q.click("ul[aria-label='Cards waiting for approval'] button:has-text('Approve')"); await q.waitForTimeout(900);
+  await q.locator("input[aria-label=\"We're looking for a trainer\"]").check(); await q.waitForTimeout(700);
+  log("27 owner listed as looking:", (await q.locator("section[aria-label=Trainers]").innerText()).includes("Trainings you need"));
+  await viewAs("trainer"); await q.waitForTimeout(800);
+  await q.click("[role=tab]:has-text('Certificates')"); await q.waitForTimeout(700);
+  const certRow = q.locator("section[aria-label=Certificates] li").first();
+  log("27 certificate:", (await certRow.innerText()).replace(/\s+/g, " ").slice(0, 200));
+  await q.evaluate(() => { window.__saved = null; });
+  await certRow.locator("button:has-text('Certificate')").click(); await q.waitForTimeout(2000);
+  log("27 certificate pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  const certCode = (await certRow.locator(".font-mono").innerText()).trim();
+  await viewAs("owner"); await q.waitForTimeout(600);
+  await q.evaluate((c) => { sessionStorage.setItem("tt-preview-start", "/verify/"); location.hash = c.replace(/-/g, ""); }, certCode);
+  await q.reload(); await q.waitForTimeout(1500);
+  log("27 verify:", (await q.locator("section[aria-label='Certificate found']").innerText().catch(() => "MISSING")).replace(/\s+/g, " ").slice(0, 220));
+  await q.screenshot({ path: `${OUT}/e-verify-certificate.png`, fullPage: false });
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();

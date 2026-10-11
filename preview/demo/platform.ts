@@ -93,5 +93,17 @@ export async function platformSupportView(companyId: string, reason: string): Pr
   };
 }
 
-const _sameShape = { amPlatformAdmin, platformCompanies, platformSetTier, platformSetPlan, platformPause, platformResume, platformSettings, platformSetTrialDays, platformAudit, platformPurge, platformSupportView } satisfies Omit<typeof Real, never>;
+export async function platformPartnerAccounts(): Promise<Real.PlatformPartnerAccount[]> {
+  await tick();
+  const x = db() as unknown as { partnerAccounts?: { user_id: string; kind: "trainer" | "insurance"; plan: "trial" | "paid" | "comp"; trial_ends: string; free_until: string | null }[] };
+  return (x.partnerAccounts ?? []).map((a) => ({ ...a, email: db().session?.user.email ?? "", credits: 0, clients: 0, created_at: new Date().toISOString() }));
+}
+export async function platformSetPartnerPlan(userId: string, kind: "trainer" | "insurance", plan: "trial" | "paid" | "comp"): Promise<void> {
+  await tick();
+  const x = db() as unknown as { partnerAccounts?: { user_id: string; kind: string; plan: string }[] };
+  const a = (x.partnerAccounts ?? []).find((y) => y.user_id === userId && y.kind === kind);
+  if (!a) throw new Error("No such partner account.");
+  a.plan = plan; log("set_partner_plan", null, { user_id: userId, kind, plan }); save();
+}
+const _sameShape = { amPlatformAdmin, platformCompanies, platformSetTier, platformSetPlan, platformPause, platformResume, platformSettings, platformSetTrialDays, platformAudit, platformPurge, platformSupportView, platformPartnerAccounts, platformSetPartnerPlan } satisfies Omit<typeof Real, never>;
 void _sameShape;

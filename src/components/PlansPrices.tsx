@@ -36,7 +36,7 @@ export function PlansPrices({ current, people }: { current?: Tier | null; people
           You have <b className="tabular-nums">{people}</b> {people === 1 ? "person" : "people"} on the roster{fits ? <>; the <b>{fits.name}</b> plan covers you.</> : <>, more than our largest plan. Contact us for a price.</>}
         </p>
       )}
-      <p className="text-xs text-muted">Every plan starts with {TRIAL_DAYS} days of everything. Trainers and insurance agents never pay. Moving down never locks anything you already have; it only stops starting new things the smaller plan doesn&apos;t include.</p>
+      <p className="text-xs text-muted">Every plan starts with {TRIAL_DAYS} days of everything. Trainers and insurance agents have their own plans. Moving down never locks anything you already have; it only stops starting new things the smaller plan doesn&apos;t include.</p>
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { CLOSE_WAIT_DAYS, PLAN_LABEL, removableFrom, type Plan } from "@/core/ac
 import { INDUSTRIES } from "@/core/industries";
 import { PLAN_SIZES, sizeFor, type Tier } from "@/core/plans";
 import {
-  amPlatformAdmin, platformAudit, platformCompanies, platformPause, platformPurge, platformResume, platformSetPlan, platformSetTier, platformSetTrialDays,
+  amPlatformAdmin, platformAudit, platformCompanies, platformPause, platformPurge, platformResume, platformSetPlan, platformSetTier, platformSetTrialDays, platformPartnerAccounts, platformSetPartnerPlan, type PlatformPartnerAccount,
   platformSettings, platformSupportView, type AuditRow, type PlatformCompany, type SupportView,
 } from "@/lib/data/platform";
 import { useSession } from "@/lib/session";
@@ -71,6 +71,8 @@ function Console() {
 
       <GroupHeading>Trials</GroupHeading>
       <TrialSetting days={trialDays} onSaved={load} />
+
+      <PartnerAccounts />
 
       <GroupHeading>Log of operator actions</GroupHeading>
       <ul aria-label="Operator log" className="mt-2 flex flex-col gap-1 text-sm">
@@ -204,3 +206,29 @@ function SupportPanel({ v }: { v: SupportView }) {
     </div>
   );
 }
+
+/** Trainer and insurance partner accounts: their plan, trial, earned free months and clients. */
+function PartnerAccounts() {
+  const [rows, setRows] = useState<PlatformPartnerAccount[] | null>(null);
+  const load = useCallback(() => { platformPartnerAccounts().then(setRows).catch(() => setRows([])); }, []);
+  useEffect(load, [load]);
+  if (!rows) return null;
+  return (
+    <section aria-label="Partner accounts" className="mt-6">
+      <GroupHeading aside={`${rows.length}`}>Trainers and insurance partners</GroupHeading>
+      {rows.length === 0 && <p className="mt-2 text-sm text-muted">None yet.</p>}
+      <ul className="mt-2 flex flex-col gap-1.5">
+        {rows.map((r) => (
+          <li key={`${r.user_id}-${r.kind}`} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface px-3 py-2 text-sm shadow-card">
+            <span className="min-w-0"><b className="block break-all">{r.email}</b><small className="text-muted">{r.kind === "trainer" ? "Trainer" : "Insurance partner"} · {r.clients} clients · trial to {day(r.trial_ends)}{r.free_until ? ` · free months to ${day(r.free_until)}` : ""} · {r.credits} earned</small></span>
+            <select aria-label={`Plan for ${r.email}`} className="rounded-md border border-line bg-surface px-2 py-1 text-sm" value={r.plan}
+              onChange={(e) => void platformSetPartnerPlan(r.user_id, r.kind, e.target.value as PlatformPartnerAccount["plan"]).then(() => { toast("Partner plan saved."); load(); }).catch(err)}>
+              <option value="trial">Trial</option><option value="paid">Paid</option><option value="comp">Complimentary</option>
+            </select>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+

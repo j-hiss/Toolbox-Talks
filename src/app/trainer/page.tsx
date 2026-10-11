@@ -14,6 +14,7 @@ import { useSession } from "@/lib/session";
 import { trainerClients } from "@/lib/data/partnerClients";
 import { trainerTotals, type TrainerClient } from "@/core/partnerClients";
 import { InviteLinkPanel, MoveToOrg, OrgPanel, useOrgs } from "@/components/PartnerTools";
+import { FindCompanies, PartnerPlanPanel, TrainerCertificates, TrainerClasses, usePartnerAccount } from "@/components/TrainerTools";
 import { CardForm } from "@/components/CardForm";
 import { NotConfigured } from "@/components/Guard";
 import { Button, ConfirmButton, ErrorNotice, Eyebrow, GroupHeading, Loading, Notice, Sheet, Shell, Title } from "@/components/ui";
@@ -35,6 +36,8 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
   const [roster, setRoster] = useState<RosterCompany[] | null>(null);
   const [clients, setClients] = useState<TrainerClient[]>([]);
   const { orgs, reload: reloadOrgs } = useOrgs("training");
+  const { account, credits } = usePartnerAccount("trainer");
+  const [tab, setTab] = useState<"clients" | "classes" | "certificates" | "find" | "account">("clients");
   const [sent, setSent] = useState<Submission[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<{ co: RosterCompany; person: RosterCompany["people"][number] } | null>(null);
@@ -77,6 +80,23 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
         {member && <Link href="/" className="underline">← Back to your company</Link>}
         {partner && <Link href="/partner/" className="underline">Partner portal</Link>}
       </div>
+      <div role="tablist" aria-label="Trainer sections" className="mt-4 flex flex-wrap gap-2">
+        {([["clients", "Clients"], ["classes", "Classes"], ["certificates", "Certificates"], ["find", "Find companies"], ["account", "Your account"]] as const).map(([id, label]) => (
+          <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
+            className={`min-h-11 rounded-full border px-3.5 text-[15px] font-semibold ${tab === id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-fg"}`}>{label}</button>
+        ))}
+      </div>
+      {tab === "classes" && <TrainerClasses roster={roster} onChanged={load} />}
+      {tab === "certificates" && <TrainerCertificates />}
+      {tab === "find" && <FindCompanies account={account} myName={orgs[0]?.name ?? ""} />}
+      {tab === "account" && (
+        <>
+          <PartnerPlanPanel kind="trainer" account={account} credits={credits} />
+          <OrgPanel kind="training" orgs={orgs} reload={() => { reloadOrgs(); load(); }} myEmail={email} />
+          <InviteLinkPanel kind="training" defaultName={email} orgs={orgs} />
+        </>
+      )}
+      {tab === "clients" && <>
 
       {waiting.length > 0 && (
         <section aria-label="Saved on this phone" className="mt-4">
@@ -145,8 +165,7 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
         </section>
       )}
 
-      <OrgPanel kind="training" orgs={orgs} reload={() => { reloadOrgs(); load(); }} myEmail={email} />
-      <InviteLinkPanel kind="training" defaultName={email} orgs={orgs} />
+      </>}
 
       <div className="mt-8"><Button variant="ghost" onClick={() => signOut()}>Sign out</Button></div>
       <p className="mt-4 text-xs text-muted">You see only the names and job titles a company shares with you. Cards you send are kept by that company, even if your access ends.</p>

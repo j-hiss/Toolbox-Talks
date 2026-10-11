@@ -12,8 +12,11 @@ import { Button, Eyebrow, Loading, Mark, Notice, Title, inputClass } from "@/com
 import { BRAND } from "@/content/brand";
 import { CHECKLISTS } from "@/content/checklists";
 import { wordingMatch, type WordingMatch } from "@/core/inspections";
+import { verifyCertificate } from "@/lib/data/trainerTools";
+import type { VerifiedCertificate } from "@/core/trainerTools";
+import { certTypeName } from "@/content/certTypes";
 
-type State = { kind: "idle" } | { kind: "loading" } | { kind: "none"; code: string } | { kind: "error"; text: string } | { kind: "ok"; code: string; rec: VerifiedRecord } | { kind: "inspection"; code: string; insp: VerifiedInspection; match: WordingMatch | null };
+type State = { kind: "idle" } | { kind: "loading" } | { kind: "none"; code: string } | { kind: "error"; text: string } | { kind: "ok"; code: string; rec: VerifiedRecord } | { kind: "inspection"; code: string; insp: VerifiedInspection; match: WordingMatch | null } | { kind: "certificate"; code: string; cert: VerifiedCertificate };
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -31,7 +34,11 @@ export default function VerifyPage() {
       .then(async (rec) => {
         if (rec) return setState({ kind: "ok", code, rec });
         const insp = await verifyInspection(code);
-        if (!insp) return setState({ kind: "none", code });
+        if (!insp) {
+          // Then a training certificate (migration 0051). A database without it just means no match.
+          const cert = await verifyCertificate(code).catch(() => null);
+          return setState(cert ? { kind: "certificate", code, cert } : { kind: "none", code });
+        }
         // Compare the saved wording with the app's own checklist. No answer (no Web Crypto) shows no line, not a guess.
         const match = await wordingMatch(CHECKLISTS, insp).catch(() => null);
         setState({ kind: "inspection", code, insp, match });
@@ -74,6 +81,7 @@ export default function VerifyPage() {
           {state.kind === "error" && <Notice tone="error">Couldn&apos;t check right now. Check the connection and try again. ({state.text})</Notice>}
           {state.kind === "ok" && <Found code={state.code} r={state.rec} />}
           {state.kind === "inspection" && <FoundInspection code={state.code} r={state.insp} match={state.match} />}
+          {state.kind === "certificate" && <FoundCertificate code={state.code} c={state.cert} />}
         </div>
         <p className="mt-8 text-xs text-muted">A record documents a safety meeting. It doesn&apos;t by itself certify OSHA compliance.</p>
       </main>
@@ -137,6 +145,21 @@ function FoundInspection({ code, r, match }: { code: string; r: VerifiedInspecti
       {match === "company_own" && <p className="mt-2 text-sm text-muted">This is the company&apos;s own checklist, so its wording is the company&apos;s, not the app&apos;s standard. The full inspection PDF lists every item that was checked.</p>}
       {match === "unknown_version" && <p className="mt-2 text-sm text-muted">This inspection used a checklist edition this copy of the app doesn&apos;t carry, so its wording can&apos;t be compared here.</p>}
       <p className="mt-3 text-xs text-muted">If the paper shows different results, a different date or a different checklist, it doesn&apos;t match what was saved.</p>
+    </section>
+  );
+}
+
+function FoundCertificate({ code, c }: { code: string; c: VerifiedCertificate }) {
+  const day = (d: string) => new Date(d.length === 10 ? `${d}T12:00:00` : d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const expired = !!c.expires_on && c.expires_on < new Date().toISOString().slice(0, 10);
+  return (
+    <section aria-label="Certificate found" className="rounded-xl border border-line bg-surface p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted">Training certificate · {formatCode(code)}</p>
+      <h2 className="mt-1 font-display text-xl font-bold">{certTypeName(c.cert_type, c.custom_name)}</h2>
+      <p className="mt-2 text-sm">Issued by <b>{c.trainer}</b> for someone at <b>{c.company}</b>.</p>
+      <p className="mt-1 text-sm">{c.issued_on ? `Training date ${day(c.issued_on)}. ` : ""}{c.expires_on ? `Expires ${day(c.expires_on)}. ` : "No expiry on the card. "}Approved by the company {day(c.approved_at)}.</p>
+      <p className={`mt-3 text-sm font-semibold ${c.withdrawn || expired ? "text-warn-text" : "text-ok"}`}>{c.withdrawn ? "The company withdrew this card." : expired ? "This card has expired." : "On file and current."}</p>
+      <p className="mt-3 text-xs text-muted">The person&apos;s name isn&apos;t shown here; it&apos;s on the certificate. If the paper shows a different training, trainer or dates, it doesn&apos;t match what was saved.</p>
     </section>
   );
 }

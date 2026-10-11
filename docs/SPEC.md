@@ -538,7 +538,7 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   price by crew size, no per-worker fees.
 - **Sizes (src/core/plans.ts):** Crew $29/month, up to 25 people; Company $79, up to 100; Larger $149, up to 250.
   Yearly is 10 months' price. 30-day trial of everything (the operator can change the trial length). Past 250: talk
-  to us. Trainers and insurance partners never pay.
+  to us. Trainers and insurance partners have their own plans (below).
 - **What each covers:** Crew has the safety basics: library read aloud in 6 languages, one-phone and QR signing, signed
   PDFs with check codes, daily plans, the app's inspection checklists, training cards and the trainer portal,
   reports, the safety profile and sending it to an agent, offline. Company and Larger add starting new OSHA log
@@ -571,6 +571,26 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   shares nothing; the partner sees how many companies signed up and the names only of those that connected.
 - **Pilot rule unchanged:** company-side partner invites and sends still need `NEXT_PUBLIC_PARTNER_PORTAL=pilot` and
   `private.partner_pilot`, and counsel's privacy review (now including organizations) before real use.
+
+## Trainer and partner plans, classes, certificates, finding companies (built, migrations 0050-0052)
+- **Their own rates (src/core/plans.ts PARTNER_PLANS):** Trainer and Insurance partner plans, each with its own price
+  (starting at $29/month each; Joe sets the real numbers). A 30-day trial when they first open their portal. Every
+  company that signs up with their invite link and starts paying earns them 6 free months (stacking, once per
+  company). Counting paying companies, not sign-ups, keeps fake sign-ups from earning anything. Their client lists,
+  summaries and cards never lock; only finding companies checks the plan. The operator sets plans in the console.
+- **The trainer portal is its own thing:** sections for Clients, Classes, Certificates, Find companies and Your
+  account (plan, organization, invite link).
+- **Classes:** pick a client, the training (card type), date, place, the card's expiry and who's in it (only people the
+  company shared). Each person signs on the trainer's phone; the trainer marks passed or not passed. Closing needs a
+  result for everyone and a signature for every pass, sends a card per pass through the company's normal approval,
+  and the class never changes after. The company reads its classes and attendance.
+- **Certificates:** every card a company approved, with the person, training, dates, current/expired/withdrawn, and a
+  landscape certificate PDF with a check code and QR. /verify shows the training, trainer, company, dates and whether
+  it's current, never the person's name. Footer: not a license, doesn't certify compliance.
+- **Find companies:** a company turns on "We're looking for a trainer" (Admin → Training → Trainers; opt-in), picks the
+  trainings it needs and adds a note. Trainers on an active plan see listed companies (name, industry, state from
+  ZIP, size band, trainings, note), filter by state and training, and ask to connect (one open request per company,
+  30 a day). The company accepts or declines; accepting invites the trainer, and the company still picks who they see.
 
 ## Written safety programs (built, migration 0047)
 - **Why:** insurers, prequalification services and OSHA ask for the written programs; competitors sell binders. Here

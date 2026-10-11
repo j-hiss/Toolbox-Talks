@@ -80,3 +80,13 @@ export type SupportView = {
 export async function platformSupportView(companyId: string, reason: string): Promise<SupportView> {
   return check(await supabase().rpc("platform_support_view", { co: companyId, reason })) as SupportView;
 }
+
+/** Trainer and insurance partner accounts (migration 0050): plan, trial, free months earned, clients. */
+export type PlatformPartnerAccount = { user_id: string; email: string; kind: "trainer" | "insurance"; plan: "trial" | "paid" | "comp"; trial_ends: string; free_until: string | null; credits: number; clients: number; created_at: string };
+export async function platformPartnerAccounts(): Promise<PlatformPartnerAccount[]> {
+  return check(await supabase().rpc("platform_partner_accounts")) as PlatformPartnerAccount[];
+}
+export async function platformSetPartnerPlan(userId: string, kind: "trainer" | "insurance", plan: "trial" | "paid" | "comp"): Promise<void> {
+  check(await supabase().rpc("platform_set_partner_plan", { target: userId, kind, new_plan: plan }));
+}
+

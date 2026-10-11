@@ -4,7 +4,8 @@
 // - The same rule the database uses: a trial, pilot or complimentary account has everything; a paid one gets what its
 //   size covers. Nothing a company already has is ever locked: moving down only stops starting new things the
 //   smaller size doesn't include, and only adding people past the size is refused.
-// - Trainers and insurance partners never pay. They are how companies hear about the app.
+// - Trainers and insurance partners have their own rates (PARTNER_PLANS) and earn free months for every company they
+//   bring in that starts paying.
 import type { CompanyAccount, Plan } from "./account";
 
 export type Tier = "crew" | "company" | "larger";
@@ -57,11 +58,25 @@ export const FAIR_PRICE = [
   "One flat price for your company's size. No charge per worker, so adding a new hand never costs more until you move up a size.",
   "Every plan includes signing, the PDFs, the check codes and working with no signal. Those are the safety basics, so they aren't held back for a higher price.",
   "Moving to a smaller plan never locks anything you already have. Your records stay yours to open, print, correct and download.",
-  "Trainers and insurance agents use it free, so the people who help you can see your progress without anyone paying more.",
+  "Trainers and insurance agents have their own plans, so your price never goes up because they help you.",
   "Try everything free for 30 days. No card needed to start.",
 ];
 
 export const yearly = (s: PlanSize) => s.monthly * YEARLY_MONTHS;
+
+/**
+ * Plans for trainers and insurance partners (migration 0050). Each has its own rate. A 30-day trial when they first
+ * open their portal, then monthly. Every company that signs up with their invite link and starts paying earns them
+ * REFERRAL_FREE_MONTHS free months (they stack). Their client lists, summaries and cards never lock; only the paid
+ * extras (finding companies that need a trainer) check the plan.
+ */
+export type PartnerPlan = { kind: "trainer" | "insurance"; name: string; monthly: number; includes: string[] };
+export const PARTNER_PLANS: PartnerPlan[] = [
+  { kind: "trainer", name: "Trainer", monthly: 29, includes: ["Every client in one list", "Classes with sign-ins, cards sent for approval in one step", "Certificates with a check code", "Find companies looking for a trainer", "Staff accounts for your training company"] },
+  { kind: "insurance", name: "Insurance partner", monthly: 29, includes: ["Every client in one list with sign-in rates and missed weeks", "Ask clients for a fresh summary", "Staff accounts for your agency"] },
+];
+export const REFERRAL_FREE_MONTHS = 6;
+export const partnerPlanFor = (kind: "trainer" | "insurance") => PARTNER_PLANS.find((p) => p.kind === kind)!;
 
 export const sizeFor = (tier: Tier): PlanSize => PLAN_SIZES.find((s) => s.id === tier)!;
 

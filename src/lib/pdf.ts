@@ -16,6 +16,8 @@ import { formatCode, verifyLink } from "@/core/verify";
 import { EMPLOYEE_ACCESS, FALSIFYING, KINDS, OUTCOMES, incidentGaps, caseLabel, logTotals, nameOnLog, postingWindow, type InjuryCase, type InjurySummary } from "@/core/oshaLog";
 import { locationFlagCount, locationNote } from "@/core/checkin";
 import type { ProgramRow, ProgramTemplate } from "@/core/programs";
+import type { Certificate } from "@/core/trainerTools";
+import { certTypeName } from "@/content/certTypes";
 import { drawQr } from "./qr";
 import { appWebAddress } from "./webAddress";
 
@@ -898,4 +900,50 @@ export function programPdfFileName(t: Pick<ProgramTemplate, "title">, row: Pick<
   const d = new Date(row.created_at);
   const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   return `${t.title.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim()} - version ${row.version} - ${iso}.pdf`;
+}
+
+/**
+ * A training certificate a trainer issued, built from the card the company approved: the person, the training, the
+ * company, the trainer, the dates and a check code (/verify) that shows what was approved. Not a license or an OSHA
+ * certification.
+ */
+export function buildCertificatePdf(c: Certificate, origin: string | null = appWebAddress()): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "letter", orientation: "landscape" });
+  const W = 792, H = 612, M = 54;
+  const fmt = (d: string | null) => (d ? new Date(d.length === 10 ? `${d}T12:00:00` : d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "");
+  doc.setDrawColor(60); doc.setLineWidth(2); doc.rect(M / 2, M / 2, W - M, H - M);
+  doc.setLineWidth(0.6); doc.rect(M / 2 + 6, M / 2 + 6, W - M - 12, H - M - 12);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(GREY);
+  doc.text("CERTIFICATE OF TRAINING", W / 2, 110, { align: "center" });
+  doc.setTextColor(0); doc.setFont("helvetica", "bold"); doc.setFontSize(30);
+  doc.text(doc.splitTextToSize(c.person_name, W - 2 * M - 40)[0] ?? "", W / 2, 165, { align: "center" });
+  doc.setFont("helvetica", "normal"); doc.setFontSize(13);
+  doc.text("completed", W / 2, 195, { align: "center" });
+  doc.setFont("helvetica", "bold"); doc.setFontSize(22);
+  (doc.splitTextToSize(certTypeName(c.cert_type, c.custom_name), W - 2 * M - 60) as string[]).slice(0, 2).forEach((l, i) => doc.text(l, W / 2, 232 + i * 26, { align: "center" }));
+  doc.setFont("helvetica", "normal"); doc.setFontSize(12);
+  const lines = [
+    `${c.issued_on ? `Training date: ${fmt(c.issued_on)}` : `Approved: ${fmt(c.approved_at)}`}${c.expires_on ? `   ·   Expires: ${fmt(c.expires_on)}` : ""}`,
+    `For: ${c.company_name}   ·   Trainer: ${c.trainer_name}`,
+    `Approved by ${c.company_name} on ${fmt(c.approved_at)}`,
+  ];
+  lines.forEach((l, i) => doc.text(doc.splitTextToSize(l, W - 2 * M - 40)[0] ?? "", W / 2, 300 + i * 20, { align: "center" }));
+  // Check code box.
+  const boxY = 380;
+  doc.setDrawColor(200); doc.roundedRect(W / 2 - 200, boxY, 400, 96, 6, 6, "S");
+  if (origin) drawQr(doc, verifyLink(origin, c.verify_code), W / 2 - 192, boxY + 8, 80);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY); doc.text("CHECK THIS CERTIFICATE", W / 2 - 100, boxY + 24); doc.setTextColor(0);
+  doc.setFont("courier", "bold"); doc.setFontSize(15); doc.text(formatCode(c.verify_code), W / 2 - 100, boxY + 46);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5);
+  doc.text(doc.splitTextToSize(`${origin ? `Scan, or open ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify and type the code, ` : "Type the code at the app's /verify page "}to see what the company approved.`, 290), W / 2 - 100, boxY + 62);
+  if (c.withdrawn) { doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...RED); doc.text("WITHDRAWN BY THE COMPANY", W / 2, boxY + 120, { align: "center" }); doc.setTextColor(0); }
+  doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
+  doc.text("Records training the trainer gave and the company approved. Not a license, and it does not by itself certify OSHA compliance.", W / 2, H - 44, { align: "center" });
+  doc.setTextColor(0);
+  return doc;
+}
+
+export function certificatePdfFileName(c: Pick<Certificate, "person_name" | "cert_type" | "custom_name" | "approved_at">): string {
+  const clean = (s: string) => s.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim();
+  return `Certificate - ${clean(certTypeName(c.cert_type, c.custom_name))} - ${clean(c.person_name)} - ${c.approved_at.slice(0, 10)}.pdf`;
 }

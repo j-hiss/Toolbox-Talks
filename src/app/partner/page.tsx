@@ -11,6 +11,7 @@ import { canRequest, partnerClientFlags, partnerTotals, sortPartnerClients, type
 import { openPartnerReport, partnerInbox } from "@/lib/data/partners";
 import { partnerClients, requestPartnerSummary } from "@/lib/data/partnerClients";
 import { InviteLinkPanel, MoveToOrg, OrgPanel, useOrgs } from "@/components/PartnerTools";
+import { PartnerPlanPanel, usePartnerAccount } from "@/components/TrainerTools";
 import { pct } from "@/core/compliance";
 import { toast } from "@/components/toast";
 import { saveFile } from "@/lib/download";
@@ -39,6 +40,7 @@ function Portal({ email, member, trainer, signOut }: { email: string; member: bo
   const [ask, setAsk] = useState<PartnerClient | null>(null);
   const [note, setNote] = useState("");
   const { orgs, reload: reloadOrgs } = useOrgs("insurance");
+  const { account, credits } = usePartnerAccount("insurance");
   const load = useCallback(() => {
     Promise.all([partnerInbox(), partnerClients()])
       .then(([r, c]) => { setRows(r); setClients(c); setError(null); })
@@ -119,6 +121,7 @@ function Portal({ email, member, trainer, signOut }: { email: string; member: bo
           );
         })}
       </ul>
+      <PartnerPlanPanel kind="insurance" account={account} credits={credits} />
       <OrgPanel kind="insurance" orgs={orgs} reload={() => { reloadOrgs(); load(); }} myEmail={email} />
       <InviteLinkPanel kind="insurance" defaultName={email} orgs={orgs} />
       <div className="mt-8"><Button variant="ghost" onClick={() => signOut()}>Sign out</Button></div>

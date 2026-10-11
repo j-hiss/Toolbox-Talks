@@ -758,6 +758,73 @@ async function main() {
       await as(userA, "select public.remove_partner($1)", [link]); await as(userA, "select public.remove_trainer($1)", [tr]);
     }
 
+    // Trainer plans, classes, certificates and finding companies (0050-0052).
+    {
+      const teach = randomUUID(), ownerR = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'teach@train.example', now()), ($2, 'owner@referred.example', now())", [teach, ownerR]);
+      const tl = (await as(userA, "select public.invite_trainer($1, 'teach@train.example', 'Example Training Pros') as id", [coA])).rows[0].id;
+      await as(teach, "select public.accept_invites()");
+      const ppl = (await db.query("select id from public.people where company_id = $1 and active and deactivated_at is null order by created_at limit 2", [coA])).rows.map((r) => r.id);
+      for (const p of ppl) await as(userA, "insert into public.company_trainer_people (company_id, trainer_id, person_id) values ($1, $2, $3)", [coA, tl, p]);
+      const acct = (await as(teach, "select (public.open_partner_account('trainer')).*")).rows[0];
+      check("A trainer's account opens with a 30-day trial", acct.plan === "trial" && acct.trial_ends > new Date());
+      const mkClass = (who, people) => as(who, "select public.create_training_class($1, 'forklift', '', '2026-10-01', 'Example yard', '2029-10-01', '', $2::uuid[]) as id", [coA, people]);
+      check("Only the company's trainer makes a class, only with people shared with them", await fails(() => mkClass(presenterA, ppl)) && await fails(() => mkClass(userB, ppl))
+        && await fails(() => mkClass(teach, [randomUUID()])));
+      const cls = (await mkClass(teach, ppl)).rows[0].id;
+      const png = "data:image/png;base64,iVBORw0KGgo=";
+      await as(teach, "select public.sign_training_class($1, $2, $3)", [cls, ppl[0], png]);
+      check("A person signs once; a bad signature image is refused", await fails(() => as(teach, "select public.sign_training_class($1, $2, $3)", [cls, ppl[0], png]))
+        && await fails(() => as(teach, "select public.sign_training_class($1, $2, 'not an image')", [cls, ppl[1]])));
+      await as(teach, "select public.set_training_result($1, $2, true)", [cls, ppl[0]]);
+      check("A class can't close until everyone has a result, or with an unsigned pass", await fails(() => as(teach, "select public.close_training_class($1)", [cls]))
+        && !!(await as(teach, "select public.set_training_result($1, $2, true)", [cls, ppl[1]])) && await fails(() => as(teach, "select public.close_training_class($1)", [cls])));
+      await as(teach, "select public.set_training_result($1, $2, false)", [cls, ppl[1]]);
+      check("Closing sends a card for each person who passed", (await as(teach, "select public.close_training_class($1) as n", [cls])).rows[0].n === 1
+        && (await as(userA, "select count(*)::int n from public.cert_submissions where trainer_id = $1 and status = 'pending'", [tl])).rows[0].n === 1);
+      check("A closed class never changes", await fails(() => as(teach, "select public.set_training_result($1, $2, true)", [cls, ppl[1]]))
+        && await fails(() => db.query("update public.training_classes set place = 'x' where id = $1", [cls])));
+      check("The company reads the class and attendance; another company can't", (await as(userA, "select count(*)::int n from public.training_class_people where class_id = $1", [cls])).rows[0].n === 2
+        && (await as(userB, "select id from public.training_classes")).rows.length === 0 && (await as(userB, "select class_id from public.training_class_people")).rows.length === 0);
+      const sub = (await as(userA, "select id, verify_code from public.cert_submissions where trainer_id = $1", [tl])).rows[0];
+      check("A card waiting for approval can't be checked", (await as(null, "select public.verify_certificate($1) as v", [sub.verify_code])).rows[0].v === null);
+      await as(userA, "select public.decide_cert_submission($1, true)", [sub.id]);
+      const certs = (await as(teach, "select * from public.my_certificates()")).rows;
+      const v = (await as(null, "select public.verify_certificate($1) as v", [sub.verify_code.toLowerCase()])).rows[0].v;
+      check("The trainer sees the approved certificate; anyone can check it, with no person's name", certs.length === 1 && certs[0].verify_code === sub.verify_code
+        && v?.cert_type === "forklift" && v.trainer === "Example Training Pros" && v.withdrawn === false && !JSON.stringify(v).includes(certs[0].person_name));
+      check("Another account sees none of the trainer's certificates", (await as(userB, "select * from public.my_certificates()")).rows.length === 0);
+      check("Before any company is looking, a trainer finds none", (await as(teach, "select * from public.find_companies_for_training()")).rows.every((r) => r.company_id !== coB));
+      check("Only a company's admins list it as looking for a trainer", await fails(() => as(userA, "select public.set_trainer_listing($1, true, '{forklift}', 'x')", [coB])));
+      await as(userB, "select public.set_trainer_listing($1, true, '{forklift,first_aid}', 'Example: need forklift evaluations')", [coB]);
+      const found = (await as(teach, "select * from public.find_companies_for_training()")).rows.find((r) => r.company_id === coB);
+      check("A trainer on an active plan finds a listed company with only what it chose to show", !!found && found.trainings.includes("forklift") && /people/.test(found.size) && !("email" in found));
+      check("Companies that aren't looking can't be found or asked", await fails(() => as(teach, "select public.request_trainer_connect($1, 'Example Training Pros', 'hi')", [coA])));
+      const req = (await as(teach, "select public.request_trainer_connect($1, 'Example Training Pros', 'Example: we run forklift classes nearby') as id", [coB])).rows[0].id;
+      check("One open request per company; the company sees it", await fails(() => as(teach, "select public.request_trainer_connect($1, 'x', 'again')", [coB]))
+        && (await as(userB, "select message from public.trainer_connect_requests where id = $1", [req])).rows[0]?.message.includes("forklift")
+        && (await as(userA, "select id from public.trainer_connect_requests where id = $1", [req])).rows.length === 0);
+      check("Only the company answers; accepting invites the trainer", await fails(() => as(teach, "select public.answer_trainer_connect($1, true)", [req]))
+        && !!(await as(userB, "select public.answer_trainer_connect($1, true)", [req]))
+        && (await as(userB, "select user_id from public.company_trainers where company_id = $1 and email = 'teach@train.example' and removed_at is null", [coB])).rows[0]?.user_id === teach);
+      check("A company the trainer already works with drops out of their search", (await as(teach, "select * from public.find_companies_for_training()")).rows.every((r) => r.company_id !== coB));
+      await db.query("update public.partner_accounts set trial_ends = current_date - 1 where user_id = $1 and kind = 'trainer'", [teach]);
+      check("When the trial ends, finding companies stops; clients and certificates stay", await fails(() => as(teach, "select * from public.find_companies_for_training()"))
+        && (await as(teach, "select * from public.my_certificates()")).rows.length === 1);
+      const tcode = (await as(teach, "select public.my_referral_code('training', 'Example Training Pros', null) as c")).rows[0].c;
+      const coR = (await as(ownerR, "select public.create_company('Example Referred Co', 'con', '33901') as id")).rows[0].id;
+      await as(ownerR, "select public.record_referral($1, $2)", [coR, tcode]);
+      check("A referred company signing up earns nothing yet", (await as(teach, "select count(*)::int n from public.partner_credits")).rows[0].n === 0);
+      await db.query("update public.company_accounts set plan = 'paid' where company_id = $1", [coR]);
+      const after = (await as(teach, "select free_until from public.partner_accounts where kind = 'trainer'")).rows[0];
+      check("When it starts paying, the trainer earns 6 free months and finding companies works again", (await as(teach, "select months from public.partner_credits")).rows[0]?.months === 6
+        && new Date(after.free_until) > new Date(Date.now() + 170 * 86400000) && (await as(teach, "select * from public.find_companies_for_training()")).rows.length >= 0);
+      await db.query("update public.company_accounts set plan = 'trial' where company_id = $1", [coR]); await db.query("update public.company_accounts set plan = 'paid' where company_id = $1", [coR]);
+      check("The same company never earns twice; nobody else sees the credit", (await as(teach, "select count(*)::int n from public.partner_credits")).rows[0].n === 1
+        && (await as(userB, "select id from public.partner_credits")).rows.length === 0 && (await as(userB, "select user_id from public.partner_accounts")).rows.length === 0);
+      await as(userA, "select public.remove_trainer($1)", [tl]);
+    }
+
     // Your own talks (0029): versions only, admins write, staff read, never across companies.
     {
       const empT = randomUUID();
@@ -1249,7 +1316,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 450;
+  const EXPECTED = 471;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

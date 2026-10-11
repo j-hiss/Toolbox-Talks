@@ -15,6 +15,7 @@ import { Button, ConfirmButton, GroupHeading, Notice, inputClass } from "./ui";
 import { OutsideInvite } from "./OutsideInvite";
 import { toast } from "./toast";
 import { OrgMembersNote } from "./PartnerTools";
+import { FindTrainerSetting } from "./TrainerTools";
 
 const day = (iso: string | null) => (iso ? new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "");
 
@@ -38,6 +39,7 @@ export function TrainersSection({ companyId, people, roles, onApproved }: { comp
       <GroupHeading aside={waiting.length ? `${waiting.length} waiting` : undefined}>Trainers</GroupHeading>
       <p className="mt-1 text-sm text-muted">Let an outside trainer send in cards for the people you pick. Each card waits for an owner or admin to approve it. Trainers see only those people&apos;s names and job titles, nothing else.</p>
       <OrgMembersNote companyId={companyId} />
+      <FindTrainerSetting companyId={companyId} onAccepted={load} />
 
       {waiting.length > 0 && (
         <ul className="mt-3 flex flex-col gap-2" aria-label="Cards waiting for approval">
