@@ -1136,7 +1136,8 @@ async function main() {
       check("Items must be 1 to 60, each with an id and text, ids unique", await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa1", items: "[]" }))
         && await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa2", items: JSON.stringify([{ id: "a", text: "x" }, { id: "a", text: "y" }]) }))
         && await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa3", items: JSON.stringify([{ id: "a" }]) }))
-        && await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa4", how: "weekly" })));
+        && await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa4", how: "yearly" })));
+      check("A checklist can be weekly (0046)", (await add(userA, coA, 1, { key: "own-aaaaaaaa5", how: "weekly" })).rows.length === 1);
       await add(userA, coA, 3, { retired: true });
       check("A retired checklist stays retired", await fails(() => add(userA, coA, 4)));
     }
@@ -1159,7 +1160,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 422;
+  const EXPECTED = 423;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

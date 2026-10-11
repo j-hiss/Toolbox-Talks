@@ -9,10 +9,10 @@
 //   inspection of that checklist. It documents that someone looked; it never says a site passed or complies.
 import { industryTags, type IndustryId } from "./industries";
 
-export type ChecklistWhen = "each_use" | "each_shift" | "daily" | "monthly";
+export type ChecklistWhen = "each_use" | "each_shift" | "daily" | "weekly" | "monthly";
 
 export const WHEN_LABEL: Record<ChecklistWhen, string> = {
-  each_use: "Before each use", each_shift: "Each shift", daily: "Daily", monthly: "Monthly",
+  each_use: "Before each use", each_shift: "Each shift", daily: "Daily", weekly: "Weekly", monthly: "Monthly",
 };
 
 export type ChecklistItem = { id: string; text: string; rule?: string };
@@ -92,6 +92,11 @@ export function dueState(when: ChecklistWhen, last: string | null, now: Date = n
   const d = new Date(last);
   const sameDay = d.toDateString() === now.toDateString();
   if (when === "daily" || when === "each_shift") return sameDay ? { due: false, label: `Done today` } : { due: true, label: `Due today · last ${ago(last, now)}` };
+  if (when === "weekly") {
+    // "At least once every 7 calendar days": due again once 7 days have passed since the last one.
+    const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+    return d > weekAgo ? { due: false, label: `Done ${ago(last, now)}` } : { due: true, label: `Due · last ${ago(last, now)}` };
+  }
   const monthAgo = new Date(now); monthAgo.setMonth(monthAgo.getMonth() - 1);
   return d > monthAgo ? { due: false, label: `Done ${ago(last, now)}` } : { due: true, label: `Due · last ${ago(last, now)}` };
 }

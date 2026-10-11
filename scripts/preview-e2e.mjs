@@ -720,6 +720,8 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.fill("#oc-items", "Outriggers down on pads\nLoad chart in the cab | 1926.1417(c)\nSwing radius barricaded");
   await q.click("[role=dialog] button:has-text('Add checklist')"); await q.waitForTimeout(900);
   log("23 listed:", (await q.locator("main li:has-text('Example crane setup')").first().innerText()).replace(/\s+/g, " "));
+  { const sw = q.locator("main li:has-text('Stormwater site inspection')").first();
+    log("23 weekly:", (await sw.count()) ? (await sw.innerText()).replace(/\s+/g, " ") : "MISSING"); }
   await q.click("ul[aria-label='Change your checklists'] button:has-text('Change')"); await q.waitForTimeout(300);
   await q.fill("#oc-items", "Outriggers down on pads\nLoad chart in the cab | 1926.1417(c)\nSwing radius barricaded\nWind under the limit");
   await q.click("[role=dialog] button:has-text('Save changes')"); await q.waitForTimeout(900);

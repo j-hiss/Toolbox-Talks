@@ -722,4 +722,33 @@ export const CHECKLISTS: Checklist[] = [
       { id: "people", text: "Never pointed at a person or used on clothing", rule: "1910.242(b)" },
     ],
   },
+  // Environmental (EPA) ------------------------------------------------------------------------------------------------
+  {
+    id: "stormwater", version: 1, title: "Stormwater site inspection", industries: ["con"], when: "weekly",
+    rule: "EPA 2022 Construction General Permit Part 4.2: every 7 days, or every 14 days and within 24 hours of 0.25 inches of rain. A site under a state permit follows that permit's schedule",
+    sources: [{ label: "EPA 2022 Construction General Permit (as modified 2025), Part 4: site inspections", url: "https://www.epa.gov/system/files/documents/2025-04/2022-cgp-permit-as-modified.pdf", kind: "standard" }],
+    items: [
+      { id: "areas", text: "Cleared, graded or dug areas not yet stabilized, and areas already stabilized, walked", rule: "CGP 4.5.1, 4.5.7" },
+      { id: "controls", text: "Silt fence, inlet protection and other stormwater controls installed, working and not overloaded", rule: "CGP 4.5.2, 4.6.1(a)" },
+      { id: "storage", text: "Material, waste and equipment areas: no spills, leaks or loose material rain could carry off", rule: "CGP 4.5.3, 4.6.1(b)" },
+      { id: "discharge", text: "Every point where water leaves the site checked for erosion and sediment", rule: "CGP 4.5.6, 4.6.1(d)" },
+      { id: "offsite", text: "No sediment on nearby streets, curbs, drains or water", rule: "CGP 4.6.1(e)" },
+      { id: "dewatering", text: "Where water is pumped out: the discharge goes through its treatment control", rule: "CGP 4.5.5" },
+      { id: "fixes", text: "Spots needing new or repaired controls noted for repair", rule: "CGP 4.6.1(c), 4.6.4(a)" },
+      { id: "rain", text: "After a storm: the rain gauge or weather station reading noted", rule: "CGP 4.7.1(d)" },
+    ],
+  },
+  {
+    id: "haz-waste", version: 1, title: "Hazardous waste storage area", industries: ["auto", "mfg"], when: "weekly",
+    rule: "EPA 40 CFR 262.16(b)(2)(iv), 262.17(a)(1)(v): weekly, for small and large quantity generators (very small quantity generators are exempt, 262.14)",
+    sources: [{ label: "EPA 40 CFR 262 Subpart A: generator accumulation (262.14, 262.16, 262.17)", url: "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-I/part-262/subpart-A", kind: "standard" }],
+    items: [
+      { id: "closed", text: "Containers closed except when adding or removing waste", rule: "262.16(b)(2)(iii)(A); 262.17(a)(1)(iv)(A)" },
+      { id: "condition", text: "No leaking containers and none deteriorating from rust or other damage; any found moved to a good container right away", rule: "262.16(b)(2)(i), (iv); 262.17(a)(1)(ii), (v)" },
+      { id: "compatible", text: "Each container made of a material that won't react with its waste", rule: "262.16(b)(2)(ii); 262.17(a)(1)(iii)" },
+      { id: "label", text: "Each container marked \"Hazardous Waste\" with the hazards of what's in it", rule: "262.16(b)(6)(i)(A)-(B); 262.17(a)(5)(i)(A)-(B)" },
+      { id: "date", text: "Start date visible on each container, and nothing past its limit (180 days small generator, 90 days large)", rule: "262.16(b), (b)(6)(i)(C); 262.17(a), (a)(5)(i)(C)" },
+      { id: "no-smoking", text: "Large generators: No Smoking signs where ignitable or reactive waste is kept", rule: "262.17(a)(1)(vi)(B)" },
+    ],
+  },
 ];

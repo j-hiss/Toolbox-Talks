@@ -140,7 +140,10 @@ customer #1, not a special case.
   keyed by its first Monday; makeups, reports, Home and the database lock all work per period. A change starts when
   the current period ends and is kept once it starts, so past periods never re-shape. The app warns when a cadence is
   less often than a checked state rule (Washington construction weekly, California construction every 10 working
-  days, Oregon construction monthly). **Override per crew or jobsite: not built yet** (needs a plan per crew).
+  days, Oregon construction monthly). Every state plan covering private employers was checked (2026-10-11); no other
+  state sets a crew-meeting frequency a 1, 2 or 4 week cadence could miss. Committee-only rules (North Carolina and
+  Tennessee, triggered by a high experience mod) aren't crew-talk rules and aren't warned about. Some states were
+  only partly checked (docs/claims-and-evidence.md). **Override per crew or jobsite: not built yet** (needs a plan per crew).
 - **Daily tailgate talks:** separate records that count on their own; the weekly (or slower) talk stays the main
   record and its grading doesn't change. Not built yet.
 - **Who changes the plan:** office admins only. Crew leads give the talk that's scheduled.
@@ -533,14 +536,16 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 ## Training cards and certifications (built, migration 0023)
 - **Admin → Training:** every person with their cards (OSHA 10/30, fall protection, scaffold, aerial lift, forklift,
   crane, respirator fit test, hearing, first aid/CPR, bloodborne pathogens, confined space, HAZWOPER, asbestos, lead,
-  EPA lead-safe renovator, EPA WPS pesticide, CDL medical card, flagger, or a typed name). Each card: issued date,
+  EPA lead-safe renovator, lead-safe work practices trained by a certified renovator, DOT hazmat employee training,
+  EPA WPS pesticide, CDL medical card, DOT reasonable-suspicion supervisor training, flagger, or a typed name). Each card: issued date,
   expiry typed from the card (none = stays current), note, optional photo of the card (private, admins only).
 - **What each job title needs:** tick the cards a title needs; anyone with that title shows **Missing** until one is
   on file. Status per card: current, expiring (within 30 days), expired, missing. Home tells admins the counts.
 - **Append-only:** a renewal is a new card; a mistake is withdrawn with a reason and stays on file. The latest card per
   type counts.
 - **The app never works out an expiry from a rule.** Rule notes show only where the rule text was checked (the
-  repeat-talk rules, crane 29 CFR 1926.1427, scaffold 1926.454). HAZWOPER, CDL medical, fall protection, OSHA 10/30,
+  repeat-talk rules, crane 29 CFR 1926.1427, scaffold 1926.454, hazmat 49 CFR 172.704, lead-safe worker 40 CFR
+  745.90/745.86, DOT supervisor 49 CFR 382.603). HAZWOPER, CDL medical, fall protection, OSHA 10/30,
   first aid, confined space and RRP have no note until their rule is checked.
 - **Who sees cards:** owners, admins and office see the company's; employees see only their own on their home screen;
   presenters see none. Photos of cards: admins only.
@@ -641,13 +646,17 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   aerial lifts and rigging for construction; roof setup, brackets, kettles and hoists for roofing; temporary power and
   lockout for electrical; forklifts, cranes, guards and grinders for plants and warehouses; the driver vehicle
   inspection and cargo securement for trucking; tractors, PTO guards and grain bins for farms; bucket trucks and
-  climbing gear for utilities; sharps containers for healthcare; and so on. Each names how often its rule asks for it
+  climbing gear for utilities; sharps containers for healthcare; EPA's weekly stormwater site inspection for
+  construction (2022 Construction General Permit; a site under a state permit follows that permit) and the weekly
+  hazardous waste storage area check for auto shops and plants (small and large quantity generators); and so on. Each names how often its rule asks for it
   and every item cites its paragraph. Every industry gets at least two of its own (a test enforces it).
 - **Running one:** pick a checklist (what's due comes first), say what's being inspected, mark each item pass, fail or
   not applicable ("mark the rest as pass" for speed), a failed item needs a note and can take a photo and go on the
   issues list, the inspector signs. Saved on the phone first, uploaded when there's signal, never edited after.
-- **Due:** from how often the rule asks (each shift, daily, monthly) and the last one saved. Only checklists the company
+- **Due:** from how often the rule asks (each shift, daily, weekly, monthly) and the last one saved. Only checklists the company
   has started using count as due, so a roofer without a trench isn't told a trench check is due.
+- **Not added on purpose:** fire drills and emergency-light tests. No federal OSHA rule sets a schedule for them
+  (local fire codes and CMS do); they belong in a drill log, not an inspection checklist.
 - **After:** a failed inspection offers the related talk. The PDF lists every item, notes, photos, the signature and a
   check code that /verify accepts (counts only, no names, places, photos or the free-text subject).
 - **Wording check (built, migration 0039):** /verify also says whether the inspection used the app's own checklist

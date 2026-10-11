@@ -19,7 +19,7 @@ describe("checklist content", () => {
     for (const c of CHECKLISTS) {
       expect(c.rule, c.id).toBeTruthy();
       expect(c.sources.length, c.id).toBeGreaterThan(0);
-      for (const s of c.sources) expect(s.url, c.id).toMatch(/^https:\/\/www\.(osha\.gov|ecfr\.gov)\//);
+      for (const s of c.sources) expect(s.url, c.id).toMatch(/^https:\/\/www\.(osha\.gov|ecfr\.gov|epa\.gov)\//);
       expect(new Set(c.items.map((i) => i.id)).size, c.id).toBe(c.items.length);
       for (const it of c.items) expect(it.rule, `${c.id}/${it.id}`).toBeTruthy();
       if (c.talkId) expect(TALKS.some((t) => t.id === c.talkId), `${c.id} → ${c.talkId}`).toBe(true);
@@ -45,6 +45,8 @@ describe("running an inspection", () => {
     expect(dueState("daily", new Date(2026, 9, 9, 7).toISOString(), now).due).toBe(true);
     expect(dueState("monthly", new Date(2026, 8, 20).toISOString(), now).due).toBe(false);
     expect(dueState("monthly", new Date(2026, 7, 20).toISOString(), now).due).toBe(true);
+    expect(dueState("weekly", new Date(2026, 9, 4, 9).toISOString(), now).due).toBe(false); // 6 days ago
+    expect(dueState("weekly", new Date(2026, 9, 3, 9).toISOString(), now).due).toBe(true);  // 7 days ago: due today
     expect(dueState("each_use", null, now).due).toBe(false);
     expect(dueFor({ when: "daily", industries: ["con"] }, null, now).due).toBe(false); // not every crew has a trench
     expect(dueFor({ when: "daily", industries: ["all"] }, null, now).due).toBe(true);

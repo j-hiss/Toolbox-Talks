@@ -1,6 +1,10 @@
 // State meeting-frequency rules that a chosen cadence could fall short of. Pure module. Each rule here was read
-// against the state's own text (docs/claims-and-evidence.md, "Federal and state rules"); the other state plans
-// haven't been checked yet, so no warning there means "not checked", not "fine".
+// against the state's own text (docs/claims-and-evidence.md, "Federal and state rules"). Every state plan that covers
+// private employers was checked (2026-10-11): only these set a crew-meeting frequency. Washington general industry
+// (monthly, when meetings replace a committee) and Oregon general industry (monthly, quarterly for office work) are
+// met by every cadence the app offers (4 weeks at most), so they never warn. Committee-only rules (North Carolina,
+// Tennessee, the California and Oregon committee options) are about safety committees, not crew talks, and aren't
+// cadence warnings. Some states were only partly checked; see the evidence file.
 import { industryTags, type IndustryId } from "./industries";
 import type { Cadence } from "./plan";
 

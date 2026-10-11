@@ -13,7 +13,7 @@ export type RepeatNote = {
   /** Who it applies to, so nobody reads it as applying to everyone. */
   appliesIf: string;
   /** The agency, when it isn't OSHA. */
-  agency?: "EPA";
+  agency?: "EPA" | "DOT";
 };
 
 export const REPEAT_NOTES: Record<string, RepeatNote> = {
