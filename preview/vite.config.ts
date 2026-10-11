@@ -7,7 +7,11 @@
 //   @/lib/download               -> the preview page's own save-file prompt
 //   @/lib/weather                -> an example forecast (the preview can't reach the weather service)
 //   @/lib/offlineApp             -> off (the preview is one page; there's no sw.js beside it)
-// Run: npm run preview:build   (output: preview/dist/preview.html)
+//   @/app/checkin/page           -> a short note, in the PUBLISHED preview only (npm run preview:publish): the
+//                                   Artifact publisher refuses the page with the crew's sign-in page in it, and a
+//                                   crew phone can't open a private preview link anyway (see preview/stubs/).
+// Run: npm run preview:build   (output: preview/dist/preview.html; full, used by the phone walkthrough)
+//      npm run preview:publish (the same, minus the crew sign-in page; this is what gets published)
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -21,6 +25,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), viteSingleFile()],
   resolve: {
     alias: [
+      ...(process.env.PREVIEW_PUBLISH ? [{ find: /^@\/app\/checkin\/page$/, replacement: here("stubs/checkin-page.tsx") }] : []),
       { find: /^next\/link$/, replacement: here("shims/link.tsx") },
       { find: /^next\/navigation$/, replacement: here("shims/navigation.ts") },
       { find: /^@\/lib\/supabase$/, replacement: here("demo/supabase.ts") },

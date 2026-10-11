@@ -281,3 +281,4 @@ point the row at the real file and keep the prototype line as its origin.
 | demo sign-in | `preview/demo/supabase.ts` | Code `123456` |
 | example history | `preview/demo/example.ts` | Preview-only "Add example history": people named "Example …", eight past weeks, misses and makeups |
 | router shims | `preview/shims/` | Stand-ins for `next/link` and `next/navigation` |
+| published build | `npm run preview:publish` · `preview/stubs/checkin-page.tsx` · `preview/to-artifact.mjs` | What gets published to the preview artifact: the full preview minus the crew's own-phone sign-in page (the Artifact publisher refuses the page with it in; a crew phone can't open a private preview anyway), with fonts trimmed to Latin woff2. `npm run preview:build` stays the full build the phone walkthrough tests |

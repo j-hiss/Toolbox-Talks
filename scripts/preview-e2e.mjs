@@ -673,7 +673,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     await q.click("main button:has-text('Crew signs on their own phones')"); await q.waitForTimeout(1200);
     log("21 code shown:", await q.locator("[role=dialog] img[alt^='QR code']").count() === 1, "|", (await q.locator("ul[aria-label='Who has signed']").innerText()).replace(/\s+/g, " "));
     await q.screenshot({ path: `${OUT}/e-checkin-code.png`, fullPage: false });
-    const secret = await q.evaluate(() => JSON.parse(localStorage.getItem("tt-preview-db") || "{}").checkins?.at(-1)?.secret ?? null);
+    const secret = await q.evaluate(() => JSON.parse(localStorage.getItem("tt-preview-db") || "{}").checkins?.at(-1)?.code ?? null);
     // The crew member's phone: a separate browser holding a copy of the demo data (like the server both phones reach).
     const crewCtx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: process.env.SCHEME || "light" });
     const crew = await crewCtx.newPage();

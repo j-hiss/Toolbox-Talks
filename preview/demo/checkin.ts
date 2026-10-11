@@ -5,7 +5,7 @@ import { nearOrFar, type CheckinEntry, type WaitingSignature } from "@/core/chec
 import { db, save, tick } from "./store";
 import { accountFor } from "./account";
 
-type Session = { id: string; company_id: string; client_id: string; secret: string; roster: CheckinEntry[]; statement: string; title: string; created_at: string; expires_at: string; closed_at: string | null; spot?: Real.TalkSpot };
+type Session = { id: string; company_id: string; client_id: string; code: string; roster: CheckinEntry[]; statement: string; title: string; created_at: string; expires_at: string; closed_at: string | null; spot?: Real.TalkSpot };
 type Waiting = WaitingSignature & { session_id: string };
 const store = () => db() as unknown as { checkins?: Session[]; checkinSigs?: Waiting[] };
 // Check-ins are shared by two "phones" (tabs) in the preview, so they're reread from this browser's storage each time.
@@ -20,16 +20,16 @@ const sessions = () => (store().checkins ??= []);
 const sigs = () => (store().checkinSigs ??= []);
 const canPresent = (co: string) => ["owner", "admin", "presenter"].includes(db().members.find((m) => m.company_id === co && m.user_id === db().session?.user.id)?.access ?? "");
 // Same as the database: a paused company's code looks like any closed code.
-const live = (secret: string) => sessions().find((s) => s.secret === secret && !s.closed_at && Date.parse(s.expires_at) > Date.now() && !accountFor(s.company_id).paused_at);
+const live = (token: string) => sessions().find((s) => s.code === token && !s.closed_at && Date.parse(s.expires_at) > Date.now() && !accountFor(s.company_id).paused_at);
 
 export async function openCheckin(companyId: string, clientId: string, roster: CheckinEntry[], statement: string, title: string, spot: Real.TalkSpot): Promise<string> {
   await tick(); fresh();
   if (!canPresent(companyId)) throw new Error("Only presenters can start a check-in.");
   for (const s of sessions()) if (s.company_id === companyId && s.client_id === clientId && !s.closed_at) s.closed_at = new Date().toISOString(); // its signatures still wait
-  const secret = Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join("");
-  sessions().push({ id: crypto.randomUUID(), company_id: companyId, client_id: clientId, secret, roster, statement, title, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 3600_000).toISOString(), closed_at: null, spot });
+  const code = Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join("");
+  sessions().push({ id: crypto.randomUUID(), company_id: companyId, client_id: clientId, code, roster, statement, title, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 3600_000).toISOString(), closed_at: null, spot });
   save();
-  return secret;
+  return code;
 }
 export async function waitingSignatures(companyId: string, clientId: string): Promise<WaitingSignature[]> {
   await tick(); fresh();
