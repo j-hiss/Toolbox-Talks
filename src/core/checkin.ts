@@ -5,7 +5,8 @@
 //   presenter's phone as before.
 // - A signature from a phone goes into the draft exactly like one signed on the presenter's phone, with the time the
 //   person tapped the signing statement. It never replaces a signature already in the draft.
-import type { Signature } from "./record";
+import type { LocationFlag, Signature } from "./record";
+import { AT_SITE_METERS, distanceMeters, formatDistance, type Point } from "./geo";
 
 /** The QR code's link. The secret is after "#", so it never reaches a server log. */
 export function checkinLink(origin: string, secret: string): string {
@@ -31,7 +32,40 @@ export function reopenTaken(taken: string[], keys: string[]): string[] {
   return taken.filter((k) => !open.has(k));
 }
 
-export type WaitingSignature = { roster_key: string; name: string; image: string; signed_at: string; confirmed_at: string };
+export type WaitingSignature = { roster_key: string; name: string; image: string; signed_at: string; confirmed_at: string; distance_m: number | null; location: LocationFlag };
+
+/**
+ * Where a phone signature was against the talk's spot (the presenter's GPS, or the jobsite's). The same rule runs in
+ * the database (private.checkin_location, migration 0044), which is the one the saved record uses: near = within the
+ * at-site distance plus both phones' GPS accuracy; GPS rougher than 500 m on either side can't tell; no spot for the
+ * talk can't tell; no position is "not shared" only when the person said no, else "couldn't be checked".
+ */
+export function nearOrFar(
+  talk: (Point & { accuracyMeters?: number | null }) | null, phone: (Point & { accuracyMeters?: number | null }) | null, denied = false,
+): { flag: LocationFlag; distance: number | null } {
+  if (!phone) return { flag: denied ? "not_shared" : "unknown", distance: null };
+  if (!talk) return { flag: "unknown", distance: null };
+  const d = distanceMeters(talk, phone);
+  const distance = Math.round(d);
+  if ((phone.accuracyMeters ?? 0) > 500 || (talk.accuracyMeters ?? 0) > 500) return { flag: "unknown", distance };
+  return { flag: d > AT_SITE_METERS + (talk.accuracyMeters ?? 0) + (phone.accuracyMeters ?? 0) ? "far" : "near", distance };
+}
+
+/** How many signed people on a record signed on their own phone away from the talk, or without a location check. */
+export function locationFlagCount(attendees: { status: string; location?: LocationFlag | null }[]): number {
+  return attendees.filter((a) => a.status === "signed" && !!a.location && a.location !== "near").length;
+}
+
+/** Plain words for a phone signature's location, or null when there's nothing to flag. */
+export function locationNote(flag: LocationFlag | null | undefined, distance: number | null | undefined): { text: string; flagged: boolean } | null {
+  if (!flag) return null;
+  switch (flag) {
+    case "near": return { text: "Signed on own phone at the talk", flagged: false };
+    case "far": return { text: `Signed on own phone ${distance != null ? formatDistance(distance) : "far"} from the talk`, flagged: true };
+    case "not_shared": return { text: "Signed on own phone · location not shared", flagged: true };
+    case "unknown": return { text: "Signed on own phone · location couldn't be checked", flagged: true };
+  }
+}
 
 /**
  * Take waiting phone signatures into the draft, once each. Keeps any signature the draft already has, only for people
@@ -48,7 +82,7 @@ export function mergeCheckins(
     if (done.has(w.roster_key)) continue;
     done.add(w.roster_key);
     if (!keys.has(w.roster_key) || present[w.roster_key] === false || out.signatures[w.roster_key]) continue;
-    out.signatures[w.roster_key] = { image: w.image, signedAt: w.signed_at, confirmedAt: w.confirmed_at };
+    out.signatures[w.roster_key] = { image: w.image, signedAt: w.signed_at, confirmedAt: w.confirmed_at, via: "phone", location: w.location, distanceM: w.distance_m };
     out.added.push(w.name);
   }
   return { ...out, taken: [...done] };

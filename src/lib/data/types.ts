@@ -82,6 +82,10 @@ export type AttendanceRow = {
   signature: string | null;
   signed_at: string | null;
   confirmed_at?: string | null; // when they tapped the signing statement
+  /** Crew self check-in (migration 0044): signed on their own phone, with a location flag and distance. */
+  signed_on?: "presenter_phone" | "own_phone";
+  location?: "near" | "far" | "not_shared" | "unknown" | null;
+  distance_m?: number | null;
 };
 
 /** A saved talk as listed (no signatures). */

@@ -1036,19 +1036,19 @@ async function main() {
       check("With the code, a phone sees the company, talk, statement and names only", view.company === "Company A" && view.title === "Ladders" && view.roster.length === 2
         && Object.keys(view).sort().join() === "company,expires_at,roster,statement,title" && view.roster.every((r) => Object.keys(r).sort().join() === "key,name,signed"));
       check("A wrong code shows nothing and signs nothing", (await as(null, "select public.checkin_view($1) as v", ["0".repeat(64)])).rows[0].v === null
-        && (await as(null, "select public.checkin_sign($1, 'p1', $2, now()) as ok", ["0".repeat(64), png])).rows[0].ok === false);
-      check("A crew member signs once for their own name, no account needed", (await as(null, "select public.checkin_sign($1, 'p1', $2, now()) as ok", [secret, png])).rows[0].ok === true
-        && (await as(null, "select public.checkin_sign($1, 'p1', $2, now()) as ok", [secret, png])).rows[0].ok === false);
-      check("Names not on the roster and non-images are refused", (await as(null, "select public.checkin_sign($1, 'p9', $2, now()) as ok", [secret, png])).rows[0].ok === false
-        && (await as(null, "select public.checkin_sign($1, 'p2', 'data:text/html,<script>', now()) as ok", [secret])).rows[0].ok === false);
+        && (await as(null, "select public.checkin_sign($1, 'p1', $2, now(), null, null, null, false) as ok", ["0".repeat(64), png])).rows[0].ok === false);
+      check("A crew member signs once for their own name, no account needed", (await as(null, "select public.checkin_sign($1, 'p1', $2, now(), null, null, null, false) as ok", [secret, png])).rows[0].ok === true
+        && (await as(null, "select public.checkin_sign($1, 'p1', $2, now(), null, null, null, false) as ok", [secret, png])).rows[0].ok === false);
+      check("Names not on the roster and non-images are refused", (await as(null, "select public.checkin_sign($1, 'p9', $2, now(), null, null, null, false) as ok", [secret, png])).rows[0].ok === false
+        && (await as(null, "select public.checkin_sign($1, 'p2', 'data:text/html,<script>', now(), null, null, null, false) as ok", [secret])).rows[0].ok === false);
       check("The presenter's company sees waiting signatures; another company and visitors don't", (await as(presenterA, "select roster_key from public.checkin_signatures")).rows.map((r) => r.roster_key).join() === "p1"
         && (await as(userB, "select id from public.checkin_signatures")).rows.length === 0 && await fails(() => as(null, "select id from public.checkin_signatures")));
       check("Nobody reads the code's fingerprint, even the company", await fails(() => as(userA, "select token_hash from public.checkin_sessions")));
       check("Nobody writes waiting signatures directly", await fails(() => as(userA, "insert into public.checkin_signatures (company_id, session_id, roster_key, name, image, confirmed_at) select company_id, id, 'p2', 'x', $2, now() from public.checkin_sessions where client_id = $1", [tc, png])));
       check("B can't close A's check-in or take its signatures", await fails(() => as(userB, "select public.close_checkin($1, $2)", [coA, tc])) && await fails(() => as(userB, "select public.take_checkin_signatures($1, $2, array['p1'])", [coA, tc])));
-      check("Broken or fake images are refused, so nothing can stop the talk from uploading", (await as(null, "select public.checkin_sign($1, 'p2', 'data:image/png;base64,@@@!!', now()) as ok", [secret])).rows[0].ok === false
-        && (await as(null, "select public.checkin_sign($1, 'p2', 'data:image/png;base64,AAAA', now()) as ok", [secret])).rows[0].ok === false
-        && (await as(null, "select public.checkin_sign($1, 'p2', $2, now()) as ok", [secret, "data:image/png;base64,iVBORw0KGgo" + "A".repeat(200001)])).rows[0].ok === false);
+      check("Broken or fake images are refused, so nothing can stop the talk from uploading", (await as(null, "select public.checkin_sign($1, 'p2', 'data:image/png;base64,@@@!!', now(), null, null, null, false) as ok", [secret])).rows[0].ok === false
+        && (await as(null, "select public.checkin_sign($1, 'p2', 'data:image/png;base64,AAAA', now(), null, null, null, false) as ok", [secret])).rows[0].ok === false
+        && (await as(null, "select public.checkin_sign($1, 'p2', $2, now(), null, null, null, false) as ok", [secret, "data:image/png;base64,iVBORw0KGgo" + "A".repeat(200001)])).rows[0].ok === false);
       check("A roster entry with no name is refused", await fails(() => as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'x')", [coA, randomUUID(), JSON.stringify([{ key: "p1" }])])));
       const sRestart = (await as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders') as s", [coA, tc, roster])).rows[0].s;
       check("Restarting the code keeps signatures already given, and the old code stops working", (await as(presenterA, "select roster_key from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc])).rows.map((r) => r.roster_key).join() === "p1"
@@ -1057,18 +1057,66 @@ async function main() {
       check("Signatures the phone took are deleted from the waiting area", (await db.query("select count(*)::int as n from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc])).rows[0].n === 0);
       await db.query("update public.company_accounts set paused_at = now() where company_id = $1", [coA]);
       check("A paused company's code looks closed, like any wrong code (no hint that it's paused)", (await as(null, "select public.checkin_view($1) as v", [sRestart])).rows[0].v === null
-        && (await as(null, "select public.checkin_sign($1, 'p2', $2, now()) as ok", [sRestart, png])).rows[0].ok === false);
+        && (await as(null, "select public.checkin_sign($1, 'p2', $2, now(), null, null, null, false) as ok", [sRestart, png])).rows[0].ok === false);
       await db.query("update public.company_accounts set paused_at = null where company_id = $1", [coA]);
-      await as(null, "select public.checkin_sign($1, 'p2', $2, now())", [sRestart, png]);
+      await as(null, "select public.checkin_sign($1, 'p2', $2, now(), null, null, null, false)", [sRestart, png]);
       await as(presenterA, "select public.close_checkin($1, $2)", [coA, tc]);
       check("Closed, the code stops working and waiting signatures are deleted", (await as(null, "select public.checkin_view($1) as v", [sRestart])).rows[0].v === null
         && (await db.query("select count(*)::int as n from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc])).rows[0].n === 0);
       const s2 = (await as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders') as s", [coA, tc, roster])).rows[0].s;
       await db.query("update public.checkin_sessions set expires_at = now() - interval '1 minute' where token_hash = encode(sha256(convert_to($1, 'UTF8')), 'hex')", [s2]);
-      check("An expired code stops working", (await as(null, "select public.checkin_sign($1, 'p2', $2, now()) as ok", [s2, png])).rows[0].ok === false);
+      check("An expired code stops working", (await as(null, "select public.checkin_sign($1, 'p2', $2, now(), null, null, null, false) as ok", [s2, png])).rows[0].ok === false);
       await db.query("update public.checkin_sessions set expires_at = now() - interval '2 days' where token_hash = encode(sha256(convert_to($1, 'UTF8')), 'hex')", [s2]);
       await as(null, "select public.checkin_view($1)", ["0".repeat(64)]);
       check("Check-ins a day past expiry are cleared on any check-in call, for every company", (await db.query("select count(*)::int as n from public.checkin_sessions where token_hash = encode(sha256(convert_to($1, 'UTF8')), 'hex')", [s2])).rows[0].n === 0);
+    }
+
+    // Location flag on phone signatures (0044): only a distance and a flag are kept; flagged signatures still count;
+    // the saved record uses the flag the database kept, never what a phone sends.
+    {
+      const tc = randomUUID();
+      const png = "data:image/png;base64,iVBORw0KGgo=";
+      const ids = { n1: randomUUID(), f1: randomUUID(), x1: randomUUID(), g1: randomUUID(), r1: randomUUID() };
+      for (const [k, id] of Object.entries(ids)) await db.query("insert into public.people (id, company_id, full_name) values ($1, $2, $3)", [id, coA, `Example ${k}`]);
+      const roster = JSON.stringify(Object.entries(ids).map(([k, id]) => ({ key: id, name: `Example ${k}` })));
+      const sec = (await as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders', 26.6, -81.9, 20) as s", [coA, tc, roster])).rows[0].s;
+      const sign = (key, lat, lng, acc, denied = false) => as(null, "select public.checkin_sign($1, $2, $3, now(), $4, $5, $6, $7) as ok", [sec, key, png, lat, lng, acc, denied]);
+      await sign(ids.n1, 26.6005, -81.9, 15);          // ~55 m away
+      await sign(ids.f1, 26.62, -81.9, 15);            // ~2.2 km away
+      await sign(ids.x1, null, null, null, true);      // said no to location
+      await sign(ids.g1, null, null, null, false);     // GPS failed
+      await sign(ids.r1, 26.6, -81.9, 600);            // GPS too rough to tell
+      const got = Object.fromEntries((await as(presenterA, "select roster_key, location, distance_m from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc])).rows.map((r) => [r.roster_key, r]));
+      check("A phone signature near the talk is 'near'; far away is 'far' with its distance", got[ids.n1]?.location === "near" && got[ids.n1].distance_m < 100 && got[ids.f1]?.location === "far" && got[ids.f1].distance_m > 2000);
+      check("Saying no to location is 'not shared'; a GPS failure or a fix rougher than 500 m is 'unknown', never 'near'", got[ids.x1]?.location === "not_shared" && got[ids.g1]?.location === "unknown" && got[ids.r1]?.location === "unknown");
+      check("The phone's position itself is never stored anywhere, only the distance", (await db.query("select table_name, column_name from information_schema.columns where table_schema = 'public' and (column_name ~ '(lat|lng|latitude|longitude)$') and table_name ~ '^checkin|talk_attendees'")).rows.every((r) => r.table_name === "checkin_sessions" && /^near_/.test(r.column_name)));
+      const tc2 = randomUUID();
+      const sec2 = (await as(presenterA, "select public.open_checkin($1, $2, $3::jsonb, 'I attended', 'Ladders', null, null, null) as s", [coA, tc2, roster])).rows[0].s;
+      await as(null, "select public.checkin_sign($1, $2, $3, now(), 26.6, -81.9, 10, false)", [sec2, ids.n1, png]);
+      check("With no spot for the talk, a phone signature is 'unknown', never 'near'", (await as(presenterA, "select location from public.checkin_signatures s join public.checkin_sessions c on c.id = s.session_id where c.client_id = $1", [tc2])).rows[0]?.location === "unknown");
+      let oldErr = ""; try { await as(null, "select public.checkin_sign($1, $2, $3, now())", [sec2, ids.f1, png]); } catch (e) { oldErr = e.message; }
+      check("Phones can't use the old way of signing that skips the location check", /permission denied/.test(oldErr));
+      // The presenter's phone takes them; the database keeps each flag; the save uses the database's flag.
+      await as(presenterA, "select public.take_checkin_signatures($1, $2, $3::text[])", [coA, tc, Object.values(ids)]);
+      check("Taking signatures keeps each flag in the database (no image, no position)", (await as(presenterA, "select count(*)::int as n from public.checkin_results where client_id = $1", [tc])).rows[0].n === 5
+        && (await as(userB, "select 1 from public.checkin_results")).rows.length === 0);
+      const paths = [0, 1, 2].map((i) => `${coA}/${tc}/sig-${i}.png`);
+      for (const pth of paths) await upload(userA, pth);
+      // A tampered phone sends "near"/"presenter_phone" for the far one: the database's flag wins.
+      const rid = (await as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", [
+        JSON.stringify({ company_id: coA, client_id: tc, talk_id: "fall", language: "en", content: { title: "Fall Protection" }, presenter_name: "Presenter", held_at: new Date().toISOString() }),
+        JSON.stringify([
+          { person_id: ids.f1, name: "Example f1", status: "signed", signature_path: paths[0], signed_on: "presenter_phone", location: "near", distance_m: 1 },
+          { person_id: ids.n1, name: "Example n1", status: "signed", signature_path: paths[1], signed_on: "own_phone", location: "bogus" },
+          { person_id: null, name: "Example Walk-in", status: "signed", signature_path: paths[2], signed_on: "own_phone", location: "near" },
+          { person_id: ids.x1, name: "Example x1", status: "absent" },
+        ]),
+      ])).rows[0].id;
+      const rows = (await as(userA, "select name, status, signed_on, distance_m, location from public.talk_attendees where record_id = $1 order by position", [rid])).rows;
+      check("A tampered save can't clean a flag: the record keeps the database's 'far' and distance, still signed", rows[0].status === "signed" && rows[0].signed_on === "own_phone" && rows[0].location === "far" && rows[0].distance_m > 2000);
+      check("A made-up flag from the phone is ignored, never blocks the save", rows[1].location === "near" && rows[1].signed_on === "own_phone");
+      check("Without a database record of a phone signature, it's a presenter-phone signature; absent people carry no flag", rows[2].signed_on === "presenter_phone" && rows[2].location === null && rows[3].location === null);
+      check("After the save, the kept flags are cleared", (await db.query("select count(*)::int as n from public.checkin_results where client_id = $1", [tc])).rows[0].n === 0);
     }
 
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
@@ -1089,7 +1137,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 180;
+  const EXPECTED = 417;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

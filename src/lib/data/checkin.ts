@@ -8,15 +8,21 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
   return res.data as T;
 }
 
+/** Where the talk is (presenter's GPS or the jobsite), for flagging phone signatures far from it; null = unknown. */
+export type TalkSpot = { latitude: number; longitude: number; accuracyMeters: number | null } | null;
+
 /** Start (or restart) a check-in for this talk. Returns the secret for the QR code. */
-export async function openCheckin(companyId: string, clientId: string, roster: CheckinEntry[], statement: string, title: string): Promise<string> {
-  return check(await supabase().rpc("open_checkin", { co: companyId, talk_client: clientId, roster, statement, title })) as string;
+export async function openCheckin(companyId: string, clientId: string, roster: CheckinEntry[], statement: string, title: string, spot: TalkSpot): Promise<string> {
+  return check(await supabase().rpc("open_checkin", {
+    co: companyId, talk_client: clientId, roster, statement, title,
+    near_lat: spot?.latitude ?? null, near_lng: spot?.longitude ?? null, near_accuracy_m: spot?.accuracyMeters != null ? Math.round(spot.accuracyMeters) : null,
+  })) as string;
 }
 
 /** Signatures waiting for this talk (presenters of the company only). */
 export async function waitingSignatures(companyId: string, clientId: string): Promise<WaitingSignature[]> {
   // Every check-in for this talk, open or restarted: a signature given with an earlier code is never lost.
-  const rows = check(await supabase().from("checkin_signatures").select("roster_key, name, image, signed_at, confirmed_at, checkin_sessions!inner(client_id)")
+  const rows = check(await supabase().from("checkin_signatures").select("roster_key, name, image, signed_at, confirmed_at, distance_m, location, checkin_sessions!inner(client_id)")
     .eq("company_id", companyId).eq("checkin_sessions.client_id", clientId)) as unknown as (WaitingSignature & { checkin_sessions: unknown })[];
   return rows.map(({ checkin_sessions: _s, ...w }) => { void _s; return w; });
 }
@@ -38,7 +44,13 @@ export async function checkinView(token: string): Promise<CheckinView | null> {
   return (check(await supabase().rpc("checkin_view", { token })) as CheckinView | null) ?? null;
 }
 
-/** Sign once for one name. False when the code is closed, the name isn't open, or it's already signed. */
-export async function checkinSign(token: string, key: string, image: string, confirmedAt: string): Promise<boolean> {
-  return check(await supabase().rpc("checkin_sign", { token, key, image, confirmed_at: confirmedAt })) as boolean;
+/**
+ * Sign once for one name, with this phone's location when allowed (null when not; it's flagged). Only the distance
+ * from the talk is kept. False when the code is closed, the name isn't open, or it's already signed.
+ */
+export async function checkinSign(token: string, key: string, image: string, confirmedAt: string, at: { latitude: number; longitude: number; accuracyMeters: number } | null, denied: boolean): Promise<boolean> {
+  return check(await supabase().rpc("checkin_sign", {
+    token, key, image, confirmed_at: confirmedAt, lat: at?.latitude ?? null, lng: at?.longitude ?? null, accuracy_m: at ? Math.round(at.accuracyMeters) : null,
+    location_denied: !at && denied,
+  })) as boolean;
 }

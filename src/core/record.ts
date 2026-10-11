@@ -5,8 +5,14 @@ import { resolveStatus, type AttendanceStatus } from "./attendance";
 import type { TalkText } from "./talks";
 import type { LanguageId } from "./languages";
 
-/** A finger signature, and when the signer tapped the signing statement before signing (see SigningStatement). */
-export type Signature = { image: string; signedAt: string; confirmedAt?: string };
+/** Where a signature given on the crew member's own phone was, against the talk's spot (src/core/checkin.ts). */
+export type LocationFlag = "near" | "far" | "not_shared" | "unknown";
+
+/**
+ * A finger signature, and when the signer tapped the signing statement before signing (see SigningStatement). One
+ * given on the crew member's own phone (crew self check-in) carries via "phone" and its location flag and distance.
+ */
+export type Signature = { image: string; signedAt: string; confirmedAt?: string; via?: "phone"; location?: LocationFlag; distanceM?: number | null };
 
 /** The exact statement each crew member tapped before signing, saved with the record so the PDF matches. */
 export type SigningStatement = { text: string; en: string; language: string; version: number };
@@ -31,6 +37,10 @@ export type AttendeeRow = {
   signature: string | null;
   signed_at: string | null;
   confirmed_at: string | null; // when they tapped the signing statement (null on records from before it existed)
+  /** Signed on the presenter's phone, or on their own (crew self check-in) with a location flag and distance. */
+  signed_on: "presenter_phone" | "own_phone";
+  location: LocationFlag | null;
+  distance_m: number | null;
 };
 
 /**
@@ -52,6 +62,9 @@ export function buildAttendees(roster: RosterEntry[], present: Record<string, bo
       signature: status === "signed" ? sig!.image : null,
       signed_at: status === "signed" ? sig!.signedAt : null,
       confirmed_at: status === "signed" ? sig!.confirmedAt ?? null : null,
+      signed_on: status === "signed" && sig!.via === "phone" ? "own_phone" : "presenter_phone",
+      location: status === "signed" && sig!.via === "phone" ? sig!.location ?? "unknown" : null,
+      distance_m: status === "signed" && sig!.via === "phone" ? sig!.distanceM ?? null : null,
     };
   });
 }

@@ -14,6 +14,7 @@ import { normalizeTheme, printBrand, rgb } from "@/core/theme";
 import { DOCUMENT_KINDS, type SafetyProfile } from "@/core/profile";
 import { formatCode, verifyLink } from "@/core/verify";
 import { EMPLOYEE_ACCESS, FALSIFYING, KINDS, OUTCOMES, incidentGaps, caseLabel, logTotals, nameOnLog, postingWindow, type InjuryCase, type InjurySummary } from "@/core/oshaLog";
+import { locationFlagCount, locationNote } from "@/core/checkin";
 import { drawQr } from "./qr";
 import { appWebAddress } from "./webAddress";
 
@@ -161,12 +162,13 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
 
   // Attendance summary --------------------------------------------------------------------------------------------
   const c = countStatuses(r.attendees);
-  const flagged = c.flagged + (r.presenter_signature ? 0 : 1);
+  const away = locationFlagCount(r.attendees);   // phone signatures away from the talk or not checked: counted, never hidden
+  const flagged = c.flagged + (r.presenter_signature ? 0 : 1) + away;
   y += 2;
   if (flagged) doc.setFillColor(251, 230, 228); else doc.setFillColor(236, 244, 238);
   doc.roundedRect(M, y, CW, 26, 3, 3, "F");
   doc.setFont("helvetica", "bold"); doc.setFontSize(10);
-  doc.text(`Attendance: ${c.signed} signed  ·  ${c.not_signed} not signed  ·  ${c.absent} absent`, M + 10, y + 17);
+  doc.text(`Attendance: ${c.signed} signed  ·  ${c.not_signed} not signed  ·  ${c.absent} absent${away ? `  ·  ${away} location ${away === 1 ? "flag" : "flags"}` : ""}`, M + 10, y + 17);
   if (flagged) { doc.setTextColor(...RED); doc.text(`${flagged} FLAGGED`, W - M - 10, y + 17, { align: "right" }); doc.setTextColor(0); }
   y += 44;
 
@@ -267,6 +269,13 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
     doc.setFont("helvetica", "bold"); doc.text(doc.splitTextToSize(a.name, 155)[0] ?? "", COL.name, y + 18);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100);
     doc.text(doc.splitTextToSize([a.role, a.team_name, a.company_name].filter(Boolean).join(" · "), 155)[0] ?? "", COL.name, y + 30); doc.setTextColor(0);
+    // Signed on their own phone (crew self check-in): say so, and flag one away from the talk or without a location.
+    const where = a.status === "signed" ? locationNote(a.location, a.distance_m) : null;
+    if (where) {
+      doc.setFont("helvetica", where.flagged ? "bold" : "normal"); doc.setFontSize(7);
+      if (where.flagged) doc.setTextColor(...RED); else doc.setTextColor(110);
+      doc.text(doc.splitTextToSize(`${where.flagged ? "FLAG: " : ""}${where.text}`, 165)[0] ?? "", COL.name, y + 40); doc.setTextColor(0);
+    }
     doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...(flag ? RED : GREEN));
     doc.text(STATUS_LABEL[a.status].toUpperCase(), COL.status, y + 22); doc.setTextColor(0);
     image(a.signature, COL.sig, y + 2);

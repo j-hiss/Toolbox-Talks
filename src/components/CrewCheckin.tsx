@@ -10,9 +10,9 @@
 //   is deleted from the waiting area, so nothing comes back after the presenter changes it.
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
-import { checkinLink, checkinRoster, type WaitingSignature } from "@/core/checkin";
+import { checkinLink, checkinRoster, locationNote, type WaitingSignature } from "@/core/checkin";
 import type { Signature } from "@/core/record";
-import { closeCheckin, openCheckin, takeCheckinSignatures, waitingSignatures } from "@/lib/data/checkin";
+import { closeCheckin, openCheckin, takeCheckinSignatures, waitingSignatures, type TalkSpot } from "@/lib/data/checkin";
 import { Button, Notice, Sheet } from "./ui";
 import { toast } from "./toast";
 
@@ -37,11 +37,13 @@ export async function endCheckin(companyId: string, clientId: string): Promise<v
   await closeCheckin(companyId, clientId).catch(() => { /* cleared within a day of expiring */ });
 }
 
-export function CrewCheckin({ companyId, clientId, roster, present, signatures, statement, title, team, active, setActive, take, onOpened, hidden = false }: {
+export function CrewCheckin({ companyId, clientId, roster, present, signatures, statement, title, team, spot, active, setActive, take, onOpened, hidden = false }: {
   companyId: string; clientId: string; roster: Entry[]; present: Record<string, boolean>; signatures: Record<string, Signature>;
   statement: string; title: string;
   /** The team the presenter picked; its people are the names offered. */
   team: string;
+  /** Where the talk is: phone signatures far from it are flagged. */
+  spot: TalkSpot;
   active: boolean; setActive: (on: boolean) => void; take: TakeSignatures;
   /** A new code opened for these names: they may sign by phone again. */
   onOpened: (keys: string[]) => void;
@@ -84,7 +86,7 @@ export function CrewCheckin({ companyId, clientId, roster, present, signatures, 
     if (!who.length) { setError("Everyone here has signed."); return; }
     setBusy(true);
     try {
-      const secret = await openCheckin(companyId, clientId, who, statement, title); // an earlier code stops; its signatures still wait
+      const secret = await openCheckin(companyId, clientId, who, statement, title, spot); // an earlier code stops; its signatures still wait
       setQr(await QRCode.toDataURL(checkinLink(window.location.origin, secret), { errorCorrectionLevel: "M", margin: 1, width: 560 }));
       onOpened(who.map((w) => w.key)); setActive(true); setSheet(true);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
@@ -113,13 +115,15 @@ export function CrewCheckin({ companyId, clientId, roster, present, signatures, 
           <p className="text-center text-sm">{team ? <>{team}: open </> : "Crew: open "}your phone&apos;s camera, scan this, pick your name and sign. No app or account needed.</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {qr && <img src={qr} alt="QR code for crew to sign on their phones" className="w-full max-w-[280px] rounded-xl bg-white p-2" />}
-          <p className="text-center text-xs text-muted">Only the people on {team || "this team"} who are marked here are listed. Works only for this talk, once each, for 1 hour. Signatures appear here as they come in; check each one is someone who&apos;s here.</p>
+          <p className="text-center text-xs text-muted">Only the people on {team || "this team"} who are marked here are listed. Works only for this talk, once each, for 1 hour. Signatures appear here as they come in. Anyone who signs away from here, or doesn&apos;t share their location, is flagged.</p>
         </div>
         <ul aria-label="Who has signed" className="mt-4 flex flex-col gap-1.5">
           {onRoster.map((r) => (
             <li key={r.key} className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${signatures[r.key] ? "border-ok bg-ok-bg" : "border-line"}`}>
               <span aria-hidden className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${signatures[r.key] ? "bg-ok text-white" : "border-2 border-line"}`}>{signatures[r.key] ? "✓" : ""}</span>
-              <span className="flex-1">{r.name}</span>
+              <span className="min-w-0 flex-1">{r.name}
+                {(() => { const n = locationNote(signatures[r.key]?.location, signatures[r.key]?.distanceM); return n?.flagged ? <small className="block font-semibold text-warn-ink">⚠ {n.text}</small> : null; })()}
+              </span>
               <small className="text-muted">{signatures[r.key] ? "Signed" : "Waiting"}</small>
             </li>
           ))}

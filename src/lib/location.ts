@@ -4,7 +4,10 @@ import type { Point } from "@/core/geo";
 
 export type Fix = Point & { accuracyMeters: number };
 
-export class LocationError extends Error {}
+export class LocationError extends Error {
+  /** True when the person (or the phone's settings) said no to sharing location, not a GPS failure. */
+  constructor(message: string, readonly denied = false) { super(message); }
+}
 
 export function getLocation(timeoutMs = 15_000): Promise<Fix> {
   return new Promise((resolve, reject) => {
@@ -24,6 +27,7 @@ export function getLocation(timeoutMs = 15_000): Promise<Fix> {
               : e.code === e.TIMEOUT
                 ? "Couldn't get a GPS fix in time. Step outside or away from steel, then try again."
                 : "Couldn't find your location. Try again in a moment.",
+            e.code === e.PERMISSION_DENIED,
           ),
         ),
       { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 30_000 },

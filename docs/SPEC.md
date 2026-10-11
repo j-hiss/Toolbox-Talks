@@ -699,9 +699,21 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   is stored. Signatures wait in a private table only that company's presenters can read; each is deleted as soon as the
   presenter's phone takes it, the rest when the talk is saved or discarded, and every check-in a day past expiry is
   cleared. Only real PNG images under 200 KB are accepted. A paused company's code just looks closed.
-- **Honest limit:** anyone holding the code could sign for an unsigned name (the code could be texted off site). The
-  presenter sees each signature arrive and the code lasts an hour. The saved record doesn't yet say which signatures
-  came from a phone.
+- **Which team:** the names offered are the people on the team the presenter picked on "Who's here" (or all teams, or
+  those who still need the talk), marked here. The team's name shows on the QR screen and the crew's phone.
+- **Location flag (migration 0044; Joe: "if someone isn't at the site or in proximity to the person giving the talk it
+  should flag"):** the talk's spot is the presenter's GPS, or the jobsite's pin. When a crew member sends their
+  signature, their phone's location is checked once against it, in the database. Near = within the at-site distance
+  (400 m) plus both phones' GPS accuracy. Flagged: far away, "location not shared" (they said no), or "couldn't be
+  checked" (GPS failed, rougher than 500 m, or no spot for the talk). A flagged signature still counts as signed (they
+  did sign) and the flag is never hidden: on the presenter's list as it arrives, on the review screen, on the saved
+  record ("Signed on own phone 1.4 mi from the talk"), counted in the record's flags, and on the PDF in red. The
+  database keeps each flag when the presenter's phone takes the signature and the saved record uses that, so an
+  edited app can't clean a flag. Only the distance is kept, never where the worker was.
+- **Honest limits:** the flag is worked out from what the phones report, and the talk's spot comes from the
+  presenter's phone (or the jobsite pin); a determined person can fake a phone's location. It shows who signed from
+  somewhere else, not proof of who was there. Release note: migration 0044 and the app update go out together (the
+  new crew page needs it; the old one stops working once it's applied).
 
 ## Running many companies (built, migration 0042; decided with Joe 2026-10-11)
 - **Plans:** each company has a plan: Trial, Pilot, Paid or Complimentary, plus an optional trial end date. Labels only

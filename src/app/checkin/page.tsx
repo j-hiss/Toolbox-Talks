@@ -9,6 +9,7 @@ import { secretFromHash } from "@/core/checkin";
 import type { Signature } from "@/core/record";
 import { checkinSign, checkinView, type CheckinView } from "@/lib/data/checkin";
 import { SignaturePad } from "@/components/SignaturePad";
+import { LocationError, getLocation } from "@/lib/location";
 import { Button, Eyebrow, Loading, Mark, Notice, Title } from "@/components/ui";
 import { BRAND } from "@/content/brand";
 
@@ -37,7 +38,10 @@ export default function CheckinPage() {
     if (!secret || !pick || !sig || !confirmedAt) return;
     setSending(true); setNotice(null);
     try {
-      const ok = await checkinSign(secret, pick.key, sig.image, confirmedAt);
+      // Checked once to show the presenter you're at the talk. Only the distance is kept; saying no is allowed (flagged).
+      let denied = false;
+      const at = await getLocation(8000).catch((e) => { denied = e instanceof LocationError && e.denied; return null; });
+      const ok = await checkinSign(secret, pick.key, sig.image, confirmedAt, at, denied);
       if (ok) { setState({ kind: "done", name: pick.name }); return; }
       setNotice(`${pick.name} is already signed, or signing has closed. Ask the presenter.`);
       setPick(null); setSig(null); setConfirmedAt(null); load(secret);
@@ -100,6 +104,7 @@ export default function CheckinPage() {
             </div>
             {notice && <div className="mt-3"><Notice tone="error">{notice}</Notice></div>}
             <div className="mt-5 flex flex-col gap-2">
+              <p className="text-xs text-muted">When you send, your phone may ask to share your location. It&apos;s checked once to show you&apos;re at the talk; only how far you were is kept. If you don&apos;t share it, your signature still counts and is marked &quot;location not shared&quot;.</p>
               <Button type="button" disabled={!sig || !confirmedAt || sending} onClick={send}>{sending ? "Sending…" : "Send my signature"}</Button>
               <Button type="button" variant="ghost" onClick={() => { setPick(null); setSig(null); setConfirmedAt(null); }}>That&apos;s not me</Button>
             </div>

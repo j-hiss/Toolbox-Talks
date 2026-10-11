@@ -1,6 +1,7 @@
 "use client";
 
 // One saved talk: what was read, where, by whom, and every person's status and signature. Read-only by design.
+import { locationFlagCount, locationNote } from "@/core/checkin";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { getRecord } from "@/lib/data/records";
@@ -64,7 +65,7 @@ function RecordView({ m }: { m: Membership }) {
   };
 
   const c = countStatuses(rec.attendees);
-  const flagged = c.flagged + (rec.presenter_signature ? 0 : 1);
+  const flagged = c.flagged + (rec.presenter_signature ? 0 : 1) + locationFlagCount(rec.attendees);
   const scheduled = rec.scheduled_talk_id && rec.scheduled_talk_id !== rec.talk_id ? findTalk(rec.scheduled_talk_id)?.content.en.title : null;
   const when = new Date(rec.held_at).toLocaleString([], { weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
   const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "");
@@ -97,7 +98,10 @@ function RecordView({ m }: { m: Membership }) {
       </dl>
 
       <div className={`mt-4 flex flex-wrap items-center gap-2 rounded-lg border px-4 py-3 text-sm tabular-nums ${flagged ? "border-warn bg-warn-bg" : "border-ok bg-surface"}`}>
-        <span><b>{signedSummary(c)}</b> · {rec.presenter_signature ? "presenter signed" : "presenter not signed"}</span>
+        <span><b>{signedSummary(c)}</b> · {rec.presenter_signature ? "presenter signed" : "presenter not signed"}
+          {(() => { const away = locationFlagCount(rec.attendees);
+            return away ? <> · <b className="text-warn-ink">{away} phone {away === 1 ? "signature" : "signatures"} flagged for location</b></> : null; })()}
+        </span>
         <span className="ml-auto"><FlagChip n={flagged} /></span>
       </div>
 
@@ -114,6 +118,7 @@ function RecordView({ m }: { m: Membership }) {
             <span className="min-w-0 flex-1">
               <b className="block">{a.name}</b>
               <small className="text-muted">{[a.role, a.team_name, a.company_name].filter(Boolean).join(" · ")}{a.signed_at ? ` · ${time(a.signed_at)}` : ""}</small>
+              {(() => { const n = locationNote(a.location, a.distance_m); return n ? <small className={`block ${n.flagged ? "font-semibold text-warn-ink" : "text-muted"}`}>{n.flagged ? "⚠ " : ""}{n.text}</small> : null; })()}
             </span>
             {a.signature ? (
               // eslint-disable-next-line @next/next/no-img-element

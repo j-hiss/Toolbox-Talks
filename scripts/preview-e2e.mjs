@@ -695,7 +695,11 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     log("21 presenter sees it:", (await q.locator("ul[aria-label='Who has signed']").innerText()).replace(/\s+/g, " "));
     await q.click("[role=dialog] button:has-text('Stop phone signing')"); await q.waitForTimeout(800);
     log("21 stopped, waiting deleted:", await q.evaluate(() => (JSON.parse(localStorage.getItem("tt-preview-db") || "{}").checkinSigs ?? []).length === 0));
-    await q.evaluate(() => localStorage.removeItem(Object.keys(localStorage).find((k) => k.startsWith("tt-draft-")) ?? "x"));
+    // Save the talk (others still unsigned are flagged as such) and check the phone signature's flag reached the record.
+    if (await q.locator("main button:has-text('Review all')").count()) { await q.click("main button:has-text('Review all')"); await q.waitForTimeout(300); }
+    await q.locator("main button:has-text('Save and flag'), main button:has-text('Save record')").first().click(); await q.waitForTimeout(1500);
+    const saved = await q.evaluate(() => { const d = JSON.parse(localStorage.getItem("tt-preview-db") || "{}"); const r = (d.records ?? []).at(-1); return (r?.attendees ?? []).map((a) => `${a.name}:${a.status}:${a.signed_on ?? "-"}:${a.location ?? "-"}`).join(" | "); });
+    log("21 saved record:", saved);
   } else log("21: no talk to start on Home");
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");

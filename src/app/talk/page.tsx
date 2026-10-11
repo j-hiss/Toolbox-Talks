@@ -4,7 +4,7 @@
 // every crew gives the same one. A makeup gives a missed week's talk, keeps today's real date and GPS, and says why. The talk in progress lives in a draft on the phone
 // (src/lib/draft.ts), and the finished record goes through the offline outbox (src/lib/outbox.ts).
 import { CrewCheckin, collectPhoneSignatures, endCheckin, type TakeSignatures } from "@/components/CrewCheckin";
-import { mergeCheckins, reopenTaken } from "@/core/checkin";
+import { locationNote, mergeCheckins, reopenTaken } from "@/core/checkin";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -697,6 +697,12 @@ function Sign({
   // shows on both screens so everyone knows which list they're on.
   const checkinTeam = org.teams.find((x) => x.id === draft.teamId)?.name
     ?? (draft.teamId === "all" ? "All teams" : draft.teamId === "needs" ? "Still needed it" : "");
+  // Where the talk is, to flag phone signatures far from it: this phone's GPS, else the jobsite's pin.
+  const checkinSpot = (() => {
+    if (draft.gps) return { latitude: draft.gps.latitude, longitude: draft.gps.longitude, accuracyMeters: draft.gps.accuracyMeters };
+    const j = org.jobsites.find((x) => x.id === draft.jobsiteId);
+    return j && j.latitude != null && j.longitude != null ? { latitude: j.latitude, longitude: j.longitude, accuracyMeters: null } : null;
+  })();
   const checkinTitle = (() => {
     const talkName = draft.kind === "daily" ? (draft.lang === "es" ? "Plan de trabajo del día" : "Today's pre-task plan")
       : (() => { const tk = findTalk(draft.talkId); return tk ? talkText(tk, draft.lang).text.title : ""; })();
@@ -714,7 +720,7 @@ function Sign({
   const reopenPhone = (keys: string[]) => { const cur = readDraft(m.company.id); if (cur && cur.clientId === draft.clientId) writeDraft({ ...cur, phoneTaken: reopenTaken(cur.phoneTaken ?? [], keys) }); };
   const checkinProps = {
     companyId: m.company.id, clientId: draft.clientId, roster, present: draft.present, signatures: draft.signatures,
-    statement: checkinStatement, title: checkinTitle, team: checkinTeam, active: !!draft.phoneSigning, setActive: setPhoneSigning, take: takePhone, onOpened: reopenPhone,
+    statement: checkinStatement, title: checkinTitle, team: checkinTeam, spot: checkinSpot, active: !!draft.phoneSigning, setActive: setPhoneSigning, take: takePhone, onOpened: reopenPhone,
   };
   const phoneSigning = <CrewCheckin {...checkinProps} />;
 
@@ -817,7 +823,9 @@ function Sign({
                 <button onClick={() => go(i)} className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left ${sig ? "border-ok bg-ok-bg" : "border-warn bg-warn-bg"}`}>
                   {/* Signed rows turn green with a check, so the presenter sees at a glance who's left. */}
                   <span aria-hidden className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${sig ? "bg-ok text-white" : "border-2 border-warn"}`}>{sig ? "✓" : ""}</span>
-                  <span className="min-w-0 flex-1"><b className="block">{t.name}</b><small className="text-muted">{t.sub}</small></span>
+                  <span className="min-w-0 flex-1"><b className="block">{t.name}</b><small className="text-muted">{t.sub}</small>
+                    {(() => { const n = locationNote(sig?.location, sig?.distanceM); return n ? <small className={`block ${n.flagged ? "font-semibold text-warn-ink" : "text-muted"}`}>{n.flagged ? "⚠ " : ""}{n.text}</small> : null; })()}
+                  </span>
                   {sig ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={sig.image} alt={`Signature of ${t.name}`} className="h-10 w-24 rounded bg-white object-contain" />
