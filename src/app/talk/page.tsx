@@ -693,9 +693,14 @@ function Sign({
   const checkinStatement = draft.kind === "daily"
     ? [dailyStatement(draft.lang).text, draft.lang !== "en" ? DAILY_STATEMENT.en : ""].filter(Boolean).join("\n")
     : [ui.signedBy, draft.lang !== "en" ? crewText("en").signedBy : ""].filter(Boolean).join("\n");
+  // The team the presenter picked on "Who's here": only its people are offered on the crew's phones, and its name
+  // shows on both screens so everyone knows which list they're on.
+  const checkinTeam = org.teams.find((x) => x.id === draft.teamId)?.name
+    ?? (draft.teamId === "all" ? "All teams" : draft.teamId === "needs" ? "Still needed it" : "");
   const checkinTitle = (() => {
-    if (draft.kind === "daily") return draft.lang === "es" ? "Plan de trabajo del día" : "Today's pre-task plan";
-    const tk = findTalk(draft.talkId); return tk ? talkText(tk, draft.lang).text.title : "";
+    const talkName = draft.kind === "daily" ? (draft.lang === "es" ? "Plan de trabajo del día" : "Today's pre-task plan")
+      : (() => { const tk = findTalk(draft.talkId); return tk ? talkText(tk, draft.lang).text.title : ""; })();
+    return [talkName, checkinTeam].filter(Boolean).join(" · ");
   })();
   // Phone signatures are applied to the latest saved draft (never this screen's copy), once each.
   const takePhone: TakeSignatures = (waiting) => {
@@ -709,7 +714,7 @@ function Sign({
   const reopenPhone = (keys: string[]) => { const cur = readDraft(m.company.id); if (cur && cur.clientId === draft.clientId) writeDraft({ ...cur, phoneTaken: reopenTaken(cur.phoneTaken ?? [], keys) }); };
   const checkinProps = {
     companyId: m.company.id, clientId: draft.clientId, roster, present: draft.present, signatures: draft.signatures,
-    statement: checkinStatement, title: checkinTitle, active: !!draft.phoneSigning, setActive: setPhoneSigning, take: takePhone, onOpened: reopenPhone,
+    statement: checkinStatement, title: checkinTitle, team: checkinTeam, active: !!draft.phoneSigning, setActive: setPhoneSigning, take: takePhone, onOpened: reopenPhone,
   };
   const phoneSigning = <CrewCheckin {...checkinProps} />;
 

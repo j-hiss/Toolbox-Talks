@@ -37,9 +37,12 @@ export async function endCheckin(companyId: string, clientId: string): Promise<v
   await closeCheckin(companyId, clientId).catch(() => { /* cleared within a day of expiring */ });
 }
 
-export function CrewCheckin({ companyId, clientId, roster, present, signatures, statement, title, active, setActive, take, onOpened, hidden = false }: {
+export function CrewCheckin({ companyId, clientId, roster, present, signatures, statement, title, team, active, setActive, take, onOpened, hidden = false }: {
   companyId: string; clientId: string; roster: Entry[]; present: Record<string, boolean>; signatures: Record<string, Signature>;
-  statement: string; title: string; active: boolean; setActive: (on: boolean) => void; take: TakeSignatures;
+  statement: string; title: string;
+  /** The team the presenter picked; its people are the names offered. */
+  team: string;
+  active: boolean; setActive: (on: boolean) => void; take: TakeSignatures;
   /** A new code opened for these names: they may sign by phone again. */
   onOpened: (keys: string[]) => void;
   /** Keep collecting while the crew pass the phone, without showing anything. */
@@ -105,12 +108,12 @@ export function CrewCheckin({ companyId, clientId, roster, present, signatures, 
         {active && <span className="text-sm text-muted">Phone signing is on · {signed} of {onRoster.length} signed</span>}
       </div>
       {error && <div className="mt-2"><Notice tone="caution">{error}</Notice></div>}
-      <Sheet title="Scan to sign" open={sheet} onClose={() => setSheet(false)}>
+      <Sheet title={team ? `Scan to sign · ${team}` : "Scan to sign"} open={sheet} onClose={() => setSheet(false)}>
         <div className="flex flex-col items-center gap-3">
-          <p className="text-center text-sm">Crew: open your phone&apos;s camera, scan this, pick your name and sign. No app or account needed.</p>
+          <p className="text-center text-sm">{team ? <>{team}: open </> : "Crew: open "}your phone&apos;s camera, scan this, pick your name and sign. No app or account needed.</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {qr && <img src={qr} alt="QR code for crew to sign on their phones" className="w-full max-w-[280px] rounded-xl bg-white p-2" />}
-          <p className="text-center text-xs text-muted">Works only for this talk, only for the names on it, once each, for 1 hour. Signatures appear here as they come in; check each one is someone who&apos;s here.</p>
+          <p className="text-center text-xs text-muted">Only the people on {team || "this team"} who are marked here are listed. Works only for this talk, once each, for 1 hour. Signatures appear here as they come in; check each one is someone who&apos;s here.</p>
         </div>
         <ul aria-label="Who has signed" className="mt-4 flex flex-col gap-1.5">
           {onRoster.map((r) => (
