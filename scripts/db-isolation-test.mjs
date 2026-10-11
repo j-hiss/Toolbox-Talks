@@ -822,6 +822,19 @@ async function main() {
       check("B still can't read A's 301 details", (await as(userB, "select birth_date from public.injury_cases")).rows.length === 0);
     }
 
+    // client_id unique per company (0041): the same phone-made id in two companies never collides or reveals the other.
+    {
+      const shared = randomUUID();
+      const issue = (user, co) => as(user, "insert into public.talk_issues (company_id, client_id, description) values ($1, $2, 'Example issue') returning id", [co, shared]);
+      check("Two companies can each have an issue with the same phone id", (await issue(userA, coA)).rows.length === 1 && (await issue(userB, coB)).rows.length === 1);
+      check("Inside one company the phone id is still unique", await fails(() => issue(userA, coA)));
+      const cl = randomUUID();
+      const a = (await as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", rec(coA, cl, []))).rows[0].id;
+      const b = (await as(userB, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", rec(coB, cl, []))).rows[0].id;
+      check("The same record id saved by two companies makes two separate records; a retry still finds its own",
+        a !== b && (await as(userA, "select public.save_talk_record($1::jsonb, $2::jsonb) as id", rec(coA, cl, []))).rows[0].id === a);
+    }
+
     // OSHA logs per location (0040, 29 CFR 1904.30): owners and admins only, never across companies, closed not deleted.
     {
       const newCase = (user, co, extra = {}) => {
@@ -928,7 +941,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 121;
+  const EXPECTED = 124;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

@@ -618,8 +618,8 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   "More than one location?" adds others. Each log has its own cases, 300A, PDFs and online filing files (one 300A file
   per location, as OSHA's size thresholds are per establishment). The 10-or-fewer exemption counts the whole company
   (sum of each log's headcount, which can only overstate). A case stays on the log it was put on; a location is closed,
-  never deleted. Case numbers count across all of a company's logs (each still unique); starting each log at 1 is a
-  proposed change waiting for Joe (docs/proposed-migrations/case-numbers-per-log.sql).
+  never deleted. Case numbers count across all of a company's logs, so they build on each other and each stays unique
+  (decided with Joe, 2026-10-11).
 
 ## Topic icons and spreadsheet export (built)
 - **Topic icons:** every talk shows a small icon for its topic (weather, falls, electrical, fire, chemicals and air,
@@ -678,8 +678,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   an email-code account; email confirmation on; admins can't add arbitrary accounts or rewrite memberships; people
   can't be deleted; who-did-it columns come from the signed-in user; issue history kept when an issue is reopened; a
   shared phone only uploads the saved talks of the person signed in.
-- **Waiting for Joe:** make `client_id` unique per company (not across all companies) on records, issues and safety
-  events (a constraint swap). **Deferred:** a reviewed safety event can still be edited by admins.
+- **client_id per company (built, migration 0041, Joe's go 2026-10-11):** the id a phone makes for an upload is unique
+  per company, not across all companies, on records, issues, safety events and inspections, so a retry never collides
+  with or reveals another company's row. **Deferred:** a reviewed safety event can still be edited by admins.
 - **Hosted project:** turn on "Confirm email" in Supabase Auth settings before real use.
 
 ## Product name (placeholder, 2026-10-09)
