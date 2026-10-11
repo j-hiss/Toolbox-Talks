@@ -3,6 +3,7 @@
 // Admin setup: people, teams, jobsites, the roles that can give talks, the talks the plan uses, the weekly plan, the
 // safety log, and company info.
 // Owners and admins only.
+import { WrittenPrograms } from "@/components/WrittenPrograms";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
 import {
@@ -54,6 +55,7 @@ const TABS = [
   { id: "plan", label: "Plan", group: "program" },
   { id: "safety", label: "Safety log", group: "program" },
   { id: "injuries", label: "Injury log", group: "program" },
+  { id: "programs", label: "Written programs", group: "program" },
   { id: "company", label: "Company", group: "program" },
   { id: "brand", label: "Brand", group: "program" },
 ] as const;
@@ -181,6 +183,8 @@ function Admin({ m }: { m: Membership }) {
           <AppAccess companyId={companyId} myAccess={m.access} myUserId={s.user?.id ?? null} people={people} />
         ) : tab === "injuries" ? (
           <InjuryLog company={m.company} people={people} roles={roles} />
+        ) : tab === "programs" ? (
+          <WrittenPrograms company={m.company} />
         ) : tab === "safety" ? (
           <SafetyLog company={m.company} state={climateFor(m.company.zip).state} jobsites={jobsites} people={people} />
         ) : (

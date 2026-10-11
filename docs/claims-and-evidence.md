@@ -70,6 +70,20 @@ by an attorney or a certified safety professional.
     1910.165(d)(2): non-supervised employee alarm systems tested every two months. CMS: hospitals and nursing homes
     exercise the emergency plan at least twice a year (42 CFR 482.15(d)(2); 483.73(d)(2), Cornell copy).
 
+## Written programs (read 2026-10-11; eCFR, Cornell LII or osha.gov, through a fetch tool; re-check wording against eCFR)
+- Hazard communication 1910.1200(e)(1)-(5); construction 1926.59 "identical". No review interval.
+- Emergency action plan 1910.38(a)-(f); construction 1926.35 (adds types of evacuation (d), "persons or departments").
+  Oral plan allowed at 10 or fewer employees. Reviewed with employees at start, duty change, plan change.
+- Fire prevention plan 1910.39(a)-(d). No 1926 counterpart checked, so offered to general industries first.
+- Bloodborne pathogens 1910.1030(c)(1)-(2): exposure determination, schedule for (d)-(h), incident evaluation,
+  annual review with safer devices, frontline input (direct patient care only).
+- Silica: 1926.1153(g)(1)-(4) four elements + competent person, annual review; 1910.1053(f)(2) three elements,
+  annual review.
+- Lockout/tagout 1910.147(c)(1), (c)(4)(i)-(ii), note's eight conditions, (c)(6) annual periodic inspection and
+  certification fields. Construction and agriculture excluded ((a)(1)(ii)(A)).
+- Respiratory protection 1910.134(c)(1)-(4), (l), (m)(3)-(4); construction 1926.103 identical. No fixed interval.
+- Not built: the LOTO periodic-inspection certification as its own record (the program's yearly reminder points at it).
+
 ## How the app backs the signature claims
 - Intent to sign: crew tap the signing statement before the pad takes ink (src/content/ui.ts `signingStatement`);
   the record keeps the statement + version (talk_records.signing_statement) and each tap time

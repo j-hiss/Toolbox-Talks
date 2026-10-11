@@ -15,6 +15,7 @@ import { DOCUMENT_KINDS, type SafetyProfile } from "@/core/profile";
 import { formatCode, verifyLink } from "@/core/verify";
 import { EMPLOYEE_ACCESS, FALSIFYING, KINDS, OUTCOMES, incidentGaps, caseLabel, logTotals, nameOnLog, postingWindow, type InjuryCase, type InjurySummary } from "@/core/oshaLog";
 import { locationFlagCount, locationNote } from "@/core/checkin";
+import type { ProgramRow, ProgramTemplate } from "@/core/programs";
 import { drawQr } from "./qr";
 import { appWebAddress } from "./webAddress";
 
@@ -837,4 +838,64 @@ export function inspectionPdfFileName(r: Pick<InspectionPdfInput, "title" | "sub
   const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const clean = (s: string) => s.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim();
   return `Inspection - ${clean(r.title)}${r.subject ? ` - ${clean(r.subject)}` : ""} - ${iso}.pdf`;
+}
+
+/**
+ * A written program's PDF, built only from the saved version and the template edition it was written on: each
+ * element with its rule paragraph and the company's own words, who approved it and when, and the version history.
+ * Never says the program meets the rule.
+ */
+export function buildProgramPdf(t: ProgramTemplate, row: ProgramRow, history: ProgramRow[], co: HeaderCompany): jsPDF {
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const { W, H, M } = PAGE, CW = W - 2 * M;
+  let page = 1;
+  const footer = () => {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
+    doc.text(`${co.name ? co.name + " · " : ""}${t.title} · version ${row.version} · Page ${page}`, M, H - 28);
+    doc.text("Written by the company. Does not by itself certify OSHA compliance.", W - M, H - 28, { align: "right" });
+    doc.setTextColor(0); page++;
+  };
+  let y = companyHeader(doc, co, "WRITTEN SAFETY PROGRAM");
+  const next = (h: number) => { if (y + h > H - M - 30) { footer(); doc.addPage(); y = M; } };
+  const para = (text: string, size: number, color: number | [number, number, number] = 0, style: "normal" | "bold" | "italic" = "normal", lead = size + 3) => {
+    doc.setFont("helvetica", style); doc.setFontSize(size);
+    if (typeof color === "number") doc.setTextColor(color); else doc.setTextColor(...color);
+    (doc.splitTextToSize(text, CW) as string[]).forEach((l) => { next(lead); doc.text(l, M, y); y += lead; });
+    doc.setTextColor(0);
+  };
+  doc.setFont("helvetica", "bold"); doc.setFontSize(20);
+  (doc.splitTextToSize(t.title, CW) as string[]).forEach((l) => { doc.text(l, M, y); y += 22; });
+  para(`Rule: ${t.rule}`, 9, 80);
+  para(`Who needs it: ${t.appliesIf}`, 9, 80);
+  para(`Where it's kept: ${t.keep}`, 9, 80);
+  if (t.review) para(`Review: ${t.review.what} (${t.review.cite})`, 9, 80);
+  y += 6;
+  const when = stampParts(row.created_at);
+  para(`Version ${row.version}, approved by ${row.approved_name}${row.approved_title ? `, ${row.approved_title}` : ""}, ${when.date}${row.review_only ? " (reviewed, no changes)" : ""}.`, 10, 0, "bold");
+  if (row.template_version < t.version) para(`Written on edition ${row.template_version} of this template; the app now has edition ${t.version}.`, 9, RED);
+  y += 10;
+  for (const s of t.sections) {
+    const answer = (row.answers[s.id] ?? "").trim();
+    next(40); doc.setDrawColor(225); doc.line(M, y - 4, W - M, y - 4); y += 10;
+    para(s.heading, 11.5, 0, "bold");
+    para(s.rule, 7.5, 120);
+    if (answer) para(answer, 10);
+    else para(s.optional ? "Not filled in (applies only in some workplaces)." : "Not filled in.", 9.5, s.optional ? GREY : RED, "italic");
+    y += 6;
+  }
+  if (row.note) { y += 4; para("NOTE", 8, GREY, "bold"); para(row.note, 9.5); }
+  next(60); y += 14;
+  para("VERSION HISTORY", 8, GREY, "bold");
+  for (const h of [...history].sort((a, b) => b.version - a.version)) {
+    const d = stampParts(h.created_at);
+    para(`Version ${h.version} · ${d.date} · ${h.approved_name}${h.review_only ? " · reviewed, no changes" : ""}${h.note ? ` · ${h.note}` : ""}`, 8.5, 60);
+  }
+  footer();
+  return doc;
+}
+
+export function programPdfFileName(t: Pick<ProgramTemplate, "title">, row: Pick<ProgramRow, "version" | "created_at">): string {
+  const d = new Date(row.created_at);
+  const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return `${t.title.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim()} - version ${row.version} - ${iso}.pdf`;
 }

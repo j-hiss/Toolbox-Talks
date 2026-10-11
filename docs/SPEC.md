@@ -533,6 +533,28 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Pricing idea (Joe, 2026-10-09, not decided):** carriers drive adoption; the app may be paid, discounted for a
   company that shares its profile with its carrier, or carrier-sponsored.
 
+## Written safety programs (built, migration 0047)
+- **Why:** insurers, prequalification services and OSHA ask for the written programs; competitors sell binders. Here
+  each program is the rule's own list of elements, filled in by the company, versioned and printable.
+- **Templates (content, not code, src/content/programs.ts):** hazard communication (1910.1200(e); 1926.59), emergency
+  action plan (1910.38; 1926.35), fire prevention plan (1910.39), bloodborne pathogens exposure control plan
+  (1910.1030(c)), silica exposure control plan for construction (1926.1153(g)) and general industry (1910.1053(f)(2)),
+  lockout/tagout energy control program (1910.147(c)), respiratory protection program (1910.134(c)). Each says who
+  needs it and where it's kept, in the rule's terms. Every company sees every program; its industry's come first.
+- **Writing one (Admin → Written programs):** one box per element with the paragraph, a plain-words ask and a labelled
+  example (never pre-filled). Optional elements say "if this applies". An owner or admin types who approves it and
+  saves: a new version every time, never edited. Required elements and the approver are checked before saving.
+- **Reviews:** where the rule asks for a yearly review (bloodborne pathogens, silica, the lockout yearly inspection)
+  the program shows "review due" 12 months after its last version. "Reviewed, no changes" saves its own version, so the
+  history shows when it was looked at. A newer template edition is flagged on the program.
+- **PDF:** each element with its paragraph and the company's words (missing ones in red), the approver, and the
+  version history. Footer: written by the company, doesn't certify compliance.
+- **Everyone can read them:** the rules say the written program is available to employees. My record lists the
+  programs on file with their PDF for every signed-in member.
+- **Safety profile:** the "written safety policy" element names the programs kept in the app (template titles only) and
+  any overdue yearly review; on their own they count as "partly shown", since they aren't the company's overall policy.
+- **Not built:** the lockout periodic-inspection certification as its own record; Home or reminder alerts for reviews.
+
 ## Training cards and certifications (built, migration 0023)
 - **Admin → Training:** every person with their cards (OSHA 10/30, fall protection, scaffold, aerial lift, forklift,
   crane, respirator fit test, hearing, first aid/CPR, bloodborne pathogens, confined space, HAZWOPER, asbestos, lead,

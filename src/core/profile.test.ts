@@ -73,6 +73,10 @@ describe("company safety profile", () => {
     const withDoc = buildProfile({ ...base, documents: [{ kind: "safety_program", title: "Safety manual 2026", uploaded_at: "2026-01-02T00:00:00Z" }] });
     expect(withDoc.elements[0]).toMatchObject({ status: "records", evidence: expect.stringMatching(/^Written program attached \(1 document, latest uploaded /) });
     expect(withDoc.elements[0].evidence).not.toContain("Safety manual");
+    // Written programs kept in the app partly show the policy element on their own, and are named by template title.
+    const withPrograms = buildProfile({ ...base, programs: { titles: ["Hazard communication program"], reviewDue: 1 } });
+    expect(withPrograms.elements[0]).toMatchObject({ status: "some", evidence: "No overall safety policy attached. Written programs kept in the app: Hazard communication program (1 yearly review overdue)." });
+    expect(JSON.stringify(withPrograms.elements)).not.toMatch(/complian|meets|satisf|certif/i);
   });
   it("self-reported EMR: the latest entry per year", () => {
     expect(buildProfile(base).emr).toEqual([{ rating_year: 2026, emr: 0.88, note: "corrected", entered_at: "2026-03-01T00:00:00Z" }]);

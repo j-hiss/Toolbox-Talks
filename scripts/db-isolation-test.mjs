@@ -1142,6 +1142,24 @@ async function main() {
       check("A retired checklist stays retired", await fails(() => add(userA, coA, 4)));
     }
 
+    // Written programs (0047): versions, never edits; admins write, everyone in the company reads, never across companies.
+    {
+      const add = (user, co, version, extra = {}) => as(user, "insert into public.company_programs (company_id, program_key, template_version, version, answers, approved_name, review_only) values ($1, $2, 1, $3, $4::jsonb, $5, $6) returning created_by",
+        [co, extra.key ?? "hazcom", version, extra.answers ?? JSON.stringify({ labels: "Shop lead checks labels on arrival" }), extra.name ?? "Example Owner", extra.review ?? false]);
+      check("An admin saves a written program; who saved it is stamped", (await add(userA, coA, 1)).rows[0].created_by === userA);
+      check("Everyone in A reads it; a presenter can't write one; B can't see or add A's", (await as(presenterA, "select 1 from public.company_programs where company_id = $1", [coA])).rows.length === 1
+        && await fails(() => add(presenterA, coA, 2)) && (await as(userB, "select 1 from public.company_programs where company_id = $1", [coA])).rows.length === 0
+        && await fails(() => add(userB, coA, 2)));
+      check("Program versions go in order; never edited or deleted; a review is its own version", await fails(() => add(userA, coA, 3))
+        && (await add(userA, coA, 2, { review: true })).rows.length === 1
+        && await fails(() => as(userA, "update public.company_programs set approved_name = 'x' where company_id = $1", [coA]))
+        && await fails(() => as(userA, "delete from public.company_programs where company_id = $1", [coA])));
+      check("Program answers must be an object of short text; an approver is required", await fails(() => add(userA, coA, 1, { key: "eap", answers: "[]" }))
+        && await fails(() => add(userA, coA, 1, { key: "eap", answers: JSON.stringify({ report: 5 }) }))
+        && await fails(() => add(userA, coA, 1, { key: "eap", answers: JSON.stringify({ report: "x".repeat(4001) }) }))
+        && await fails(() => add(userA, coA, 1, { key: "eap", name: " " })));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -1160,7 +1178,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 423;
+  const EXPECTED = 427;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

@@ -729,6 +729,33 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.screenshot({ path: `${OUT}/e-own-checklists.png`, fullPage: false });
   await q.click("main button[aria-label='Start Example crane setup']"); await q.waitForTimeout(800);
   log("23 run:", (await q.locator("main").innerText()).replace(/\s+/g, " ").slice(0, 200));
+  // Scenario 24: written programs. Write the hazard communication program, see it on file, save a review with no
+  // changes (version 2), and find it on My record.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600);
+  await q.click("[role=tab]:has-text('Written programs')"); await q.waitForTimeout(800);
+  log("24 list:", (await q.locator("section[aria-label='For your industry']").innerText()).replace(/\s+/g, " ").slice(0, 240));
+  await q.locator("section[aria-label='For your industry'] li:has-text('Hazard communication program') button:has-text('Write')").click(); await q.waitForTimeout(400);
+  await q.click("[role=dialog] button:has-text('Save program')"); await q.waitForTimeout(200);
+  log("24 empty:", (await q.locator("[role=dialog] [role=alert], [role=dialog] [role=status]").allInnerTexts()).join(" | "));
+  await q.fill("#pg-labels", "Example: the shop lead checks labels when product arrives.");
+  await q.fill("#pg-sds", "Example: a binder in each truck and the office.");
+  await q.fill("#pg-training", "Example: at hire and when a new product comes in.");
+  await q.fill("#pg-chemicals", "Example: roof primer, mastic, propane.");
+  await q.fill("#pg-nonroutine", "Example: the lead briefs the crew before any non-routine task.");
+  await q.fill("#pg-approved", "Example Owner"); await q.fill("#pg-title", "Owner");
+  await q.click("[role=dialog] button:has-text('Save program')"); await q.waitForTimeout(900);
+  log("24 on file:", (await q.locator("li:has-text('Hazard communication program')").first().innerText()).replace(/\s+/g, " "));
+  await q.screenshot({ path: `${OUT}/e-programs.png`, fullPage: false });
+  await q.locator("li:has-text('Hazard communication program') button:has-text('Open')").first().click(); await q.waitForTimeout(400);
+  await q.click("[role=dialog] button:has-text('Reviewed, no changes')"); await q.waitForTimeout(900);
+  log("24 reviewed:", (await q.locator("li:has-text('Hazard communication program')").first().innerText()).replace(/\s+/g, " "));
+  await q.evaluate(() => { window.__saved = null; });
+  await q.locator("li:has-text('Hazard communication program') button:has-text('PDF')").first().click(); await q.waitForTimeout(2000);
+  log("24 pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("main a[href*='/me']"); await q.waitForTimeout(1200);
+  log("24 my record:", (await q.locator("section[aria-label='Company safety programs']").innerText().catch(() => "MISSING")).replace(/\s+/g, " "));
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();

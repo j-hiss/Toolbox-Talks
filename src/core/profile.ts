@@ -39,6 +39,8 @@ export type ProfileInput = {
   documents: CompanyDocument[];
   /** Training cards entered by the company (src/core/certs.ts trainingSummary), counted today. Optional. */
   training?: { current: number; expiring: number; expired: number; missing: number };
+  /** Written programs kept in the app (src/core/programs.ts): template titles on file and how many need a yearly review. Optional. */
+  programs?: { titles: string[]; reviewDue: number };
   /** Inclusive range, YYYY-MM-DD. */
   from: string;
   to: string;
@@ -150,11 +152,18 @@ export function buildProfile(input: ProfileInput): SafetyProfile {
   const cards = t && t.current + t.expiring + t.expired + t.missing > 0
     ? ` Training cards entered by the company, as of today: ${t.current + t.expiring} current${t.expiring ? ` (${t.expiring} expiring within 30 days)` : ""}${t.expired ? `, ${t.expired} expired` : ""}${t.missing ? `, ${t.missing} missing for job titles that need them` : ""}.`
     : "";
+  // Written programs kept in the app are the app's own template titles (never free text), so they can be named.
+  const pg = input.programs && input.programs.titles.length
+    ? ` Written programs kept in the app: ${input.programs.titles.join(", ")}${input.programs.reviewDue ? ` (${s(input.programs.reviewDue, "yearly review")} overdue)` : ""}.`
+    : "";
   const elements: ProgramElement[] = [
     docs.some((d) => d.kind === "safety_program")
       // Never the document's title: titles are free text and summaries go to agents and carriers (review 2026-10-10).
-      ? { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "records", evidence: programDocsEvidence(docs.filter((d) => d.kind === "safety_program")) }
-      : { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "outside", evidence: "Not attached to this summary. The company can attach its written program in the app." },
+      ? { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "records", evidence: programDocsEvidence(docs.filter((d) => d.kind === "safety_program")) + pg }
+      : pg
+        // OSHA's written programs aren't the company's overall safety policy, so on their own they only partly show it.
+        ? { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "some", evidence: `No overall safety policy attached.${pg}` }
+        : { id: "policy", name: PROGRAM_ELEMENTS[0].name, status: "outside", evidence: "Not attached to this summary. The company can attach its written program in the app." },
     log.inspections + log.walkarounds > 0
       ? { id: "inspections", name: PROGRAM_ELEMENTS[1].name, status: "records", evidence: `${s(log.inspections, "inspection")} and ${s(log.walkarounds, "walk-around")} logged in the safety log.` }
       : { id: "inspections", name: PROGRAM_ELEMENTS[1].name, status: "outside", evidence: "No inspections were logged in the app in this range." },
