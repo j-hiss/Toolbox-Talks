@@ -29,6 +29,8 @@ export type Checklist = {
   items: ChecklistItem[];
   /** The talk that covers the same hazard, offered after a failed inspection. */
   talkId?: string;
+  /** The company's own checklist (src/core/ownChecklists.ts), not one of the app's. */
+  own?: boolean;
 };
 
 /** The checklists a company in `industry` gets: "Every job" first, then its own and those it uses. */
@@ -54,13 +56,14 @@ export async function wordingHash(c: { title: string; rule: string; items: Check
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export type WordingMatch = "standard" | "different" | "unknown_version";
+export type WordingMatch = "standard" | "different" | "unknown_version" | "company_own";
 
 /**
  * Does a saved inspection's wording match the app's checklist with the same id and version? "unknown_version" when this
  * copy of the app doesn't carry that checklist version (an older or newer edition), so it can't say either way.
  */
 export async function wordingMatch(all: Pick<Checklist, "id" | "version" | "title" | "rule" | "items">[], saved: { checklist_id: string; checklist_version: number; wording_hash: string }): Promise<WordingMatch> {
+  if (saved.checklist_id.startsWith("own-")) return "company_own"; // the company's own checklist: its wording is theirs
   const c = all.find((x) => x.id === saved.checklist_id && x.version === saved.checklist_version);
   if (!c) return "unknown_version";
   return (await wordingHash(c)) === saved.wording_hash ? "standard" : "different";

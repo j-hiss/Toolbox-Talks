@@ -710,6 +710,23 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("22 jobsites:", (await q.locator("ul[aria-label='Jobsites side by side']").innerText().catch(() => "none")).replace(/\s+/g, " ").slice(0, 220));
   await q.locator("summary:has-text('Compare teams and jobsites')").scrollIntoViewIfNeeded();
   await q.screenshot({ path: `${OUT}/e-compare.png`, fullPage: false });
+  // Scenario 23: your own checklists. Make one, see it under "Your checklists", change it (version 2), open it to run.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("a[href*='inspect']"); await q.waitForTimeout(1000);
+  await q.click("main button:has-text('Make your own checklist')"); await q.waitForTimeout(300);
+  await q.click("[role=dialog] button:has-text('Add checklist')"); await q.waitForTimeout(200);
+  log("23 empty:", (await q.locator("[role=dialog] [role=alert], [role=dialog] [role=status]").allInnerTexts()).join(" | "));
+  await q.fill("#oc-title", "Example crane setup");
+  await q.fill("#oc-items", "Outriggers down on pads\nLoad chart in the cab | 1926.1417(c)\nSwing radius barricaded");
+  await q.click("[role=dialog] button:has-text('Add checklist')"); await q.waitForTimeout(900);
+  log("23 listed:", (await q.locator("main li:has-text('Example crane setup')").first().innerText()).replace(/\s+/g, " "));
+  await q.click("ul[aria-label='Change your checklists'] button:has-text('Change')"); await q.waitForTimeout(300);
+  await q.fill("#oc-items", "Outriggers down on pads\nLoad chart in the cab | 1926.1417(c)\nSwing radius barricaded\nWind under the limit");
+  await q.click("[role=dialog] button:has-text('Save changes')"); await q.waitForTimeout(900);
+  log("23 version:", (await q.locator("ul[aria-label='Change your checklists']").innerText()).replace(/\s+/g, " "));
+  await q.screenshot({ path: `${OUT}/e-own-checklists.png`, fullPage: false });
+  await q.click("main button[aria-label='Start Example crane setup']"); await q.waitForTimeout(800);
+  log("23 run:", (await q.locator("main").innerText()).replace(/\s+/g, " ").slice(0, 200));
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();

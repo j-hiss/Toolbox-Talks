@@ -3,11 +3,12 @@
 // Inspections: pick a checklist (what's due comes first), mark each item pass, fail or not applicable, add a note and a
 // photo for anything wrong, sign, save. Saved on the phone first and uploaded when there's signal; never edited after.
 // Failed items can raise a crew issue. Rules: src/core/inspections.ts. Checklists: src/content/checklists.ts.
+import { OwnChecklistTools, ownAsChecklists, useOwnChecklists } from "@/components/OwnChecklists";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { CHECKLISTS } from "@/content/checklists";
 import { WHEN_LABEL, checklistsFor, dueFor, inspectionProblem, type CheckedItem, type Checklist, type InspectionPayload, type InspectionSummary, type ItemResult } from "@/core/inspections";
-import { canPresent, type Jobsite, type Membership, type Person } from "@/lib/data/types";
+import { canAdmin, canPresent, type Jobsite, type Membership, type Person } from "@/lib/data/types";
 import type { IssuePayload, Signature } from "@/core/record";
 import { getInspection, listInspections, saveInspection, type InspectionRecord } from "@/lib/data/inspections";
 import { listJobsites, listPeople } from "@/lib/data/company";
@@ -60,7 +61,9 @@ function Inspect({ m }: { m: Membership }) {
     return () => { live = false; };
   }, [co.id, userId, version]);
 
-  const lists = useMemo(() => checklistsFor(CHECKLISTS, co.industry), [co.industry]);
+  // The company's own checklists first (kept on the phone for offline), then the app's for its industry.
+  const own = useOwnChecklists(co.id);
+  const lists = useMemo(() => [...ownAsChecklists(own.rows), ...checklistsFor(CHECKLISTS, co.industry)], [own.rows, co.industry]);
   const run = hash.startsWith("run=") ? lists.find((c) => c.id === hash.slice(4)) : undefined;
   const view = hash.startsWith("view=") ? hash.slice(5) : null;
   const go = (h: string) => { window.location.hash = h; window.scrollTo?.(0, 0); };
@@ -93,8 +96,12 @@ function Inspect({ m }: { m: Membership }) {
           <ul className="mt-2 flex flex-col gap-2">{due.map(card)}</ul>
         </>
       )}
+      <GroupHeading>Your checklists</GroupHeading>
+      {lists.some((c) => c.own) ? <ul className="mt-2 flex flex-col gap-2">{lists.filter((c) => c.own && !due.includes(c)).map(card)}</ul>
+        : <p className="mt-2 text-sm text-muted">Checks your company does that aren&apos;t in the app&apos;s lists: a crane setup, a truck walk-around, a site opening. {canAdmin(m.access) ? "Make one below." : "Your admin can add them."}</p>}
+      {canAdmin(m.access) && <OwnChecklistTools companyId={co.id} rows={own.rows} onChanged={own.reload} />}
       <GroupHeading>Every job</GroupHeading>
-      <ul className="mt-2 flex flex-col gap-2">{lists.filter((c) => c.industries.includes("all") && !due.includes(c)).map(card)}</ul>
+      <ul className="mt-2 flex flex-col gap-2">{lists.filter((c) => !c.own && c.industries.includes("all") && !due.includes(c)).map(card)}</ul>
       <GroupHeading>Your work</GroupHeading>
       <ul className="mt-2 flex flex-col gap-2">{lists.filter((c) => !c.industries.includes("all") && !due.includes(c)).map(card)}</ul>
       <GroupHeading aside={history ? `${history.length}` : undefined}>Recent</GroupHeading>

@@ -1119,6 +1119,28 @@ async function main() {
       check("After the save, the kept flags are cleared", (await db.query("select count(*)::int as n from public.checkin_results where client_id = $1", [tc])).rows[0].n === 0);
     }
 
+    // Your own checklists (0045): versions, never edits; admins write, staff read, never across companies.
+    {
+      const key = "own-" + randomUUID().replace(/-/g, "").slice(0, 12);
+      const items = JSON.stringify([{ id: "i1", text: "Outriggers down on pads" }, { id: "i2", text: "Load chart in the cab", rule: "1926.1417(c)" }]);
+      const add = (user, co, version, extra = {}) => as(user, "insert into public.company_checklists (company_id, checklist_key, version, title, how_often, items, retired) values ($1, $2, $3, $4, $5, $6::jsonb, $7) returning created_by",
+        [co, extra.key ?? key, version, extra.title ?? "Example crane setup", extra.how ?? "daily", extra.items ?? items, extra.retired ?? false]);
+      check("An admin makes a checklist; who saved it is stamped", (await add(userA, coA, 1)).rows[0].created_by === userA);
+      check("Staff read it; a presenter can't write one; B can't see or add A's", (await as(presenterA, "select title from public.company_checklists where checklist_key = $1", [key])).rows.length === 1
+        && await fails(() => add(presenterA, coA, 2)) && (await as(userB, "select 1 from public.company_checklists where company_id = $1", [coA])).rows.length === 0
+        && await fails(() => add(userB, coA, 2)));
+      check("Versions go in order; a checklist is never edited or deleted", await fails(() => add(userA, coA, 3))
+        && (await add(userA, coA, 2, { title: "Example crane setup v2" })).rows.length === 1
+        && await fails(() => as(userA, "update public.company_checklists set title = 'x' where checklist_key = $1", [key]))
+        && await fails(() => as(userA, "delete from public.company_checklists where checklist_key = $1", [key])));
+      check("Items must be 1 to 60, each with an id and text, ids unique", await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa1", items: "[]" }))
+        && await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa2", items: JSON.stringify([{ id: "a", text: "x" }, { id: "a", text: "y" }]) }))
+        && await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa3", items: JSON.stringify([{ id: "a" }]) }))
+        && await fails(() => add(userA, coA, 1, { key: "own-aaaaaaaa4", how: "weekly" })));
+      await add(userA, coA, 3, { retired: true });
+      check("A retired checklist stays retired", await fails(() => add(userA, coA, 4)));
+    }
+
     check("Signed-out visitors read nothing", await fails(() => as(null, "select id from public.people")));
     check("Signed-out visitors cannot create a company", await fails(() => as(null, "select public.create_company('x', 'con')")));
 
@@ -1137,7 +1159,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 417;
+  const EXPECTED = 422;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

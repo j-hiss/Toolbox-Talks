@@ -134,6 +134,7 @@ function FoundInspection({ code, r, match }: { code: string; r: VerifiedInspecti
       <p className="mt-3 text-sm">{r.items} items checked. Results show as saved; failed items are never hidden.</p>
       {match === "standard" && <p className="mt-2 text-sm text-ok">✓ Checked against the app&apos;s standard “{r.title}” checklist, word for word (version {r.checklist_version}).</p>}
       {match === "different" && <p className="mt-2 text-sm text-warn">The checklist wording on this inspection is not the app&apos;s standard wording for “{r.title}”. Ask the company for the full inspection PDF to see the items that were checked.</p>}
+      {match === "company_own" && <p className="mt-2 text-sm text-muted">This is the company&apos;s own checklist, so its wording is the company&apos;s, not the app&apos;s standard. The full inspection PDF lists every item that was checked.</p>}
       {match === "unknown_version" && <p className="mt-2 text-sm text-muted">This inspection used a checklist edition this copy of the app doesn&apos;t carry, so its wording can&apos;t be compared here.</p>}
       <p className="mt-3 text-xs text-muted">If the paper shows different results, a different date or a different checklist, it doesn&apos;t match what was saved.</p>
     </section>

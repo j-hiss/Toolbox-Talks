@@ -654,6 +654,13 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   wording, word for word: the database fingerprints the saved title, rule and items (SHA-256) and the page compares it
   with the same checklist and version in the app. A mismatch says so plainly; an edition this copy of the app doesn't
   carry says it can't compare.
+- **Your own checklists (built, migration 0045):** owners and admins make checklists for checks the app doesn't list
+  (a crane setup, a truck walk-around, a site opening): a name, how often, an optional rule line, and one item per line
+  (a rule reference after "|"). They run exactly like the app's checklists (pass, fail or n/a, notes, photos, signed,
+  failures to the issues list, PDF, check code) and count on Home's "due" card and in reminders. Changing one saves a
+  new version; retiring stops it being offered; inspections already saved keep the items they checked. Kept on the
+  phone so they run with no signal. The check page says it's the company's own checklist rather than comparing it
+  with the app's wording. A job hazard analysis is the daily pre-task plan (tasks, hazards, controls).
 - **Reminders (built):** on the phone, a 6:45 AM reminder lists the checks due by then (today if it's still early,
   else tomorrow), from the same list as Home's count. Only "Every job" checks and ones the company has used.
 - **Honest:** every item ends pass, fail or not applicable; failures are never hidden. An inspection documents that

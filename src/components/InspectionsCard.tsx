@@ -8,6 +8,8 @@ import { CHECKLISTS } from "@/content/checklists";
 import { dueState, trackedChecks, type TrackedCheck } from "@/core/inspections";
 import type { IndustryId } from "@/core/industries";
 import { listInspections } from "@/lib/data/inspections";
+import { listOwnChecklists } from "@/lib/data/ownChecklists";
+import { asChecklist, latestOwnChecklists } from "@/core/ownChecklists";
 
 const cacheKey = (companyId: string) => `tt-tracked-checks:${companyId}`;
 
@@ -19,8 +21,9 @@ export function useTrackedChecks(companyId: string, industry: IndustryId): Track
   const [tracked, setTracked] = useState<TrackedCheck[] | null>(null);
   useEffect(() => {
     let live = true;
-    listInspections(companyId, 300).then((h) => {
-      const t = trackedChecks(CHECKLISTS, industry, h);
+    // The company's own checklists count too (latest versions; none if they can't be loaded).
+    Promise.all([listInspections(companyId, 300), listOwnChecklists(companyId).then(latestOwnChecklists).catch(() => [])]).then(([h, own]) => {
+      const t = trackedChecks([...own.map(asChecklist), ...CHECKLISTS], industry, h);
       try { localStorage.setItem(cacheKey(companyId), JSON.stringify(t)); } catch { /* fine */ }
       if (live) setTracked(t);
     }).catch(() => {
