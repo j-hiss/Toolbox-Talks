@@ -11,6 +11,9 @@ import { certTypeName } from "@/content/certTypes";
 import { myTrainerRoster, mySubmissions, submitCert } from "@/lib/data/trainers";
 import { discardCard, flushCards, onCardOutboxChange, saveCard, waitingCards, type QueuedCard } from "@/lib/cardOutbox";
 import { useSession } from "@/lib/session";
+import { trainerClients } from "@/lib/data/partnerClients";
+import { trainerTotals, type TrainerClient } from "@/core/partnerClients";
+import { InviteLinkPanel, MoveToOrg, OrgPanel, useOrgs } from "@/components/PartnerTools";
 import { CardForm } from "@/components/CardForm";
 import { NotConfigured } from "@/components/Guard";
 import { Button, ConfirmButton, ErrorNotice, Eyebrow, GroupHeading, Loading, Notice, Sheet, Shell, Title } from "@/components/ui";
@@ -30,12 +33,14 @@ export default function TrainerPage() {
 
 function Portal({ userId, email, member, partner, signOut }: { userId: string | null; email: string; member: boolean; partner: boolean; signOut: () => Promise<void> }) {
   const [roster, setRoster] = useState<RosterCompany[] | null>(null);
+  const [clients, setClients] = useState<TrainerClient[]>([]);
+  const { orgs, reload: reloadOrgs } = useOrgs("training");
   const [sent, setSent] = useState<Submission[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<{ co: RosterCompany; person: RosterCompany["people"][number] } | null>(null);
   const load = useCallback(() => {
-    Promise.all([myTrainerRoster(), mySubmissions()])
-      .then(([r, s]) => { setRoster(groupRoster(r)); setSent(s); setError(null); })
+    Promise.all([myTrainerRoster(), mySubmissions(), trainerClients().catch(() => [] as TrainerClient[])])
+      .then(([r, s, c]) => { setRoster(groupRoster(r)); setSent(s); setClients(c); setError(null); })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
   useEffect(load, [load]);
@@ -90,6 +95,20 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
         </section>
       )}
 
+      {clients.length > 0 && (() => { const t = trainerTotals(clients); return (
+        <section aria-label="Your clients" className="mt-4">
+          <GroupHeading aside={`${t.clients}`}>Your clients</GroupHeading>
+          <p className="mt-1 text-sm text-muted">{t.people} {t.people === 1 ? "person" : "people"} shared with you · {t.waiting} {t.waiting === 1 ? "card" : "cards"} waiting for approval{t.declined ? ` · ${t.declined} declined` : ""}</p>
+          <ul className="mt-2 flex flex-col gap-1.5">
+            {clients.map((c) => (
+              <li key={c.link_id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface px-3 py-2 text-sm shadow-card">
+                <span className="min-w-0"><b className="block">{c.company_name}</b><small className="text-muted tabular-nums">{c.people} shared · {c.waiting} waiting · {c.approved} approved{c.declined ? ` · ${c.declined} declined` : ""}{c.org_name ? ` · ${c.org_name}` : ""}</small></span>
+                {c.mine && <MoveToOrg kind="trainer" linkId={c.link_id} current={c.org_id} orgs={orgs} onMoved={load} />}
+              </li>
+            ))}
+          </ul>
+        </section>); })()}
+
       {roster.length === 0 && <div className="mt-4"><Notice>No company has invited {email || "this email"} as a trainer yet, or access was ended. Ask the company to invite this email in Admin → Training.</Notice></div>}
       {roster.map((co) => (
         <section key={co.companyId} aria-label={co.companyName}>
@@ -125,6 +144,9 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
           </ul>
         </section>
       )}
+
+      <OrgPanel kind="training" orgs={orgs} reload={() => { reloadOrgs(); load(); }} myEmail={email} />
+      <InviteLinkPanel kind="training" defaultName={email} orgs={orgs} />
 
       <div className="mt-8"><Button variant="ghost" onClick={() => signOut()}>Sign out</Button></div>
       <p className="mt-4 text-xs text-muted">You see only the names and job titles a company shares with you. Cards you send are kept by that company, even if your access ends.</p>

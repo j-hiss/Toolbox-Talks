@@ -4,6 +4,7 @@
 // safety log, and company info.
 // Owners and admins only.
 import { WrittenPrograms } from "@/components/WrittenPrograms";
+import { ReferralOffer } from "@/components/ReferralOffer";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useSession } from "@/lib/session";
 import {
@@ -119,6 +120,7 @@ function Admin({ m }: { m: Membership }) {
     <Shell>
       <Eyebrow>Admin · {m.company.name}</Eyebrow>
       <Title>Company setup</Title>
+      {(m.access === "owner" || m.access === "admin") && <ReferralOffer companyId={companyId} />}
 
       <div role="tablist" aria-label="Admin sections" className="mt-4 flex flex-col gap-2">
         {TAB_GROUPS.map((g) => (

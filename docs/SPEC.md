@@ -551,6 +551,27 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   (private.plan_allows, private.people_limit); the screen explains it (Admin → Company → Plan and account → See
   plans and prices, with the "fair price" points). The operator sets the size in the console.
 
+## Trainers and insurance partners with many clients (built, migration 0049; partner side still a pilot)
+- **Why:** trainers and agents are how companies hear about the app. It has to be easy for them to see every client
+  at once and to bring new ones in, and it's free for them.
+- **Client list:** the partner portal opens on "Your clients": totals (clients, average crew sign-in, clients with
+  missed weeks, summaries to refresh) and one card per client with the latest summary's sign-in, on-time and missed
+  weeks, open issues and flags ("Latest summary is over 35 days old", "2 weeks with no talk", "Up to date"). Missed
+  weeks are never hidden. Older summaries open from the card. The trainer portal adds "Your clients" with people
+  shared and cards waiting, approved and declined.
+- **Ask for a fresh summary:** a partner asks a client (once a week at most, optional note). The company sees it on
+  the Safety profile until it sends a newer summary to that partner; the company decides.
+- **Organizations:** a trainer or agent makes their training company or agency, adds staff by email (admins and
+  staff), and chooses which clients go in its shared list ("Shared with: Only me / the organization"). Only the
+  person the company invited can move a client in. The company sees the organization and everyone in it under
+  Training → Trainers and Safety profile → partners; every open is logged by person; removing the partner or trainer
+  ends access for all of them. An organization keeps at least one admin.
+- **Invite link:** each partner gets a link (`/setup/?ref=CODE`). Sign-up shows "Recommended by …", records which
+  link brought the company in, and Admin offers once to add that person as trainer or insurance partner. The link
+  shares nothing; the partner sees how many companies signed up and the names only of those that connected.
+- **Pilot rule unchanged:** company-side partner invites and sends still need `NEXT_PUBLIC_PARTNER_PORTAL=pilot` and
+  `private.partner_pilot`, and counsel's privacy review (now including organizations) before real use.
+
 ## Written safety programs (built, migration 0047)
 - **Why:** insurers, prequalification services and OSHA ask for the written programs; competitors sell binders. Here
   each program is the rule's own list of elements, filled in by the company, versioned and printable.

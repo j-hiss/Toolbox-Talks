@@ -707,6 +707,57 @@ async function main() {
       check("A removed partner can't be sent anything", await fails(() => as(userA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb)", [pA, snap])));
     }
 
+    // Partners with many clients (0049): organizations, client lists, asking for a summary, referral links.
+    {
+      const lead = randomUUID(), staff = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'lead@agency.example', now()), ($2, 'staff@agency.example', now())", [lead, staff]);
+      const link = (await as(userA, "select public.invite_partner($1, 'lead@agency.example', 'Example Agency Lead', 'agent') as id", [coA])).rows[0].id;
+      await as(lead, "select public.accept_invites()");
+      const snap = JSON.stringify({ v: 1, kind: "renewal", company: { name: "Company A" }, crew: 12, profile: { from: "2025-10-01", to: "2026-09-30", signIn: 0.91, onTime: 0.8, periodsEnded: 52, periodsMissed: 2, issues: { open: 3 } } });
+      const rep = (await as(userA, "select public.send_partner_report($1, '2025-10-01', '2026-09-30', $2::jsonb) as id", [link, snap])).rows[0].id;
+      const mine = (await as(lead, "select * from public.partner_clients()")).rows;
+      check("A partner's client list shows the latest summary's figures", mine.length === 1 && mine[0].company_name === "Company A" && Number(mine[0].sign_in) === 0.91 && mine[0].crew === 12 && mine[0].periods_missed === 2 && mine[0].open_issues === 3 && mine[0].mine === true);
+      const org = (await as(lead, "select public.create_partner_org('Example Agency', 'insurance') as id")).rows[0].id;
+      await as(lead, "select public.invite_org_member($1, 'Staff@Agency.example')", [org]);
+      check("Only an organization's admin adds people", await fails(() => as(userB, "select public.invite_org_member($1, 'x@y.example')", [org])));
+      check("Staff join their organization by signing in with the invited email", (await as(staff, "select public.accept_partner_org_invites() as n")).rows[0].n === 1);
+      check("Staff see nothing until a client is put in the organization", (await as(staff, "select * from public.partner_clients()")).rows.length === 0
+        && (await as(staff, "select public.partner_report($1) as r", [rep])).rows[0].r === null);
+      check("Only the person the company invited can move a client into an organization", await fails(() => as(staff, "select public.set_link_org('partner', $1, $2)", [link, org])));
+      await as(lead, "select public.set_link_org('partner', $1, $2)", [link, org]);
+      const theirs = (await as(staff, "select * from public.partner_clients()")).rows;
+      check("Then organization staff see the client and open its summary, logged as them", theirs.length === 1 && theirs[0].org_name === "Example Agency" && theirs[0].mine === false
+        && (await as(staff, "select public.partner_report($1) as r", [rep])).rows[0].r?.snapshot?.crew === 12
+        && (await as(userA, "select count(*)::int n from public.partner_report_views where report_id = $1 and by_user = $2", [rep, staff])).rows[0].n === 1);
+      check("The company sees the organization and everyone in it", (await as(userA, "select email from public.link_org_members($1)", [coA])).rows.map((r) => r.email).sort().join() === "lead@agency.example,staff@agency.example");
+      check("Another company can't see who is in the organization", (await as(userB, "select * from public.link_org_members($1)", [coA])).rows.length === 0
+        && (await as(userB, "select id from public.partner_orgs")).rows.length === 0 && (await as(userB, "select id from public.partner_org_members")).rows.length === 0);
+      await as(staff, "select public.request_partner_summary($1, 'Renewal is next month')", [link]);
+      check("A partner asks for a fresh summary; the company sees it; once a week at most", (await as(userA, "select note from public.partner_summary_requests where company_id = $1", [coA])).rows[0]?.note === "Renewal is next month"
+        && await fails(() => as(lead, "select public.request_partner_summary($1)", [link])) && (await as(userB, "select id from public.partner_summary_requests")).rows.length === 0);
+      check("An organization keeps at least one admin", await fails(async () => { const m = (await as(lead, "select id from public.partner_org_members where email = 'lead@agency.example'")).rows[0].id; return as(lead, "select public.remove_org_member($1)", [m]); }));
+      const sm = (await as(lead, "select id from public.partner_org_members where email = 'staff@agency.example'")).rows[0].id;
+      await as(lead, "select public.remove_org_member($1)", [sm]);
+      check("Staff taken out of the organization see nothing", (await as(staff, "select * from public.partner_clients()")).rows.length === 0 && (await as(staff, "select public.partner_report($1) as r", [rep])).rows[0].r === null);
+      const tr = (await as(userA, "select public.invite_trainer($1, 'lead@agency.example', 'Example Agency Training') as id", [coA])).rows[0].id;
+      await as(lead, "select public.accept_invites()");
+      const tc = (await as(lead, "select * from public.trainer_clients()")).rows.find((r) => r.link_id === tr);
+      check("A trainer's client list shows each company with card counts", !!tc && tc.company_name === "Company A" && tc.waiting === 0 && tc.people === 0);
+      check("A training client can't go in an insurance organization", await fails(() => as(lead, "select public.set_link_org('trainer', $1, $2)", [tr, org])));
+      const code = (await as(lead, "select public.my_referral_code('insurance', 'Example Agency Lead', $1) as c", [org])).rows[0].c;
+      check("A referral code is 10 letters and asking again gives the same one", /^[a-z2-9]{10}$/.test(code) && (await as(lead, "select public.my_referral_code('insurance', 'x', $1) as c", [org])).rows[0].c === code);
+      check("A new company sees who sent the link", (await as(userB, "select public.referral_info($1) as i", [code.toUpperCase()])).rows[0].i?.name === "Example Agency"
+        && (await as(userB, "select public.referral_info('zzzzzzzzzz') as i")).rows[0].i === null);
+      check("Only the company's own admins record its referral, once", await fails(() => as(userA, "select public.record_referral($1, $2)", [coB, code]))
+        && (await as(userB, "select public.record_referral($1, $2) as ok", [coB, code])).rows[0].ok === true
+        && (await as(userB, "select public.record_referral($1, $2) as ok", [coB, code])).rows[0].ok === false);
+      const refs = (await as(lead, "select * from public.my_referrals()")).rows.find((r) => r.code === code);
+      check("A referral shares nothing: the partner sees a count, and names only of clients that connected", refs?.signed_up === 1 && refs.connected.length === 0
+        && (await as(lead, "select * from public.partner_clients()")).rows.every((r) => r.company_id !== coB));
+      check("Another account can't read someone's referral codes", (await as(userB, "select code from public.partner_referral_codes")).rows.length === 0);
+      await as(userA, "select public.remove_partner($1)", [link]); await as(userA, "select public.remove_trainer($1)", [tr]);
+    }
+
     // Your own talks (0029): versions only, admins write, staff read, never across companies.
     {
       const empT = randomUUID();
@@ -1198,7 +1249,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 432;
+  const EXPECTED = 450;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

@@ -450,12 +450,25 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await viewAs("partner"); await q.waitForTimeout(800);
   log("14 partner portal:", await q.locator("h1").first().textContent(), "| summaries:", await q.locator("button[aria-label^='Open summary']").count(), "| tabs:", await q.locator("nav[aria-label=Main] a").count());
   await q.screenshot({ path: `${OUT}/e-partner-inbox.png`, fullPage: true });
+  // Scenario 25: the partner's client list, organization, invite link and asking for a fresh summary.
+  log("25 clients:", (await q.locator("div[aria-label='Client totals']").innerText()).replace(/\s+/g, " "), "|", (await q.locator("ul[aria-label=Clients] li").first().innerText()).replace(/\s+/g, " ").slice(0, 200));
+  await q.fill("#org-name-insurance", "Example Insurance Agency"); await q.click("button:has-text('Make an organization')"); await q.waitForTimeout(700);
+  await q.fill("section[aria-label='Your organization'] input[type=email]", "staff@insure.example"); await q.click("section[aria-label='Your organization'] button:has-text('Add to')"); await q.waitForTimeout(700);
+  log("25 organization:", (await q.locator("section[aria-label='Your organization']").innerText()).replace(/\s+/g, " ").slice(0, 200));
+  await q.selectOption("select[aria-label='Share this client with your organization']", { label: "Example Insurance Agency" }); await q.waitForTimeout(700);
+  await q.click("button:has-text('Show my invite link')"); await q.waitForTimeout(600);
+  log("25 invite link:", (await q.locator("[aria-label='Your invite link']").innerText()).replace(/[a-z2-9]{10}$/, "<code>"));
+  await q.click("ul[aria-label=Clients] button:has-text('Ask for a fresh summary')"); await q.waitForTimeout(300);
+  await q.fill("#ask-note", "Example: renewal is next month"); await q.click("[role=dialog] button:has-text('Send request')"); await q.waitForTimeout(800);
+  log("25 asked:", (await q.locator("ul[aria-label=Clients] li").first().innerText()).replace(/\s+/g, " ").slice(0, 220));
+  await q.screenshot({ path: `${OUT}/e-partner-clients.png`, fullPage: true });
   await q.locator("button[aria-label^='Open summary']").first().click(); await q.waitForTimeout(1000);
   const ptext = await q.locator("main").innerText();
   log("14 partner report:", await q.locator("h1").first().textContent(), "| no worker names:", !/Alvarez|Brooks|Diaz/.test(ptext), "| no compliance claim:", !/\bcompliant\b/i.test(ptext.replace("doesn't certify compliance", "")));
   await q.screenshot({ path: `${OUT}/e-partner-report.png`, fullPage: true });
   await viewAs("owner"); await q.waitForTimeout(600);
   await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Reports"); await q.waitForTimeout(900); await q.locator("a[href*='profile']").first().click(); await q.waitForTimeout(1500);
+  log("25 company sees the request:", (await q.locator("ul[aria-label='Summary requests']").innerText().catch(() => "MISSING")).replace(/\s+/g, " "), "| org:", (await q.locator("section[aria-label='Insurance partners'] >> text=Shared with organizations").count()) > 0);
   const sentRow = q.locator("ul[aria-label='Sent to Example Insurance Agency'] li").first();
   log("14 open logged:", (await sentRow.innerText()).replace(/\s+/g, " "));
   await sentRow.locator("button:has-text('Withdraw')").click(); await sentRow.locator("button:has-text('Tap again')").click(); await q.waitForTimeout(800);
@@ -625,7 +638,11 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("20 console:", await q.locator("h1").first().textContent(), "|", (await q.locator("[aria-label=Totals]").innerText()).replace(/\s+/g, " "));
   const coRow = q.locator("ul[aria-label=Companies] li").filter({ hasText: "Demo 2" }).first();
   await coRow.locator("button[aria-expanded]").click(); await q.waitForTimeout(300);
-  await coRow.locator("select").selectOption("pilot"); await coRow.locator("button:has-text('Save plan')").click(); await q.waitForTimeout(800);
+  await coRow.locator("select[id^=pl-]").selectOption("pilot"); await coRow.locator("button:has-text('Save plan')").click(); await q.waitForTimeout(800);
+  { const r = q.locator("ul[aria-label=Companies] li").filter({ hasText: "Demo 2" }).first();
+    if ((await r.locator("button[aria-expanded]").getAttribute("aria-expanded")) !== "true") await r.locator("button[aria-expanded]").click();
+    await r.locator("select[id^=ps-]").selectOption("crew"); await r.locator("button:has-text('Save size')").click(); await q.waitForTimeout(800);
+    log("20 plan size saved:", (await q.locator("ul[aria-label=Companies] li").filter({ hasText: "Demo 2" }).first().locator("select[id^=ps-]").inputValue().catch(() => "closed"))); }
   const coRow2 = q.locator("ul[aria-label=Companies] li").filter({ hasText: "Demo 2" }).first();
   log("20 plan:", (await coRow2.locator("button[aria-expanded]").innerText()).replace(/\s+/g, " "));
   if ((await coRow2.locator("button[aria-expanded]").getAttribute("aria-expanded")) !== "true") await coRow2.locator("button[aria-expanded]").click();
@@ -756,6 +773,14 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.goto(PAGE); await q.waitForTimeout(1000);
   await q.click("main a[href*='/me']"); await q.waitForTimeout(1200);
   log("24 my record:", (await q.locator("section[aria-label='Company safety programs']").innerText().catch(() => "MISSING")).replace(/\s+/g, " "));
+  // Scenario 26: plans and prices, from Admin → Company.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600);
+  await q.click("[role=tab]:has-text('Company')"); await q.waitForTimeout(800);
+  await q.click("button:has-text('See plans and prices')"); await q.waitForTimeout(500);
+  log("26 plans:", (await q.locator("[role=dialog] ul[aria-label=Plans]").innerText()).replace(/\s+/g, " ").slice(0, 260));
+  log("26 fair:", (await q.locator("[role=dialog] section[aria-label='Why the price is fair'] li").count()), "points |", (await q.locator("[role=dialog]").innerText()).includes("covers you"));
+  await q.screenshot({ path: `${OUT}/e-plans.png`, fullPage: false });
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();

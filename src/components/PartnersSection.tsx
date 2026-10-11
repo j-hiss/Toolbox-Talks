@@ -13,6 +13,9 @@ import type { Membership } from "@/lib/data/types";
 import { Button, ConfirmButton, Field, GroupHeading, Notice, inputClass } from "./ui";
 import { OutsideInvite } from "./OutsideInvite";
 import { toast } from "./toast";
+import { OrgMembersNote } from "./PartnerTools";
+import { summaryRequests } from "@/lib/data/partnerClients";
+import type { SummaryRequest } from "@/core/partnerClients";
 
 const fmt = (iso: string) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
@@ -21,9 +24,10 @@ export function PartnersSection({ p, co, florida, crew }: { p: SafetyProfile; co
   const [sent, setSent] = useState<SentReport[]>([]);
   const [kind, setKind] = useState<PartnerKind>("agent");
   const [missing, setMissing] = useState(false);
+  const [asks, setAsks] = useState<SummaryRequest[]>([]);
   const load = useCallback(() => {
-    Promise.all([listPartners(co.id), listSentReports(co.id)])
-      .then(([a, b]) => { setPartners(a); setSent(b); setMissing(false); })
+    Promise.all([listPartners(co.id), listSentReports(co.id), summaryRequests(co.id).catch(() => [] as SummaryRequest[])])
+      .then(([a, b, c]) => { setPartners(a); setSent(b); setAsks(c); setMissing(false); })
       .catch(() => setMissing(true)); // a database without migration 0027
   }, [co.id]);
   useEffect(load, [load]);
@@ -38,6 +42,18 @@ export function PartnersSection({ p, co, florida, crew }: { p: SafetyProfile; co
       <GroupHeading>Insurance partners <span className="ml-1 rounded bg-caution-bg px-1.5 py-0.5 align-middle text-xs font-semibold text-caution-text">Pilot</span></GroupHeading>
       <p className="mt-1 text-sm text-muted">Give your agent, broker or carrier their own sign-in to read the summaries you send them. They see counts and rates only, never names, signatures or injury details. You see every time they open one, and you can withdraw a summary or end their access at any time.</p>
       <div className="mt-2"><Notice tone="caution">Pilot: this needs a privacy review before it&apos;s used with a real partner.</Notice></div>
+      {(() => {
+        // Requests newer than the last summary sent to that partner: they're still waiting.
+        const open = asks.filter((a) => !sent.some((r) => r.partner_id === a.partner_id && !r.withdrawn_at && r.sent_at > a.requested_at));
+        return open.length > 0 && (
+          <ul aria-label="Summary requests" className="mt-3 flex flex-col gap-1.5">
+            {open.map((a) => (
+              <li key={a.id}><Notice><b>{partners.find((x) => x.id === a.partner_id)?.name ?? "A partner"}</b> asked for a fresh summary on {fmt(a.requested_at)}{a.note ? `: "${a.note}"` : "."} Send this one below if it looks right.</Notice></li>
+            ))}
+          </ul>
+        );
+      })()}
+      <OrgMembersNote companyId={co.id} />
 
       <OutsideInvite id="pt" nameLabel="Agency, broker or carrier" namePlaceholder="Example Insurance Agency" buttonLabel="Invite partner"
         extra={<Field label="They are" id="pt-kind"><select id="pt-kind" className={inputClass} value={kind} onChange={(e) => setKind(e.target.value as PartnerKind)}>{PARTNER_KINDS.map((k) => <option key={k.id} value={k.id}>{k.name}</option>)}</select></Field>}

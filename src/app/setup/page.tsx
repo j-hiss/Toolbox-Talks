@@ -8,11 +8,13 @@ import { addRoles, createCompany, listRoles } from "@/lib/data/company";
 import { missingStarterTitles } from "@/content/jobTitles";
 import { CompanyForm, blankCompany } from "@/components/CompanyForm";
 import { NotConfigured } from "@/components/Guard";
-import { Eyebrow, Loading, NavLink, Shell, Title } from "@/components/ui";
+import { Eyebrow, Loading, NavLink, Notice, Shell, Title } from "@/components/ui";
+import { recordStoredReferral, useReferralFromLink } from "@/components/ReferralOffer";
 
 export default function Setup() {
   const s = useSession();
   const router = useRouter();
+  const ref = useReferralFromLink();
 
   useEffect(() => {
     if (s.status === "signed-out") router.replace("/sign-in/");
@@ -28,11 +30,13 @@ export default function Setup() {
       <p className="mt-2 mb-5 text-muted">
         This prints at the top of every signed record. You can change any of it later in Admin.
       </p>
+      {ref && <div className="mb-5"><Notice>Recommended by <b>{ref.name}</b>. After setup you can add them as your {ref.kind === "training" ? "trainer" : "insurance partner"}; nothing is shared until you choose.</Notice></div>}
       <CompanyForm
         initial={blankCompany()}
         submitLabel="Create company"
         onSubmit={async (c) => {
           const id = await createCompany(c);
+          await recordStoredReferral(id);
           // The industry's starter job titles. Not essential: if this fails, Admin → Job titles offers them again.
           try { await addRoles(id, missingStarterTitles(c.industry, await listRoles(id))); } catch { /* offered later */ }
           await s.refresh();

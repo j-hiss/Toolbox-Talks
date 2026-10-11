@@ -8,6 +8,7 @@ import { myMemberships } from "@/lib/data/company";
 import { acceptInvites } from "@/lib/data/members";
 import { amTrainer } from "@/lib/data/trainers";
 import { amPartner } from "@/lib/data/partners";
+import { acceptOrgInvites, myOrgs } from "@/lib/data/partnerClients";
 import { loadOwnTalks } from "@/lib/library";
 import { setOutboxUser } from "@/lib/outbox";
 import type { Membership } from "@/lib/data/types";
@@ -69,8 +70,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try {
       // Join any company that invited this email (Admin → App access). Never blocks signing in.
       try { await acceptInvites(); } catch { /* offline or not yet migrated: try again next sign-in */ }
-      // A database without 0026/0027 just means not a trainer or partner.
-      const [ms, tr, pa] = await Promise.all([myMemberships(u.id), amTrainer(u.id).catch(() => false), amPartner(u.id).catch(() => false)]);
+      try { await acceptOrgInvites(); } catch { /* same: partner organizations (0049) */ }
+      // A database without 0026/0027 just means not a trainer or partner. Staff of a training or insurance
+      // organization (0049) count too, even before their organization has its first client.
+      const [ms, trLink, paLink, orgs] = await Promise.all([myMemberships(u.id), amTrainer(u.id).catch(() => false), amPartner(u.id).catch(() => false), myOrgs().catch(() => [])]);
+      const tr = trLink || orgs.some((o) => o.kind === "training");
+      const pa = paLink || orgs.some((o) => o.kind === "insurance");
       setMemberships(ms);
       setTrainer(tr);
       setPartner(pa);
