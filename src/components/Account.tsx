@@ -11,6 +11,10 @@ import type { Membership } from "@/lib/data/types";
 import { saveFile } from "@/lib/download";
 import { Button, ConfirmButton, GroupHeading, Notice, inputClass } from "./ui";
 import { toast } from "./toast";
+import { PlansPrices } from "./PlansPrices";
+import { peopleLimit, sizeFor } from "@/core/plans";
+import { listPeople } from "@/lib/data/company";
+import { Sheet } from "./ui";
 
 const day = (d: Date | string) => new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
@@ -23,11 +27,15 @@ export function AccountPanel({ m }: { m: Membership }) {
   const [progress, setProgress] = useState<ExportProgress | null>(null);
   const [confirmName, setConfirmName] = useState("");
   const [log, setLog] = useState<{ at: string; reason: string }[] | null>(null);
+  const [people, setPeople] = useState<number | null>(null);
+  const [plans, setPlans] = useState(false);
   useEffect(() => {
     let live = true;
     supportAccessLog(co.id).then((l) => live && setLog(l)).catch(() => live && setLog(null));
+    listPeople(co.id).then((p) => live && setPeople(p.filter((x) => x.active).length)).catch(() => live && setPeople(null));
     return () => { live = false; };
   }, [co.id]);
+  const limit = peopleLimit(account);
 
   const download = async () => {
     setProgress({ step: "Starting", done: 0, total: 1 });
@@ -53,8 +61,14 @@ export function AccountPanel({ m }: { m: Membership }) {
       <div className="mt-2 rounded-xl border border-line bg-surface p-3 shadow-[var(--shadow-card)]">
         <p className="font-semibold">{account ? PLAN_LABEL[account.plan] : "Plan"}{account?.plan === "trial" && account.trial_ends_at ? ` · ends ${day(`${account.trial_ends_at}T12:00:00`)}` : ""}</p>
         {account?.paused_at && <p className="mt-1 text-sm">Paused since {day(account.paused_at)}{account.pause_reason ? `: ${account.pause_reason}` : ""}. Everything can be viewed and downloaded; nothing new saves.</p>}
+        {account?.plan === "paid" && <p className="mt-1 text-sm">{sizeFor(account.tier ?? "company").name} plan · up to {limit} people{people != null ? ` · ${people} on the roster` : ""}</p>}
+        {account?.plan === "paid" && limit != null && people != null && people >= limit && <p className="mt-1 text-sm font-semibold text-warn-text">Your roster is full for this plan. Everyone on it keeps working; adding more needs a larger plan.</p>}
         {!account?.paused_at && <p className="mt-1 text-sm text-muted">Questions about your plan: contact us.</p>}
+        <div className="mt-2"><Button type="button" size="sm" variant="soft" onClick={() => setPlans(true)}>See plans and prices</Button></div>
       </div>
+      <Sheet title="Plans and prices" open={plans} onClose={() => setPlans(false)}>
+        <PlansPrices current={account?.plan === "paid" ? account.tier ?? "company" : null} people={people} />
+      </Sheet>
 
       <GroupHeading>Download all your data</GroupHeading>
       <p className="mt-1 text-sm text-muted">Every record, roster, issue, inspection, log and setting your company has, as spreadsheets (CSV) and JSON in one ZIP. Your data is yours; this works even if the account is paused or closing.</p>

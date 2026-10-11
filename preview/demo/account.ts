@@ -10,7 +10,7 @@ export const accounts = () => ((db() as unknown as { accounts?: DemoAccount[] })
 export const audit = () => ((db() as unknown as { platformAudit?: Audit[] }).platformAudit ??= []);
 export function accountFor(companyId: string): DemoAccount {
   let a = accounts().find((x) => x.company_id === companyId);
-  if (!a) { a = { company_id: companyId, plan: "trial", trial_ends_at: null, paused_at: null, pause_reason: "", closure_requested_at: null }; accounts().push(a); }
+  if (!a) { a = { company_id: companyId, plan: "trial", tier: "company", trial_ends_at: null, paused_at: null, pause_reason: "", closure_requested_at: null }; accounts().push(a); }
   return a;
 }
 export function log(action: string, companyId: string | null, detail: Record<string, unknown> = {}) {

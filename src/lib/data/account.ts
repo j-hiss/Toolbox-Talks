@@ -10,7 +10,7 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
 
 /** This company's account, or null if it can't be read yet (offline). */
 export async function getAccount(companyId: string): Promise<CompanyAccount | null> {
-  const rows = check(await supabase().from("company_accounts").select("plan, trial_ends_at, paused_at, pause_reason, closure_requested_at").eq("company_id", companyId).limit(1)) as CompanyAccount[];
+  const rows = check(await supabase().from("company_accounts").select("*").eq("company_id", companyId).limit(1)) as CompanyAccount[];
   return rows[0] ?? null;
 }
 

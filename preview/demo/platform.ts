@@ -1,6 +1,7 @@
 // Demo version of src/lib/data/platform.ts: in the preview the demo account also runs the service, so the console
 // shows the demo companies in this browser. Same rules as the database: reasons required, 30 days before removal,
 // exact name, everything logged.
+import type { Tier } from "@/core/plans";
 import type * as Real from "@/../src/lib/data/platform";
 import type { Plan } from "@/core/account";
 import { db, save, tick } from "./store";
@@ -27,6 +28,11 @@ export async function platformCompanies(): Promise<Real.PlatformCompany[]> {
       inspections_total: rowsOf("inspections").filter((r) => r.company_id === id).length,
     };
   });
+}
+export async function platformSetTier(companyId: string, tier: Tier): Promise<void> {
+  await tick();
+  const a = accountFor(companyId) as { tier?: Tier }; a.tier = tier;
+  log("set_tier", companyId, { tier }); save();
 }
 export async function platformSetPlan(companyId: string, plan: Plan, trialEnd: string | null): Promise<void> {
   await tick();
@@ -87,5 +93,5 @@ export async function platformSupportView(companyId: string, reason: string): Pr
   };
 }
 
-const _sameShape = { amPlatformAdmin, platformCompanies, platformSetPlan, platformPause, platformResume, platformSettings, platformSetTrialDays, platformAudit, platformPurge, platformSupportView } satisfies Omit<typeof Real, never>;
+const _sameShape = { amPlatformAdmin, platformCompanies, platformSetTier, platformSetPlan, platformPause, platformResume, platformSettings, platformSetTrialDays, platformAudit, platformPurge, platformSupportView } satisfies Omit<typeof Real, never>;
 void _sameShape;

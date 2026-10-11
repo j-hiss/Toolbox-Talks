@@ -1,6 +1,7 @@
 // The operator console (migration 0042): the people running the service see every company with counts, open one's
 // records to help (support view, logged and shown to the company), set plans, pause and resume, and remove a company 30 days after its owner asked to close it. Every call is checked in
 // the database (private.platform_admins) and logged; nobody in a customer company can reach these.
+import type { Tier } from "@/core/plans";
 import { supabase } from "@/lib/supabase";
 import type { Plan } from "@/core/account";
 
@@ -10,7 +11,7 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
 }
 
 export type PlatformCompany = {
-  id: string; name: string; industry: string; created_at: string; plan: Plan; trial_ends_at: string | null; paused_at: string | null; pause_reason: string;
+  id: string; name: string; industry: string; created_at: string; plan: Plan; tier?: Tier; trial_ends_at: string | null; paused_at: string | null; pause_reason: string;
   closure_requested_at: string | null; members: number; people_active: number; talks_total: number; talks_30d: number; last_talk_at: string | null; inspections_total: number;
 };
 export type AuditRow = { at: string; action: string; company_id: string | null; company_name: string; detail: Record<string, unknown> };
@@ -24,6 +25,11 @@ export async function amPlatformAdmin(): Promise<boolean> {
 
 export async function platformCompanies(): Promise<PlatformCompany[]> {
   return check(await supabase().rpc("platform_companies")) as PlatformCompany[];
+}
+
+/** Set the plan size (Crew, Company or Larger); only a paid account is held to it. */
+export async function platformSetTier(companyId: string, tier: Tier): Promise<void> {
+  check(await supabase().rpc("platform_set_tier", { co: companyId, new_tier: tier }));
 }
 
 export async function platformSetPlan(companyId: string, plan: Plan, trialEnd: string | null): Promise<void> {

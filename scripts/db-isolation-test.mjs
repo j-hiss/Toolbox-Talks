@@ -943,7 +943,7 @@ async function main() {
       const list = await as(op, "select * from public.platform_companies()");
       const mine = list.rows.find((r) => r.id === coP);
       check("An operator sees every company with counts only", list.rows.length >= 3 && mine?.people_active === 1 && mine?.members === 2
-        && list.fields.map((f) => f.name).join() === "id,name,industry,created_at,plan,trial_ends_at,paused_at,pause_reason,closure_requested_at,members,people_active,talks_total,talks_30d,last_talk_at,inspections_total");
+        && list.fields.map((f) => f.name).join() === "id,name,industry,created_at,plan,tier,trial_ends_at,paused_at,pause_reason,closure_requested_at,members,people_active,talks_total,talks_30d,last_talk_at,inspections_total");
       check("An operator sets a plan; an unknown plan is refused", !!(await as(op, "select public.platform_set_plan($1, 'pilot', null)", [coP]))
         && (await as(ownerP, "select plan from public.company_accounts where company_id = $1", [coP])).rows[0].plan === "pilot"
         && await fails(() => as(op, "select public.platform_set_plan($1, 'gold', null)", [coP])));
@@ -971,6 +971,26 @@ async function main() {
       check("Another company keeps working while one is paused", (await as(userA, "insert into public.people (company_id, full_name) values ($1, 'Example Still Works') returning id", [coA])).rows.length === 1);
       await as(op, "select public.platform_resume($1)", [coP]);
       check("Resumed, saving works again", (await as(ownerP, "insert into public.people (company_id, full_name) values ($1, 'Example After') returning id", [coP])).rows.length === 1);
+      // Plan sizes (0048): only a paid account is held to its size; nothing it already has is locked.
+      {
+        const caseKey = randomUUID();
+        const addCase = (key, version) => as(ownerP, "insert into public.injury_cases (company_id, case_key, version, employee_name, injury_date, description, outcome, kind, year) values ($1, $2, $3, 'Example Tier Person', '2025-04-02', 'Example tier case', 'other', 'injury', 2025) returning id", [coP, key, version]);
+        await as(op, "select public.platform_set_plan($1, 'paid', null)", [coP]);
+        await addCase(caseKey, 1);   // on the Company size (the default) a new case is fine
+        check("Only operators set the plan size; an unknown size is refused", await fails(() => as(ownerP, "select public.platform_set_tier($1, 'larger')", [coP]))
+          && await fails(() => as(op, "select public.platform_set_tier($1, 'huge')", [coP])));
+        await as(op, "select public.platform_set_tier($1, 'crew')", [coP]);
+        const progAdd = () => as(ownerP, "insert into public.company_programs (company_id, program_key, template_version, version, answers, approved_name) values ($1, 'hazcom', 1, 1, '{}'::jsonb, 'Example Owner') returning id", [coP]);
+        check("Paid Crew size: starting a new OSHA case or written program waits for a larger plan", await fails(() => addCase(randomUUID(), 1)) && await fails(progAdd));
+        check("Paid Crew size: an existing OSHA case can still be corrected", (await addCase(caseKey, 2)).rows.length === 1);
+        const active = Number((await db.query("select count(*) from public.people where company_id = $1 and active", [coP])).rows[0].count);
+        await as(ownerP, "insert into public.people (company_id, full_name) select $1, 'Example Crew ' || g from generate_series(1, $2::int) g", [coP, 25 - active]);
+        check("Paid Crew size: a 26th person is refused, with the reason", await fails(() => as(ownerP, "insert into public.people (company_id, full_name) values ($1, 'Example One Too Many')", [coP])));
+        await as(op, "select public.platform_set_tier($1, 'company')", [coP]);
+        check("A larger size lifts both at once", (await progAdd()).rows.length === 1 && (await as(ownerP, "insert into public.people (company_id, full_name) values ($1, 'Example Now Fits') returning id", [coP])).rows.length === 1);
+        await db.query("update public.people set active = false where company_id = $1 and full_name like 'Example Crew %' or full_name = 'Example Now Fits'", [coP]);
+        await as(op, "select public.platform_set_plan($1, 'pilot', null)", [coP]);
+      }
       // Support access: a reason every time, logged, shown to the company; injury details and images never included.
       await as(ownerP, "insert into public.injury_cases (company_id, case_key, version, employee_name, injury_date, description, outcome, kind, year) values ($1, $2, 1, 'Example Injured Person', '2026-03-02', 'Example secret injury detail', 'other', 'injury', 2026)", [coP, randomUUID()]);
       check("Support access needs a reason, and only operators have it", await fails(() => as(op, "select public.platform_support_view($1, '  ')", [coP]))
@@ -1178,7 +1198,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 427;
+  const EXPECTED = 432;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

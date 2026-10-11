@@ -10,6 +10,8 @@ export type Plan = "trial" | "pilot" | "paid" | "comp";
 
 export type CompanyAccount = {
   plan: Plan;
+  /** Plan size (migration 0048): only a paid account is held to it. Older databases leave it out. */
+  tier?: "crew" | "company" | "larger";
   trial_ends_at: string | null;      // YYYY-MM-DD, null = no end date
   paused_at: string | null;
   pause_reason: string;

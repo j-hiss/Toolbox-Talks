@@ -8,8 +8,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CLOSE_WAIT_DAYS, PLAN_LABEL, removableFrom, type Plan } from "@/core/account";
 import { INDUSTRIES } from "@/core/industries";
+import { PLAN_SIZES, sizeFor, type Tier } from "@/core/plans";
 import {
-  amPlatformAdmin, platformAudit, platformCompanies, platformPause, platformPurge, platformResume, platformSetPlan, platformSetTrialDays,
+  amPlatformAdmin, platformAudit, platformCompanies, platformPause, platformPurge, platformResume, platformSetPlan, platformSetTier, platformSetTrialDays,
   platformSettings, platformSupportView, type AuditRow, type PlatformCompany, type SupportView,
 } from "@/lib/data/platform";
 import { useSession } from "@/lib/session";
@@ -87,6 +88,7 @@ function Console() {
 function CompanyRow({ c, onChanged, onSupport }: { c: PlatformCompany; onChanged: () => void; onSupport: (v: SupportView) => void }) {
   const [open, setOpen] = useState(false);
   const [plan, setPlan] = useState<Plan>(c.plan);
+  const [tier, setTier] = useState<Tier>(c.tier ?? "company");
   const [trialEnd, setTrialEnd] = useState(c.trial_ends_at ?? "");
   const [reason, setReason] = useState("");
   const [why, setWhy] = useState("");
@@ -100,7 +102,7 @@ function CompanyRow({ c, onChanged, onSupport }: { c: PlatformCompany; onChanged
     <li className="rounded-xl border border-line bg-surface p-3 shadow-[var(--shadow-card)]">
       <button type="button" className="flex w-full flex-wrap items-baseline justify-between gap-2 text-left" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span><b>{c.name}</b> <span className="text-sm text-muted">· {industry} · since {day(c.created_at)}</span></span>
-        <span className="text-sm font-semibold">{PLAN_LABEL[c.plan]}{c.plan === "trial" && c.trial_ends_at ? ` to ${day(c.trial_ends_at)}` : ""}{c.paused_at ? " · Paused" : ""}{c.closure_requested_at ? " · Closing" : ""}</span>
+        <span className="text-sm font-semibold">{PLAN_LABEL[c.plan]}{c.plan === "paid" ? ` · ${sizeFor(c.tier ?? "company").name}` : ""}{c.plan === "trial" && c.trial_ends_at ? ` to ${day(c.trial_ends_at)}` : ""}{c.paused_at ? " · Paused" : ""}{c.closure_requested_at ? " · Closing" : ""}</span>
       </button>
       <p className="mt-1 text-sm text-muted">{c.members} account{c.members === 1 ? "" : "s"} · {c.people_active} people · {c.talks_30d} talks in 30 days ({c.talks_total} total) · {c.inspections_total} inspections · last talk {c.last_talk_at ? day(c.last_talk_at) : "none yet"}</p>
       {open && (
@@ -109,6 +111,10 @@ function CompanyRow({ c, onChanged, onSupport }: { c: PlatformCompany; onChanged
             <Field label="Plan" id={`pl-${c.id}`}><select id={`pl-${c.id}`} className={inputClass} value={plan} onChange={(e) => setPlan(e.target.value as Plan)}>{PLANS.map((p) => <option key={p} value={p}>{PLAN_LABEL[p]}</option>)}</select></Field>
             {plan === "trial" && <Field label="Trial ends" hint="empty = no end" id={`te-${c.id}`}><input id={`te-${c.id}`} type="date" className={inputClass} value={trialEnd} onChange={(e) => setTrialEnd(e.target.value)} /></Field>}
             <Button type="button" variant="soft" disabled={busy} onClick={() => act(() => platformSetPlan(c.id, plan, plan === "trial" && trialEnd ? trialEnd : null), `${c.name}: plan saved.`)}>Save plan</Button>
+          </div>
+          <div className="flex flex-wrap items-end gap-2">
+            <Field label="Plan size" hint="Only a paid plan is held to it" id={`ps-${c.id}`}><select id={`ps-${c.id}`} className={inputClass} value={tier} onChange={(e) => setTier(e.target.value as Tier)}>{PLAN_SIZES.map((s) => <option key={s.id} value={s.id}>{s.name} · up to {s.people} · ${s.monthly}/mo</option>)}</select></Field>
+            <Button type="button" variant="soft" disabled={busy} onClick={() => act(() => platformSetTier(c.id, tier), `${c.name}: plan size saved.`)}>Save size</Button>
           </div>
 
           <div className="flex flex-col gap-2">

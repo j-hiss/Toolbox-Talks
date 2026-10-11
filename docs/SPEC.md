@@ -533,6 +533,24 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Pricing idea (Joe, 2026-10-09, not decided):** carriers drive adoption; the app may be paid, discounted for a
   company that shares its profile with its carrier, or carrier-sponsored.
 
+## Plans and prices (built, migration 0048; payment outside the app for now)
+- **Why:** an affordable, fair price so trainers and agents can recommend it without scaring clients. Flat monthly
+  price by crew size, no per-worker fees.
+- **Sizes (src/core/plans.ts):** Crew $29/month, up to 25 people; Company $79, up to 100; Larger $149, up to 250.
+  Yearly is 10 months' price. 30-day trial of everything (the operator can change the trial length). Past 250: talk
+  to us. Trainers and insurance partners never pay.
+- **What each covers:** Crew has the safety basics: library read aloud in 6 languages, one-phone and QR signing, signed
+  PDFs with check codes, daily plans, the app's inspection checklists, training cards and the trainer portal,
+  reports, the safety profile and sending it to an agent, offline. Company and Larger add starting new OSHA log
+  cases, written programs, your own talks and your own checklists. Sending summaries to an agent is on every plan
+  because that's how agents see their clients.
+- **Fair to a company that moves down:** nothing it has is locked. It can open, print, correct, review and download
+  everything; a new version of an existing case, program, talk or checklist saves. Only starting a new one waits for
+  a larger plan. People past the size can't be added (or brought back); nobody on the roster is affected.
+- **Only paid accounts are held to a size.** Trial, pilot and complimentary have everything. The database enforces it
+  (private.plan_allows, private.people_limit); the screen explains it (Admin → Company → Plan and account → See
+  plans and prices, with the "fair price" points). The operator sets the size in the console.
+
 ## Written safety programs (built, migration 0047)
 - **Why:** insurers, prequalification services and OSHA ask for the written programs; competitors sell binders. Here
   each program is the rule's own list of elements, filled in by the company, versioned and printable.
