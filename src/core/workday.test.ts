@@ -103,3 +103,46 @@ describe("reminders", () => {
     ]);
   });
 });
+
+import { trackedChecks } from "./inspections";
+import { INDUSTRIES } from "./industries";
+import { CHECKLISTS } from "@/content/checklists";
+describe("inspection reminders", () => {
+  const base = { thisWeekTitle: null, nextWeekTitle: null, crewName: null, crewDone: true, expiringSoon: 0 };
+  it("lists only Every-job checks and ones the company has used, never 'before each use'", () => {
+    for (const ind of INDUSTRIES) { // every industry gets the same reminders rule and at least the Every-job checks
+      const t = trackedChecks(CHECKLISTS, ind.id, [{ checklist_id: "ladders", inspected_at: "2026-10-01T12:00:00Z" }]);
+      expect(t.length, ind.id).toBeGreaterThan(0);
+      expect(t.every((c) => c.when !== "each_use")).toBe(true);
+      const unused = CHECKLISTS.filter((c) => !c.industries.includes("all") && c.id !== "ladders");
+      expect(t.some((c) => unused.some((u) => u.id === c.id))).toBe(false);
+    }
+  });
+  it("early morning: today at 6:45 with what's due; a daily check done today comes due again tomorrow", () => {
+    const daily = { id: "walk", title: "Walkways and exits", when: "daily" as const, last: new Date(2026, 9, 7, 8, 0).toISOString() };
+    const monthly = { id: "ext", title: "Fire extinguishers", when: "monthly" as const, last: new Date(2026, 9, 1, 8, 0).toISOString() };
+    const yesterday = { ...daily, last: new Date(2026, 9, 6, 8, 0).toISOString() };
+    const early = planReminders({ ...base, today: new Date(2026, 9, 7, 5, 0), inspections: [yesterday, monthly] }); // Wed 5:00 AM
+    expect(early.map((x) => [x.id, x.at.toString().slice(0, 21), x.body])).toEqual([[104, "Wed Oct 07 2026 06:45", "Walkways and exits. Open Inspections to do it."]]);
+    const later = planReminders({ ...base, today: new Date(2026, 9, 7, 9, 0), inspections: [daily, monthly] });
+    expect(later.map((x) => [x.id, x.at.toString().slice(0, 21), x.title, x.body])).toEqual([
+      [104, "Thu Oct 08 2026 06:45", "Inspection due", "Walkways and exits. Open Inspections to do it."],
+    ]);
+  });
+  it("names two, then counts the rest; nothing when nothing is due", () => {
+    const never = (title: string) => ({ id: title, title, when: "daily" as const, last: null });
+    const r = planReminders({ ...base, today: new Date(2026, 9, 7, 5, 0), inspections: [never("A"), never("B"), never("C")] });
+    expect(r.map((x) => [x.at.toString().slice(0, 21), x.title, x.body])).toEqual([["Wed Oct 07 2026 06:45", "3 inspections due", "A, B and 1 more. Open Inspections to do them."]]);
+    expect(planReminders({ ...base, today: new Date(2026, 9, 7, 5, 0), inspections: [] })).toEqual([]);
+  });
+});
+
+import { REMINDER_IDS } from "./reminders";
+describe("reminder ids", () => {
+  it("every reminder the planner makes is in REMINDER_IDS, so it can be cleared", () => {
+    const never = { id: "x", title: "X", when: "daily" as const, last: null };
+    const r = planReminders({ today: new Date(2026, 9, 5, 5, 0), thisWeekTitle: "A", nextWeekTitle: "B", crewName: null, crewDone: false, expiringSoon: 1, inspections: [never] });
+    expect(r.every((x) => (REMINDER_IDS as readonly number[]).includes(x.id))).toBe(true);
+    expect(new Set(r.map((x) => x.id)).size).toBe(4);
+  });
+});

@@ -1,6 +1,6 @@
 // OSHA 300 log data (migration 0031). Owners and admins only; every save is a new version. Rules: src/core/oshaLog.ts.
 import { supabase } from "@/lib/supabase";
-import type { CaseDraft, InjuryCase, InjurySummary } from "@/core/oshaLog";
+import type { CaseDraft, Establishment, InjuryCase, InjurySummary } from "@/core/oshaLog";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
   if (res.error) throw new Error(res.error.message);
@@ -8,9 +8,9 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
 }
 
 const FIELDS_301 = ["employee_address", "birth_date", "hire_date", "sex", "provider_name", "provider_facility", "er_visit", "inpatient", "time_started", "time_of_event", "time_unknown", "activity_before", "what_happened", "injury_detail", "object_substance", "death_date", "completed_by", "completed_title", "completed_phone"] as const;
-const DRAFT_FIELDS = ["person_id", "employee_name", "job_title", "injury_date", "location", "description", "outcome", "days_away", "days_restricted", "kind", "privacy", "privacy_reason", ...FIELDS_301] as const;
+const DRAFT_FIELDS = ["establishment_id", "person_id", "employee_name", "job_title", "injury_date", "location", "description", "outcome", "days_away", "days_restricted", "kind", "privacy", "privacy_reason", ...FIELDS_301] as const;
 const CASE_COLS = ["case_key", "version", "year", "case_no", "removed", "removed_reason", ...DRAFT_FIELDS, "created_at"].join(", ");
-const SUMMARY_COLS = "year, version, establishment, address, industry, naics, avg_employees, hours_worked, certifier_name, certifier_title, certifier_phone, legal_name, ein, street, city, state, zip, peak_employees, establishment_type";
+const SUMMARY_COLS = "year, version, establishment, address, industry, naics, avg_employees, hours_worked, certifier_name, certifier_title, certifier_phone, legal_name, ein, street, city, state, zip, peak_employees, establishment_type, establishment_id";
 
 /** Every version of every case for a year (the latest per case: latestCases). */
 export async function listInjuryCases(companyId: string, year: number): Promise<InjuryCase[]> {
@@ -40,4 +40,22 @@ export async function listInjurySummaries(companyId: string): Promise<InjurySumm
 
 export async function saveInjurySummary(companyId: string, s: InjurySummary): Promise<void> {
   check(await supabase().from("injury_summaries").insert({ company_id: companyId, ...s }).select("year"));
+}
+
+// Locations with their own OSHA log (migration 0040, 29 CFR 1904.30). The main log isn't a row: it's establishment null.
+
+/** Every location this company keeps a separate log for, open and closed, by name. */
+export async function listEstablishments(companyId: string): Promise<Establishment[]> {
+  return check(await supabase().from("osha_establishments").select("id, name, short_term, closed_at").eq("company_id", companyId).order("name")) as Establishment[];
+}
+
+/** Start a separate log for a location. */
+export async function addEstablishment(companyId: string, name: string, shortTerm: boolean): Promise<Establishment> {
+  return check(await supabase().from("osha_establishments").insert({ company_id: companyId, name: name.trim(), short_term: shortTerm }).select("id, name, short_term, closed_at").single()) as Establishment;
+}
+
+/** Rename a location, mark it short-term, or close it (closed logs keep their cases and summaries; reopen by clearing). */
+export async function updateEstablishment(companyId: string, id: string, p: Partial<Pick<Establishment, "name" | "short_term" | "closed_at">>): Promise<void> {
+  const patch = { ...p, ...(p.name !== undefined ? { name: p.name.trim() } : {}) };
+  check(await supabase().from("osha_establishments").update(patch).eq("company_id", companyId).eq("id", id).select("id"));
 }

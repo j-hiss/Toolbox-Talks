@@ -557,6 +557,26 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     await q.locator(`main button:has-text("${label}")`).click(); await q.waitForTimeout(1500);
     log(`17 ${label}:`, JSON.stringify(await q.evaluate(() => window.__saved)));
   }
+  // Scenario 17b: a second OSHA log for a location (1904.30). Start it, add a case there, see each log keep its own.
+  await q.click("main button:has-text('More than one location')"); await q.waitForTimeout(200);
+  await q.fill("#est-name", "North yard"); await q.click("main button:has-text('Start this log')"); await q.waitForTimeout(800);
+  log("17b picker:", await q.locator("#osha-log option:checked").innerText(), "| empty:", await q.locator("main p:has-text('No recordable cases')").count() > 0);
+  await q.click("main button:has-text('Add a case to North yard')"); await q.waitForTimeout(300);
+  await q.fill("#inj-name", "Example Yard Worker"); await q.fill("#inj-date", `${new Date().getFullYear()}-06-03`); await q.fill("#inj-desc", "Cut on left hand from sheet metal");
+  await isheet.locator("button:has-text('Add to the log')").click(); await q.waitForTimeout(800);
+  const yardCases = (await q.locator("main ul li b").allInnerTexts()).filter((t) => /^\d{4}-\d{3}/.test(t));
+  await q.evaluate(() => { window.__saved = null; });
+  await q.locator('main button:has-text("log (300) PDF")').click(); await q.waitForTimeout(1500);
+  log("17b yard log:", yardCases.join(" | "), "| file:", JSON.stringify(await q.evaluate(() => window.__saved)));
+  // This location's own 300A saves even though the main log already has a 2026 summary (versions count company-wide).
+  await q.fill("#sum-peak", "40"); await q.fill("#sum-naics", "238160");
+  await q.click("main button:has-text('Save summary details')"); await q.waitForTimeout(800);
+  log("17b yard 300A:", await q.evaluate(() => JSON.stringify((JSON.parse(localStorage.getItem("tt-preview-db") || "{}").injurySummaries ?? []).map((x) => [x.version, x.establishment_id ? "yard" : "main", x.peak_employees]))),
+    "| filing:", await q.locator("section[aria-label='Filing online with OSHA'] p.font-semibold").innerText());
+  await q.locator("#osha-log").scrollIntoViewIfNeeded(); await q.evaluate(() => window.scrollBy(0, -120));
+  await q.screenshot({ path: `${OUT}/e-injury-locations.png`, fullPage: false });
+  await q.selectOption("#osha-log", ""); await q.waitForTimeout(300);
+  log("17b main log:", (await q.locator("main ul li b").allInnerTexts()).filter((t) => /^\d{4}-\d{3}/.test(t)).join(" | "));
   // Scenario 18: inspections. Home card, run the ladder checklist with one failure (note + issue), sign, save, see it in
   // Recent, open it, download the PDF, then check it on /verify by its code.
   await q.goto(PAGE); await q.waitForTimeout(1200);
@@ -590,7 +610,14 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
     await q.evaluate((c) => { sessionStorage.setItem("tt-preview-start", "/verify/"); location.hash = c; }, inspCode);
     await q.reload(); await q.waitForTimeout(1500);
     log("18 verify:", (await q.locator("section[aria-label='What was saved']").innerText()).replace(/\s+/g, " ").slice(0, 140));
+    log("18 wording:", (await q.locator("section[aria-label='What was saved'] p:has-text('checklist')").allInnerTexts()).join(" | ") || "no wording line");
   } else log("18 verify: no code found in demo store");
+  // Scenario 19: My record. Home card opens the signed-in person's own record: stats, what's owed, no rankings.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("main a[href*='/me']"); await q.waitForTimeout(1000);
+  const me = (await q.locator("main").innerText()).replace(/\s+/g, " ");
+  log("19 my record:", await q.locator("h1").first().textContent(), "|", me.slice(0, 220), "| no ranking words:", !/\b(rank|leaderboard|top performer)\b/i.test(me.replace("no rankings", "")));
+  await q.screenshot({ path: `${OUT}/e-my-record.png`, fullPage: true });
   await q.goto(PAGE); await q.waitForTimeout(800);
   log("errors:", errs.length ? errs : "none");
   await b.close();

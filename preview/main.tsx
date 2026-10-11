@@ -16,6 +16,7 @@ import ProfilePage from "@/app/profile/page";
 import SharePage from "@/app/share/page";
 import VerifyPage from "@/app/verify/page";
 import InspectPage from "@/app/inspect/page";
+import MePage from "@/app/me/page";
 import TrainerPage from "@/app/trainer/page";
 import PartnerPage from "@/app/partner/page";
 import { usePreviewPath } from "./shims/router";
@@ -38,6 +39,7 @@ const ROUTES: Record<string, () => React.ReactElement> = {
   "/share/": () => <SharePage />,
   "/verify/": () => <VerifyPage />,
   "/inspect/": () => <InspectPage />,
+  "/me/": () => <MePage />,
   "/trainer/": () => <TrainerPage />,
   "/partner/": () => <PartnerPage />,
 };

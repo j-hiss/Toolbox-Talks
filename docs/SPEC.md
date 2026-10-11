@@ -42,6 +42,10 @@ Two separate things describe a person (decided with Joe, 2026-10-09):
   - **Presenter**: gives talks and daily plans; sees records and the plan.
   - **Office**: sees reports and records and works the issues list; doesn't give talks or change setup.
   - **Employee**: sees only their own talk history (linked to their name on the roster). Nothing else of the company.
+- **My record (built, migration 0038):** everyone who signs in sees their own record (Home → My record; an employee's
+  Home shows it too): weeks closed, weeks in a row, what they owe and by when, worked out by the same rules as Reports
+  (a week they presented and signed as presenter counts). Staff also see what they did: talks saved, inspections,
+  issues raised and fixed. Only that person sees it; no rankings or leaderboards. Admins see everyone in Reports.
 - **Team member** (anyone on the roster): listens and signs on the presenter's phone. No account needed.
 - **Joining:** an admin invites an email with an app role (employees also pick their roster name). The person signs
   in with that email (emailed code, so the address is proven) and is added automatically. The app sends no email.
@@ -608,7 +612,14 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   NAICS codes; a newer code is matched by prefix and flagged to confirm on OSHA's site.
 - **Honest limits:** the app keeps the log and builds the forms; deciding recordability is the company's. It reminds
   about 8-hour and 24-hour serious-injury reports (1904.39) but doesn't send them, and it doesn't submit to OSHA (the
-  company uploads the file). Not yet: several establishments per company.
+  company uploads the file).
+- **More than one location (built, migration 0040):** a separate log for each establishment expected to run a year or
+  longer (1904.30(a)); short-term jobsites can share one log (1904.30(b)(1)). The main log carries the company's name;
+  "More than one location?" adds others. Each log has its own cases, 300A, PDFs and online filing files (one 300A file
+  per location, as OSHA's size thresholds are per establishment). The 10-or-fewer exemption counts the whole company
+  (sum of each log's headcount, which can only overstate). A case stays on the log it was put on; a location is closed,
+  never deleted. Case numbers count across all of a company's logs (each still unique); starting each log at 1 is a
+  proposed change waiting for Joe (docs/proposed-migrations/case-numbers-per-log.sql).
 
 ## Topic icons and spreadsheet export (built)
 - **Topic icons:** every talk shows a small icon for its topic (weather, falls, electrical, fire, chemicals and air,
@@ -634,6 +645,12 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   has started using count as due, so a roofer without a trench isn't told a trench check is due.
 - **After:** a failed inspection offers the related talk. The PDF lists every item, notes, photos, the signature and a
   check code that /verify accepts (counts only, no names, places, photos or the free-text subject).
+- **Wording check (built, migration 0039):** /verify also says whether the inspection used the app's own checklist
+  wording, word for word: the database fingerprints the saved title, rule and items (SHA-256) and the page compares it
+  with the same checklist and version in the app. A mismatch says so plainly; an edition this copy of the app doesn't
+  carry says it can't compare.
+- **Reminders (built):** on the phone, a 6:45 AM reminder lists the checks due by then (today if it's still early,
+  else tomorrow), from the same list as Home's count. Only "Every job" checks and ones the company has used.
 - **Honest:** every item ends pass, fail or not applicable; failures are never hidden. An inspection documents that
   someone looked; it doesn't certify a site.
 

@@ -36,6 +36,10 @@ export function seedExample(): string {
     return { id, name, teamId };
   };
   const leadA = person("Example Lead Alvarez", t1, foreman);
+  // The demo account is this lead, so "My record" has talks to show (in the app, an invite with a roster name links it).
+  const people = d.people as { id: string; company_id: string; user_id?: string | null }[];
+  if (user && !people.some((p) => p.company_id === coId && p.user_id === user)) { const p = people.find((x) => x.id === leadA.id); if (p) p.user_id = user; }
+  (d as unknown as { demoSelf?: Record<string, string> }).demoSelf = { ...(d as unknown as { demoSelf?: Record<string, string> }).demoSelf, [coId]: leadA.id };
   const leadB = person("Example Lead Brooks", t2, foreman);
   const teams = d.teams as { id: string; lead_person_id: string | null }[];
   teams.find((t) => t.id === t1)!.lead_person_id = leadA.id;
@@ -143,6 +147,11 @@ export function viewAs(access: "owner" | "admin" | "presenter" | "office" | "emp
     const onTalks = new Set(recs.filter((r) => r.company_id === member.company_id).flatMap((r) => r.attendees.map((a) => a.person_id)));
     const p = people.find((x) => x.company_id === member.company_id && x.active !== false && onTalks.has(x.id))
       ?? people.find((x) => x.company_id === member.company_id && x.active !== false);
+    if (p) p.user_id = user;
+  } else {
+    // Back to a staff role: the demo account is the seeded lead again (see seedExample).
+    const self = (d as unknown as { demoSelf?: Record<string, string> }).demoSelf?.[member.company_id];
+    const p = self ? people.find((x) => x.id === self) : undefined;
     if (p) p.user_id = user;
   }
   member.access = access;

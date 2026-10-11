@@ -6,10 +6,10 @@ import { BLANK_301, nameInNarrative, incidentGaps, type InjuryCase, type InjuryS
 const sum: InjurySummary = {
   year: 2026, version: 1, establishment: "Example Roofing Co - Main", address: "", industry: "Roofing", naics: "238160", avg_employees: 24, hours_worked: 49920,
   certifier_name: "", certifier_title: "", certifier_phone: "", legal_name: "Example Roofing Co LLC", ein: "123456789", street: "1 Example St", city: "Fort Myers", state: "FL", zip: "33913",
-  peak_employees: 31, establishment_type: 1,
+  peak_employees: 31, establishment_type: 1, establishment_id: null,
 };
 const c = (over: Partial<InjuryCase> = {}): InjuryCase => ({
-  ...BLANK_301, case_key: "k", version: 1, year: 2026, case_no: 1, removed: false, removed_reason: "", person_id: null, employee_name: "Pat Rivera", job_title: "Roofer",
+  ...BLANK_301, case_key: "k", version: 1, year: 2026, case_no: 1, removed: false, removed_reason: "", establishment_id: null, person_id: null, employee_name: "Pat Rivera", job_title: "Roofer",
   injury_date: "2026-03-02", location: "Example Jobsite", description: "Sprained ankle", outcome: "days_away", days_away: 3, days_restricted: 0, kind: "injury",
   privacy: false, privacy_reason: null, created_at: "", birth_date: "1990-01-15", hire_date: "2024-05-01", er_visit: false, inpatient: false, time_of_event: "09:30:00",
   activity_before: "Carrying shingles down a ladder", what_happened: "Missed the last rung", injury_detail: "Sprained left ankle", object_substance: "Ladder", ...over,

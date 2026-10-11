@@ -53,6 +53,8 @@ export type InjuryCase = {
   case_key: string; version: number; year: number; case_no: number; removed: boolean; removed_reason: string;
   person_id: string | null; employee_name: string; job_title: string; injury_date: string; location: string; description: string;
   outcome: Outcome; days_away: number; days_restricted: number; kind: CaseKind; privacy: boolean; privacy_reason: PrivacyReason | null;
+  /** Which log (migration 0040): null = the company's main log, else one of its locations. */
+  establishment_id: string | null;
   created_at: string;
 } & Incident301;
 
@@ -106,7 +108,28 @@ export type InjurySummary = {
   avg_employees: number | null; hours_worked: number | null; certifier_name: string; certifier_title: string; certifier_phone: string;
   /** For OSHA's online filing (migration 0033). peak_employees = everyone employed at any time in the year. */
   legal_name: string; ein: string; street: string; city: string; state: string; zip: string; peak_employees: number | null; establishment_type: 1 | 2 | 3;
+  /** Which log this 300A belongs to (migration 0040): null = the company's main log. */
+  establishment_id: string | null;
 };
+
+/**
+ * One OSHA log per establishment open a year or longer (29 CFR 1904.30(a)); short-term sites can share one log
+ * (1904.30(b)(1)). The main log (id null) is always there and carries the company's name.
+ */
+export type Establishment = { id: string; name: string; short_term: boolean; closed_at: string | null };
+
+/** Rows on one log: the main log is establishment_id null. Older rows saved before 0040 have no field and count as main. */
+export const onLog = <R extends { establishment_id?: string | null }>(rows: R[], est: string | null): R[] => rows.filter((r) => (r.establishment_id ?? null) === est);
+
+/**
+ * Company-wide headcount for the 10-or-fewer exemption (1904.1), which counts the whole company, not one location:
+ * the sum of each log's "employed at any time" for the year. People who worked at two locations count twice, so this
+ * can only overstate, never wrongly exempt. Null (unknown) until every listed log has a headcount for the year.
+ */
+export function companyHeadcount(rows: InjurySummary[], year: number, logs: (string | null)[]): number | null {
+  const counts = logs.map((l) => latestSummary(onLog(rows, l), year)?.peak_employees ?? null);
+  return counts.length && counts.every((n) => n !== null) ? (counts as number[]).reduce((a, b) => a + b, 0) : null;
+}
 
 /** The latest version of each case for a year, by case number. Removed cases drop out unless `withRemoved`. */
 export function latestCases<C extends Pick<InjuryCase, "case_key" | "version" | "removed" | "case_no">>(rows: C[], withRemoved = false): C[] {

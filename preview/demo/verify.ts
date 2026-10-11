@@ -4,6 +4,7 @@ import type * as Real from "@/../src/lib/data/verify";
 import type { VerifiedRecord } from "@/core/verify";
 import { db, tick } from "./store";
 import { withCode } from "./records";
+import { wordingHash } from "@/core/inspections";
 
 type Rec = { company_id: string; record_kind?: "weekly" | "daily"; content: { title: string; en?: { title?: string } }; language: string; held_at: string;
   week_start: string | null; week_number: number | null; makeup_for_week?: string | null; presenter_signed_at: string | null;
@@ -24,11 +25,12 @@ export async function verifyRecord(code: string): Promise<VerifiedRecord | null>
 
 export async function verifyInspection(code: string): Promise<Real.VerifiedInspection | null> {
   await tick();
-  type I = { company_id: string; title: string; rule: string; subject: string; inspected_at: string; created_at: string; verify_code: string; items: { result: string }[] };
+  type I = { company_id: string; checklist_id: string; checklist_version: number; title: string; rule: string; subject: string; inspected_at: string; created_at: string; verify_code: string; items: { id: string; text: string; rule?: string; result: string }[] };
   const r = ((db() as unknown as { inspections?: I[] }).inspections ?? []).find((x) => x.verify_code === code);
   if (!r) return null;
   const n = (s: string) => r.items.filter((i) => i.result === s).length;
-  return { company: String(db().companies.find((c) => c.id === r.company_id)?.name ?? ""), title: r.title, rule: r.rule, inspected_at: r.inspected_at, saved_at: r.created_at, items: r.items.length, passed: n("pass"), failed: n("fail"), na: n("na") };
+  return { company: String(db().companies.find((c) => c.id === r.company_id)?.name ?? ""), title: r.title, rule: r.rule, inspected_at: r.inspected_at, saved_at: r.created_at, items: r.items.length, passed: n("pass"), failed: n("fail"), na: n("na"),
+    checklist_id: r.checklist_id, checklist_version: r.checklist_version, wording_hash: await wordingHash(r) };
 }
 
 const _sameShape = { verifyRecord, verifyInspection } satisfies Omit<typeof Real, never>;

@@ -5,12 +5,12 @@
 // version, so the five years of updates keep their history. Nothing here reaches shared summaries or partners.
 import { useEffect, useMemo, useState } from "react";
 import {
-  BLANK_301, KINDS, MAX_DAYS, OUTCOMES, PRIVACY_REASONS, caseLabel, caseProblem, incidentGaps, latestCases, latestSummary, logRates, logTotals,
-  nameInNarrative, postingWindow, type CaseDraft, type InjuryCase, type InjurySummary,
+  BLANK_301, KINDS, MAX_DAYS, OUTCOMES, PRIVACY_REASONS, caseLabel, caseProblem, companyHeadcount, incidentGaps, latestCases, latestSummary, logRates, logTotals,
+  nameInNarrative, onLog, postingWindow, type CaseDraft, type Establishment, type InjuryCase, type InjurySummary,
 } from "@/core/oshaLog";
-import { filingDue, filingDuty, itaCaseCsv, itaCaseProblems, itaSummaryCsv, itaSummaryProblems } from "@/core/oshaFiling";
+import { filingDue, filingDuty, type FilingDuty, itaCaseCsv, itaCaseProblems, itaSummaryCsv, itaSummaryProblems } from "@/core/oshaFiling";
 import { INDUSTRIES } from "@/core/industries";
-import { listInjuryCases, listInjurySummaries, removeInjuryCase, saveInjuryCase, saveInjurySummary } from "@/lib/data/injuries";
+import { addEstablishment, listEstablishments, listInjuryCases, listInjurySummaries, removeInjuryCase, saveInjuryCase, saveInjurySummary, updateEstablishment } from "@/lib/data/injuries";
 import type { Company, Person, Role } from "@/lib/data/types";
 import { saveFile } from "@/lib/download";
 import { Button, ConfirmButton, Field, GroupHeading, Loading, Notice, Sheet, inputClass } from "@/components/ui";
@@ -21,7 +21,15 @@ const thisYear = () => new Date().getFullYear();
 const short = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 const blank = (): CaseDraft => ({
   ...BLANK_301, person_id: null, employee_name: "", job_title: "", injury_date: "", location: "", description: "",
-  outcome: "other", days_away: 0, days_restricted: 0, kind: "injury", privacy: false, privacy_reason: null,
+  outcome: "other", days_away: 0, days_restricted: 0, kind: "injury", privacy: false, privacy_reason: null, establishment_id: null,
+});
+
+/** A 300A with nothing filled in yet for one log: the establishment's name, and the company's details as a start. */
+const blankSummary = (company: Company, year: number, log: string | null, est: Establishment | null): InjurySummary => ({
+  year, version: 0, establishment: est ? est.name : company.name, address: est ? "" : company.address ?? "", industry: "", naics: "",
+  avg_employees: null, hours_worked: null, certifier_name: "", certifier_title: "", certifier_phone: company.phone ?? "",
+  legal_name: company.name, ein: "", street: "", city: "", state: "", zip: est ? "" : company.zip ?? "", peak_employees: null, establishment_type: 1,
+  establishment_id: log, // the chosen log, even before its details have loaded
 });
 
 // Only the fields a person fills in: numbers, versions and times come from the database.
@@ -33,8 +41,10 @@ const toDraft = (c: InjuryCase): CaseDraft => {
 
 export function InjuryLog({ company, people, roles }: { company: Company; people: Person[]; roles: Role[] }) {
   const [year, setYear] = useState(thisYear());
-  const [rows, setRows] = useState<InjuryCase[] | null>(null);
-  const [sums, setSums] = useState<InjurySummary[]>([]);
+  const [allRows, setRows] = useState<InjuryCase[] | null>(null);
+  const [allSums, setSums] = useState<InjurySummary[]>([]);
+  const [ests, setEsts] = useState<Establishment[]>([]);
+  const [log, setLog] = useState<string | null>(null); // null = the main log
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
   const [edit, setEdit] = useState<{ prev: InjuryCase | null; draft: CaseDraft } | null>(null);
@@ -43,15 +53,20 @@ export function InjuryLog({ company, people, roles }: { company: Company; people
 
   useEffect(() => {
     let live = true;
-    Promise.all([listInjuryCases(company.id, year), listInjurySummaries(company.id)])
-      .then(([c, s]) => { if (live) { setRows(c); setSums(s); setError(null); } })
+    Promise.all([listInjuryCases(company.id, year), listInjurySummaries(company.id), listEstablishments(company.id)])
+      .then(([c, s, e]) => { if (live) { setRows(c); setSums(s); setEsts(e); setError(null); } })
       .catch((e) => { if (live) setError(e instanceof Error ? e.message : String(e)); });
     return () => { live = false; };
   }, [company.id, year, version]);
 
+  // One log at a time (29 CFR 1904.30): everything below is the chosen log's cases, 300A, forms and files.
+  const est = ests.find((e) => e.id === log) ?? null;
+  const rows = useMemo(() => (allRows ? onLog(allRows, log) : null), [allRows, log]);
   const cases = useMemo(() => latestCases(rows ?? []), [rows]);
   const removed = useMemo(() => latestCases(rows ?? [], true).filter((c) => c.removed), [rows]);
-  const sum = latestSummary(sums, year);
+  const sum = latestSummary(onLog(allSums, log), year);
+  const sumOrBlank = sum ?? blankSummary(company, year, log, est);
+  const fileCo = est ? { name: `${company.name} - ${est.name}` } : company;
   const totals = logTotals(cases);
   const rates = logRates(totals, sum?.hours_worked ?? null);
   const today = new Date();
@@ -63,14 +78,20 @@ export function InjuryLog({ company, people, roles }: { company: Company; people
     setBusy(true);
     try {
       const { buildOsha300Pdf, buildOsha300APdf, buildPrivacyListPdf, buildOsha301Pdf, oshaFileName } = await import("@/lib/pdf");
-      const doc = what === "300" ? buildOsha300Pdf(cases, company, year, sum) : what === "300A" ? buildOsha300APdf(cases, company, year, sum)
+      const doc = what === "300" ? buildOsha300Pdf(cases, company, year, sumOrBlank) : what === "300A" ? buildOsha300APdf(cases, company, year, sumOrBlank)
         : what === "301" && one ? buildOsha301Pdf(one, company) : buildPrivacyListPdf(cases, company, year);
-      const res = await saveFile(oshaFileName(company, year, what, one ? caseLabel(one) : undefined), doc.output("blob"));
+      const res = await saveFile(oshaFileName(fileCo, year, what, one ? caseLabel(one) : undefined), doc.output("blob"));
       if (res !== "canceled") toast("PDF ready.");
     } catch (e) { toast(e instanceof Error ? e.message : String(e), { tone: "error" }); }
     setBusy(false);
   };
-  const duty = filingDuty(sum?.naics ?? "", sum?.peak_employees ?? null);
+  // Online filing goes by this location's headcount (1904.41); the 10-or-fewer exemption by the whole company's (1904.1).
+  // Logs that count for this year: the main log, open locations, and locations closed during or after it.
+  const yearLogs = [null, ...ests.filter((e) => !e.closed_at || new Date(e.closed_at).getFullYear() >= year).map((e) => e.id)];
+  const companyCount = yearLogs.length > 1 ? companyHeadcount(allSums, year, yearLogs) : null;
+  const duty: FilingDuty = yearLogs.length > 1 && companyCount === null
+    ? { log: "unknown", file300A: false, file300_301: false, why: [`Add how many people worked at any time in ${year} on every location's 300A. The 10-or-fewer test counts the whole company (1904.1).`] }
+    : filingDuty(sum?.naics ?? "", sum?.peak_employees ?? null, companyCount);
   const summaryIssues = itaSummaryProblems(sum, cases);
   const caseIssues = itaCaseProblems(cases);
   const ita = async (what: "ita-summary" | "ita-cases") => {
@@ -78,7 +99,7 @@ export function InjuryLog({ company, people, roles }: { company: Company; people
     try {
       const { oshaFileName } = await import("@/lib/pdf");
       const csv = what === "ita-summary" ? itaSummaryCsv(sum, cases, year) : itaCaseCsv(sum.establishment, cases, year);
-      const res = await saveFile(oshaFileName(company, year, what), new Blob([csv], { type: "text/csv" }));
+      const res = await saveFile(oshaFileName(fileCo, year, what), new Blob([csv], { type: "text/csv" }));
       if (res !== "canceled") toast("File ready to upload on OSHA's Injury Tracking Application.");
     } catch (e) { toast(e instanceof Error ? e.message : String(e), { tone: "error" }); }
   };
@@ -104,6 +125,7 @@ export function InjuryLog({ company, people, roles }: { company: Company; people
         </select>
         <span className="text-xs text-muted">Keep five years after each year ends (1904.33).</span>
       </div>
+      <LogPicker company={company} ests={ests} log={log} setLog={(l) => setLog(l)} onAdded={(e) => setEsts((list) => [...list, e])} onChanged={reload} />
 
       {error && <div className="mt-3"><Notice tone="error">{error}</Notice></div>}
       {!rows && !error ? <Loading /> : rows && (
@@ -129,7 +151,8 @@ export function InjuryLog({ company, people, roles }: { company: Company; people
               catch (e) { toast(e instanceof Error ? e.message : String(e), { tone: "error" }); }
             }} />)}
           </ul>
-          <div className="mt-3"><Button type="button" onClick={() => setEdit({ prev: null, draft: { ...blank(), injury_date: "" } })}>Add a case</Button></div>
+          <div className="mt-3"><Button type="button" disabled={!!est?.closed_at} onClick={() => setEdit({ prev: null, draft: { ...blank(), establishment_id: log, injury_date: "" } })}>Add a case{est ? ` to ${est.name}` : ""}</Button></div>
+          {est?.closed_at && <p className="mt-1 text-xs text-muted">This location&apos;s log is closed. Reopen it below to add a case.</p>}
           {removed.length > 0 && (
             <details className="mt-3 text-sm">
               <summary className="cursor-pointer font-semibold">Taken off the log ({removed.length})</summary>
@@ -140,7 +163,8 @@ export function InjuryLog({ company, people, roles }: { company: Company; people
           )}
 
           <GroupHeading>Summary (300A) details</GroupHeading>
-          <SummaryForm key={`${year}-${sum?.version ?? 0}`} company={company} year={year} sum={sum} onSaved={reload} />
+          <SummaryForm key={`${log ?? "main"}-${est?.name ?? ""}-${year}-${sum?.version ?? 0}`} company={company} year={year} sum={sum} blank={sumOrBlank}
+            nextVersion={Math.max(0, ...allSums.filter((x) => x.year === year).map((x) => x.version)) + 1} onSaved={reload} />
 
           <GroupHeading>Forms</GroupHeading>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -322,12 +346,9 @@ function CaseEditor({ company, people, roles, edit, setEdit, onSaved }: {
   );
 }
 
-function SummaryForm({ company, year, sum, onSaved }: { company: Company; year: number; sum: InjurySummary | null; onSaved: () => void }) {
-  const [f, setF] = useState<InjurySummary>(() => sum ?? {
-    year, version: 0, establishment: company.name, address: company.address ?? "", industry: "", naics: "",
-    avg_employees: null, hours_worked: null, certifier_name: "", certifier_title: "", certifier_phone: company.phone ?? "",
-    legal_name: company.name, ein: "", street: "", city: "", state: "", zip: company.zip ?? "", peak_employees: null, establishment_type: 1,
-  });
+/** `nextVersion`: 300A versions count per company and year across all its logs (migration 0031), so it comes from every log's rows. */
+function SummaryForm({ company, year, sum, blank, nextVersion, onSaved }: { company: Company; year: number; sum: InjurySummary | null; blank: InjurySummary; nextVersion: number; onSaved: () => void }) {
+  const [f, setF] = useState<InjurySummary>(() => sum ?? blank);
   const suggestions = INDUSTRIES.find((i) => i.id === company.industry)?.naics ?? [];
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<InjurySummary>) => setF({ ...f, ...p });
@@ -337,7 +358,7 @@ function SummaryForm({ company, year, sum, onSaved }: { company: Company; year: 
     if (f.ein && !/^\d{9}$/.test(f.ein)) { toast("EIN is 9 digits, or leave it blank.", { tone: "error" }); return; }
     if (f.zip && !/^\d{5}(\d{4})?$/.test(f.zip)) { toast("ZIP is 5 or 9 digits.", { tone: "error" }); return; }
     setBusy(true);
-    try { await saveInjurySummary(company.id, { ...f, year, version: (sum?.version ?? 0) + 1, avg_employees: f.avg_employees === null ? null : Math.round(f.avg_employees), peak_employees: f.peak_employees === null ? null : Math.round(f.peak_employees) }); toast("Summary details saved."); onSaved(); }
+    try { await saveInjurySummary(company.id, { ...f, year, version: nextVersion, avg_employees: f.avg_employees === null ? null : Math.round(f.avg_employees), peak_employees: f.peak_employees === null ? null : Math.round(f.peak_employees) }); toast("Summary details saved."); onSaved(); }
     catch (e) { toast(e instanceof Error ? e.message : String(e), { tone: "error" }); }
     setBusy(false);
   };
@@ -438,5 +459,67 @@ function Incident301({ d, set }: { d: CaseDraft; set: (p: Partial<CaseDraft>) =>
         </div>
       </div>
     </details>
+  );
+}
+
+/**
+ * Which OSHA log to show: the main one (the company's name) and one per location. A separate log for each
+ * establishment open a year or longer (29 CFR 1904.30(a)); short-term sites can share one (1904.30(b)(1)).
+ * Shown as a small line until a company adds a second log, so a one-location company sees nothing new.
+ */
+function LogPicker({ company, ests, log, setLog, onAdded, onChanged }: { company: Company; ests: Establishment[]; log: string | null; setLog: (l: string | null) => void; onAdded: (e: Establishment) => void; onChanged: () => void }) {
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState("");
+  const [shortTerm, setShortTerm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const est = ests.find((e) => e.id === log) ?? null;
+  const add = async () => {
+    if (!name.trim()) { toast("Name the location, like the yard or shop it is.", { tone: "error" }); return; }
+    setBusy(true);
+    try { const e = await addEstablishment(company.id, name, shortTerm); setName(""); setShortTerm(false); setAdding(false); onAdded(e); setLog(e.id); onChanged(); toast(`Started a separate log for ${e.name}.`); }
+    catch (e) { toast(/duplicate|unique/i.test(String(e)) ? "There's already a log with that name." : e instanceof Error ? e.message : String(e), { tone: "error" }); }
+    setBusy(false);
+  };
+  const close = async (closed: boolean) => {
+    if (!est) return;
+    try { await updateEstablishment(company.id, est.id, { closed_at: closed ? new Date().toISOString() : null }); onChanged(); toast(closed ? `${est.name} closed. Its log and history stay.` : `${est.name} reopened.`); }
+    catch (e) { toast(e instanceof Error ? e.message : String(e), { tone: "error" }); }
+  };
+  return (
+    <div className="mt-3">
+      {ests.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor="osha-log" className="text-sm font-semibold">Log for</label>
+          <select id="osha-log" className={`${inputClass} max-w-64`} value={log ?? ""} onChange={(e) => setLog(e.target.value || null)}>
+            <option value="">{company.name} (main)</option>
+            {ests.map((e) => <option key={e.id} value={e.id}>{e.name}{e.short_term ? " (short-term sites)" : ""}{e.closed_at ? " (closed)" : ""}</option>)}
+          </select>
+          {est && (est.closed_at
+            ? <Button type="button" size="sm" variant="ghost" onClick={() => close(false)}>Reopen</Button>
+            : <ConfirmButton label="Close this location" confirmLabel="Tap again to close it" onConfirm={() => void close(true)} />)}
+        </div>
+      )}
+      {!adding ? (
+        <button type="button" className="mt-2 text-sm font-semibold text-brand-text underline" onClick={() => setAdding(true)}>
+          {ests.length ? "Add another location" : "More than one location? Keep a separate log for each"}
+        </button>
+      ) : (
+        <section aria-label="Add a location" className="mt-2 rounded-xl border border-line bg-surface p-3 shadow-[var(--shadow-card)]">
+          <p className="text-sm text-muted">
+            Keep a separate log for each location expected to run a year or longer, like a shop, yard or plant (1904.30(a)).
+            Jobsites under a year can share one log, kept together or by area (1904.30(b)(1)). Record each case on the log
+            of the location where it happened; if it happened away from your locations, on the log where the person
+            normally works (1904.30(b)(3)-(4)).
+          </p>
+          <Field label="Location name" id="est-name"><input id="est-name" className={inputClass} maxLength={120} value={name} onChange={(e) => setName(e.target.value)} placeholder="Example: North yard" /></Field>
+          <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={shortTerm} onChange={(e) => setShortTerm(e.target.checked)} /> This log is for short-term jobsites (under a year)</label>
+          <div className="mt-3 flex gap-2">
+            <Button type="button" disabled={busy} onClick={add}>Start this log</Button>
+            <Button type="button" variant="ghost" onClick={() => setAdding(false)}>Cancel</Button>
+          </div>
+        </section>
+      )}
+      {ests.length > 0 && <p className="mt-2 text-xs text-muted">Each log has its own cases, 300A, forms and online filing file. Case numbers count across all your logs, so each stays unique.</p>}
+    </div>
   );
 }

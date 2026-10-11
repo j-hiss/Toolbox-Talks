@@ -5,7 +5,7 @@ const draft = (over: Partial<CaseDraft> = {}): CaseDraft => ({
   ...BLANK_301,
   person_id: null, employee_name: "Example Worker", job_title: "Roofer", injury_date: "2026-03-02", location: "Example Jobsite, roof",
   description: "Sprained left ankle stepping off a ladder", outcome: "days_away", days_away: 3, days_restricted: 0, kind: "injury",
-  privacy: false, privacy_reason: null, ...over,
+  privacy: false, privacy_reason: null, establishment_id: null, ...over,
 });
 const row = (key: string, version: number, over: Partial<InjuryCase> = {}): InjuryCase => ({
   ...draft(), case_key: key, version, year: 2026, case_no: 1, removed: false, removed_reason: "", created_at: "2026-03-03T00:00:00Z", ...over,
@@ -46,5 +46,30 @@ describe("OSHA 300 log", () => {
     expect(countDays("2026-01-01", "2026-12-31")).toBe(180);
     expect(countDays("2026-03-05", "2026-03-02")).toBe(0);
     expect(postingWindow(2026)).toEqual({ from: "2027-02-01", to: "2027-04-30" });
+  });
+});
+
+import { companyHeadcount, onLog, type InjurySummary } from "./oshaLog";
+import { filingDuty } from "./oshaFiling";
+describe("more than one log (1904.30)", () => {
+  const s = (est: string | null, peak: number | null, version = 1, year = 2026): InjurySummary => ({
+    year, version, establishment: est ?? "Main", address: "", industry: "", naics: "238160", avg_employees: null, hours_worked: null, certifier_name: "",
+    certifier_title: "", certifier_phone: "", legal_name: "", ein: "", street: "", city: "", state: "", zip: "", peak_employees: peak, establishment_type: 1, establishment_id: est,
+  });
+  it("splits rows by log; rows saved before locations existed count as the main log", () => {
+    const rows = [{ establishment_id: null }, { establishment_id: "a" }, {} as { establishment_id?: string | null }];
+    expect(onLog(rows, null)).toHaveLength(2);
+    expect(onLog(rows, "a")).toHaveLength(1);
+    expect(onLog(rows, "b")).toHaveLength(0);
+  });
+  it("adds each log's latest headcount for the year, for the company-wide 10-or-fewer test", () => {
+    const rows = [s(null, 4), s(null, 6, 2), s("a", 7, 3), s("b", null, 4), s("a", 50, 5, 2025)];
+    expect(companyHeadcount(rows, 2026, [null, "a"])).toBe(13);
+    expect(companyHeadcount(rows, 2026, [null, "a", "b"])).toBeNull(); // b has no headcount yet: unknown, never a guess
+    expect(companyHeadcount(rows, 2024, [null, "a"])).toBeNull();
+  });
+  it("a small location of a bigger company still keeps its log: the exemption counts the whole company", () => {
+    expect(filingDuty("238160", 6).log).toBe("small");
+    expect(filingDuty("238160", 6, 13).log).toBe("keep");
   });
 });

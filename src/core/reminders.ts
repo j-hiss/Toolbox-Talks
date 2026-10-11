@@ -1,6 +1,10 @@
 // Which reminders the phone should have scheduled right now. Pure: the app reschedules from this every time it
 // opens, so reminders always match the latest plan and records. Delivery is src/lib/reminders.ts.
 import { addDays, mondayOf } from "./weeks";
+import { dueState, type TrackedCheck } from "./inspections";
+
+/** Every id planReminders can use, so turning reminders off or rescheduling clears all of them. */
+export const REMINDER_IDS = [101, 102, 103, 104] as const;
 
 export type Reminder = { id: number; at: Date; title: string; body: string };
 
@@ -13,6 +17,8 @@ export type ReminderInput = {
   expiringSoon: number;          // makeups that run out within 7 days
   /** The current talk period (every 2 or 4 weeks); null or absent = weekly. */
   period?: { start: Date; weeks: number } | null;
+  /** The company's scheduled checklists and when each was last done (trackedChecks in src/core/inspections.ts). */
+  inspections?: TrackedCheck[];
 };
 
 const at = (d: Date, h: number, m = 0) => { const x = new Date(d); x.setHours(h, m, 0, 0); return x; };
@@ -35,6 +41,16 @@ export function planReminders(i: ReminderInput): Reminder[] {
   // Next morning 7 AM: makeups about to run out.
   if (i.expiringSoon > 0) {
     out.push({ id: 103, at: at(addDays(i.today, 1), 7), title: "Makeups running out", body: `${i.expiringSoon} missed ${i.expiringSoon === 1 ? "talk runs" : "talks run"} out within a week. Give the makeup from Home.` });
+  }
+  // 6:45 AM, today if it's still early, else tomorrow: the checks due by then (daily ones done today come due again).
+  if (i.inspections?.length) {
+    const early = at(i.today, 6, 45);
+    const when = i.today < early ? early : at(addDays(i.today, 1), 6, 45);
+    const due = i.inspections.filter((c) => dueState(c.when, c.last, when).due).map((c) => c.title);
+    if (due.length) {
+      const names = due.length <= 2 ? due.join(" and ") : `${due.slice(0, 2).join(", ")} and ${due.length - 2} more`;
+      out.push({ id: 104, at: when, title: due.length === 1 ? "Inspection due" : `${due.length} inspections due`, body: `${names}. Open Inspections to do ${due.length === 1 ? "it" : "them"}.` });
+    }
   }
   return out.filter((r) => r.at > i.today);
 }

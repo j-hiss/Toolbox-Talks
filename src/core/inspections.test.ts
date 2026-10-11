@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CHECKLISTS } from "@/content/checklists";
 import { TALKS } from "@/content/talks";
 import { INDUSTRIES } from "./industries";
-import { checklistsFor, dueFor, dueState, inspectionProblem, inspectionUpload } from "./inspections";
+import { checklistsFor, dueFor, dueState, inspectionProblem, inspectionUpload, wordingHash, wordingMatch, wordingText } from "./inspections";
 
 describe("checklist content", () => {
   it("every industry gets the Every-job set plus at least two of its own", () => {
@@ -59,5 +59,41 @@ describe("running an inspection", () => {
     expect(up.insp.items[0]).toMatchObject({ note: "gap", photo_path: "co/cl/item-0.jpg" });
     expect(up.insp.items[1].photo_path).toBeNull();
     expect("photo" in up.insp.items[0]).toBe(false);
+  });
+});
+
+// The same fixture and hash are checked against public.verify_inspection() in scripts/db-isolation-test.mjs, so the
+// app and the database agree on the fingerprint byte for byte.
+const WORDING_FIXTURE = { title: "Ladders – daily", rule: "OSHA 1926.1053(b)(15)", items: [
+  { id: "feet", text: "Feet and rungs sound; no cracks", rule: "1926.1053(b)(15)" },
+  { id: "label", text: "Label readable (año)" },
+] };
+const WORDING_FIXTURE_HASH = "ce32251b8e6109356c35c1f8c2bde373d688327a75384a017d602fcf99745dc3";
+
+describe("checklist wording fingerprint", () => {
+  it("joins title, rule and items in order, with blank item rules kept as empty", () => {
+    expect(wordingText(WORDING_FIXTURE)).toBe("Ladders – daily\nOSHA 1926.1053(b)(15)\nfeet\tFeet and rungs sound; no cracks\t1926.1053(b)(15)\nlabel\tLabel readable (año)\t");
+  });
+  it("hashes to the value the database computes", async () => {
+    expect(await wordingHash(WORDING_FIXTURE)).toBe(WORDING_FIXTURE_HASH);
+  });
+  it("tells standard wording from changed wording and from a version this app doesn't carry", async () => {
+    const c = CHECKLISTS[0];
+    const hash = await wordingHash(c);
+    expect(await wordingMatch(CHECKLISTS, { checklist_id: c.id, checklist_version: c.version, wording_hash: hash })).toBe("standard");
+    const edited = { ...c, items: c.items.map((i, n) => (n === 0 ? { ...i, text: i.text + " (mostly)" } : i)) };
+    expect(await wordingMatch(CHECKLISTS, { checklist_id: c.id, checklist_version: c.version, wording_hash: await wordingHash(edited) })).toBe("different");
+    expect(await wordingMatch(CHECKLISTS, { checklist_id: c.id, checklist_version: c.version + 1, wording_hash: hash })).toBe("unknown_version");
+  });
+  it("tabs, newlines and backslashes inside text can't pass for item boundaries (same vector as the database test)", async () => {
+    const odd = { title: "Odd\ttitle", rule: "rule\\x", items: [{ id: "a", text: "x\t\nb\ty" }] };
+    expect(await wordingHash(odd)).toBe("45b575df476f4d9ce185687d7211643f24cb96122eb33bc1bf2187adabf181a1");
+    const split = { title: "T", rule: "R", items: [{ id: "a", text: "x", rule: "" }, { id: "b", text: "y", rule: "" }] };
+    const smuggled = { title: "T", rule: "R", items: [{ id: "a", text: "x\t\nb\ty", rule: "" }] };
+    expect(await wordingHash(smuggled)).not.toBe(await wordingHash(split));
+  });
+  it("every shipped checklist has a distinct fingerprint", async () => {
+    const all = await Promise.all(CHECKLISTS.map(wordingHash));
+    expect(new Set(all).size).toBe(CHECKLISTS.length);
   });
 });

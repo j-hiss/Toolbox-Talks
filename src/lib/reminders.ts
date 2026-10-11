@@ -3,10 +3,10 @@
 // Reminders the phone schedules for itself (no server, no texts, works offline). Only in the iPhone/Android apps;
 // on the website this does nothing. Turned on per phone. What to schedule comes from src/core/reminders.ts.
 import { Capacitor } from "@capacitor/core";
-import type { Reminder } from "@/core/reminders";
+import { REMINDER_IDS, type Reminder } from "@/core/reminders";
 
 const KEY = "tt-reminders";
-const IDS = [101, 102, 103];
+const IDS = REMINDER_IDS;
 
 export const remindersSupported = () => Capacitor.isNativePlatform();
 export function remindersOn(): boolean { try { return localStorage.getItem(KEY) === "on"; } catch { return false; } }

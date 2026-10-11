@@ -4,7 +4,7 @@
 // plus a way to make up a missed week.
 import { useTalkLookup } from "@/lib/library";
 import { TopicChip, TopicIcon } from "@/components/TopicIcon";
-import { InspectionsCard } from "@/components/InspectionsCard";
+import { InspectionsCard, useTrackedChecks } from "@/components/InspectionsCard";
 import { climateFor } from "@/core/climate";
 import { parseDay, periodLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
@@ -57,11 +57,13 @@ function Home({ m }: { m: Membership }) {
   const last = readLastSetup(co.id);
   const lastCrew = last?.teamId === "all" ? "All teams" : st?.teams.find((t) => t.id === last?.teamId)?.name;
   const [remind, setRemind] = useState(() => remindersOn());
+  const tracked = useTrackedChecks(co.id, co.industry);
   const nextWeek = plan[nextIdx];
   const crewGrid = st?.week.find((g) => g.teamId === (last?.teamId || null))?.weeks[0]?.tally;
   // Keep this phone's reminders matching the latest plan and records (phone app only; nothing on the website).
   useEffect(() => {
-    if (!st || !remind) return;
+    // Wait for the inspections list (or this phone's saved copy) so rescheduling never drops an inspection reminder.
+    if (!st || !remind || tracked === null) return;
     void applyReminders(planReminders({
       today: new Date(),
       thisWeekTitle: talk?.content.en.title ?? null,
@@ -70,9 +72,10 @@ function Home({ m }: { m: Membership }) {
       crewDone: !!crewGrid && crewGrid.expected > 0 && crewGrid.on_time >= crewGrid.expected,
       expiringSoon: st.expiringSoon,
       period: week ? { start: week.monday, weeks: week.weeks } : null,
+      inspections: tracked,
     })).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [st, remind, talk?.id, nextWeek?.key]);
+  }, [st, remind, talk?.id, nextWeek?.key, tracked]);
   const start = (talkId: string | null) => {
     newDraft(co.id, talkId, readChosenJobsite(co.id) ?? "");
     router.push("/talk/");
@@ -172,7 +175,11 @@ function Home({ m }: { m: Membership }) {
         </div>
       )}
 
-      <InspectionsCard companyId={co.id} industry={co.industry} />
+      <InspectionsCard tracked={tracked} />
+      <Link href="/me/" className="mt-3 flex items-center justify-between rounded-xl bg-surface px-4 py-3 shadow-card">
+        <span><b className="block">My record</b><small className="text-muted">Your own talks, inspections and fixes</small></span>
+        <span aria-hidden className="text-muted">›</span>
+      </Link>
       {canAdmin(m.access) && <TrainingAlert companyId={co.id} />}
       {!co.zip && canAdmin(m.access) && (
         <div className="mt-4">

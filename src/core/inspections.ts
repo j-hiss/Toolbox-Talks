@@ -37,6 +37,35 @@ export function checklistsFor<C extends Pick<Checklist, "industries">>(all: C[],
   return [...all.filter((c) => c.industries.includes("all")), ...all.filter((c) => !c.industries.includes("all") && tags.some((t) => c.industries.includes(t)))];
 }
 
+/**
+ * The wording an inspection was checked against, as one string: the title, the rule, then one line per item (id, text
+ * and rule, separated by tabs; backslash, tab and newline inside a field are escaped as \\\\, \\t, \\n). public.verify_inspection() (migration 0039) hashes the same string with SHA-256, so
+ * the check page can tell whether a saved inspection used the app's own checklist wording, word for word.
+ */
+export function wordingText(c: { title: string; rule: string; items: ChecklistItem[] }): string {
+  // Backslash, tab and newline are escaped inside each field, so no text can pass for a field or item boundary.
+  const f = (v: string) => v.replace(/\\/g, "\\\\").replace(/\t/g, "\\t").replace(/\n/g, "\\n");
+  return [f(c.title), f(c.rule), ...c.items.map((i) => [f(i.id), f(i.text), f(i.rule ?? "")].join("\t"))].join("\n");
+}
+
+/** SHA-256 of wordingText, as lowercase hex. Uses the platform's Web Crypto (browsers, the phone apps, Node 20). */
+export async function wordingHash(c: { title: string; rule: string; items: ChecklistItem[] }): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(wordingText(c)));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export type WordingMatch = "standard" | "different" | "unknown_version";
+
+/**
+ * Does a saved inspection's wording match the app's checklist with the same id and version? "unknown_version" when this
+ * copy of the app doesn't carry that checklist version (an older or newer edition), so it can't say either way.
+ */
+export async function wordingMatch(all: Pick<Checklist, "id" | "version" | "title" | "rule" | "items">[], saved: { checklist_id: string; checklist_version: number; wording_hash: string }): Promise<WordingMatch> {
+  const c = all.find((x) => x.id === saved.checklist_id && x.version === saved.checklist_version);
+  if (!c) return "unknown_version";
+  return (await wordingHash(c)) === saved.wording_hash ? "standard" : "different";
+}
+
 export type ItemResult = "pass" | "fail" | "na";
 export type CheckedItem = ChecklistItem & { result: ItemResult; note?: string; photo?: string | null; photo_path?: string | null };
 
@@ -72,6 +101,21 @@ export function dueFor(c: Pick<Checklist, "when" | "industries">, last: string |
   const s = dueState(c.when, last, now);
   if (!last && !c.industries.includes("all")) return { due: false, label: "Not done yet" };
   return s;
+}
+
+/** A checklist this company keeps on a schedule, with when it was last done: what Home counts and reminders use. */
+export type TrackedCheck = { id: string; title: string; when: ChecklistWhen; last: string | null };
+
+/**
+ * The checklists this company keeps on a schedule: its industry's set, minus "before each use" ones (no schedule),
+ * minus ones it has never used unless they're "Every job" (the same rule as dueFor). One list for the Home count and
+ * the phone reminders, so they never disagree.
+ */
+export function trackedChecks(all: Checklist[], industry: IndustryId, history: { checklist_id: string; inspected_at: string }[]): TrackedCheck[] {
+  const last = (id: string) => history.filter((x) => x.checklist_id === id).map((x) => x.inspected_at).sort().at(-1) ?? null;
+  return checklistsFor(all, industry)
+    .filter((c) => c.when !== "each_use" && (c.industries.includes("all") || last(c.id) !== null))
+    .map((c) => ({ id: c.id, title: c.title, when: c.when, last: last(c.id) }));
 }
 
 function ago(iso: string, now: Date): string {

@@ -10,7 +10,9 @@ export async function verifyRecord(code: string): Promise<VerifiedRecord | null>
   return (data as VerifiedRecord | null) ?? null;
 }
 
-export type VerifiedInspection = { company: string; title: string; rule: string; inspected_at: string; saved_at: string; items: number; passed: number; failed: number; na: number };
+export type VerifiedInspection = { company: string; title: string; rule: string; inspected_at: string; saved_at: string; items: number; passed: number; failed: number; na: number;
+  /** Which checklist and edition, and a SHA-256 fingerprint of its wording (migration 0039; src/core/inspections.ts wordingHash). */
+  checklist_id: string; checklist_version: number; wording_hash: string };
 
 /** What was saved for an inspection under this (cleaned) code, or null. */
 export async function verifyInspection(code: string): Promise<VerifiedInspection | null> {

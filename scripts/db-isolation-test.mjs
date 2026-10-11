@@ -506,6 +506,13 @@ async function main() {
       check("Employee sees their company's name", (await as(empA, "select name from public.companies")).rows.length === 1);
       check("Employee sees no issues, teams or jobsites", (await as(empA, "select id from public.talk_issues union all select id from public.teams union all select id from public.jobsites")).rows.length === 0);
       check("Employee can't record a talk", await fails(() => as(empA, "select public.save_talk_record($1::jsonb, $2::jsonb)", rec(coA, randomUUID(), []))));
+      // My record (migration 0038): an employee reads their own company's talk cadence, never another company's, and can't change it.
+      const empCad = (await as(empA, "select company_id from public.company_cadences")).rows;
+      const staffCad = (await as(userA, "select company_id from public.company_cadences")).rows;
+      check("Employee reads their own company's cadence, the same rows staff see", empCad.length === staffCad.length && empCad.every((r) => r.company_id === coA));
+      check("Employee sees no other company's cadence", (await db.query("select 1 from public.company_cadences where company_id = $1", [coB])).rows.length > 0
+        && (await as(empA, "select 1 from public.company_cadences where company_id = $1", [coB])).rows.length === 0);
+      check("Employee can't change the cadence", await fails(() => as(empA, "insert into public.company_cadences (company_id, from_week, weeks) values ($1, $2, 2)", [coA, monday(4)])));
       check("Employee sees only their own membership", (await as(empA, "select user_id from public.company_members")).rows.every((r) => r.user_id === empA));
       // Training cards (migration 0023).
       const otherPerson = (await as(userA, "select id from public.people where company_id = $1 and id <> $2 limit 1", [coA, empPerson])).rows[0].id;
@@ -815,6 +822,33 @@ async function main() {
       check("B still can't read A's 301 details", (await as(userB, "select birth_date from public.injury_cases")).rows.length === 0);
     }
 
+    // OSHA logs per location (0040, 29 CFR 1904.30): owners and admins only, never across companies, closed not deleted.
+    {
+      const newCase = (user, co, extra = {}) => {
+        const c = { case_key: randomUUID(), version: 1, employee_name: "Example Worker", injury_date: "2026-04-02", description: "Cut hand", outcome: "other", kind: "injury", year: 2026, ...extra };
+        const cols = Object.keys(c);
+        return as(user, `insert into public.injury_cases (company_id, ${cols.join(", ")}) values ($1, ${cols.map((_, i) => `$${i + 2}`).join(", ")}) returning case_key, case_no, establishment_id`, [co, ...cols.map((k) => c[k])]);
+      };
+      const estA = (await as(userA, "insert into public.osha_establishments (company_id, name) values ($1, 'North yard') returning id, created_by", [coA])).rows[0];
+      const estB = (await as(userB, "insert into public.osha_establishments (company_id, name) values ($1, 'B plant') returning id", [coB])).rows[0].id;
+      check("An owner starts a separate log for a location, stamped with who", !!estA.id && estA.created_by === userA);
+      check("A new location can't set its own id or creation time", await fails(() => as(userA, "insert into public.osha_establishments (company_id, name, created_at) values ($1, 'Backdated', '2001-01-01')", [coA])));
+      check("Two logs can't share a name", await fails(() => as(userA, "insert into public.osha_establishments (company_id, name) values ($1, ' north YARD ')", [coA])));
+      check("B can't see A's locations or add one for A; a presenter can't see them", (await as(userB, "select id from public.osha_establishments where company_id = $1", [coA])).rows.length === 0
+        && await fails(() => as(userB, "insert into public.osha_establishments (company_id, name) values ($1, 'x')", [coA]))
+        && (await as(presenterA, "select id from public.osha_establishments")).rows.length === 0);
+      const onEst = (await newCase(userA, coA, { establishment_id: estA.id })).rows[0];
+      check("A case goes on a location's log", onEst.establishment_id === estA.id && onEst.case_no >= 1);
+      check("A case can't go on another company's location", await fails(() => newCase(userA, coA, { establishment_id: estB })));
+      check("A case stays on the log it was put on", await fails(() => newCase(userA, coA, { case_key: onEst.case_key, version: 2, establishment_id: null })));
+      check("A later version on the same log keeps its number", (await newCase(userA, coA, { case_key: onEst.case_key, version: 2, establishment_id: estA.id })).rows[0].case_no === onEst.case_no);
+      check("Each log keeps its own 300A", (await as(userA, "insert into public.injury_summaries (company_id, year, version, establishment, establishment_id) values ($1, 2026, (select coalesce(max(version), 0) + 1 from public.injury_summaries where company_id = $1 and year = 2026), 'North yard', $2) returning establishment_id", [coA, estA.id])).rows[0].establishment_id === estA.id);
+      check("A location is closed, never deleted or moved", (await as(userA, "update public.osha_establishments set closed_at = now() where id = $1 returning id", [estA.id])).rows.length === 1
+        && await fails(() => as(userA, "delete from public.osha_establishments where id = $1", [estA.id]))
+        && await fails(() => as(userA, "update public.osha_establishments set company_id = $2 where id = $1", [estA.id, coB])));
+      check("B can't close A's location", (await as(userB, "update public.osha_establishments set closed_at = null where id = $1 returning id", [estA.id])).rows.length === 0);
+    }
+
     // Inspections (0034): presenters save once through save_inspection, staff read, never across companies.
     {
       const cl = randomUUID();
@@ -837,7 +871,20 @@ async function main() {
         && await fails(() => { const c2 = randomUUID(); return as(presenterA, "select public.save_inspection($1::jsonb, '[]'::jsonb)", [insp({ client_id: c2, items: [{ id: "a", text: "x", result: "fail", note: "n", photo_path: `${coA}/${c2}/item-0.jpg` }] })]); }));
       const v = (await as(null, "select public.verify_inspection($1) as v", [row.verify_code])).rows[0].v;
       check("Anyone with an inspection's code sees counts only", !!v && v.failed === 1 && v.passed === 1 && v.na === 1
-        && Object.keys(v).sort().join() === "company,failed,inspected_at,items,na,passed,rule,saved_at,title");
+        && Object.keys(v).sort().join() === "checklist_id,checklist_version,company,failed,inspected_at,items,na,passed,rule,saved_at,title,wording_hash");
+      // Wording fingerprint (0039): the same fixture and hash as src/core/inspections.test.ts, so app and database agree.
+      const fx = { checklist_id: "ladders", checklist_version: 1, title: "Ladders – daily", rule: "OSHA 1926.1053(b)(15)", items: [
+        { id: "feet", text: "Feet and rungs sound; no cracks", rule: "1926.1053(b)(15)", result: "fail", note: "Cracked rung" }, { id: "label", text: "Label readable (año)", result: "pass" }] };
+      const fxId = (await as(presenterA, "select public.save_inspection($1::jsonb, '[]'::jsonb) as id", [insp({ client_id: randomUUID(), ...fx })])).rows[0].id;
+      const fxCode = (await as(userA, "select verify_code from public.inspections where id = $1", [fxId])).rows[0].verify_code;
+      const fv = (await as(null, "select public.verify_inspection($1) as v", [fxCode])).rows[0].v;
+      check("The check page gets the checklist's wording fingerprint, matching the app's (results and notes not included)",
+        fv.wording_hash === "ce32251b8e6109356c35c1f8c2bde373d688327a75384a017d602fcf99745dc3" && fv.checklist_id === "ladders" && fv.checklist_version === 1);
+      const oddArgs = ["Odd\ttitle", "rule\\x", JSON.stringify([{ id: "a", text: "x\t\nb\ty", result: "pass" }])];
+      const odd = (await db.query("select private.inspection_wording_hash($1, $2, $3::jsonb) as h", oddArgs)).rows[0].h;
+      check("Tabs, newlines and backslashes are escaped the same way as the app (no item can pass for two)", odd === "45b575df476f4d9ce185687d7211643f24cb96122eb33bc1bf2187adabf181a1");
+      check("Signed-out visitors can't call the fingerprint helper directly", await fails(() => as(null, "select private.inspection_wording_hash($1, $2, $3::jsonb)", oddArgs)));
+      check("Changed wording gives a different fingerprint", v.wording_hash !== fv.wording_hash && /^[0-9a-f]{64}$/.test(v.wording_hash));
     }
 
     // AI tailoring (0036): owners and admins only, 20 drafts a day per company, logged; AI-started talks marked.
@@ -881,7 +928,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 103;
+  const EXPECTED = 121;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

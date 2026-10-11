@@ -10,8 +10,10 @@ import { verifyInspection, verifyRecord, type VerifiedInspection } from "@/lib/d
 import { parseDay, weekLabel } from "@/core/weeks";
 import { Button, Eyebrow, Loading, Mark, Notice, Title, inputClass } from "@/components/ui";
 import { BRAND } from "@/content/brand";
+import { CHECKLISTS } from "@/content/checklists";
+import { wordingMatch, type WordingMatch } from "@/core/inspections";
 
-type State = { kind: "idle" } | { kind: "loading" } | { kind: "none"; code: string } | { kind: "error"; text: string } | { kind: "ok"; code: string; rec: VerifiedRecord } | { kind: "inspection"; code: string; insp: VerifiedInspection };
+type State = { kind: "idle" } | { kind: "loading" } | { kind: "none"; code: string } | { kind: "error"; text: string } | { kind: "ok"; code: string; rec: VerifiedRecord } | { kind: "inspection"; code: string; insp: VerifiedInspection; match: WordingMatch | null };
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -29,7 +31,10 @@ export default function VerifyPage() {
       .then(async (rec) => {
         if (rec) return setState({ kind: "ok", code, rec });
         const insp = await verifyInspection(code);
-        setState(insp ? { kind: "inspection", code, insp } : { kind: "none", code });
+        if (!insp) return setState({ kind: "none", code });
+        // Compare the saved wording with the app's own checklist. No answer (no Web Crypto) shows no line, not a guess.
+        const match = await wordingMatch(CHECKLISTS, insp).catch(() => null);
+        setState({ kind: "inspection", code, insp, match });
       })
       .catch((e) => setState({ kind: "error", text: e instanceof Error ? e.message : String(e) }));
   };
@@ -68,7 +73,7 @@ export default function VerifyPage() {
           )}
           {state.kind === "error" && <Notice tone="error">Couldn&apos;t check right now. Check the connection and try again. ({state.text})</Notice>}
           {state.kind === "ok" && <Found code={state.code} r={state.rec} />}
-          {state.kind === "inspection" && <FoundInspection code={state.code} r={state.insp} />}
+          {state.kind === "inspection" && <FoundInspection code={state.code} r={state.insp} match={state.match} />}
         </div>
         <p className="mt-8 text-xs text-muted">A record documents a safety meeting. It doesn&apos;t by itself certify OSHA compliance.</p>
       </main>
@@ -110,7 +115,7 @@ function Found({ code, r }: { code: string; r: VerifiedRecord }) {
   );
 }
 
-function FoundInspection({ code, r }: { code: string; r: VerifiedInspection }) {
+function FoundInspection({ code, r, match }: { code: string; r: VerifiedInspection; match: WordingMatch | null }) {
   const rows: [string, string][] = [
     ["Company", r.company], ["Inspection", r.title],
     ["Done", when(r.inspected_at)], ["Saved", when(r.saved_at)], ["Rule", r.rule], ["Code", formatCode(code)],
@@ -127,6 +132,9 @@ function FoundInspection({ code, r }: { code: string; r: VerifiedInspection }) {
         ))}
       </div>
       <p className="mt-3 text-sm">{r.items} items checked. Results show as saved; failed items are never hidden.</p>
+      {match === "standard" && <p className="mt-2 text-sm text-ok">✓ Checked against the app&apos;s standard “{r.title}” checklist, word for word (version {r.checklist_version}).</p>}
+      {match === "different" && <p className="mt-2 text-sm text-warn">The checklist wording on this inspection is not the app&apos;s standard wording for “{r.title}”. Ask the company for the full inspection PDF to see the items that were checked.</p>}
+      {match === "unknown_version" && <p className="mt-2 text-sm text-muted">This inspection used a checklist edition this copy of the app doesn&apos;t carry, so its wording can&apos;t be compared here.</p>}
       <p className="mt-3 text-xs text-muted">If the paper shows different results, a different date or a different checklist, it doesn&apos;t match what was saved.</p>
     </section>
   );

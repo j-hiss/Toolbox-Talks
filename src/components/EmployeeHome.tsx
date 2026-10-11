@@ -12,6 +12,7 @@ import { certState, latestCerts } from "@/core/certs";
 import { certTypeName } from "@/content/certTypes";
 import { CERT_CHIP } from "./Training";
 import type { Membership } from "@/lib/data/types";
+import { MyRecord } from "./MyRecord";
 import { Button, ErrorNotice, Eyebrow, GroupHeading, Loading, Notice, Shell, Title } from "./ui";
 
 const STATUS: Record<MyTalk["status"], { label: string; tone: string }> = {
@@ -47,6 +48,7 @@ export function EmployeeHome({ m }: { m: Membership }) {
       <Eyebrow>{co.name}</Eyebrow>
       <Title>My safety talks</Title>
       <p className="mt-1 text-sm text-muted">Talks you were on, and whether you signed. You sign at each talk on the presenter&apos;s phone, the same as always.</p>
+      <div className="mt-4"><MyRecord m={m} /></div>
 
       {error ? (
         <div className="mt-4"><ErrorNotice what="Couldn't load your talks." detail={error} onRetry={() => { setError(null); setAttempt((a) => a + 1); }} /></div>

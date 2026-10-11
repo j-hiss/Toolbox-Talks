@@ -5,21 +5,36 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CHECKLISTS } from "@/content/checklists";
-import { checklistsFor, dueFor } from "@/core/inspections";
+import { dueState, trackedChecks, type TrackedCheck } from "@/core/inspections";
 import type { IndustryId } from "@/core/industries";
 import { listInspections } from "@/lib/data/inspections";
 
-export function InspectionsCard({ companyId, industry }: { companyId: string; industry: IndustryId }) {
-  const [due, setDue] = useState<number | null>(null);
+const cacheKey = (companyId: string) => `tt-tracked-checks:${companyId}`;
+
+/**
+ * This company's scheduled checklists and when each was last done, or null while loading. Offline, the last list this
+ * phone loaded (kept on the device), so reminders aren't dropped just because there's no signal.
+ */
+export function useTrackedChecks(companyId: string, industry: IndustryId): TrackedCheck[] | null {
+  const [tracked, setTracked] = useState<TrackedCheck[] | null>(null);
   useEffect(() => {
     let live = true;
     listInspections(companyId, 300).then((h) => {
-      if (!live) return;
-      const last = (id: string) => h.find((x) => x.checklist_id === id)?.inspected_at ?? null;
-      setDue(checklistsFor(CHECKLISTS, industry).filter((c) => dueFor(c, last(c.id)).due).length);
-    }).catch(() => { /* offline: just show the way in */ });
+      const t = trackedChecks(CHECKLISTS, industry, h);
+      try { localStorage.setItem(cacheKey(companyId), JSON.stringify(t)); } catch { /* fine */ }
+      if (live) setTracked(t);
+    }).catch(() => {
+      let saved: TrackedCheck[] | null = null;
+      try { saved = JSON.parse(localStorage.getItem(cacheKey(companyId)) ?? "null"); } catch { /* none */ }
+      if (live) setTracked(Array.isArray(saved) ? saved : []); // never loaded on this phone: nothing to remind about yet
+    });
     return () => { live = false; };
   }, [companyId, industry]);
+  return tracked;
+}
+
+export function InspectionsCard({ tracked }: { tracked: TrackedCheck[] | null }) {
+  const due = tracked === null ? null : tracked.filter((c) => dueState(c.when, c.last).due).length;
   return (
     <Link href="/inspect/" className="mt-4 flex items-center gap-3 rounded-xl bg-surface p-4 shadow-card">
       <span aria-hidden className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand-text">
