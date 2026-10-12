@@ -105,3 +105,9 @@ export function weatherPdfLines(w: WeatherRecord): [string, string] {
   const day = [w.high_f != null ? `high ${Math.round(w.high_f)}°F${w.low_f != null ? ` / low ${Math.round(w.low_f)}°F` : ""}` : null, ...weatherChips(w).map((c) => c.label)].filter(Boolean).join(", ");
   return [`${l.now ?? "Conditions at the time weren't in the forecast"}${day ? `. Day: ${day}` : ""}. ${l.alerts}`, l.source];
 }
+
+/** On a makeup: the weather is from when and where it was given, not the week it makes up. */
+export function makeupWeatherNote(w: Pick<WeatherRecord, "checked_at">): string {
+  const day = new Date(w.checked_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return `Makeup: the weather the day it was given (${day}) where it was given, not the week it makes up.`;
+}

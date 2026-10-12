@@ -592,6 +592,17 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   ZIP, size band, trainings, note), filter by state and training, and ask to connect (one open request per company,
   30 a day). The company accepts or declines; accepting invites the trainer, and the company still picks who they see.
 
+## What kind of talk a record is (built, 2026-10-12)
+- **Badges with icons** on the Records list and the saved record: Weekly talk, Makeup, or Daily plan, plus Own talk
+  (the company's own) and Swapped (a different talk than the plan had) when true. Worked out from what the record
+  already holds (src/core/recordType.ts); nothing new is stored. The PDF already marks makeups (red), daily plans and
+  swapped talks, and now "The company's own talk".
+- **While giving a makeup:** the makeup line already on the reading, who's-here, review and signing screens ("Makeup for
+  Week 40 (Oct 5 – Oct 9) · reason") is now flagged: gold, with a clock icon, same compact size.
+- **Weather on a makeup** says it's the weather the day it was given, where it was given, not the week it makes up
+  (record and PDF).
+- **Records filter by type:** All, Weekly talks, Makeups, Daily plans, Own talks (with the team and flagged filters).
+
 ## Weather saved with each signed talk (built, migration 0057)
 - **Why:** for outdoor crews, the weather that day is part of the story (Joe, 2026-10-12): what the crew faced and
   what they were told, on the record the owner hands to an insurer or inspector.

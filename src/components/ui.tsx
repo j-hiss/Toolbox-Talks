@@ -343,13 +343,14 @@ export const STATUS_CHIP: Record<"signed" | "not_signed" | "absent", string> = {
 };
 
 /** "Makeup for the week of Sep 21 · Out sick". The record's own date stays its real date. */
-export function MakeupTag({ weekStart, reason }: { weekStart: string; reason: string | null }) {
+/** The week a makeup covers and why. `pill`: false where RecordBadges already shows "Makeup". */
+export function MakeupTag({ weekStart, reason, pill = true }: { weekStart: string; reason: string | null; pill?: boolean }) {
   const [y, m, d] = weekStart.split("-").map(Number);
   const label = new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   return (
     <span className="mt-1 block text-sm">
-      <span className="mr-1.5 rounded bg-caution-bg px-1.5 py-0.5 text-xs font-semibold text-caution-text">Makeup</span>
-      for the week of {label}{reason ? ` · ${reason}` : ""}
+      {pill && <span className="mr-1.5 rounded bg-caution-bg px-1.5 py-0.5 text-xs font-semibold text-caution-text">Makeup</span>}
+      {pill ? "for" : "Makeup for"} the week of {label}{reason ? ` · ${reason}` : ""}
     </span>
   );
 }

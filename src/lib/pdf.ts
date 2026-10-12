@@ -10,7 +10,7 @@ import { parseDay, periodLabel, weekLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
 import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
-import { weatherPdfLines } from "@/core/weatherRecord";
+import { makeupWeatherNote, weatherPdfLines } from "@/core/weatherRecord";
 import { normalizeTheme, printBrand, rgb } from "@/core/theme";
 import { DOCUMENT_KINDS, type SafetyProfile } from "@/core/profile";
 import { formatCode, verifyLink } from "@/core/verify";
@@ -137,6 +137,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
     const kind = r.scheduled_talk_id && r.scheduled_talk_id !== r.talk_id ? "DIFFERENT FROM THE PLAN" : "SCHEDULED TALK";
     doc.text(`${weekNo} OF 52  ·  ${weekOf} ${heldWeek.toUpperCase()}  ·  ${kind}`, M, y); y += 20;
   }
+  if (r.talk_id.startsWith("own-")) { doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(GREY); doc.text("THE COMPANY'S OWN TALK", M, y); y += 16; }
   doc.setTextColor(0); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
   doc.splitTextToSize(r.content.title || r.title, CW).forEach((l: string) => { doc.text(l, M, y); y += 24; });
   if (r.language !== "en" && r.title !== r.content.title) {
@@ -226,6 +227,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
     const [main, source] = weatherPdfLines(r.weather);
     para("Weather at the talk", true);
     para(main, false);
+    if (r.makeup_for_week) para(makeupWeatherNote(r.weather), true);
     const size = doc.getFontSize();
     doc.setFontSize(8); doc.setTextColor(110); para(source, false); doc.setTextColor(0); doc.setFontSize(size);
     y += 6;

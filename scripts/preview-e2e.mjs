@@ -97,6 +97,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("2 home week card:", (await q.locator("section:has-text('Signed this week')").last().innerText()).replace(/\s+/g, " "));
   await q.click("text=Make up a talk"); await q.waitForTimeout(600);
   await q.locator("[role=radio]").nth(0).click(); await q.click("button:has-text('Off that week')"); await q.click("text=Continue to the talk"); await q.waitForTimeout(400);
+  log("2 makeup banner:", (await q.locator("[role=note]").first().innerText().catch(() => "MISSING")).replace(/\s+/g, " "));
   log("2 read heat:", (await q.locator("main p.border-warn").first().innerText().catch(() => "none")).replace(/\s+/g, " "), "| reminder lines:", await q.locator("main p.border-l-4.border-warn").count());
   await q.screenshot({ path: `${OUT}/e-read-heat.png` });
   await q.click("text=Done reading"); await q.waitForTimeout(300);
@@ -113,6 +114,7 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("2 review:", await q.locator("h1").textContent()); await q.click("button:has-text('Save')"); await q.waitForTimeout(1200);
   log("2 saved:", await q.locator("main").innerText().then((t) => t.split("\n").slice(0, 2).join(" | ")));
   await q.click("text=See records"); await q.waitForTimeout(700); await q.locator("main ul li a").first().click(); await q.waitForTimeout(800);
+  log("2 record type:", await q.locator("[aria-label^='Type:']").first().getAttribute("aria-label").catch(() => "MISSING"));
   log("2 weather on record:", (await q.locator("section[aria-label='Weather at the talk']").innerText().catch(() => "MISSING")).replace(/\s+/g, " ").slice(0, 260));
   await q.locator("section[aria-label='Weather at the talk']").screenshot({ path: `${OUT}/e-record-weather.png` }).catch(() => {});
   await q.click("text=Download PDF"); await q.waitForTimeout(2500);
@@ -869,6 +871,14 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   await q.locator("button[aria-label='Training for Example Lead Alvarez']").click(); await q.waitForTimeout(500);
   log("28 after rename, card keeps:", (await q.locator("[role=dialog]").innerText()).includes("Example skid steer checkout\n") || (await q.locator("[role=dialog] b:text-is('Example skid steer checkout')").count()) > 0);
   await q.click("[role=dialog] button[aria-label=Close]"); await q.waitForTimeout(300);
+  // Records filter by type (makeups, daily plans, own talks).
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Records"); await q.waitForTimeout(900);
+  const allCount = await q.locator("main ul li a[href^='/record/']").count();
+  await q.selectOption("select[aria-label='Type of talk']", "makeup"); await q.waitForTimeout(400);
+  const makeups = await q.locator("main ul li a[href^='/record/']").allInnerTexts();
+  log("28b filter makeups:", makeups.length, "of", allCount, "| all makeup:", makeups.every((t) => t.includes("Makeup")));
+  await q.selectOption("select[aria-label='Type of talk']", "all"); await q.waitForTimeout(300);
   // Scenario 29: CRM connector (0054). Make a key (shown once), see where the CRM posts, type a job ID on a jobsite, revoke.
   await q.goto(PAGE); await q.waitForTimeout(1000);
   await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Jobsites')"); await q.waitForTimeout(800);

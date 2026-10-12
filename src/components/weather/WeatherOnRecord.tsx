@@ -4,7 +4,7 @@
 // conditions; one row of small chips for the day's heat, rain, wind and storms; alerts; and a one-line note on where
 // it came from. Compact on purpose. Wording and rules: src/core/weatherRecord.ts. Sky icons: ./Sky.tsx.
 import { skyKind } from "@/core/conditions";
-import { weatherChips, type WeatherChip, type WeatherRecord } from "@/core/weatherRecord";
+import { makeupWeatherNote, weatherChips, type WeatherChip, type WeatherRecord } from "@/core/weatherRecord";
 import { SkyIcon, SkyIconDefs } from "./Sky";
 
 const ICON: Record<WeatherChip["kind"] | "alert" | "clear", React.ReactNode> = {
@@ -24,7 +24,8 @@ const Chip = ({ k, tone, children }: { k: keyof typeof ICON; tone: "hot" | "calm
   </span>
 );
 
-export function WeatherOnRecord({ w }: { w: WeatherRecord }) {
+/** `makeupFor`: on a makeup, says this is the weather where and when it was given, not the week it covers. */
+export function WeatherOnRecord({ w, makeupFor = null }: { w: WeatherRecord; makeupFor?: string | null }) {
   const checked = new Date(w.checked_at);
   const hour = checked.getHours();
   const chips = weatherChips(w);
@@ -49,6 +50,7 @@ export function WeatherOnRecord({ w }: { w: WeatherRecord }) {
           : w.alerts.length ? w.alerts.map((a) => <Chip key={a.event} k="alert" tone="hot">{a.event}</Chip>)
           : <Chip k="clear" tone="ok">No alerts</Chip>}
       </div>
+      {makeupFor && <p className="mt-1.5 text-[11px] font-semibold leading-snug text-caution-text">{makeupWeatherNote(w)}</p>}
       <p className="mt-1.5 text-[11px] leading-snug text-muted">
         Weather at the talk · NWS forecast for {w.place || "the jobsite"}, {checked.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · not measured on site
       </p>

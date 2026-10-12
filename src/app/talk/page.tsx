@@ -490,8 +490,10 @@ function ReadTalk({ co, draft, update, org, talk }: { co: Company; draft: TalkDr
 function MakeupBanner({ draft }: { draft: TalkDraft }) {
   if (!draft.makeup) return null;
   return (
-    <p className="mb-3 rounded-xl bg-surface shadow-card px-3 py-2 text-sm">
-      <b>Makeup for {weekNumbers({ n: draft.makeup.weekNumber, weeks: draft.makeup.weeks ?? 1 })}</b> ({periodLabel(parseDay(draft.makeup.weekStart), draft.makeup.weeks ?? 1)}) · {makeupReasonText(draft.makeupPick, draft.makeupNote)}
+    // Flagged on every step (read, who's here, review, sign) so everyone knows it's a makeup and which week it covers.
+    <p role="note" className="mb-3 flex items-start gap-2 rounded-xl bg-caution-bg px-3 py-2 text-sm text-caution-text">
+      <svg aria-hidden viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4M12 8v4l3 2" /></svg>
+      <span><b>Makeup for {weekNumbers({ n: draft.makeup.weekNumber, weeks: draft.makeup.weeks ?? 1 })}</b> ({periodLabel(parseDay(draft.makeup.weekStart), draft.makeup.weeks ?? 1)}) · {makeupReasonText(draft.makeupPick, draft.makeupNote)}</span>
     </p>
   );
 }

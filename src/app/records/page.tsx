@@ -4,6 +4,8 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { IssuesList } from "@/components/Issues";
 import { HazardList } from "@/components/Hazards";
+import { RecordBadges } from "@/components/RecordBadges";
+import { RECORD_FILTERS, matchesRecordFilter, type RecordFilter } from "@/core/recordType";
 import { WeeklyEmail } from "@/components/WeeklyEmail";
 import { listPeople } from "@/lib/data/company";
 import type { Person } from "@/lib/data/types";
@@ -39,19 +41,21 @@ function Records({ m }: { m: Membership }) {
   useEffect(() => { if (seesReports && view === "reports") listPeople(m.company.id).then(setPeople).catch(() => setPeople([])); }, [seesReports, view, m.company.id]);
   const [team, setTeam] = useState("all");
   const [onlyFlagged, setOnlyFlagged] = useState(false);
+  const [type, setType] = useState<RecordFilter>("all");
   const teams = useMemo(() => [...new Set((rows ?? []).map((r) => r.team_name).filter(Boolean))].sort(), [rows]);
   // Newest week first; each week's talks newest first. Grouped by the week the talk was given.
   const weeks = useMemo(() => {
     const out = new Map<string, TalkRecordSummary[]>();
     for (const r of rows ?? []) {
       if (team !== "all" && r.team_name !== team) continue;
+      if (!matchesRecordFilter(r, type)) continue;
       const c = countStatuses(r.statuses.map((status) => ({ status })));
       if (onlyFlagged && c.flagged + (r.presenter_signed ? 0 : 1) === 0) continue;
       const k = isoDay(mondayOf(new Date(r.held_at)));
       out.set(k, [...(out.get(k) ?? []), r]);
     }
     return [...out.entries()];
-  }, [rows, team, onlyFlagged]);
+  }, [rows, team, onlyFlagged, type]);
   const waitingCount = outbox.items.length;
 
   useEffect(() => {
@@ -113,6 +117,9 @@ function Records({ m }: { m: Membership }) {
                 {teams.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             )}
+            <select aria-label="Type of talk" className={`${inputClass} w-auto py-2`} value={type} onChange={(e) => setType(e.target.value as RecordFilter)}>
+              {RECORD_FILTERS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+            </select>
             <label className="flex min-h-11 items-center gap-2 text-sm">
               <input type="checkbox" className="h-5 w-5 accent-[var(--brand)]" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} />
               Only flagged
@@ -146,10 +153,11 @@ function Records({ m }: { m: Membership }) {
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="flex items-start justify-between gap-2">
-                              <b className="block leading-snug">{r.title}{r.kind === "daily" && <span className="ml-2 rounded bg-brand-soft px-1.5 py-0.5 align-middle text-xs font-semibold text-brand-text">Daily plan</span>}</b>
+                              <b className="block leading-snug">{r.title}</b>
                               <FlagChip n={c.flagged + (r.presenter_signed ? 0 : 1)} />
                             </span>
-                            {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} />}
+                            <RecordBadges r={r} className="mt-1" />
+                            {r.makeup_for_week && <MakeupTag weekStart={r.makeup_for_week} reason={r.makeup_reason} pill={false} />}
                             <small className="block text-muted tabular-nums">
                               <span className="sr-only">{when(r.held_at)} · </span>
                               <span aria-hidden>{held.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>{r.team_name ? ` · ${r.team_name}` : ""}{r.jobsite_name ? ` · ${r.jobsite_name}` : ""}

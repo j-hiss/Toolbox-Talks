@@ -19,6 +19,7 @@ import { mapsLink } from "@/core/geo";
 import { weekNumbers } from "@/core/plan";
 import { RequireCompany } from "@/components/Guard";
 import { WeatherOnRecord } from "@/components/weather/WeatherOnRecord";
+import { RecordBadges } from "@/components/RecordBadges";
 import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title, Avatar } from "@/components/ui";
 
 export default function RecordPage() {
@@ -86,7 +87,8 @@ function RecordView({ m }: { m: Membership }) {
         {rec.week_number ? `${rec.makeup_for_week ? "Given in " : ""}${weekNumbers({ n: rec.week_number, weeks: rec.period_weeks ?? 1 })} of 52 · ` : ""}{rec.kind === "daily" ? "Daily pre-task plan · separate from the weekly talk" : rec.makeup_for_week ? "Makeup talk" : rec.scheduled_talk_id ? (scheduled ? "Different from the plan" : "Scheduled talk") : "Talk record"}
       </Eyebrow>
       <Title>{rec.title}</Title>
-      {rec.makeup_for_week && <MakeupTag weekStart={rec.makeup_for_week} reason={rec.makeup_reason} />}
+      <RecordBadges r={rec} className="mt-2" />
+      {rec.makeup_for_week && <MakeupTag weekStart={rec.makeup_for_week} reason={rec.makeup_reason} pill={false} />}
       {scheduled && !rec.makeup_for_week && <p className="mt-1 text-sm text-muted">Scheduled for that week: {scheduled}</p>}
 
       <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
@@ -185,7 +187,7 @@ function RecordView({ m }: { m: Membership }) {
                 <b>Heat index up to {rec.heat.max_heat_index_f}°F</b> ({HEAT_LABEL[rec.heat.level as HeatLevel] ?? rec.heat.level}){rec.heat.reminder_read ? " · heat reminder read with this talk" : ""}
               </p>
             )}
-            {rec.weather && <WeatherOnRecord w={rec.weather} />}
+            {rec.weather && <WeatherOnRecord w={rec.weather} makeupFor={rec.makeup_for_week} />}
             {issues.length > 0 && (
               <div className="rounded-xl bg-surface shadow-card px-3 py-2">
                 <b>Raised by the team ({issues.length})</b>

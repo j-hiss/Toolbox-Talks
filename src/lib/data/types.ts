@@ -104,6 +104,8 @@ export type TalkRecordSummary = {
   period_weeks?: number;
   makeup_for_week: string | null;
   makeup_reason: string | null;
+  /** The talk the plan had for that week (a different talk_id means an admin swapped it). */
+  scheduled_talk_id?: string | null;
   held_at: string;
   jobsite_name: string;
   team_name: string;
