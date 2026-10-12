@@ -2,6 +2,7 @@
 // (admins add and withdraw; admins and office read all; others only their own; withdraw only, never edit).
 import type * as Real from "@/../src/lib/data/certs";
 import type { CertRequirement } from "@/core/certs";
+import { stampCourse } from "./courses";
 import { db, save, tick, uid } from "./store";
 
 export const PERSON_CERTS_BUCKET = "person-certs";
@@ -37,7 +38,7 @@ export async function addCert(companyId: string, c: NewCert, card: File | null =
     card_path = `${companyId}/${c.personId}/${uid()}-card`;
   }
   certs().push({
-    id: uid(), company_id: companyId, person_id: c.personId, cert_type: c.certType, custom_name: c.certType === "custom" ? c.customName.trim() : "",
+    id: uid(), company_id: companyId, person_id: c.personId, cert_type: c.certType, custom_name: stampCourse(companyId, c.certType, c.certType === "custom" ? c.customName.trim() : "", null),
     issued_on: c.issuedOn || null, expires_on: c.expiresOn || null, note: c.note.trim(), card_path, entered_at: new Date().toISOString(),
     withdrawn_at: null, withdrawn_reason: "", data, submission_id: null,
   });

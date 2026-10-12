@@ -180,7 +180,7 @@ function Admin({ m }: { m: Membership }) {
         ) : tab === "jobsites" ? (
           <JobsitesTab companyId={companyId} company={m.company} jobsites={jobsites} act={act} />
         ) : tab === "training" ? (
-          <Training companyId={companyId} people={people} roles={roles} />
+          <Training companyId={companyId} people={people} roles={roles} canEdit={m.access === "owner" || m.access === "admin"} />
         ) : tab === "access" ? (
           <AppAccess companyId={companyId} myAccess={m.access} myUserId={s.user?.id ?? null} people={people} />
         ) : tab === "injuries" ? (

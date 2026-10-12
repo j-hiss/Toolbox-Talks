@@ -578,8 +578,8 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   company that signs up with their invite link and starts paying earns them 6 free months (stacking, once per
   company). Counting paying companies, not sign-ups, keeps fake sign-ups from earning anything. Their client lists,
   summaries and cards never lock; only finding companies checks the plan. The operator sets plans in the console.
-- **The trainer portal is its own thing:** sections for Clients, Classes, Certificates, Find companies and Your
-  account (plan, organization, invite link).
+- **The trainer portal is its own thing:** sections for Clients, Classes, Your trainings (0053), Certificates, Find
+  companies and Your account (plan, organization, invite link).
 - **Classes:** pick a client, the training (card type), date, place, the card's expiry and who's in it (only people the
   company shared). Each person signs on the trainer's phone; the trainer marks passed or not passed. Closing needs a
   result for everyone and a signature for every pass, sends a card per pass through the company's normal approval,
@@ -591,6 +591,24 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   trainings it needs and adds a note. Trainers on an active plan see listed companies (name, industry, state from
   ZIP, size band, trainings, note), filter by state and training, and ask to connect (one open request per company,
   30 a day). The company accepts or declines; accepting invites the trainer, and the company still picks who they see.
+
+## Your own trainings (built, migration 0053)
+- **Why:** not every training is OSHA's. A company has its own equipment checkouts and site orientations; a trainer or
+  training company teaches its own courses (a manufacturer's install course, a level 1 / level 2 program). These are
+  housed here like any other card.
+- **Who makes them:** a company's owners and admins (Admin → Training → Your own trainings); a trainer on their own, or
+  a training company's admins for the whole organization (trainer portal → Your trainings). A training has a name, what
+  it covers, and an optional renewal in months (a suggestion for the card's expiry, never a rule).
+- **Used like a built-in type:** a training's code is the card type, so job-title needs, Missing/Expiring/Expired,
+  classes, approval, certificates and check codes all work the same. Every card, sent-in card and class carries the
+  training's name at that moment, so renaming or retiring one never changes a card already given. Retired trainings
+  can't be given again; cards stay on file.
+- **Who can give one:** the company enters cards for its own trainings; any trainer of the company (its own staff
+  invited as trainers, or an outside trainer) can give the company's trainings; a trainer gives their own, and
+  organization staff give the organization's to clients in the shared list. A company can't type in a card for a
+  trainer's training; it comes through approval. The database refuses anything else.
+- **Who sees them:** the owning company's members; the trainer or organization that made it; trainers of the owning
+  company; and admins of companies the trainer trains (so they can require it for a job title). No plan gate.
 
 ## Written safety programs (built, migration 0047)
 - **Why:** insurers, prequalification services and OSHA ask for the written programs; competitors sell binders. Here

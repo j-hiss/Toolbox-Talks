@@ -3,6 +3,7 @@
 // Admin → Training: each person's training cards (forklift, OSHA 10, first aid...), what each job title needs, and
 // what's expiring, expired or missing. Expiry dates are typed from the card; the app never works one out from a rule.
 // Cards are append-only: a renewal is a new card, a mistake is withdrawn with a reason. Status: src/core/certs.ts.
+// The company's own trainings and its trainers' (migration 0053) show beside the common ones everywhere a type is picked.
 import { useEffect, useMemo, useState } from "react";
 import { EXPIRING_DAYS, personTraining, trainingSummary, type CertState, type TrainingRow } from "@/core/certs";
 import { CERT_TYPES, certTypeName } from "@/content/certTypes";
@@ -13,6 +14,9 @@ import type { Person, Role } from "@/lib/data/types";
 import { Avatar, Button, ConfirmButton, GroupHeading, Loading, Notice, Sheet, inputClass } from "./ui";
 import { toast } from "./toast";
 import { CardForm } from "./CardForm";
+import { CourseManager } from "./OwnCourses";
+import { activeCourses, type TrainingCourse } from "@/core/courses";
+import { trainingsForCompany } from "@/lib/data/courses";
 import { TrainersSection } from "./Trainers";
 
 export const CERT_CHIP: Record<CertState, { label: string; tone: string }> = {
@@ -22,10 +26,11 @@ export const CERT_CHIP: Record<CertState, { label: string; tone: string }> = {
   missing: { label: "Missing", tone: "border border-dashed border-warn text-warn-text" },
 };
 const day = (iso: string | null) => (iso ? new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "");
-const rowName = (r: TrainingRow) => certTypeName(r.cert_type, r.cert?.custom_name ?? r.name ?? "");
+const rowName = (r: TrainingRow, courses: TrainingCourse[]) => certTypeName(r.cert_type, r.cert?.custom_name ?? r.name ?? "", courses);
 
-export function Training({ companyId, people, roles }: { companyId: string; people: Person[]; roles: Role[] }) {
+export function Training({ companyId, people, roles, canEdit = true }: { companyId: string; people: Person[]; roles: Role[]; canEdit?: boolean }) {
   const [certs, setCerts] = useState<StoredCert[] | null>(null);
+  const [courses, setCourses] = useState<TrainingCourse[]>([]);
   const [reqs, setReqs] = useState<CertRequirement[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
@@ -36,8 +41,8 @@ export function Training({ companyId, people, roles }: { companyId: string; peop
 
   useEffect(() => {
     let live = true;
-    Promise.all([listCerts(companyId), listRequirements(companyId)])
-      .then(([c, r]) => { if (live) { setCerts(c); setReqs(r); setError(null); } })
+    Promise.all([listCerts(companyId), listRequirements(companyId), trainingsForCompany(companyId).catch(() => [] as TrainingCourse[])])
+      .then(([c, r, k]) => { if (live) { setCerts(c); setReqs(r); setCourses(k); setError(null); } })
       .catch((e) => live && setError(e instanceof Error ? e.message : String(e)));
     return () => { live = false; };
   }, [companyId, version]);
@@ -65,7 +70,7 @@ export function Training({ companyId, people, roles }: { companyId: string; peop
                 <span className="flex items-baseline justify-between gap-2"><b>{p.full_name}</b><small className="text-muted">{titleOf(p, roles)}</small></span>
                 <span className="mt-1.5 flex flex-wrap gap-1.5">
                   {rows.length === 0 ? <small className="text-muted">No cards on file</small> : rows.map((r) => (
-                    <span key={`${r.cert_type}${r.cert?.id ?? ""}`} className={`rounded px-2 py-0.5 text-xs font-semibold ${CERT_CHIP[r.state].tone}`}>{rowName(r)}{r.state !== "current" ? ` · ${CERT_CHIP[r.state].label}` : ""}</span>
+                    <span key={`${r.cert_type}${r.cert?.id ?? ""}`} className={`rounded px-2 py-0.5 text-xs font-semibold ${CERT_CHIP[r.state].tone}`}>{rowName(r, courses)}{r.state !== "current" ? ` · ${CERT_CHIP[r.state].label}` : ""}</span>
                   ))}
                 </span>
                 </span>
@@ -76,18 +81,29 @@ export function Training({ companyId, people, roles }: { companyId: string; peop
       </ul>
       {shown.length === 0 && <p className="mt-3 text-sm text-muted">{onlyAttention ? "Everyone's cards are current." : "Add people first."}</p>}
 
-      <TitleNeeds companyId={companyId} roles={roles} reqs={reqs} reload={reload} />
+      <TitleNeeds companyId={companyId} roles={roles} reqs={reqs} courses={courses} reload={reload} />
+      <CourseManager ownerKind="company" owner={companyId} courses={courses.filter((c) => c.owner_company === companyId)} canEdit={canEdit} reload={reload}
+        intro="Trainings that aren't on the common list: an equipment checkout, a manufacturer's install course, a site orientation. Give them yourself here, or have a trainer give them: your own staff can be invited as trainers under Trainers below, the same as an outside trainer." />
+      {courses.some((c) => !c.owner_company) && (
+        <section aria-label="Trainings your trainers give" className="mt-4 text-sm">
+          <p className="font-semibold">Trainings your trainers give</p>
+          <ul className="mt-1 list-disc pl-5 text-muted">{activeCourses(courses.filter((c) => !c.owner_company)).map((c) => <li key={c.code}>{c.name}</li>)}</ul>
+          <p className="mt-1 text-xs text-muted">Made by your trainers. You can require them for a job title; cards for them come from the trainer and you approve each one.</p>
+        </section>
+      )}
       <TrainersSection companyId={companyId} people={people} roles={roles} onApproved={reload} />
-      {open && <PersonSheet companyId={companyId} person={open} roles={roles} certs={certs} reqs={reqs} today={today} onClose={() => setOpen(null)} reload={reload} />}
+      {open && <PersonSheet companyId={companyId} person={open} roles={roles} certs={certs} reqs={reqs} courses={courses} today={today} onClose={() => setOpen(null)} reload={reload} />}
     </>
   );
 }
 
-function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, reload }: {
-  companyId: string; person: Person; roles: Role[]; certs: StoredCert[]; reqs: CertRequirement[]; today: Date; onClose: () => void; reload: () => void;
+function PersonSheet({ companyId, person, roles, certs, reqs, courses, today, onClose, reload }: {
+  companyId: string; person: Person; roles: Role[]; certs: StoredCert[]; reqs: CertRequirement[]; courses: TrainingCourse[]; today: Date; onClose: () => void; reload: () => void;
 }) {
   const rows = personTraining(person.id, person.role_id, certs, reqs, today);
   const history = certs.filter((c) => c.person_id === person.id);
+  // A company enters cards for its own trainings; a trainer's training comes in from the trainer for approval.
+  const ownGivable = courses.filter((c) => c.owner_company === companyId);
   const [msg, setMsg] = useState<string | null>(null);
   const [why, setWhy] = useState<Record<string, string>>({});
   const open = async (path: string) => { try { window.open(await cardUrl(path), "_blank", "noopener"); } catch (e) { setMsg(e instanceof Error ? e.message : String(e)); } };
@@ -98,7 +114,7 @@ function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, re
         {rows.length === 0 && <li className="text-sm text-muted">No cards on file, and their job title doesn&apos;t need any.</li>}
         {rows.map((r) => (
           <li key={`${r.cert_type}${r.cert?.id ?? ""}`} className="flex items-center justify-between gap-2 rounded-lg bg-surface px-3 py-2 text-sm">
-            <span className="min-w-0"><b className="block">{rowName(r)}</b>
+            <span className="min-w-0"><b className="block">{rowName(r, courses)}</b>
               <small className="text-muted">{r.cert ? (r.cert.expires_on ? `Expires ${day(r.cert.expires_on)}` : "No expiry on the card") : "Needed for their job title"}{r.required ? "" : " · not required"}</small></span>
             <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-semibold ${CERT_CHIP[r.state].tone}`}>{CERT_CHIP[r.state].label}</span>
           </li>
@@ -106,7 +122,7 @@ function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, re
       </ul>
 
       <GroupHeading>Add a card</GroupHeading>
-      <CardForm initialType={rows.find((r) => r.state === "missing")?.cert_type} onSave={async (c, file) => {
+      <CardForm initialType={rows.find((r) => r.state === "missing" && (!r.cert_type.startsWith("c_") || ownGivable.some((c) => c.code === r.cert_type)))?.cert_type} courses={ownGivable} onSave={async (c, file) => {
         await addCert(companyId, { personId: person.id, ...c }, file);
         toast(`${certTypeName(c.certType, c.customName)} added for ${person.full_name}`);
         reload();
@@ -142,7 +158,7 @@ function PersonSheet({ companyId, person, roles, certs, reqs, today, onClose, re
   );
 }
 
-function TitleNeeds({ companyId, roles, reqs, reload }: { companyId: string; roles: Role[]; reqs: CertRequirement[]; reload: () => void }) {
+function TitleNeeds({ companyId, roles, reqs, courses, reload }: { companyId: string; roles: Role[]; reqs: CertRequirement[]; courses: TrainingCourse[]; reload: () => void }) {
   const [roleId, setRoleId] = useState("");
   const role = roles.find((r) => r.id === roleId);
   // Shows the tick at once; the saved list catches up on reload (and an error puts the tick back).
@@ -164,7 +180,7 @@ function TitleNeeds({ companyId, roles, reqs, reload }: { companyId: string; rol
       </select>
       {role && (
         <ul className="mt-2 flex flex-col gap-1">
-          {CERT_TYPES.map((c) => {
+          {[...courses.filter((c) => !c.retired || reqs.some((q) => q.role_id === role.id && q.cert_type === c.code)).map((c) => ({ id: c.code, name: c.retired ? `${c.name} (retired)` : c.name })), ...CERT_TYPES].map((c) => {
             const on = local[`${role.id}|${c.id}`] ?? reqs.some((q) => q.role_id === role.id && q.cert_type === c.id);
             return (
               <li key={c.id}>

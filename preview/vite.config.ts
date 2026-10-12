@@ -52,6 +52,7 @@ export default defineConfig({
       { find: /^@\/lib\/data\/checkin$/, replacement: here("demo/checkin.ts") },
       { find: /^@\/lib\/data\/ownChecklists$/, replacement: here("demo/ownChecklists.ts") },
       { find: /^@\/lib\/data\/programs$/, replacement: here("demo/programs.ts") },
+      { find: /^@\/lib\/data\/courses$/, replacement: here("demo/courses.ts") },
       { find: /^@\/lib\/data\/partnerClients$/, replacement: here("demo/partnerClients.ts") },
       { find: /^@\/lib\/data\/trainerTools$/, replacement: here("demo/trainerTools.ts") },
       { find: /^@\/lib\/weather$/, replacement: here("demo/weather.ts") },

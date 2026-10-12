@@ -68,4 +68,11 @@ export const CERT_TYPES: CertType[] = [
   { id: "flagger", name: "Flagger" },
 ];
 
-export const certTypeName = (id: string, custom = "") => (id === "custom" ? custom || "Other" : CERT_TYPES.find((c) => c.id === id)?.name ?? id);
+/**
+ * A card type's name. A company's or trainer's own training (code "c_...", migration 0053) uses the name stamped on
+ * the card, or, for a job-title need with no card yet, the name from `courses`.
+ */
+export const certTypeName = (id: string, custom = "", courses: { code: string; name: string }[] = []) =>
+  id === "custom" ? custom || "Other"
+  : id.startsWith("c_") ? custom || courses.find((c) => c.code === id)?.name || "Own training"
+  : CERT_TYPES.find((c) => c.id === id)?.name ?? id;

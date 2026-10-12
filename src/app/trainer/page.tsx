@@ -16,6 +16,9 @@ import { trainerTotals, type TrainerClient } from "@/core/partnerClients";
 import { InviteLinkPanel, MoveToOrg, OrgPanel, useOrgs } from "@/components/PartnerTools";
 import { FindCompanies, PartnerPlanPanel, TrainerCertificates, TrainerClasses, usePartnerAccount } from "@/components/TrainerTools";
 import { CardForm } from "@/components/CardForm";
+import { CourseManager, useTrainingsFor } from "@/components/OwnCourses";
+import { myOwnCourses, type TrainingCourse } from "@/core/courses";
+import { myTrainerCourses } from "@/lib/data/courses";
 import { NotConfigured } from "@/components/Guard";
 import { Button, ConfirmButton, ErrorNotice, Eyebrow, GroupHeading, Loading, Notice, Sheet, Shell, Title } from "@/components/ui";
 import { toast } from "@/components/toast";
@@ -37,7 +40,12 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
   const [clients, setClients] = useState<TrainerClient[]>([]);
   const { orgs, reload: reloadOrgs } = useOrgs("training");
   const { account, credits } = usePartnerAccount("trainer");
-  const [tab, setTab] = useState<"clients" | "classes" | "certificates" | "find" | "account">("clients");
+  const [tab, setTab] = useState<"clients" | "classes" | "trainings" | "certificates" | "find" | "account">("clients");
+  const [courseList, setCourseList] = useState<TrainingCourse[]>([]);
+  const [courseTick, setCourseTick] = useState(0);
+  useEffect(() => { let live = true; myTrainerCourses().then((c) => live && setCourseList(c)).catch(() => live && setCourseList([])); return () => { live = false; }; }, [courseTick]);
+  const ownCourses = myOwnCourses(courseList, userId ?? "", orgs.map((o) => o.id));
+  const mine = ownCourses.map((c) => c.code);
   const [sent, setSent] = useState<Submission[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<{ co: RosterCompany; person: RosterCompany["people"][number] } | null>(null);
@@ -81,12 +89,21 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
         {partner && <Link href="/partner/" className="underline">Partner portal</Link>}
       </div>
       <div role="tablist" aria-label="Trainer sections" className="mt-4 flex flex-wrap gap-2">
-        {([["clients", "Clients"], ["classes", "Classes"], ["certificates", "Certificates"], ["find", "Find companies"], ["account", "Your account"]] as const).map(([id, label]) => (
+        {([["clients", "Clients"], ["classes", "Classes"], ["trainings", "Your trainings"], ["certificates", "Certificates"], ["find", "Find companies"], ["account", "Your account"]] as const).map(([id, label]) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
             className={`min-h-11 rounded-full border px-3.5 text-[15px] font-semibold ${tab === id ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-fg"}`}>{label}</button>
         ))}
       </div>
-      {tab === "classes" && <TrainerClasses roster={roster} onChanged={load} />}
+      {tab === "classes" && <TrainerClasses roster={roster} onChanged={load} mine={mine} />}
+      {tab === "trainings" && <>
+        <CourseManager ownerKind="me" owner={null} courses={ownCourses.filter((c) => c.owner_user === userId)} canEdit reload={() => setCourseTick((t) => t + 1)}
+          intro="Trainings you made that aren't on the common list: a manufacturer's install course, an equipment checkout, your own class. Give them to any client: in a class, or by sending a card. Each card carries the training's name, and the client approves it like any other card." />
+        {orgs.map((o) => {
+          const admin = o.members.some((m) => m.email === email.toLowerCase() && m.role === "admin");
+          return <CourseManager key={o.id} ownerKind="org" owner={o.id} heading={`${o.name} trainings`} courses={ownCourses.filter((c) => c.owner_org === o.id)} canEdit={admin} reload={() => setCourseTick((t) => t + 1)}
+            intro={`Shared by everyone in ${o.name}. Staff give them to clients that are in the organization's shared list.${admin ? "" : " Only the organization's admins make or change them."}`} />;
+        })}
+      </>}
       {tab === "certificates" && <TrainerCertificates />}
       {tab === "find" && <FindCompanies account={account} myName={orgs[0]?.name ?? ""} />}
       {tab === "account" && (
@@ -174,10 +191,10 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
         <Sheet title={open.person.name} open onClose={() => setOpen(null)}>
           <p className="text-sm text-muted">{open.co.companyName}{open.person.title ? ` · ${open.person.title}` : ""}</p>
           <p className="mt-2 text-sm">Type the dates printed on the card. The company sees it as waiting until they approve it.</p>
-          <CardForm saveLabel="Send for approval" onSave={async (c, file) => {
+          <TrainerCardForm companyId={open.co.companyId} mine={mine} onSave={async (c, file) => {
             // Saved on the phone first, so a dropped connection never loses it or sends it twice.
             const saved = await saveCard({ companyId: open.co.companyId, trainerId: open.co.trainerId, userId, cert: { personId: open.person.id, ...c },
-              label: `${certTypeName(c.certType, c.customName)} for ${open.person.name}` }, file);
+              label: `${certTypeName(c.certType, c.customName, courseList)} for ${open.person.name}` }, file);
             await sendWaiting();
             const stillWaiting = waitingCards(userId).some((x) => x.clientId === saved.clientId);
             toast(stillWaiting ? "Saved on this phone. It sends when there's signal." : `Sent to ${open.co.companyName} for approval`);
@@ -186,4 +203,10 @@ function Portal({ userId, email, member, partner, signOut }: { userId: string | 
       )}
     </Shell>
   );
+}
+
+/** The card form for a client: the client's own trainings and this trainer's appear beside the common ones. */
+function TrainerCardForm({ companyId, mine, onSave }: { companyId: string; mine: string[]; onSave: React.ComponentProps<typeof CardForm>["onSave"] }) {
+  const courses = useTrainingsFor(companyId).filter((c) => c.owner_company === companyId || mine.includes(c.code));
+  return <CardForm saveLabel="Send for approval" courses={courses} onSave={onSave} />;
 }

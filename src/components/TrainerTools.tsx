@@ -17,6 +17,8 @@ import { saveFile } from "@/lib/download";
 import { formatCode } from "@/core/verify";
 import { isoDay } from "@/core/weeks";
 import { SignaturePad } from "./SignaturePad";
+import { useTrainingsFor } from "./OwnCourses";
+import { activeCourses } from "@/core/courses";
 import { Button, ConfirmButton, Field, GroupHeading, Notice, Sheet, inputClass } from "./ui";
 import { toast } from "./toast";
 
@@ -57,7 +59,8 @@ export function PartnerPlanPanel({ kind, account, credits }: { kind: PartnerKind
 
 // Classes ---------------------------------------------------------------------------------------------------------------
 
-export function TrainerClasses({ roster, onChanged }: { roster: RosterCompany[]; onChanged: () => void }) {
+/** `mine`: codes of the trainings this trainer owns (their own and their organizations'), migration 0053. */
+export function TrainerClasses({ roster, onChanged, mine = [] }: { roster: RosterCompany[]; onChanged: () => void; mine?: string[] }) {
   const [classes, setClasses] = useState<TrainingClass[] | null>(null);
   const [making, setMaking] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -89,18 +92,20 @@ export function TrainerClasses({ roster, onChanged }: { roster: RosterCompany[];
           );
         })}
       </ul>
-      <NewClassSheet open={making} roster={roster} onClose={() => setMaking(false)} onMade={(id) => { setMaking(false); load(); setOpenId(id); }} />
+      <NewClassSheet open={making} roster={roster} mine={mine} onClose={() => setMaking(false)} onMade={(id) => { setMaking(false); load(); setOpenId(id); }} />
       {open && <RunClass c={open} people={co(open.company_id)?.people ?? []} companyName={co(open.company_id)?.companyName ?? ""} onClose={() => setOpenId(null)} onChanged={() => { load(); onChanged(); }} />}
     </section>
   );
 }
 
-function NewClassSheet({ open, roster, onClose, onMade }: { open: boolean; roster: RosterCompany[]; onClose: () => void; onMade: (id: string) => void }) {
+function NewClassSheet({ open, roster, mine, onClose, onMade }: { open: boolean; roster: RosterCompany[]; mine: string[]; onClose: () => void; onMade: (id: string) => void }) {
   const withPeople = roster.filter((r) => r.people.length);
   const blank = (): NewClass => ({ companyId: withPeople[0]?.companyId ?? "", certType: CERT_TYPES[0].id, customName: "", heldOn: isoDay(new Date()), place: "", expiresOn: null, note: "", people: [] });
   const [n, setN] = useState<NewClass>(blank);
   const [busy, setBusy] = useState(false);
   const co = withPeople.find((r) => r.companyId === n.companyId);
+  // Trainings this trainer can give this client: the client's own, and the trainer's own or their organization's.
+  const courses = activeCourses(useTrainingsFor(n.companyId || null).filter((c) => c.owner_company === n.companyId || mine.includes(c.code)));
   const save = async () => {
     const p = newClassProblem(n, isoDay(new Date())); if (p) { toast(p, { tone: "error" }); return; }
     setBusy(true);
@@ -110,8 +115,8 @@ function NewClassSheet({ open, roster, onClose, onMade }: { open: boolean; roste
   return (
     <Sheet title="New class" open={open} onClose={onClose}>
       <div className="flex flex-col gap-3">
-        <Field label="Client" id="cl-co"><select id="cl-co" className={inputClass} value={n.companyId} onChange={(e) => setN({ ...n, companyId: e.target.value, people: [] })}>{withPeople.map((r) => <option key={r.companyId} value={r.companyId}>{r.companyName}</option>)}</select></Field>
-        <Field label="Training" id="cl-type"><select id="cl-type" className={inputClass} value={n.certType} onChange={(e) => setN({ ...n, certType: e.target.value })}>{CERT_TYPES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}<option value="custom">Other (type a name)</option></select></Field>
+        <Field label="Client" id="cl-co"><select id="cl-co" className={inputClass} value={n.companyId} onChange={(e) => setN({ ...n, companyId: e.target.value, people: [], certType: n.certType.startsWith("c_") ? CERT_TYPES[0].id : n.certType })}>{withPeople.map((r) => <option key={r.companyId} value={r.companyId}>{r.companyName}</option>)}</select></Field>
+        <Field label="Training" id="cl-type"><select id="cl-type" className={inputClass} value={n.certType} onChange={(e) => setN({ ...n, certType: e.target.value })}>{courses.length > 0 && <optgroup label="Own trainings">{courses.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</optgroup>}<optgroup label="Common trainings">{CERT_TYPES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</optgroup><option value="custom">Other (type a name)</option></select></Field>
         {n.certType === "custom" && <Field label="Training name" id="cl-name"><input id="cl-name" className={inputClass} maxLength={100} value={n.customName} onChange={(e) => setN({ ...n, customName: e.target.value })} /></Field>}
         <Field label="Class date" id="cl-date"><input id="cl-date" type="date" className={inputClass} value={n.heldOn} onChange={(e) => setN({ ...n, heldOn: e.target.value })} /></Field>
         <Field label="Where (optional)" id="cl-place"><input id="cl-place" className={inputClass} maxLength={200} value={n.place} onChange={(e) => setN({ ...n, place: e.target.value })} placeholder="Example: company yard" /></Field>

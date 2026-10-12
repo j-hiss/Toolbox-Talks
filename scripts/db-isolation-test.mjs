@@ -825,6 +825,50 @@ async function main() {
       await as(userA, "select public.remove_trainer($1)", [tl]);
     }
 
+    // Your own trainings (0053): company, trainer and organization trainings; who may give them; names stamped.
+    {
+      const coach = randomUUID(), inside = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'coach@courses.example', now()), ($2, 'inside@a.example', now())", [coach, inside]);
+      const person = (await db.query("select id from public.people where company_id = $1 and active and deactivated_at is null order by created_at limit 1", [coA])).rows[0].id;
+      const personB = (await as(userB, "insert into public.people (company_id, full_name) values ($1, 'Example B Worker') returning id", [coB])).rows[0].id;
+      const save = (who, kind, owner, code, name, months = null) => as(who, "select public.save_training_course($1, $2, $3, $4, '', $5) as c", [kind, owner, code, name, months]);
+      const coCode = (await save(userA, "company", coA, null, "Example equipment checkout", 12)).rows[0].c;
+      check("A company makes its own training; staff read it; another company can't", /^c_[a-z0-9]{12}$/.test(coCode)
+        && (await as(presenterA, "select name from public.training_courses where code = $1", [coCode])).rows.length === 1
+        && (await as(userB, "select 1 from public.training_courses where code = $1", [coCode])).rows.length === 0);
+      check("Only owners and admins make or change company trainings", await fails(() => save(presenterA, "company", coA, null, "x")) && await fails(() => save(userB, "company", coA, coCode, "x")));
+      const card = (await as(userA, "insert into public.person_certs (company_id, person_id, cert_type, issued_on) values ($1, $2, $3, '2026-10-01') returning custom_name", [coA, person, coCode])).rows[0];
+      check("A card for a company training carries the training's name", card.custom_name === "Example equipment checkout");
+      check("Another company can't give A's training", await fails(() => as(userB, "insert into public.person_certs (company_id, person_id, cert_type) values ($1, $2, $3)", [coB, personB, coCode])));
+      const tl = (await as(userA, "select public.invite_trainer($1, 'coach@courses.example', 'Example Course Co') as id", [coA])).rows[0].id;
+      const tin = (await as(userA, "select public.invite_trainer($1, 'inside@a.example', 'Example Inside Trainer') as id", [coA])).rows[0].id;
+      await as(coach, "select public.accept_invites()"); await as(inside, "select public.accept_invites()");
+      for (const t of [tl, tin]) await as(userA, "insert into public.company_trainer_people (company_id, trainer_id, person_id) values ($1, $2, $3)", [coA, t, person]);
+      const myCode = (await save(coach, "me", null, null, "Example shingle install level 1", 24)).rows[0].c;
+      const send = (who, code) => as(who, "select public.submit_cert($1::jsonb) as id", [JSON.stringify({ company_id: coA, person_id: person, client_id: randomUUID(), cert_type: code, issued_on: "2026-10-02" })]);
+      const sid = (await send(coach, myCode)).rows[0].id;
+      check("An outside trainer gives their own training to a client; the card carries its name", (await as(userA, "select custom_name from public.cert_submissions where id = $1", [sid])).rows[0].custom_name === "Example shingle install level 1");
+      check("The client's admins can see trainings their trainers give; others can't", (await as(userA, "select 1 from public.training_courses where code = $1", [myCode])).rows.length === 1
+        && (await as(userB, "select 1 from public.training_courses where code = $1", [myCode])).rows.length === 0);
+      check("A company can't type in a trainer's training itself; it comes through approval", await fails(() => as(userA, "insert into public.person_certs (company_id, person_id, cert_type) values ($1, $2, $3)", [coA, person, myCode])));
+      await as(userA, "select public.decide_cert_submission($1, true)", [sid]);
+      check("Approved, it's on file under the trainer's training", (await as(userA, "select custom_name from public.person_certs where submission_id = $1", [sid])).rows[0]?.custom_name === "Example shingle install level 1");
+      check("An internal trainer gives the company's own training; can't give another trainer's", (await send(inside, coCode)).rows.length === 1 && await fails(() => send(inside, myCode)));
+      check("An outside trainer can read the company's trainings to give them, but not change them", (await as(coach, "select 1 from public.training_courses where code = $1", [coCode])).rows.length === 1
+        && await fails(() => save(coach, "company", coA, coCode, "Renamed")));
+      await save(userA, "company", coA, coCode, "Example equipment checkout v2", 12);
+      check("Renaming a training never changes a saved card", (await as(userA, "select custom_name from public.person_certs where company_id = $1 and cert_type = $2 order by entered_at limit 1", [coA, coCode])).rows[0].custom_name === "Example equipment checkout");
+      await as(userA, "select public.retire_training_course($1, true)", [coCode]);
+      check("A retired training can't be given again", await fails(() => as(userA, "insert into public.person_certs (company_id, person_id, cert_type) values ($1, $2, $3)", [coA, person, coCode])) && await fails(() => send(inside, coCode)));
+      check("A made-up training code is refused", await fails(() => as(userA, "insert into public.person_certs (company_id, person_id, cert_type) values ($1, $2, 'c_zzzzzzzzzzzz')", [coA, person])));
+      const forA = async (who) => (await as(who, "select code from public.trainings_for_company($1)", [coA])).rows.map((r) => r.code).sort();
+      const insideCode = (await save(inside, "me", null, null, "Example inside trainer course")).rows[0].c;
+      check("A company's list of trainings: its own and its trainers'; a trainer sees only what they can give", JSON.stringify(await forA(presenterA)) === JSON.stringify([coCode, myCode, insideCode].sort())
+        && JSON.stringify(await forA(coach)) === JSON.stringify([coCode, myCode].sort()));
+      check("Another company gets nothing from A's list of trainings", (await forA(userB)).length === 0);
+      await as(userA, "select public.remove_trainer($1)", [tl]); await as(userA, "select public.remove_trainer($1)", [tin]);
+    }
+
     // Your own talks (0029): versions only, admins write, staff read, never across companies.
     {
       const empT = randomUUID();
@@ -1316,7 +1360,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 471;
+  const EXPECTED = 486;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

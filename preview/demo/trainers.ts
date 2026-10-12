@@ -6,6 +6,7 @@ import type * as Real from "@/../src/lib/data/trainers";
 import type { NewCert } from "@/lib/data/certs";
 import type { RosterRow, Submission } from "@/core/trainers";
 import { db, save, tick, uid } from "./store";
+import { stampCourse } from "./courses";
 
 export type Trainer = Real.Trainer;
 export type CompanySubmission = Real.CompanySubmission;
@@ -117,7 +118,7 @@ export async function submitCert(companyId: string, trainerId: string, c: NewCer
     data = await new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = () => rej(r.error); r.readAsDataURL(card); });
     card_path = `${companyId}/trainer/${trainerId}/${clientId}-card`;
   }
-  subs().push({ id: uid(), company_id: companyId, trainer_id: trainerId, person_id: c.personId, cert_type: c.certType, custom_name: c.certType === "custom" ? c.customName.trim() : "",
+  subs().push({ id: uid(), company_id: companyId, trainer_id: trainerId, person_id: c.personId, cert_type: c.certType, custom_name: stampCourse(companyId, c.certType, c.certType === "custom" ? c.customName.trim() : "", trainerId),
     issued_on: c.issuedOn || null, expires_on: c.expiresOn || null, note: c.note.trim(), card_path, submitted_at: new Date().toISOString(), status: "pending",
     decided_at: null, decline_reason: "", data, ...{ client_id: clientId } });
   save();

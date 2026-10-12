@@ -826,6 +826,47 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("27 verify:", (await q.locator("section[aria-label='Certificate found']").innerText().catch(() => "MISSING")).replace(/\s+/g, " ").slice(0, 220));
   await q.screenshot({ path: `${OUT}/e-verify-certificate.png`, fullPage: false });
   await q.goto(PAGE); await q.waitForTimeout(800);
+  // Scenario 28: your own trainings (0053). The company makes one, requires it for a job title, adds a card (the
+  // renewal suggests the expiry); the trainer makes their own and both show in the class form; a rename never changes a card.
+  await q.goto(PAGE); await q.waitForTimeout(1000);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(900);
+  const own = q.locator("section[aria-label='Your own trainings']");
+  await own.locator("button:has-text('Make a training')").click(); await q.waitForTimeout(200);
+  await q.fill("#course-name", "Example skid steer checkout"); await q.fill("#course-desc", "Walkaround, controls, hands-on test"); await q.fill("#course-months", "24");
+  await own.locator("button:has-text('Make the training')").click(); await q.waitForTimeout(900);
+  log("28 own list:", (await own.innerText()).replace(/\s+/g, " ").slice(-160));
+  { const sel = q.locator('section[aria-label="What each job title needs"] select');
+    const v = await sel.locator("option").evaluateAll((os) => os.find((o) => o.textContent.startsWith("Foreman"))?.value);
+    await sel.selectOption(v); await q.waitForTimeout(200); }
+  await q.locator('input[aria-label="Foreman needs Example skid steer checkout"]').check(); await q.waitForTimeout(700);
+  await q.locator("button[aria-label='Training for Example Lead Alvarez']").click(); await q.waitForTimeout(500);
+  log("28 needed:", (await q.locator("[role=dialog] ul li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).filter((t) => t.includes("skid")).join(" | "));
+  await q.selectOption("#ct-type", { label: "Example skid steer checkout" }); await q.fill("#ct-issued", "2026-10-01"); await q.locator("#ct-issued").blur(); await q.waitForTimeout(200);
+  log("28 suggested expiry:", await q.inputValue("#ct-expires"));
+  await q.click("[role=dialog] button:has-text('Save card')"); await q.waitForTimeout(900);
+  log("28 card:", (await q.locator("[role=dialog] ul li").allInnerTexts()).map((t) => t.replace(/\s+/g, " ")).filter((t) => t.includes("skid")).join(" | "));
+  await q.screenshot({ path: `${OUT}/e-own-training-card.png`, fullPage: false });
+  await q.click("[role=dialog] button[aria-label=Close]"); await q.waitForTimeout(300);
+  await viewAs("trainer"); await q.waitForTimeout(800);
+  await q.click("[role=tab]:has-text('Your trainings')"); await q.waitForTimeout(500);
+  const mineSec = q.locator("section[aria-label='Your own trainings']");
+  await mineSec.locator("button:has-text('Make a training')").click(); await q.waitForTimeout(200);
+  await q.fill("#course-name", "Example install course level 1"); await q.fill("#course-months", "36");
+  await mineSec.locator("button:has-text('Make the training')").click(); await q.waitForTimeout(900);
+  log("28 trainer list:", (await mineSec.innerText()).replace(/\s+/g, " ").slice(-120));
+  await q.screenshot({ path: `${OUT}/e-trainer-trainings.png`, fullPage: false });
+  await q.click("[role=tab]:has-text('Classes')"); await q.waitForTimeout(500);
+  await q.click("button:has-text('New class')"); await q.waitForTimeout(900);
+  log("28 class choices:", (await q.locator("#cl-type optgroup[label='Own trainings'] option").allInnerTexts()).join(" | "));
+  await q.keyboard.press("Escape"); await q.waitForTimeout(300);
+  await viewAs("owner"); await q.waitForTimeout(600);
+  await q.click("nav:is([aria-label=Main],[aria-label=Menu]):visible >> text=Admin"); await q.waitForTimeout(600); await q.click("[role=tab]:has-text('Training')"); await q.waitForTimeout(900);
+  log("28 trainers' trainings:", (await q.locator("section[aria-label='Trainings your trainers give']").innerText().catch(() => "MISSING")).replace(/\s+/g, " ").slice(0, 120));
+  await own.locator("button[aria-label='Change Example skid steer checkout']").click(); await q.waitForTimeout(200);
+  await q.fill("#course-name", "Example skid steer checkout v2"); await own.locator("button:has-text('Save changes')").click(); await q.waitForTimeout(900);
+  await q.locator("button[aria-label='Training for Example Lead Alvarez']").click(); await q.waitForTimeout(500);
+  log("28 after rename, card keeps:", (await q.locator("[role=dialog]").innerText()).includes("Example skid steer checkout\n") || (await q.locator("[role=dialog] b:text-is('Example skid steer checkout')").count()) > 0);
+  await q.click("[role=dialog] button[aria-label=Close]"); await q.waitForTimeout(300);
   log("errors:", errs.length ? errs : "none");
   await b.close();
   if (errs.length) process.exit(1);

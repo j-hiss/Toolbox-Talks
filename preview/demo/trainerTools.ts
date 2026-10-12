@@ -6,6 +6,7 @@ import type * as Real from "@/../src/lib/data/trainerTools";
 import type { Certificate, ConnectRequest, LookingCompany, NewClass, PartnerAccount, PartnerCredit, PartnerKind, TrainerListing, TrainingClass, VerifiedCertificate } from "@/core/trainerTools";
 import { partnerActive } from "@/core/trainerTools";
 import { db, save, tick, uid } from "./store";
+import { stampCourse } from "./courses";
 
 type Trainer = { id: string; company_id: string; email: string; name: string; user_id: string | null; removed_at: string | null; accepted_at?: string | null; invited_at?: string };
 type Sub = { id: string; company_id: string; trainer_id: string; person_id: string; cert_type: string; custom_name: string; issued_on: string | null; expires_on: string | null;
@@ -53,7 +54,7 @@ export async function createClass(n: NewClass): Promise<string> {
   if (!n.people.length || n.people.length > 100) throw new Error("Pick 1 to 100 people for the class.");
   if (n.people.some((p) => !shared(t.id, p))) throw new Error("You can only add people this company shared with you.");
   const id = uid();
-  classes().push({ id, company_id: n.companyId, trainer_id: t.id, cert_type: n.certType, custom_name: n.certType === "custom" ? n.customName.trim() : "", held_on: n.heldOn,
+  classes().push({ id, company_id: n.companyId, trainer_id: t.id, cert_type: n.certType, custom_name: stampCourse(n.companyId, n.certType, n.certType === "custom" ? n.customName.trim() : "", t.id), held_on: n.heldOn,
     place: n.place.trim(), expires_on: n.expiresOn, note: n.note.trim(), created_at: new Date().toISOString(), closed_at: null,
     people: [...new Set(n.people)].map((p) => ({ person_id: p, signed_at: null, result: null, submission_id: null })) });
   save();
