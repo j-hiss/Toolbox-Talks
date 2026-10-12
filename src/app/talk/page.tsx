@@ -23,7 +23,7 @@ import { listJobsites, listPeople, listRoles, listTeams } from "@/lib/data/compa
 import { saveTalkRecord, signedForWeek } from "@/lib/data/records";
 import { usePlan } from "@/lib/usePlan";
 import { useOpenMakeups, type OpenMakeups } from "@/lib/useOpenMakeups";
-import { useHeatCheck } from "@/lib/useHeatCheck";
+import { useHeatCheck, weatherForSave } from "@/lib/useHeatCheck";
 import { alertWorthy, HEAT_LABEL, type HeatLevel } from "@/core/heat";
 import { HEAT_REMINDER_VERSION, heatReminder, heatReminderReviewed } from "@/content/heat";
 import { REPEAT_NOTES, repeatNoteText } from "@/content/repeats";
@@ -777,7 +777,7 @@ function Sign({
           // the exact reminder text that was read, so the record and PDF show what the crew heard
           ...(draft.heat.reminder_read ? { reminder: { ...heatReminder(lang), version: HEAT_REMINDER_VERSION } } : {}),
         } : null,
-        weather: draft.weather,
+        weather: await weatherForSave(draft, org.jobsites, m.company),
       });
       if (record.team_id === "") record.team_id = null;
       const raisedAt = new Date().toISOString();

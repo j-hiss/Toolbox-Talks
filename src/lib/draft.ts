@@ -43,6 +43,8 @@ export type TalkDraft = {
   heat: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; place: string } | null;
   /** For outdoor and mixed work: the weather service forecast for the spot, saved with the record (migration 0057). */
   weather: import("@/core/weatherRecord").WeatherRecord | null;
+  /** The place that weather was checked for (weatherPlaceKey); not saved on the record. */
+  weatherAt?: string | null;
   /** Things the crew raised, logged before saving. */
   issues: DraftIssue[];
   /** Optional crew photo (shrunk JPEG data URL) and when it was taken. */

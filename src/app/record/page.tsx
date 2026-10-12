@@ -18,7 +18,7 @@ import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { weekNumbers } from "@/core/plan";
 import { RequireCompany } from "@/components/Guard";
-import { weatherLines, type WeatherRecord } from "@/core/weatherRecord";
+import { WeatherOnRecord } from "@/components/weather/WeatherOnRecord";
 import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title, Avatar } from "@/components/ui";
 
 export default function RecordPage() {
@@ -222,17 +222,3 @@ function RecordView({ m }: { m: Membership }) {
   );
 }
 
-/** The weather service forecast for the jobsite when the talk was given (migration 0057). */
-function WeatherOnRecord({ w }: { w: WeatherRecord }) {
-  const l = weatherLines(w);
-  const alert = w.alerts.length > 0;
-  return (
-    <section aria-label="Weather at the talk" className="rounded-xl bg-surface shadow-card px-3 py-2">
-      <b>Weather at the talk</b>
-      {l.now && <p className="mt-1">{l.now}</p>}
-      <p className="mt-1">{l.day}</p>
-      <p className={`mt-1 ${alert ? "font-semibold text-warn-text" : "text-muted"}`}>{l.alerts}</p>
-      <p className="mt-1 text-xs text-muted">{l.source}</p>
-    </section>
-  );
-}

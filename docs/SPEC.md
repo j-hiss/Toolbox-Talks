@@ -602,6 +602,12 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
 - **Honest:** labelled as the weather service's forecast for the spot and when it was checked, never as measured on
   site. A check over 3 hours old or from another day isn't saved. Indoor work saves none. Written once at save, never
   changed (append-only, like heat).
+- **Right place, every time:** the weather is for the place saved on the record. If the jobsite is changed after the
+  check, or a makeup is given somewhere else, it's checked again at save for that place (4 seconds at most; with no
+  signal, that place's last check if recent, else none). Never the original week's or another site's weather.
+- **Looks:** compact on the record (Joe: "icons... keep the space to a minimum"): the sky icon, temperature and
+  conditions in one row; chips with icons for heat, rain, wind, storms and alerts (red when dangerous); one small
+  source line. Two short lines on the PDF.
 
 ## CRM connector: jobsites from a job ID and address (built, migration 0054)
 - **Why:** the office already has every job in its CRM. Typing jobsites again is busywork; the CRM can send them.

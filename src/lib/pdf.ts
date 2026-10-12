@@ -10,7 +10,7 @@ import { parseDay, periodLabel, weekLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
 import type { Company, Issue, TalkRecord } from "@/lib/data/types";
 import { HEAT_LABEL, type HeatLevel } from "@/core/heat";
-import { weatherLines } from "@/core/weatherRecord";
+import { weatherPdfLines } from "@/core/weatherRecord";
 import { normalizeTheme, printBrand, rgb } from "@/core/theme";
 import { DOCUMENT_KINDS, type SafetyProfile } from "@/core/profile";
 import { formatCode, verifyLink } from "@/core/verify";
@@ -223,13 +223,12 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
   }
   if (r.weather) {
     newPageIf(60);
-    const l = weatherLines(r.weather);
+    const [main, source] = weatherPdfLines(r.weather);
     para("Weather at the talk", true);
-    if (l.now) para(l.now, false);
-    para(l.day, false);
-    para(l.alerts, r.weather.alerts.length > 0);
-    para(l.source, false, 0);
-    y += 8;
+    para(main, false);
+    const size = doc.getFontSize();
+    doc.setFontSize(8); doc.setTextColor(110); para(source, false); doc.setTextColor(0); doc.setFontSize(size);
+    y += 6;
   }
   if (issues.length) {
     newPageIf(40);

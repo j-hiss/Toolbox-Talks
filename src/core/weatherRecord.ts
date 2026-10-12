@@ -35,6 +35,12 @@ export type WeatherRecord = {
   summary: string;
 };
 
+/**
+ * Which place a snapshot was taken for (about 100 m), so a talk whose jobsite changed after the check, or a makeup at
+ * another site, never keeps the weather of somewhere else.
+ */
+export const weatherPlaceKey = (p: { latitude: number; longitude: number }) => `${p.latitude.toFixed(3)},${p.longitude.toFixed(3)}`;
+
 type Check = Conditions & { checkedAt: string; source: "NWS"; place: string; alertsUnavailable: boolean };
 
 /** The snapshot to save, or null: indoor work, no check, or a check too old or from another day. */
@@ -76,4 +82,26 @@ export function weatherLines(w: WeatherRecord): { now: string | null; day: strin
     alerts: w.alerts_unavailable ? "Weather alerts couldn't be checked." : w.alerts.length ? `Active alerts: ${w.alerts.map((a) => a.event).join(", ")}.` : "No active weather alerts.",
     source: `National Weather Service forecast for ${w.place || "the jobsite"}, checked ${timeOf(w.checked_at)}. A forecast for the spot, not measured on site.`,
   };
+}
+
+export type WeatherChip = { kind: "heat" | "rain" | "wind" | "storm"; label: string; hot: boolean };
+
+/** The day's notable bits as short chips, in the order the record shows them. Only what the forecast had. */
+export function weatherChips(w: WeatherRecord): WeatherChip[] {
+  const out: WeatherChip[] = [];
+  if (w.heat_index_max_f != null) {
+    const level = w.heat_level ? HEAT_LABEL[w.heat_level as keyof typeof HEAT_LABEL] ?? w.heat_level : "";
+    out.push({ kind: "heat", label: `Heat index ${w.heat_index_max_f}°${level ? ` · ${level}` : ""}`, hot: w.heat_level === "danger" || w.heat_level === "extreme_danger" });
+  }
+  if (w.rain && w.rain.max_pct >= 30) out.push({ kind: "rain", label: `Rain ${w.rain.max_pct}% · ${siteHour(w.rain.at)}`, hot: w.rain.max_pct >= 60 });
+  if (w.wind && w.wind.max_mph >= 15) out.push({ kind: "wind", label: `Wind ${w.wind.max_mph} mph · ${siteHour(w.wind.at)}`, hot: w.wind.max_mph >= 25 });
+  if (w.thunder_at) out.push({ kind: "storm", label: `Storms from ${siteHour(w.thunder_at)}`, hot: true });
+  return out;
+}
+
+/** The two short lines the PDF prints (the screen shows the same as icons and chips). */
+export function weatherPdfLines(w: WeatherRecord): [string, string] {
+  const l = weatherLines(w);
+  const day = [w.high_f != null ? `high ${Math.round(w.high_f)}°F${w.low_f != null ? ` / low ${Math.round(w.low_f)}°F` : ""}` : null, ...weatherChips(w).map((c) => c.label)].filter(Boolean).join(", ");
+  return [`${l.now ?? "Conditions at the time weren't in the forecast"}${day ? `. Day: ${day}` : ""}. ${l.alerts}`, l.source];
 }

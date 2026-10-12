@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { conditionsFor } from "./conditions";
-import { weatherLines, weatherRecordFrom } from "./weatherRecord";
+import { weatherChips, weatherLines, weatherPdfLines, weatherPlaceKey, weatherRecordFrom } from "./weatherRecord";
 
 const hour = (h: number, o: { t?: number; pop?: number; wind?: string; sf?: string } = {}) => ({
   startTime: `2026-10-06T${String(h).padStart(2, "0")}:00:00-04:00`, temperature: o.t ?? 85, temperatureUnit: "F", relativeHumidity: { value: 70 },
@@ -39,5 +39,23 @@ describe("weather saved with a talk", () => {
   it("never claims no alerts when they couldn't be checked", () => {
     expect(weatherLines(weatherRecordFrom(check({ alertsUnavailable: true, withAlerts: false }), "outdoor", now)!).alerts).toBe("Weather alerts couldn't be checked.");
     expect(weatherLines(weatherRecordFrom(check({ withAlerts: false }), "outdoor", now)!).alerts).toBe("No active weather alerts.");
+  });
+});
+
+describe("weather on the record, compact", () => {
+  it("shows only the day's notable bits as chips, the dangerous ones marked", () => {
+    const chips = weatherChips(weatherRecordFrom(check(), "outdoor", now)!);
+    expect(chips.map((c) => [c.kind, c.label, c.hot])).toEqual([
+      ["heat", "Heat index 119° · Danger", true], ["rain", "Rain 70% · 4 PM", true], ["wind", "Wind 20 mph · 1 PM", false], ["storm", "Storms from 1 PM", true],
+    ]);
+  });
+  it("prints two short lines on the PDF", () => {
+    const [main, source] = weatherPdfLines(weatherRecordFrom(check(), "outdoor", now)!);
+    expect(main).toBe("88°F, Sunny, wind SW 5 mph, 10% chance of rain. Day: high 94°F / low 85°F, Heat index 119° · Danger, Rain 70% · 4 PM, Wind 20 mph · 1 PM, Storms from 1 PM. Active alerts: Heat Advisory.");
+    expect(source).toMatch(/not measured on site\.$/);
+  });
+  it("knows when a talk moved to another place", () => {
+    expect(weatherPlaceKey({ latitude: 26.6401, longitude: -81.8723 })).toBe(weatherPlaceKey({ latitude: 26.64012, longitude: -81.87228 }));
+    expect(weatherPlaceKey({ latitude: 26.6401, longitude: -81.8723 })).not.toBe(weatherPlaceKey({ latitude: 26.66, longitude: -81.87 }));
   });
 });
