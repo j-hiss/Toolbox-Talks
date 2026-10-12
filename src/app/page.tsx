@@ -131,7 +131,7 @@ function Home({ m }: { m: Membership }) {
         <section className="mt-4">
           {/* The one bold thing on Home: this week's talk, as an entry in the year's record. */}
           <div className="overflow-hidden rounded-2xl bg-surface shadow-hero">
-            <div className="bg-band px-5 pt-4 pb-4 text-band-ink">
+            <div className="band-hero px-5 pt-4 pb-4 text-band-ink">
               <p className="flex items-end justify-between gap-3">
                 <span className="flex items-baseline gap-1.5">
                   <span className="text-sm font-semibold opacity-80">{week.weeks > 1 ? "Weeks" : "Week"}</span>

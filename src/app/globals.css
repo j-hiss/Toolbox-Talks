@@ -43,6 +43,14 @@
   --band-good: color-mix(in srgb, var(--ok) 24%, var(--surface));
   --band-warn: color-mix(in srgb, var(--caution) 38%, var(--surface));
   --band-bad: color-mix(in srgb, var(--warn) 24%, var(--surface));
+
+  /* Depth (2026-10-12): light catching the top edge of cards and buttons (strong on a light page, faint on a dark
+     one; a dark company theme sets --t-lift), the brand glow at the top of each page, and the shade behind sheets. */
+  --lift: var(--t-lift, 72%);
+  --edge-hi: color-mix(in srgb, #ffffff var(--lift), transparent);
+  --glow: color-mix(in srgb, var(--brand) 20%, transparent);
+  --glow-2: color-mix(in srgb, var(--caution) 14%, transparent);
+  --scrim: color-mix(in srgb, #0b120e 46%, transparent);
 }
 
 /* Phone in dark mode: a dark theme stays as it is; the default becomes Momentum; another light company theme gets its
@@ -67,6 +75,10 @@
     --band: color-mix(in srgb, var(--brand) 24%, var(--surface));
     --band-ink: var(--fg);
     color-scheme: dark;
+    --lift: 7%;
+    --glow: color-mix(in srgb, var(--brand) 17%, transparent);
+    --glow-2: color-mix(in srgb, var(--caution) 7%, transparent);
+    --scrim: color-mix(in srgb, #000000 58%, transparent);
   }
 }
 
@@ -105,9 +117,9 @@
   --radius-xl: 1.125rem;
   --radius-2xl: 1.375rem;
   /* Cards: a crisp hairline edge, a tight contact shadow and a soft lift, so they sit clearly on the paper. */
-  --shadow-card: 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent), 0 1px 2px color-mix(in srgb, var(--fg) 8%, transparent), 0 10px 24px -14px color-mix(in srgb, var(--fg) 30%, transparent);
+  --shadow-card: inset 0 1px 0 var(--edge-hi), 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent), 0 1px 2px color-mix(in srgb, var(--fg) 8%, transparent), 0 12px 28px -16px color-mix(in srgb, var(--fg) 34%, transparent);
   /* The one raised element on a screen (Home's talk of the week). */
-  --shadow-hero: 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent), 0 2px 4px color-mix(in srgb, var(--fg) 8%, transparent), 0 22px 40px -22px color-mix(in srgb, var(--brand) 55%, transparent);
+  --shadow-hero: inset 0 1px 0 var(--edge-hi), 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent), 0 2px 4px color-mix(in srgb, var(--fg) 8%, transparent), 0 28px 48px -24px color-mix(in srgb, var(--brand) 62%, transparent);
 }
 
 html,
@@ -120,6 +132,16 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   letter-spacing: -0.011em;
+}
+
+/* The brand glow at the top of every page: fixed, so it stays put while the page scrolls under the frosted header. */
+body {
+  /* Two soft lights from the top corners: the brand on the right, the warm gold of "on time" on the left. */
+  background-image:
+    radial-gradient(70% 34rem at 100% -6rem, var(--glow), transparent 72%),
+    radial-gradient(60% 26rem at 0% -4rem, var(--glow-2), transparent 70%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 /* Keep content clear of the phone's notch and home bar inside the iPhone/Android apps. */
@@ -187,6 +209,37 @@ body {
 :root[data-theme="dark"] .wx-basemap { filter: brightness(0.62) contrast(1.1) saturate(0.6); }
 .wx-ring-alert { box-shadow: 0 0 0 2px var(--warn); animation: wx-ring 1.8s ease-out infinite; }
 .wx-ring-caution { box-shadow: 0 0 0 2px var(--caution), 0 0 22px color-mix(in srgb, var(--caution) 40%, transparent); }
+
+/* Home's talk-of-the-week band, the one bold surface: the brand deepening toward the bottom corner, light from the
+   top right, and a faint diagonal hatch like the stripes on jobsite tape. Text sits on the darkest part. */
+.band-hero {
+  background-color: var(--band);
+  background-image:
+    radial-gradient(90% 140% at 100% 0%, color-mix(in srgb, #ffffff 16%, transparent), transparent 62%),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--band-ink) 5%, transparent) 0 2px, transparent 2px 14px),
+    linear-gradient(155deg, color-mix(in srgb, var(--band) 78%, var(--ok)), var(--band) 45%, color-mix(in srgb, var(--band) 66%, #000000));
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, #000000 18%, transparent);
+}
+/* The filled main button: lit from above, a little lift in its own color. */
+.btn-lit {
+  background-image: linear-gradient(180deg, color-mix(in srgb, #ffffff 12%, transparent), transparent 60%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 22%, transparent), 0 1px 2px color-mix(in srgb, var(--action) 30%, transparent), 0 10px 22px -10px color-mix(in srgb, var(--action) 60%, transparent);
+}
+.btn-lit:active { background-image: none; box-shadow: inset 0 2px 4px color-mix(in srgb, #000000 18%, transparent); }
+/* Frosted bars: a soft shadow so the page reads as passing under them. */
+.bar-top { box-shadow: 0 8px 24px -20px color-mix(in srgb, var(--fg) 40%, transparent); }
+.bar-bottom { box-shadow: 0 -10px 30px -22px color-mix(in srgb, var(--fg) 45%, transparent), inset 0 1px 0 var(--edge-hi); }
+/* The selected tab's pill: the brand tint with a lit edge. */
+.tab-on { background-image: linear-gradient(180deg, color-mix(in srgb, var(--brand) 22%, var(--surface)), var(--brand-soft)); box-shadow: inset 0 1px 0 var(--edge-hi), 0 0 0 1px color-mix(in srgb, var(--brand) 14%, transparent); }
+/* Sheets: the page behind dims and blurs; the sheet catches light along its top. */
+.scrim { background: var(--scrim); backdrop-filter: blur(6px) saturate(1.2); -webkit-backdrop-filter: blur(6px) saturate(1.2); }
+.sheet-panel { box-shadow: inset 0 1px 0 var(--edge-hi), 0 -12px 40px -12px color-mix(in srgb, #000000 35%, transparent); }
+
+/* People who ask for less transparency get solid bars and a plain dim behind sheets. */
+@media (prefers-reduced-transparency: reduce) {
+  .scrim { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  header.bar-top, nav.bar-bottom { background-color: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .page-in, .toast-in, .sheet-in, .skeleton, .done-ring, .done-check { animation: none; }

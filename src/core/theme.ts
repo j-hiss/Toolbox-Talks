@@ -225,6 +225,8 @@ export function themeVars(t: Theme): Record<string, string> {
   const k = darkVersion(t);
   return {
     "--t-scheme": isDark(t) ? "dark" : "light",
+    // How strongly light catches card and button edges (globals.css --lift): bright on a light page, faint on a dark one.
+    "--t-lift": isDark(t) ? "7%" : "72%",
     "--t-dark-bg": k.bg,
     "--t-dark-surface": k.surface,
     "--t-dark-text": k.text,

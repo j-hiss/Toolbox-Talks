@@ -22,7 +22,7 @@ export function Button({ variant = "primary", size = "md", className = "", ...re
     : size === "lg" ? "min-h-16 w-full rounded-full px-6 py-4 font-display text-[19px] font-extrabold tracking-[-0.02em]" // the one big action on a screen
     : "min-h-[54px] w-full rounded-full px-5 py-3.5 text-[17px] tracking-[-0.02em]";
   const variants = {
-    primary: "bg-action text-action-ink hover:brightness-110",
+    primary: "btn-lit bg-action text-action-ink hover:brightness-110",
     soft: "bg-brand-soft text-brand-text hover:brightness-[0.97]",
     ghost: "bg-fg/[0.06] text-fg hover:bg-fg/[0.1]",
     danger: "border border-warn bg-surface text-warn-text",
@@ -165,7 +165,7 @@ export function Shell({ children, nav, tabs = true, lockHeader = false, wide = f
     <div className={side ? "lg:pl-64" : ""}>
       {side && <SideNav name={name} />}
       <div className={`mx-auto px-4 md:px-8 ${width} ${tabs ? "pb-28 lg:pb-12" : "pb-10"}`}>
-        <header className={`sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-line/60 bg-bg/80 px-5 py-3 backdrop-blur-xl backdrop-saturate-[1.8] md:-mx-8 md:px-8 ${side ? "lg:justify-end lg:border-transparent" : ""}`}>
+        <header className={`sticky top-[env(safe-area-inset-top,0px)] z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 bar-top border-b border-line/60 bg-bg/75 px-5 py-3 backdrop-blur-xl backdrop-saturate-[1.8] md:-mx-8 md:px-8 ${side ? "lg:justify-end lg:border-transparent" : ""}`}>
           {lockHeader ? (
             // Signing: the logo isn't a way out while a crew member holds the phone.
             <span className="flex min-w-0 items-center gap-2.5"><Mark size={28} /><span className="truncate text-[15px] font-semibold tracking-[-0.005em]">{name}</span></span>
@@ -276,7 +276,7 @@ function TabBar() {
   if (tabs.length < 2) return null; // an employee account has only Home
   return (
     // A translucent bar on the bottom edge, like a phone's own tab bar; the selected tab is in the brand color.
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t lg:hidden border-line/60 bg-surface/80 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl backdrop-saturate-[1.8]">
+    <nav aria-label="Main" className="bar-bottom fixed inset-x-0 bottom-0 z-30 border-t lg:hidden border-line/60 bg-surface/75 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl backdrop-saturate-[1.8]">
       <ul className="mx-auto flex max-w-xl px-2 md:max-w-2xl">
         {tabs.map((t) => {
           const on = active(t.href);
@@ -288,7 +288,7 @@ function TabBar() {
                 className={`flex min-h-16 flex-col items-center justify-center gap-0.5 pt-1.5 pb-1.5 text-[11px] tracking-normal ${on ? "font-semibold text-brand-text" : "font-medium text-muted"}`}
               >
                 {/* The current tab sits on a soft pill, so it reads at a glance outdoors. */}
-                <span className={`flex h-7 w-14 items-center justify-center rounded-full transition-colors ${on ? "bg-brand-soft" : ""}`}><TabIcon icon={t.icon} on={on} /></span>
+                <span className={`flex h-7 w-14 items-center justify-center rounded-full transition-colors ${on ? "tab-on" : ""}`}><TabIcon icon={t.icon} on={on} /></span>
                 {t.label}
               </Link>
             </li>
@@ -367,13 +367,13 @@ export function Sheet({ title, open, onClose, children }: { title: string; open:
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onClose}>
+    <div className="scrim fixed inset-0 z-50 flex items-end justify-center sm:items-center" onClick={onClose}>
       <div
         ref={panel}
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="sheet-in max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-t-2xl bg-bg p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-xl sm:rounded-2xl"
+        className="sheet-in sheet-panel max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-t-2xl bg-bg p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-line sm:hidden" aria-hidden />

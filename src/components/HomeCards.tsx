@@ -92,7 +92,8 @@ export function MomentumHero({ st }: { st: Status }) {
         <div className="relative h-[124px] w-[124px] shrink-0">
           <svg viewBox="0 0 124 124" className="h-full w-full -rotate-90" aria-hidden>
             <circle cx="62" cy="62" r={R} fill="none" stroke="var(--line)" strokeWidth="12" />
-            <circle cx="62" cy="62" r={R} fill="none" stroke="var(--ok)" strokeWidth="12" strokeLinecap="round"
+            <defs><linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style={{ stopColor: "color-mix(in srgb, var(--ok) 70%, var(--caution))" }} /><stop offset="1" style={{ stopColor: "var(--ok)" }} /></linearGradient></defs>
+            <circle cx="62" cy="62" r={R} fill="none" stroke="url(#ring-grad)" strokeWidth="12" strokeLinecap="round"
               strokeDasharray={C} strokeDashoffset={C * (1 - p)} className="ring-fill" style={{ opacity: p ? 1 : 0 }} />
           </svg>
           <p className="absolute inset-0 flex flex-col items-center justify-center tabular-nums">
