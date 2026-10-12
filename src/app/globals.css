@@ -210,13 +210,12 @@ body {
 .wx-ring-alert { box-shadow: 0 0 0 2px var(--warn); animation: wx-ring 1.8s ease-out infinite; }
 .wx-ring-caution { box-shadow: 0 0 0 2px var(--caution), 0 0 22px color-mix(in srgb, var(--caution) 40%, transparent); }
 
-/* Home's talk-of-the-week band, the one bold surface: the brand deepening toward the bottom corner, light from the
-   top right, and a faint diagonal hatch like the stripes on jobsite tape. Text sits on the darkest part. */
+/* Home's talk-of-the-week band, the one bold surface: the brand deepening toward the bottom corner, with light from
+   the top right. (No stripes: Joe, 2026-10-12.) */
 .band-hero {
   background-color: var(--band);
   background-image:
     radial-gradient(90% 140% at 100% 0%, color-mix(in srgb, #ffffff 16%, transparent), transparent 62%),
-    repeating-linear-gradient(135deg, color-mix(in srgb, var(--band-ink) 5%, transparent) 0 2px, transparent 2px 14px),
     linear-gradient(155deg, color-mix(in srgb, var(--band) 78%, var(--ok)), var(--band) 45%, color-mix(in srgb, var(--band) 66%, #000000));
   box-shadow: inset 0 -1px 0 color-mix(in srgb, #000000 18%, transparent);
 }
