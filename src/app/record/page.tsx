@@ -18,6 +18,7 @@ import { LANGUAGES } from "@/core/languages";
 import { mapsLink } from "@/core/geo";
 import { weekNumbers } from "@/core/plan";
 import { RequireCompany } from "@/components/Guard";
+import { weatherLines, type WeatherRecord } from "@/core/weatherRecord";
 import { Button, ErrorNotice, Eyebrow, FlagChip, GroupHeading, Loading, MakeupTag, NavLink, Notice, STATUS_CHIP, Shell, Title, Avatar } from "@/components/ui";
 
 export default function RecordPage() {
@@ -174,7 +175,7 @@ function RecordView({ m }: { m: Membership }) {
         </>
       )}
 
-      {(rec.site_notes || rec.heat || issues.length > 0) && (
+      {(rec.site_notes || rec.heat || rec.weather || issues.length > 0) && (
         <>
           <GroupHeading>On site</GroupHeading>
           <div className="mt-3 flex flex-col gap-2 text-sm">
@@ -184,6 +185,7 @@ function RecordView({ m }: { m: Membership }) {
                 <b>Heat index up to {rec.heat.max_heat_index_f}°F</b> ({HEAT_LABEL[rec.heat.level as HeatLevel] ?? rec.heat.level}){rec.heat.reminder_read ? " · heat reminder read with this talk" : ""}
               </p>
             )}
+            {rec.weather && <WeatherOnRecord w={rec.weather} />}
             {issues.length > 0 && (
               <div className="rounded-xl bg-surface shadow-card px-3 py-2">
                 <b>Raised by the team ({issues.length})</b>
@@ -217,5 +219,20 @@ function RecordView({ m }: { m: Membership }) {
 
       <p className="mt-6 text-xs text-muted">Records can&apos;t be edited. This documents a safety meeting; it does not by itself certify OSHA compliance.</p>
     </Shell>
+  );
+}
+
+/** The weather service forecast for the jobsite when the talk was given (migration 0057). */
+function WeatherOnRecord({ w }: { w: WeatherRecord }) {
+  const l = weatherLines(w);
+  const alert = w.alerts.length > 0;
+  return (
+    <section aria-label="Weather at the talk" className="rounded-xl bg-surface shadow-card px-3 py-2">
+      <b>Weather at the talk</b>
+      {l.now && <p className="mt-1">{l.now}</p>}
+      <p className="mt-1">{l.day}</p>
+      <p className={`mt-1 ${alert ? "font-semibold text-warn-text" : "text-muted"}`}>{l.alerts}</p>
+      <p className="mt-1 text-xs text-muted">{l.source}</p>
+    </section>
   );
 }

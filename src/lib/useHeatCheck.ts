@@ -1,15 +1,20 @@
 "use client";
 
-// The heat check for a talk or daily plan in progress: today's forecast for the chosen place (or the phone's GPS),
-// saved into the draft once. Quiet when offline or when the weather service can't be reached.
+// The heat and weather check for a talk or daily plan in progress: today's forecast for the chosen place (or the
+// phone's GPS), saved into the draft once. The heat goes into the heat note; for outdoor and mixed work, a snapshot of
+// the conditions goes on the record too (src/core/weatherRecord.ts, migration 0057). Quiet when offline or when the
+// weather service can't be reached: then the last check from this morning is used if it's recent enough, else none.
 import { useEffect, useState } from "react";
-import { checkHeat } from "@/lib/weather";
+import { cachedConditions, checkConditions, checkHeat } from "@/lib/weather";
 import { readDraft, writeDraft, type TalkDraft } from "@/lib/draft";
-import type { Jobsite } from "@/lib/data/types";
+import type { Company, Jobsite } from "@/lib/data/types";
+import { workSettingFor } from "@/core/worksetting";
+import { weatherRecordFrom } from "@/core/weatherRecord";
 
-export function useHeatCheck(draft: TalkDraft, jobsites: Jobsite[]): string | null {
+export function useHeatCheck(draft: TalkDraft, jobsites: Jobsite[], company: Pick<Company, "industry" | "work_setting">): string | null {
   const site = jobsites.find((j) => j.id === draft.jobsiteId);
   const point = site?.latitude != null && site.longitude != null ? { latitude: site.latitude, longitude: site.longitude } : draft.gps;
+  const setting = workSettingFor(company, site);
   const [msg, setMsg] = useState<string | null>(null);
   useEffect(() => {
     if (!point || draft.heat) return;
@@ -24,5 +29,19 @@ export function useHeatCheck(draft: TalkDraft, jobsites: Jobsite[]): string | nu
     return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [point?.latitude, point?.longitude]);
+  useEffect(() => {
+    if (!point || draft.weather || setting === "indoor") return;
+    let live = true;
+    checkConditions(point)
+      .catch(() => cachedConditions(point))
+      .then((c) => {
+        const cur = readDraft(draft.companyId);
+        const w = weatherRecordFrom(c, setting);
+        if (!live || !w || !cur) return;
+        writeDraft({ ...cur, weather: w });
+      });
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [point?.latitude, point?.longitude, setting]);
   return msg;
 }

@@ -111,6 +111,15 @@ describe("PDF extras", () => {
     expect(withIssues).toContain("East ladder cracked");
     expect(withIssues).toContain("fix by 2026-10-13");
   });
+  it("prints the weather at the talk, labelled as the weather service forecast", () => {
+    const pdf = text(rec({ weather: { v: 1, source: "NWS", checked_at: "2026-10-06T14:05:00Z", place: "Example, FL", work_setting: "outdoor", day: "today",
+      now: { temp_f: 88, sky: "Partly Sunny", wind_mph: 12, wind_dir: "SW", rain_pct: 20 }, high_f: 91, low_f: 75, heat_index_max_f: 104, heat_level: "danger",
+      rain: null, wind: null, thunder_at: null, alerts: [{ event: "Heat Advisory", severity: "Moderate" }], alerts_unavailable: false, summary: "" } }));
+    expect(pdf).toContain("Weather at the talk");
+    expect(pdf).toContain("88°F, Partly Sunny, wind SW 12 mph, 20% chance of rain");
+    expect(pdf).toContain("Active alerts: Heat Advisory.");
+    expect(pdf).toContain("not measured on site");
+  });
 });
 
 describe("safety program summary PDF", () => {

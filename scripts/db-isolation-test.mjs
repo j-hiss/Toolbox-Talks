@@ -869,6 +869,22 @@ async function main() {
       await as(userA, "select public.remove_trainer($1)", [tl]); await as(userA, "select public.remove_trainer($1)", [tin]);
     }
 
+    // Weather with a signed talk (0057): kept with the record, never changed, only an object, size-capped.
+    {
+      const w = { v: 1, source: "NWS", checked_at: new Date().toISOString(), place: "Example, FL", work_setting: "outdoor", day: "today",
+        now: { temp_f: 88, sky: "Partly Sunny", wind_mph: 12, wind_dir: "SW", rain_pct: 20 }, high_f: 91, low_f: 75, heat_index_max_f: 104, heat_level: "danger",
+        rain: null, wind: null, thunder_at: null, alerts: [{ event: "Heat Advisory", severity: "Moderate" }], alerts_unavailable: false, summary: "Dry through the work day." };
+      const saveW = (weather) => as(userA, "select public.save_talk_record($1::jsonb, '[]'::jsonb) as id", [JSON.stringify({ ...JSON.parse(rec(coA, randomUUID(), [])[0]), weather })]);
+      const wid = (await saveW(w)).rows[0].id;
+      check("A talk saves the weather it was given in", (await as(userA, "select weather from public.talk_records where id = $1", [wid])).rows[0].weather?.alerts?.[0]?.event === "Heat Advisory");
+      check("The saved weather can't be changed", await fails(() => as(userA, "update public.talk_records set weather = '{}'::jsonb where id = $1", [wid]))
+        && (await db.query("select weather->>'high_f' as h from public.talk_records where id = $1", [wid])).rows[0].h === "91");
+      const junk = (await saveW(["not", "an", "object"])).rows[0].id;
+      check("Only a weather object is kept; anything else saves as none", (await db.query("select weather from public.talk_records where id = $1", [junk])).rows[0].weather === null);
+      check("An oversized weather snapshot is refused", await fails(() => saveW({ ...w, summary: "x".repeat(20000) })));
+      check("Another company never sees the weather on A's talk", (await as(userB, "select weather from public.talk_records where id = $1", [wid])).rows.length === 0);
+    }
+
     // CRM connector (0054): company API keys; a CRM posts a job ID and address; only its own company; revocable.
     {
       const key = (await as(userA, "select public.create_api_key($1, 'Example CRM') as k", [coA])).rows[0].k;
@@ -1470,7 +1486,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 514;
+  const EXPECTED = 519;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

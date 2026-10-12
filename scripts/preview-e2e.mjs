@@ -113,6 +113,8 @@ const launch = () => chromium.launch({ executablePath: process.env.CHROMIUM_PATH
   log("2 review:", await q.locator("h1").textContent()); await q.click("button:has-text('Save')"); await q.waitForTimeout(1200);
   log("2 saved:", await q.locator("main").innerText().then((t) => t.split("\n").slice(0, 2).join(" | ")));
   await q.click("text=See records"); await q.waitForTimeout(700); await q.locator("main ul li a").first().click(); await q.waitForTimeout(800);
+  log("2 weather on record:", (await q.locator("section[aria-label='Weather at the talk']").innerText().catch(() => "MISSING")).replace(/\s+/g, " ").slice(0, 260));
+  await q.locator("section[aria-label='Weather at the talk']").screenshot({ path: `${OUT}/e-record-weather.png` }).catch(() => {});
   await q.click("text=Download PDF"); await q.waitForTimeout(2500);
   log("2 pdf:", JSON.stringify(await q.evaluate(() => window.__saved)));
   // Jobsite QR sticker, then "scanning" it: opening the app with ?site=<id> picks that jobsite.

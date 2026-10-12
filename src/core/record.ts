@@ -4,6 +4,7 @@ import type { PretaskPlan } from "./pretask";
 import { resolveStatus, type AttendanceStatus } from "./attendance";
 import type { TalkText } from "./talks";
 import type { LanguageId } from "./languages";
+import type { WeatherRecord } from "./weatherRecord";
 
 /** Where a signature given on the crew member's own phone was, against the talk's spot (src/core/checkin.ts). */
 export type LocationFlag = "near" | "far" | "not_shared" | "unknown";
@@ -95,6 +96,8 @@ export type RecordInput = {
   siteNotes?: string;
   /** The heat forecast checked for this talk (src/core/heat.ts), and whether the heat reminder was read. */
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
+  /** For outdoor and mixed work: the weather service forecast for the jobsite at the talk (src/core/weatherRecord.ts). */
+  weather?: WeatherRecord | null;
   /** The statement crew members tapped before signing. */
   signingStatement?: SigningStatement | null;
   /** A daily pre-task plan instead of a weekly talk (src/core/pretask.ts): no week, never a makeup, never scored. */
@@ -143,6 +146,7 @@ export function recordPayload(r: RecordInput) {
     makeup_reason: r.pretask ? null : r.makeup?.reason.trim() || null,
     site_notes: (r.siteNotes ?? "").trim(),
     heat: r.heat ?? null,
+    weather: r.weather ?? null,
     signing_statement: r.signingStatement ?? null,
     photo: r.photo?.image ?? null,
     photo_taken_at: r.photo?.takenAt ?? null,

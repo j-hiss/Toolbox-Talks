@@ -41,6 +41,8 @@ export type TalkDraft = {
   siteNotes: string;
   /** The heat check for this talk; reminder_read once the heat reminder was part of what was read. */
   heat: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; place: string } | null;
+  /** For outdoor and mixed work: the weather service forecast for the spot, saved with the record (migration 0057). */
+  weather: import("@/core/weatherRecord").WeatherRecord | null;
   /** Things the crew raised, logged before saving. */
   issues: DraftIssue[];
   /** Optional crew photo (shrunk JPEG data URL) and when it was taken. */
@@ -78,7 +80,7 @@ export function readDraft(companyId: string): TalkDraft | null {
 function upgrade(raw: unknown): TalkDraft {
   const d = raw as Omit<Partial<TalkDraft>, "step"> & Omit<TalkDraft, "step" | "makeup" | "makeupPick" | "makeupNote" | "needIds" | "siteNotes" | "heat" | "issues" | "photo" | "sheet" | "walkins" | "kind" | "pretask"> & { step: string; walkins?: (string | Walkin)[] };
   const step = (d.step === "pick" ? (d.talkId ? "read" : "makeup") : d.step) as TalkDraft["step"];
-  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, issues: d.issues ?? [], photo: d.photo ?? null, sheet: d.sheet ?? null, kind: d.kind ?? "weekly", pretask: d.pretask ?? null,
+  return { ...d, makeup: d.makeup ?? null, makeupPick: d.makeupPick ?? "", makeupNote: d.makeupNote ?? "", needIds: d.needIds ?? null, siteNotes: d.siteNotes ?? "", heat: d.heat ?? null, weather: d.weather ?? null, issues: d.issues ?? [], photo: d.photo ?? null, sheet: d.sheet ?? null, kind: d.kind ?? "weekly", pretask: d.pretask ?? null,
     walkins: (d.walkins ?? []).map((w) => (typeof w === "string" ? { name: w, company: "" } : w)), step };
 }
 
@@ -118,6 +120,7 @@ export function newDraft(companyId: string, talkId: string | null, jobsiteId = "
     startedAt: new Date().toISOString(),
     siteNotes: "",
     heat: null,
+    weather: null,
     issues: [],
     photo: null,
     sheet: null,

@@ -12,18 +12,18 @@ import { heatReminder } from "@/content/heat";
 import { writeSiteEmergency } from "@/lib/lastSetup";
 import { useHeatCheck } from "@/lib/useHeatCheck";
 import type { TalkDraft } from "@/lib/draft";
-import type { Jobsite } from "@/lib/data/types";
+import type { Company, Jobsite } from "@/lib/data/types";
 import { Button, Eyebrow, Field, GroupHeading, Notice, Title, inputClass } from "./ui";
 
-type Props = { draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; jobsites: Jobsite[] };
+type Props = { draft: TalkDraft; update: (p: Partial<TalkDraft>) => void; jobsites: Jobsite[]; company: Company };
 
-export function PretaskPlanStep({ draft, update, jobsites }: Props) {
+export function PretaskPlanStep({ draft, update, jobsites, company }: Props) {
   const plan = draft.pretask!;
   const set = (patch: Partial<PretaskPlan>) => update({ pretask: { ...plan, ...patch } });
   const [task, setTask] = useState("");
   const [hazard, setHazard] = useState({ hazard: "", control: "" });
   const [problems, setProblems] = useState<string[]>([]);
-  const heatMsg = useHeatCheck(draft, jobsites);
+  const heatMsg = useHeatCheck(draft, jobsites, company);
   const hot = !!draft.heat && alertWorthy(draft.heat.level as HeatLevel);
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const eq = (id: string) => plan.equipment.find((e) => e.id === id);

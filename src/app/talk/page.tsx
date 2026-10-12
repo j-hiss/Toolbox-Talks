@@ -145,7 +145,7 @@ function Talk({ m }: { m: Membership }) {
     <Shell nav={signing ? exit : nav} tabs={false} lockHeader={signing}>
       {draft.step === "makeup" && <MakeupPick weeks={makeupWeeks(input, co.makeup_weeks ?? 4)} draft={draft} update={update} open={openMakeups} />}
       {draft.step === "read" && draft.talkId && <Read co={co} draft={draft} update={update} org={org} />}
-      {draft.step === "plan" && draft.pretask && <PretaskPlanStep draft={draft} update={update} jobsites={org.jobsites} />}
+      {draft.step === "plan" && draft.pretask && <PretaskPlanStep draft={draft} update={update} jobsites={org.jobsites} company={co} />}
       {draft.step === "crew" && <Crew org={org} draft={draft} update={update} signedIds={signedIds} />}
       {draft.step === "sign" && (
         <Sign
@@ -302,7 +302,7 @@ function ReadTalk({ co, draft, update, org, talk }: { co: Company; draft: TalkDr
   const [editingNotes, setEditingNotes] = useState(false);
 
   // Heat: hot days add the heat reminder to the talk (src/lib/useHeatCheck.ts).
-  const heatMsg = useHeatCheck(draft, org.jobsites);
+  const heatMsg = useHeatCheck(draft, org.jobsites, co);
   // Since last talk: the safety log's approved crew summaries, when the company reads them at talks. Not for makeups
   // (a makeup covers an earlier talk). Loaded once into the draft, so it stays put offline and as the crew reads.
   const useSinceLast = sinceLastSettings(co).enabled && !draft.makeup;
@@ -777,6 +777,7 @@ function Sign({
           // the exact reminder text that was read, so the record and PDF show what the crew heard
           ...(draft.heat.reminder_read ? { reminder: { ...heatReminder(lang), version: HEAT_REMINDER_VERSION } } : {}),
         } : null,
+        weather: draft.weather,
       });
       if (record.team_id === "") record.team_id = null;
       const raisedAt = new Date().toISOString();

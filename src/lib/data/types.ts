@@ -127,6 +127,8 @@ export type TalkRecord = TalkRecordSummary & {
   longitude: number | null;
   site_notes?: string;
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
+  /** The weather service forecast for the jobsite at the talk, outdoor and mixed work (migration 0057). */
+  weather?: import("@/core/weatherRecord").WeatherRecord | null;
   /** The statement crew members tapped before signing (null on records from before it existed). */
   signing_statement?: { text: string; en: string; language: string; version: number } | null;
   /** Printed on the PDF with a QR code; anyone can check it at /verify (migration 0030). Absent before upload. */

@@ -592,6 +592,17 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   ZIP, size band, trainings, note), filter by state and training, and ask to connect (one open request per company,
   30 a day). The company accepts or declines; accepting invites the trainer, and the company still picks who they see.
 
+## Weather saved with each signed talk (built, migration 0057)
+- **Why:** for outdoor crews, the weather that day is part of the story (Joe, 2026-10-12): what the crew faced and
+  what they were told, on the record the owner hands to an insurer or inspector.
+- **What:** when a talk or daily plan starts at an outdoor or mixed jobsite, the same National Weather Service check
+  Home uses is saved with the record: temperature, sky, wind and rain chance at the time; the work day's high and low,
+  heat index, rain and wind peaks, thunderstorms; and active alerts (or "couldn't be checked"). Shown on the saved
+  record ("Weather at the talk") and printed on its PDF.
+- **Honest:** labelled as the weather service's forecast for the spot and when it was checked, never as measured on
+  site. A check over 3 hours old or from another day isn't saved. Indoor work saves none. Written once at save, never
+  changed (append-only, like heat).
+
 ## CRM connector: jobsites from a job ID and address (built, migration 0054)
 - **Why:** the office already has every job in its CRM. Typing jobsites again is busywork; the CRM can send them.
 - **How:** Admin → Jobsites → Connect your CRM makes a key (shown once; only a fingerprint is kept). The CRM sends
