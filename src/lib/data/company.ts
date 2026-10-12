@@ -1,6 +1,7 @@
 // Company, roles, teams and people. Every call goes through RLS: a user only ever reaches their own companies.
 // Each function scopes by company_id explicitly as well, so a query never depends on RLS alone to be correct.
 import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Company, Jobsite, Membership, Person, Role, Team } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -62,9 +63,9 @@ export async function deleteRole(companyId: string, roleId: string): Promise<voi
 }
 
 // Teams ----------------------------------------------------------------------------------------------------------
-export async function listTeams(companyId: string): Promise<Team[]> {
+export async function listTeams(companyId: string, sb: SupabaseClient = supabase()): Promise<Team[]> {
   return check(
-    await supabase().from("teams").select("id, company_id, name, lead_person_id").eq("company_id", companyId).order("name"),
+    await sb.from("teams").select("id, company_id, name, lead_person_id").eq("company_id", companyId).order("name"),
   );
 }
 export async function addTeam(companyId: string, name: string): Promise<void> {
@@ -80,9 +81,9 @@ export async function deleteTeam(companyId: string, teamId: string): Promise<voi
 // People ---------------------------------------------------------------------------------------------------------
 const PERSON_COLUMNS = "id, company_id, full_name, role_id, team_id, employee_id, phone, preferred_language, active, user_id";
 
-export async function listPeople(companyId: string): Promise<Person[]> {
+export async function listPeople(companyId: string, sb: SupabaseClient = supabase()): Promise<Person[]> {
   return check(
-    await supabase().from("people").select(PERSON_COLUMNS).eq("company_id", companyId).eq("active", true).order("full_name"),
+    await sb.from("people").select(PERSON_COLUMNS).eq("company_id", companyId).eq("active", true).order("full_name"),
   );
 }
 /** Everyone, including removed people (for matching a spreadsheet re-import). */
@@ -105,7 +106,7 @@ export async function deactivatePerson(companyId: string, personId: string): Pro
 }
 
 // Jobsites -------------------------------------------------------------------------------------------------------
-const JOBSITE_COLUMNS = "id, company_id, name, address, latitude, longitude, kind, work_setting, active";
+const JOBSITE_COLUMNS = "id, company_id, name, address, latitude, longitude, kind, work_setting, active, external_id";
 
 export async function listJobsites(companyId: string): Promise<Jobsite[]> {
   return check(
@@ -115,7 +116,7 @@ export async function listJobsites(companyId: string): Promise<Jobsite[]> {
 export async function addJobsite(companyId: string, j: Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind">): Promise<void> {
   check(await supabase().from("jobsites").insert({ company_id: companyId, ...j }));
 }
-export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind" | "work_setting" | "active">>): Promise<void> {
+export async function updateJobsite(companyId: string, id: string, patch: Partial<Pick<Jobsite, "name" | "address" | "latitude" | "longitude" | "kind" | "work_setting" | "active" | "external_id">>): Promise<void> {
   check(await supabase().from("jobsites").update(patch).eq("company_id", companyId).eq("id", id));
 }
 /** Jobsites are deactivated, never deleted: saved talk records will point at them. */

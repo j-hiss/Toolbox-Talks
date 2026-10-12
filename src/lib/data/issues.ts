@@ -2,6 +2,7 @@
 // database stamps who and when); what was raised never changes and nothing is deleted. Issues raised at a talk
 // arrive with it (saveTalkRecord); a finding is added here (addFinding).
 import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Issue } from "./types";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -11,8 +12,8 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
 
 const COLUMNS = "id, client_id, record_id, event_id, jobsite_name, description, owner_person_id, owner_name, due_date, status, raised_by_name, raised_at, fixed_at, fixed_note";
 
-export async function listIssues(companyId: string): Promise<Issue[]> {
-  return check(await supabase().from("talk_issues").select(COLUMNS).eq("company_id", companyId).order("raised_at", { ascending: false }).limit(500));
+export async function listIssues(companyId: string, sb: SupabaseClient = supabase()): Promise<Issue[]> {
+  return check(await sb.from("talk_issues").select(COLUMNS).eq("company_id", companyId).order("raised_at", { ascending: false }).limit(500));
 }
 
 export async function listIssuesForRecord(companyId: string, recordId: string): Promise<Issue[]> {

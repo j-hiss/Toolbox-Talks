@@ -1,6 +1,7 @@
 // The report query layer: everyone who was ever on staff, and every record that counts toward the weeks in range.
 // Signatures are not loaded here (reports only need statuses). Math lives in src/core/compliance.ts.
 import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ReportPerson, ReportRecord } from "@/core/compliance";
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -9,9 +10,9 @@ function check<T>(res: { data: T | null; error: { message: string } | null }): T
 }
 
 /** All people, including deactivated ones: past weeks still expected them. */
-export async function reportPeople(companyId: string): Promise<ReportPerson[]> {
+export async function reportPeople(companyId: string, sb: SupabaseClient = supabase()): Promise<ReportPerson[]> {
   const rows = check(
-    await supabase().from("people").select("id, full_name, team_id, created_at, deactivated_at").eq("company_id", companyId).order("full_name"),
+    await sb.from("people").select("id, full_name, team_id, created_at, deactivated_at").eq("company_id", companyId).order("full_name"),
   ) as { id: string; full_name: string; team_id: string | null; created_at: string; deactivated_at: string | null }[];
   return rows.map((p) => ({ id: p.id, name: p.full_name, teamId: p.team_id, createdAt: p.created_at, deactivatedAt: p.deactivated_at }));
 }
@@ -31,9 +32,9 @@ export async function listDailyPlans(companyId: string, fromDay: string): Promis
 }
 
 /** Records held in, or making up, any week from `fromWeek` on. */
-export async function reportRecords(companyId: string, fromWeek: string): Promise<ReportRecord[]> {
+export async function reportRecords(companyId: string, fromWeek: string, sb: SupabaseClient = supabase()): Promise<ReportRecord[]> {
   const rows = check(
-    await supabase()
+    await sb
       .from("talk_records")
       .select("id, title_en:content->en->>title, title:content->>title, held_at, week_start, makeup_for_week, makeup_reason, team_name, jobsite_name, presenter_person_id, presenter_signed_at, talk_attendees(person_id, name, status, location)")
       .eq("company_id", companyId)

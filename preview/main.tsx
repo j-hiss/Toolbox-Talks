@@ -21,6 +21,7 @@ import PlatformPage from "@/app/platform/page";
 import CheckinPage from "@/app/checkin/page";
 import TrainerPage from "@/app/trainer/page";
 import PartnerPage from "@/app/partner/page";
+import ReportPage from "@/app/report/page";
 import { usePreviewPath } from "./shims/router";
 import { DEMO_CODE } from "./demo/supabase";
 import { resetDemo } from "./demo/store";
@@ -46,6 +47,7 @@ const ROUTES: Record<string, () => React.ReactElement> = {
   "/checkin/": () => <CheckinPage />,
   "/trainer/": () => <TrainerPage />,
   "/partner/": () => <PartnerPage />,
+  "/report/": () => <ReportPage />,
 };
 
 function Banner() {

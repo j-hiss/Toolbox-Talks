@@ -3,6 +3,10 @@
 // Saved talks for the current company, newest first, plus any still waiting on this phone to upload.
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { IssuesList } from "@/components/Issues";
+import { HazardList } from "@/components/Hazards";
+import { WeeklyEmail } from "@/components/WeeklyEmail";
+import { listPeople } from "@/lib/data/company";
+import type { Person } from "@/lib/data/types";
 import { isoDay, mondayOf, periodLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
 import Link from "next/link";
@@ -17,9 +21,10 @@ export default function RecordsPage() {
   return <RequireCompany need="staff">{(m) => <Records m={m} />}</RequireCompany>;
 }
 
-// Talks or Issues, kept in the URL hash (/records/#issues) so Home can link straight to issues.
+// Talks, Issues or Crew reports, kept in the URL hash (/records/#issues, #reports) so Home can link straight there.
 const subscribeHash = (cb: () => void) => { window.addEventListener("hashchange", cb); return () => window.removeEventListener("hashchange", cb); };
-const useView = () => useSyncExternalStore(subscribeHash, () => (window.location.hash === "#issues" ? "issues" : "talks"), () => "talks");
+type View = "talks" | "issues" | "reports";
+const useView = () => useSyncExternalStore(subscribeHash, (): View => (window.location.hash === "#issues" ? "issues" : window.location.hash === "#reports" ? "reports" : "talks"), (): View => "talks");
 
 const when = (iso: string) => new Date(iso).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -28,6 +33,10 @@ function Records({ m }: { m: Membership }) {
   const [error, setError] = useState<string | null>(null);
   const outbox = useOutbox(m.company.id);
   const view = useView();
+  // Crew hazard reports (migration 0055): owners, admins and office.
+  const seesReports = m.access === "owner" || m.access === "admin" || m.access === "office";
+  const [people, setPeople] = useState<Person[]>([]);
+  useEffect(() => { if (seesReports && view === "reports") listPeople(m.company.id).then(setPeople).catch(() => setPeople([])); }, [seesReports, view, m.company.id]);
   const [team, setTeam] = useState("all");
   const [onlyFlagged, setOnlyFlagged] = useState(false);
   const teams = useMemo(() => [...new Set((rows ?? []).map((r) => r.team_name).filter(Boolean))].sort(), [rows]);
@@ -58,14 +67,14 @@ function Records({ m }: { m: Membership }) {
       <Eyebrow>{m.company.name}</Eyebrow>
       <Title>Records</Title>
       <div className="mt-4 flex gap-1.5" role="tablist">
-        {(["talks", "issues"] as const).map((v) => (
-          <button key={v} role="tab" aria-selected={view === v} onClick={() => { window.location.hash = v === "issues" ? "issues" : ""; }}
+        {(seesReports ? (["talks", "issues", "reports"] as const) : (["talks", "issues"] as const)).map((v) => (
+          <button key={v} role="tab" aria-selected={view === v} onClick={() => { window.location.hash = v === "talks" ? "" : v; }}
             className={`min-h-10 flex-1 rounded-full border px-3.5 text-base font-semibold ${view === v ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface text-muted"}`}>
-            {v === "talks" ? "Talks" : "Issues"}
+            {v === "talks" ? "Talks" : v === "issues" ? "Issues" : "Crew reports"}
           </button>
         ))}
       </div>
-      {view === "issues" ? <IssuesList companyId={m.company.id} /> : (<>
+      {view === "reports" && seesReports ? <><HazardList companyId={m.company.id} people={people} />{m.access === "office" && <WeeklyEmail company={m.company} admin={false} />}</> : view === "issues" ? <IssuesList companyId={m.company.id} /> : (<>
 
       {outbox.items.length > 0 && (
         <>

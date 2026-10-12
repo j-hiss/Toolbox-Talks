@@ -1,6 +1,7 @@
 // Admin swaps of a week's talk. The database refuses a swap for a week that is over or already given
 // (supabase/migrations/20261005000005_weekly_lock_makeups.sql), so the lock holds even if the app is wrong.
 import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Cadence, CadenceSetting, RepeatEvery, RepeatSetting, TalkList } from "@/core/plan";
 import type { PlanOverride } from "./types";
 
@@ -49,8 +50,8 @@ export async function removeTalkList(companyId: string, fromWeek: string): Promi
 
 // How often the company gives a new talk (Admin → Plan). A change starts on a Monday after today; the database
 // refuses to add, change or remove one that has started (supabase/migrations/20261007000015_cadence.sql).
-export async function listCadences(companyId: string): Promise<CadenceSetting[]> {
-  return check(await supabase().from("company_cadences").select("from_week, weeks").eq("company_id", companyId).order("from_week"));
+export async function listCadences(companyId: string, sb: SupabaseClient = supabase()): Promise<CadenceSetting[]> {
+  return check(await sb.from("company_cadences").select("from_week, weeks").eq("company_id", companyId).order("from_week"));
 }
 
 export async function saveCadence(companyId: string, fromWeek: string, weeks: Cadence): Promise<void> {

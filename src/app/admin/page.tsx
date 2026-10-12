@@ -43,6 +43,8 @@ import { InjuryLog } from "@/components/InjuryLog";
 import { BrandEditor } from "@/components/BrandEditor";
 import { AppAccess } from "@/components/AppAccess";
 import { Training } from "@/components/Training";
+import { CrmConnect } from "@/components/CrmConnect";
+import { WeeklyEmail } from "@/components/WeeklyEmail";
 import { AccountPanel } from "@/components/Account";
 
 const TABS = [
@@ -170,6 +172,7 @@ function Admin({ m }: { m: Membership }) {
             />
             <DailyToggle companyId={companyId} on={!!m.company.daily_enabled} refresh={s.refresh} />
             <AccountPanel m={m} />
+            {(m.access === "owner" || m.access === "admin") && <WeeklyEmail company={m.company} admin />}
           </>
         ) : !roles || !teams || !people || !jobsites ? (
           <Loading />
@@ -178,7 +181,7 @@ function Admin({ m }: { m: Membership }) {
         ) : tab === "teams" ? (
           <TeamsTab companyId={companyId} people={people} teams={teams} act={act} />
         ) : tab === "jobsites" ? (
-          <JobsitesTab companyId={companyId} company={m.company} jobsites={jobsites} act={act} />
+          <JobsitesTab companyId={companyId} company={m.company} jobsites={jobsites} act={act} admin={m.access === "owner" || m.access === "admin"} />
         ) : tab === "training" ? (
           <Training companyId={companyId} people={people} roles={roles} canEdit={m.access === "owner" || m.access === "admin"} />
         ) : tab === "access" ? (
@@ -433,7 +436,7 @@ function RolesTab({ company, people, roles, act }: { company: Membership["compan
   );
 }
 
-function JobsitesTab({ companyId, company, jobsites, act }: { companyId: string; company: Membership["company"]; jobsites: Jobsite[]; act: Act }) {
+function JobsitesTab({ companyId, company, jobsites, act, admin }: { companyId: string; company: Membership["company"]; jobsites: Jobsite[]; act: Act; admin: boolean }) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [kind, setKind] = useState<Jobsite["kind"]>("site");
@@ -519,6 +522,19 @@ function JobsitesTab({ companyId, company, jobsites, act }: { companyId: string;
                   </select>
                 </label>
                 <input
+                  aria-label={`Job ID for ${j.name}`}
+                  defaultValue={j.external_id ?? ""}
+                  placeholder="Job ID in your CRM (optional)"
+                  className={inputClass}
+                  maxLength={100}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v === (j.external_id ?? "")) return;
+                    if (v && jobsites.some((o) => o.id !== j.id && o.external_id === v)) { setMsg(`Job ID ${v} is already on another jobsite.`); e.target.value = j.external_id ?? ""; return; }
+                    act(() => updateJobsite(companyId, j.id, { external_id: v || null }))();
+                  }}
+                />
+                <input
                   aria-label={`Address for ${j.name}`}
                   defaultValue={j.address}
                   placeholder="Address"
@@ -568,6 +584,7 @@ function JobsitesTab({ companyId, company, jobsites, act }: { companyId: string;
         </ul>
       )}
       <p className="mt-4 text-xs text-muted">Removing a place hides it from new talks. Past records keep it.</p>
+      {admin && <CrmConnect companyId={companyId} />}
     </>
   );
 }

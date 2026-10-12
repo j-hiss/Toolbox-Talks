@@ -2,6 +2,7 @@
 // a mistake is withdrawn with a reason. Card photos go to the private person-certs bucket (admins only), served by
 // one-minute signed links. Migration 0023. Status math: src/core/certs.ts.
 import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CertRequirement, PersonCert } from "@/core/certs";
 
 export const PERSON_CERTS_BUCKET = "person-certs";
@@ -16,8 +17,8 @@ export type StoredCert = PersonCert & { note: string; card_path: string | null; 
 const COLUMNS = "id, person_id, cert_type, custom_name, issued_on, expires_on, note, card_path, entered_at, withdrawn_at, withdrawn_reason, submission_id";
 
 /** Admins and office get the company's cards; anyone else gets only their own (the database decides). */
-export async function listCerts(companyId: string): Promise<StoredCert[]> {
-  return check(await supabase().from("person_certs").select(COLUMNS).eq("company_id", companyId).order("entered_at", { ascending: false }));
+export async function listCerts(companyId: string, sb: SupabaseClient = supabase()): Promise<StoredCert[]> {
+  return check(await sb.from("person_certs").select(COLUMNS).eq("company_id", companyId).order("entered_at", { ascending: false }));
 }
 
 export type NewCert = { personId: string; certType: string; customName: string; issuedOn: string | null; expiresOn: string | null; note: string };
@@ -47,8 +48,8 @@ export async function cardUrl(path: string): Promise<string> {
   return data.signedUrl;
 }
 
-export async function listRequirements(companyId: string): Promise<CertRequirement[]> {
-  return check(await supabase().from("title_cert_requirements").select("role_id, cert_type").eq("company_id", companyId));
+export async function listRequirements(companyId: string, sb: SupabaseClient = supabase()): Promise<CertRequirement[]> {
+  return check(await sb.from("title_cert_requirements").select("role_id, cert_type").eq("company_id", companyId));
 }
 
 export async function setRequirement(companyId: string, roleId: string, certType: string, needed: boolean): Promise<void> {

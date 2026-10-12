@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useSession } from "@/lib/session";
 import { canAdmin, canPresent, canReport, type Membership } from "@/lib/data/types";
 import { EmployeeHome } from "@/components/EmployeeHome";
+import { ReportHazard } from "@/components/Hazards";
 import { SignatureRule } from "@/components/Logo";
 import { TrainingAlert } from "@/components/TrainingAlert";
 import { RequireCompany } from "@/components/Guard";
@@ -165,11 +166,11 @@ function Home({ m }: { m: Membership }) {
           </div>
           {st && <MomentumHero st={st} />}
           {st && <WeekStatusCard st={st} isAdmin={canReport(m.access)} onMakeup={canPresent(m.access) ? () => start(null) : undefined} />}
-          {isAdmin && st && <GettingStarted st={st} />}
+          {isAdmin && st && <GettingStarted st={st} companyId={co.id} myUserId={s.user?.id ?? null} />}
         </section>
       ) : (
         <div className="mt-6 flex flex-col gap-3">
-          {isAdmin && st && <GettingStarted st={st} />}
+          {isAdmin && st && <GettingStarted st={st} companyId={co.id} myUserId={s.user?.id ?? null} />}
           <Notice>
             Your 52-week plan starts the week of {parseDay(co.program_start).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}.
           </Notice>
@@ -216,6 +217,8 @@ function Home({ m }: { m: Membership }) {
       )}
       </div>
       </div>
+
+      <div className="mt-6"><ReportHazard companyId={co.id} userId={s.user?.id ?? null} /></div>
 
       <div className="mt-10 border-t border-line pt-4 text-sm">
         {remindersSupported() ? (

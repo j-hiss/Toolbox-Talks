@@ -13,6 +13,9 @@ import { listJobsites, listTeams } from "@/lib/data/company";
 import type { Company, Team } from "@/lib/data/types";
 import { listIssues } from "@/lib/data/issues";
 import { listRecordedWeeks } from "@/lib/data/records";
+import { listInvites, listMembers } from "@/lib/data/members";
+import { listCerts } from "@/lib/data/certs";
+import { setupDone, setupProgress, setupSteps } from "@/core/onboarding";
 
 type Status = {
   teams: Team[];
@@ -172,29 +175,42 @@ export function WeekStatusCard({ st, isAdmin, onMakeup }: { st: Status; isAdmin:
 }
 
 /** Shown to admins until the company is set up and has given its first talk. */
-export function GettingStarted({ st }: { st: Status }) {
-  const steps = [
-    { done: st.people > 0, label: "Add your people", href: "/admin/#people" },
-    { done: st.teams.length > 0, label: "Make your teams", href: "/admin/#teams" },
-    { done: st.hasJobsite, label: "Add a jobsite or your office", href: "/admin/#jobsites" },
-    { done: st.records > 0, label: "Give your first talk", href: "/talk/" },
-  ];
-  const left = steps.filter((x) => !x.done).length;
-  if (left === 0) return null;
-  // Below the week card, so Start stays near the top. Finished steps fold into the count.
+/**
+ * The getting-started checklist for owners and admins (steps and rules: src/core/onboarding.ts). Each step ticks
+ * itself from what the company has. Gone once the required steps are done, or after "Hide this list" (this phone).
+ * Below the week card, so Start stays near the top. Finished steps fold into the count.
+ */
+export function GettingStarted({ st, companyId, myUserId }: { st: Status; companyId: string; myUserId: string | null }) {
+  const [extra, setExtra] = useState<{ helpers: number; certs: number } | null>(null);
+  const [hidden, setHidden] = useState(() => { try { return localStorage.getItem(`tt-setup-hidden-${companyId}`) === "1"; } catch { return false; } });
+  const basicsDone = st.people >= 2 && st.teams.length > 0 && st.hasJobsite && st.records > 0;
+  useEffect(() => {
+    if (hidden) return;
+    let live = true;
+    Promise.all([listMembers(companyId).catch(() => []), listInvites(companyId).catch(() => []), listCerts(companyId).catch(() => [])])
+      .then(([m, i, c]) => live && setExtra({ helpers: m.filter((x) => x.user_id !== myUserId).length + i.length, certs: c.length }));
+    return () => { live = false; };
+  }, [companyId, myUserId, hidden]);
+  if (hidden || (!extra && basicsDone)) return null;
+  const steps = setupSteps({ people: st.people, teams: st.teams.length, jobsites: st.hasJobsite ? 1 : 0, talks: st.records, helpers: extra?.helpers ?? 0, certs: extra?.certs ?? 0 });
+  if (setupDone(steps)) return null;
+  const { done, total } = setupProgress(steps);
+  const hide = () => { try { localStorage.setItem(`tt-setup-hidden-${companyId}`, "1"); } catch { /* private mode */ } setHidden(true); };
   return (
-    <section className="mt-3 rounded-2xl bg-surface shadow-card p-4 ring-2 ring-brand">
-      <p className="text-sm font-semibold text-muted">Getting started · {steps.length - left} of {steps.length} done</p>
+    <section aria-label="Getting started" className="mt-3 rounded-2xl bg-surface shadow-card p-4 ring-2 ring-brand">
+      <p className="text-sm font-semibold text-muted">Getting started · {done} of {total} done</p>
       <ol className="mt-2 flex flex-col">
         {steps.map((x, i) => (x.done ? null : (
-          <li key={x.label}>
-            <Link href={x.href} className="flex min-h-11 items-center gap-3 py-1">
+          <li key={x.id}>
+            <Link href={x.href} className="flex min-h-11 items-start gap-3 py-1.5">
               <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-line text-sm font-semibold">{i + 1}</span>
-              <span className="font-semibold">{x.label}</span>
+              <span className="min-w-0"><span className="block font-semibold">{x.title}{x.optional && <small className="font-normal text-muted"> · optional</small>}</span>
+                <small className="block text-muted">{x.why}</small></span>
             </Link>
           </li>
         )))}
       </ol>
+      <button type="button" className="mt-1 text-sm font-semibold text-muted underline" onClick={hide}>Hide this list</button>
     </section>
   );
 }

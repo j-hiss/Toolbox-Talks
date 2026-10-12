@@ -48,7 +48,7 @@ Two separate things describe a person (decided with Joe, 2026-10-09):
   issues raised and fixed. Only that person sees it; no rankings or leaderboards. Admins see everyone in Reports.
 - **Team member** (anyone on the roster): listens and signs on the presenter's phone. No account needed.
 - **Joining:** an admin invites an email with an app role (employees also pick their roster name). The person signs
-  in with that email (emailed code, so the address is proven) and is added automatically. The app sends no email.
+  in with that email (emailed code, so the address is proven) and is added automatically. The app sends no invite email (the weekly office summary is the only email it sends).
 - **Words:** one person is a "team member"; a group is a "team" (the old "crew"). Talk text keeps its own wording.
 
 ## Company-neutral, multi-company
@@ -335,7 +335,7 @@ customer #1, not a special case.
   when printed"), Home and Reports (raised, open/overdue, average days to fix).
 - **Reminders (phone app only):** a per-phone switch on Home. The phone schedules its own notifications, no server:
   Monday 6:30 AM this week's talk; Thursday noon if this phone's usual crew hasn't had it; next morning when makeups
-  run out within 7 days. Rescheduled every time Home opens. Texts/email would need a paid service: not built.
+  run out within 7 days. Rescheduled every time Home opens. The office's weekly email is separate (migration 0056).
 
 ## Running a talk (built)
 - **Home → Start this talk** opens this week's talk (locked for the week). **Make up a missed week** picks a past week
@@ -591,6 +591,50 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   trainings it needs and adds a note. Trainers on an active plan see listed companies (name, industry, state from
   ZIP, size band, trainings, note), filter by state and training, and ask to connect (one open request per company,
   30 a day). The company accepts or declines; accepting invites the trainer, and the company still picks who they see.
+
+## CRM connector: jobsites from a job ID and address (built, migration 0054)
+- **Why:** the office already has every job in its CRM. Typing jobsites again is busywork; the CRM can send them.
+- **How:** Admin → Jobsites → Connect your CRM makes a key (shown once; only a fingerprint is kept). The CRM sends
+  `POST <project>/rest/v1/rpc/crm_jobsite` with the app's public `apikey` header and a JSON body
+  `{"key", "job_id", "address", "name", "active"}`. No server of ours: a database function does the work.
+- **Rules:** the key only touches its own company's jobsites. A new job ID makes a jobsite (address used as the name
+  when there's none); the same job ID updates name and address; a changed address clears the old map pin; `"active":
+  false` closes it (never deleted). Job IDs are unique per company and can also be typed on a jobsite. 600 calls an
+  hour per key, 10 live keys per company, keys can be revoked at once. A paused company's calls are refused.
+- **Not yet:** the job ID isn't printed on talk records (records keep the jobsite name they were saved with).
+
+## Crew hazard and near-miss reports (built, migration 0055)
+- **Why:** workers see hazards every day; giving anyone a fast, optionally anonymous way to say so is cheap and
+  insurers ask for it. Before, only the presenter could log issues, and only during a talk.
+- **Who:** anyone signed in to the company (any role, employees too) from Home, or anyone with no account by scanning
+  the jobsite sticker's second code ("Anyone: see something unsafe?", `/report/?site=<id>`). Up to 30 sticker reports
+  a jobsite a day.
+- **What:** something unsafe or a near miss, what was seen, the jobsite, where exactly, an optional photo (shrunk on the
+  phone, JPEG/PNG under 1.5 MB). "Leave my name off" keeps nothing about who sent it, not even the account.
+- **Offline:** reports from the app are saved on the phone first and send when signal returns, never twice. The
+  sticker page holds the report until signal returns while it stays open.
+- **Review:** owners, admins and office see Records → Crew reports (new first) and write what was done, once;
+  optionally it goes on the issues list with an owner and fix-by date. A report never changes and is never deleted. A
+  reporter who gave their name sees what was done.
+
+## Getting started checklist (built)
+- Home, owners and admins: add your people, put them in teams, add a jobsite (or have the CRM add them), give the
+  first talk, invite a foreman or the office, and (optional) add training cards. Each step ticks itself from what the
+  company has. It disappears once the required steps are done, or after "Hide this list" (that phone).
+
+## Weekly email to the office (built, migration 0056; sends once the email service is set up)
+- **Why:** nothing reached the office unless someone opened the app.
+- **What:** Monday morning (12:00 UTC), owners, admins and office get last week's summary: sign-ins by team (a team
+  with no signatures says so, never left out), makeups still owed and those running out within 7 days, expired /
+  expiring / missing training cards, open and overdue issues, new crew reports and those waiting for review. Built
+  by the same code as the app (`src/lib/digest.ts` → `src/core/digest.ts`), so the email and the app agree. The
+  footer says it documents what was recorded and doesn't mean the company is compliant.
+- **Control:** each person can turn their own copy off (Admin → Company → Weekly email; office: Records → Crew
+  reports). A preview there shows what the email says today. Admins see when it last went out.
+- **Sending:** the `weekly-digest` server function (Supabase Edge Functions, approved by Joe 2026-10-12) with Resend.
+  One email per company per week, one email per person (no shared address lists), paused or closing companies
+  skipped, addresses never logged. Without the Resend key every run is a dry run. Setup steps:
+  `supabase/functions/weekly-digest/README.md`.
 
 ## Your own trainings (built, migration 0053)
 - **Why:** not every training is OSHA's. A company has its own equipment checkouts and site orientations; a trainer or

@@ -869,6 +869,116 @@ async function main() {
       await as(userA, "select public.remove_trainer($1)", [tl]); await as(userA, "select public.remove_trainer($1)", [tin]);
     }
 
+    // CRM connector (0054): company API keys; a CRM posts a job ID and address; only its own company; revocable.
+    {
+      const key = (await as(userA, "select public.create_api_key($1, 'Example CRM') as k", [coA])).rows[0].k;
+      check("An admin makes an API key; it's shown once and only a fingerprint is kept", /^ttk_[0-9a-f]{40}$/.test(key)
+        && (await db.query("select count(*)::int as n from public.company_api_keys where key_hash = encode(sha256(convert_to($1, 'UTF8')), 'hex') and key_prefix = $2", [key, key.slice(0, 8)])).rows[0].n === 1
+        && await fails(() => as(userA, "select key_hash from public.company_api_keys")));
+      check("A presenter or another company can't make or see A's keys", await fails(() => as(presenterA, "select public.create_api_key($1, 'x')", [coA]))
+        && await fails(() => as(userB, "select public.create_api_key($1, 'x')", [coA]))
+        && (await as(userB, "select id from public.company_api_keys")).rows.length === 0
+        && (await as(presenterA, "select id from public.company_api_keys")).rows.length === 0);
+      const post = (k, body) => as(null, "select public.crm_jobsite(key => $1, job_id => $2, address => $3, name => $4, active => $5) as r", [k, body.job_id ?? null, body.address ?? null, body.name ?? null, body.active ?? true]);
+      const made = (await post(key, { job_id: "EX-1001", address: "1 Example St, Exampletown, FL 33900" })).rows[0].r;
+      check("The CRM, with no sign-in, makes a jobsite from a job ID and address", made.result === "created" && made.name === "1 Example St, Exampletown, FL 33900"
+        && (await as(userA, "select external_id from public.jobsites where id = $1", [made.jobsite_id])).rows[0]?.external_id === "EX-1001");
+      await db.query("update public.jobsites set latitude = 26.6, longitude = -81.9 where id = $1", [made.jobsite_id]);
+      const upd = (await post(key, { job_id: "EX-1001", address: "2 Example Ave, Exampletown, FL 33900" })).rows[0].r;
+      const after = (await db.query("select name, address, latitude, company_id from public.jobsites where id = $1", [made.jobsite_id])).rows[0];
+      check("The same job ID updates that jobsite; a new address clears the old pin", upd.result === "updated" && upd.jobsite_id === made.jobsite_id
+        && after.address === "2 Example Ave, Exampletown, FL 33900" && after.name === after.address && after.latitude === null);
+      check("The jobsite lands only in the key's company; B never sees it", after.company_id === coA
+        && (await as(userB, "select id from public.jobsites where id = $1", [made.jobsite_id])).rows.length === 0);
+      await post(key, { job_id: "EX-1001", active: false });
+      check("\"active\": false closes the jobsite; it's never deleted", (await db.query("select active from public.jobsites where id = $1", [made.jobsite_id])).rows[0].active === false);
+      check("Bad calls are refused: wrong key, no job ID, a new job with no address or name", await fails(() => post("ttk_" + "0".repeat(40), { job_id: "EX-2", address: "x" }))
+        && await fails(() => post(key, { job_id: "", address: "x" })) && await fails(() => post(key, { job_id: "EX-3" })));
+      const keyB = (await as(userB, "select public.create_api_key($1, 'B CRM') as k", [coB])).rows[0].k;
+      await post(keyB, { job_id: "EX-1001", address: "9 Other Rd" });
+      check("Two companies can use the same job ID without touching each other", (await db.query("select count(*)::int as n from public.jobsites where external_id = 'EX-1001'")).rows[0].n === 2
+        && (await db.query("select address from public.jobsites where company_id = $1 and external_id = 'EX-1001'", [coA])).rows[0].address === "2 Example Ave, Exampletown, FL 33900");
+      const kid = (await as(userA, "select id from public.company_api_keys where company_id = $1", [coA])).rows[0].id;
+      check("Another company can't revoke A's key", await fails(() => as(userB, "select public.revoke_api_key($1, $2)", [coA, kid])));
+      await as(userA, "select public.revoke_api_key($1, $2)", [coA, kid]);
+      check("A revoked key stops at once", await fails(() => post(key, { job_id: "EX-1001", address: "3 Example" })));
+      await db.query("update public.company_api_keys set window_start = now(), window_count = 600 where company_id = $1", [coB]);
+      check("A key is limited to 600 calls an hour", await fails(() => post(keyB, { job_id: "EX-9", address: "x" })));
+    }
+
+    // Crew hazard and near-miss reports (0055): anyone signed in or by sticker; anonymous; never changes; reviewed once.
+    {
+      const empH = randomUUID(), officeH = randomUUID();
+      await db.query("insert into auth.users (id, email) values ($1, 'emp-h@a.example'), ($2, 'office-h@a.example')", [empH, officeH]);
+      await db.query("insert into public.company_members (company_id, user_id, access) values ($1, $2, 'employee'), ($1, $3, 'office')", [coA, empH, officeH]);
+      const site = (await db.query("insert into public.jobsites (company_id, name) values ($1, 'Example hazard site') returning id", [coA])).rows[0].id;
+      const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(300, 7)]).toString("base64");
+      const rep = (who, over = {}) => { const o = { co: coA, client: randomUUID(), kind: "hazard", what: "Open hole by the north ladder", site, anon: false, photo: null, mime: null, ...over };
+        return as(who, "select public.report_hazard($1, $2, $3, $4, '', $5, $6, $7, $8) as id", [o.co, o.client, o.kind, o.what, o.site, o.anon, o.photo, o.mime]); };
+      const siteB = (await db.query("insert into public.jobsites (company_id, name) values ($1, 'B site') returning id", [coB])).rows[0].id;
+      const c1 = randomUUID();
+      const r1 = (await rep(empH, { client: c1, photo: jpeg, mime: "image/jpeg" })).rows[0].id;
+      check("An employee account sends a hazard report with a photo; sending twice keeps one", (await rep(empH, { client: c1 })).rows[0].id === r1
+        && (await db.query("select count(*)::int as n from public.hazard_reports where client_id = $1", [c1])).rows[0].n === 1
+        && (await db.query("select has_photo, reporter_user from public.hazard_reports where id = $1", [r1])).rows[0].reporter_user === empH);
+      const r2 = (await rep(presenterA, { kind: "near_miss", what: "Bundle slid off the roof edge", anon: true })).rows[0].id;
+      check("An anonymous report keeps nothing about who sent it", (await db.query("select reporter_user, reporter_name, anonymous from public.hazard_reports where id = $1", [r2])).rows
+        .every((r) => r.reporter_user === null && r.reporter_name === "" && r.anonymous === true));
+      check("Owners and office read reports and photos; a presenter or another company can't", (await as(officeH, "select id from public.hazard_reports where company_id = $1", [coA])).rows.length >= 2
+        && (await as(userA, "select report_id from public.hazard_report_photos where report_id = $1", [r1])).rows.length === 1
+        && (await as(presenterA, "select id from public.hazard_reports where id = $1", [r2])).rows.length === 0
+        && (await as(userB, "select id from public.hazard_reports")).rows.length === 0
+        && (await as(userB, "select report_id from public.hazard_report_photos")).rows.length === 0);
+      check("A reporter who gave their name sees their own report", (await as(empH, "select id from public.hazard_reports")).rows.map((r) => r.id).join() === r1);
+      check("Another company, signed-out visitors, or a jobsite from elsewhere can't send to A", await fails(() => rep(userB)) && await fails(() => rep(null))
+        && await fails(() => rep(userA, { site: siteB })));
+      check("Only real JPEG or PNG photos are taken", await fails(() => rep(userA, { photo: Buffer.alloc(300, 1).toString("base64"), mime: "image/jpeg" }))
+        && await fails(() => rep(userA, { photo: jpeg, mime: "image/gif" })));
+      const stick = (over = {}) => as(null, "select public.report_hazard_at_site($1, $2, 'hazard', $3, '', $4) as id", [over.site ?? site, randomUUID(), over.what ?? "Loose rail on stairs", over.name ?? ""]);
+      const s1 = (await stick({ name: "Example Crew Member" })).rows[0].id;
+      check("No account: a report from the jobsite sticker lands in that jobsite's company", (await db.query("select company_id, via, reporter_name, anonymous from public.hazard_reports where id = $1", [s1])).rows
+        .every((r) => r.company_id === coA && r.via === "sticker" && r.reporter_name === "Example Crew Member" && !r.anonymous)
+        && (await as(null, "select public.hazard_site_info($1) as i", [site])).rows[0].i.jobsite === "Example hazard site");
+      check("Signed-out visitors can't read reports", await fails(() => as(null, "select id from public.hazard_reports")));
+      await db.query("insert into public.hazard_reports (company_id, client_id, kind, what, jobsite_id, via, anonymous) select $1, gen_random_uuid(), 'hazard', 'x', $2, 'sticker', true from generate_series(1, 30)", [coA, site]);
+      check("A sticker takes up to 30 reports a day", await fails(() => stick()));
+      check("A report never changes and can't be deleted", await fails(() => as(userA, "update public.hazard_reports set what = 'changed' where id = $1", [r1]))
+        && await fails(() => db.query("update public.hazard_reports set what = 'changed' where id = $1", [r1]))
+        && await fails(() => as(userA, "delete from public.hazard_reports where id = $1", [r1])));
+      const person = (await db.query("select id from public.people where company_id = $1 limit 1", [coA])).rows[0].id;
+      check("A presenter or another company can't review", await fails(() => as(presenterA, "select public.review_hazard($1, $2, 'Covered it')", [coA, r1]))
+        && await fails(() => as(userB, "select public.review_hazard($1, $2, 'Covered it')", [coA, r1])));
+      const issue = (await as(officeH, "select public.review_hazard($1, $2, 'Covered the hole and marked it', true, $3, '2026-10-20') as id", [coA, r1, person])).rows[0].id;
+      check("Office reviews it once and puts it on the issues list, linked back", !!issue
+        && (await db.query("select hazard_id, description from public.talk_issues where id = $1", [issue])).rows[0].hazard_id === r1
+        && (await as(empH, "select action from public.hazard_reports where id = $1", [r1])).rows[0].action === "Covered the hole and marked it"
+        && await fails(() => as(userA, "select public.review_hazard($1, $2, 'again')", [coA, r1])));
+    }
+
+    // Weekly email (0056): owners, admins and office get it; each can turn it off; only the server lists addresses.
+    {
+      const offW = randomUUID();
+      await db.query("insert into auth.users (id, email, email_confirmed_at) values ($1, 'office-w@a.example', now())", [offW]);
+      await db.query("insert into public.company_members (company_id, user_id, access) values ($1, $2, 'office')", [coA, offW]);
+      await db.query("update auth.users set email_confirmed_at = coalesce(email_confirmed_at, now()), email = coalesce(email, 'owner-a@a.example') where id = $1", [userA]);
+      const list = async () => (await db.query("select email from public.digest_recipients($1)", [coA])).rows.map((r) => r.email);
+      const before = await list();
+      check("The weekly email goes to owners, admins and office with a confirmed address, never presenters", before.includes("office-w@a.example") && before.length >= 2
+        && !(await db.query("select lower(email) as e from auth.users where id = $1", [presenterA])).rows.some((r) => r.e && before.includes(r.e)));
+      await as(offW, "select public.set_weekly_email($1, false)", [coA]);
+      check("Someone who turns it off stops getting it; they see only their own choice", !(await list()).includes("office-w@a.example")
+        && (await as(offW, "select company_id from public.digest_optouts")).rows.length === 1 && (await as(userA, "select company_id from public.digest_optouts")).rows.length === 0);
+      await as(offW, "select public.set_weekly_email($1, true)", [coA]);
+      check("Turning it back on works", (await list()).includes("office-w@a.example"));
+      check("A presenter or another company can't change it; nobody signed in can list the addresses", await fails(() => as(presenterA, "select public.set_weekly_email($1, false)", [coA]))
+        && await fails(() => as(userB, "select public.set_weekly_email($1, false)", [coA]))
+        && await fails(() => as(userA, "select * from public.digest_recipients($1)", [coA])) && await fails(() => as(null, "select * from public.digest_recipients($1)", [coA])));
+      await db.query("insert into public.digest_log (company_id, week_key, recipients, status) values ($1, '2026-10-05', 2, 'sent')", [coA]);
+      check("One email per company per week; only admins read the send log", await fails(() => db.query("insert into public.digest_log (company_id, week_key, status) values ($1, '2026-10-05', 'sent')", [coA]))
+        && (await as(userA, "select id from public.digest_log")).rows.length === 1 && (await as(offW, "select id from public.digest_log")).rows.length === 0
+        && (await as(userB, "select id from public.digest_log")).rows.length === 0);
+    }
+
     // Your own talks (0029): versions only, admins write, staff read, never across companies.
     {
       const empT = randomUUID();
@@ -1360,7 +1470,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 486;
+  const EXPECTED = 514;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

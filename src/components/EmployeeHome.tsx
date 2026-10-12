@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/session";
+import { ReportHazard } from "./Hazards";
 import { myTalks, type MyTalk } from "@/lib/data/members";
 import { listCerts, type StoredCert } from "@/lib/data/certs";
 import { certState, latestCerts } from "@/core/certs";
@@ -49,6 +50,7 @@ export function EmployeeHome({ m }: { m: Membership }) {
       <Title>My safety talks</Title>
       <p className="mt-1 text-sm text-muted">Talks you were on, and whether you signed. You sign at each talk on the presenter&apos;s phone, the same as always.</p>
       <div className="mt-4"><MyRecord m={m} /></div>
+      <div className="mt-4"><ReportHazard companyId={co.id} userId={s.user?.id ?? null} /></div>
 
       {error ? (
         <div className="mt-4"><ErrorNotice what="Couldn't load your talks." detail={error} onRetry={() => { setError(null); setAttempt((a) => a + 1); }} /></div>

@@ -69,6 +69,7 @@ export type Jobsite = {
   longitude: number | null;
   kind: "site" | "office"; // office or shop: talks there are normal, not a flag
   work_setting?: WorkSetting | null; // where the crew works here; null = the company's setting (src/core/worksetting.ts)
+  external_id?: string | null; // the job ID in the company's CRM (migration 0054); set by the CRM connector or typed here
   active: boolean;
 };
 
