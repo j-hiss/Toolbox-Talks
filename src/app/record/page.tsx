@@ -73,7 +73,7 @@ function RecordView({ m }: { m: Membership }) {
   const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "");
   const details: [string, string][] = [
     ["When", when],
-    ["Where", rec.jobsite_name || "Not set"],
+    ["Where", [rec.jobsite_name, rec.jobsite_address].filter(Boolean).join(" · ") || "Not set"],
     ["Team", rec.team_name ? `${rec.team_name}${rec.team_lead_name ? ` (lead: ${rec.team_lead_name})` : ""}` : "Not set"],
     ["Presented by", `${rec.presenter_name}${rec.presenter_role ? `, ${rec.presenter_role}` : ""}`],
     ["Language", LANGUAGES.find((l) => l.id === rec.language)?.label ?? rec.language],

@@ -885,6 +885,16 @@ async function main() {
       check("Another company never sees the weather on A's talk", (await as(userB, "select weather from public.talk_records where id = $1", [wid])).rows.length === 0);
     }
 
+    // Jobsite address on a signed talk (0058): kept as sent, trimmed and capped, never changed, company-scoped.
+    {
+      const saveA = (addr) => as(userA, "select public.save_talk_record($1::jsonb, '[]'::jsonb) as id", [JSON.stringify({ ...JSON.parse(rec(coA, randomUUID(), [])[0]), jobsite_address: addr })]);
+      const aid = (await saveA("  1 Example St, Town, ST 00000 ")).rows[0].id;
+      check("A talk keeps the jobsite's address", (await as(userA, "select jobsite_address from public.talk_records where id = $1", [aid])).rows[0].jobsite_address === "1 Example St, Town, ST 00000");
+      check("The saved address can't be changed", await fails(() => as(userA, "update public.talk_records set jobsite_address = 'x' where id = $1", [aid])));
+      check("A long address is cut to 300 characters", (await db.query("select char_length(jobsite_address) as n from public.talk_records where id = $1", [(await saveA("x".repeat(500))).rows[0].id])).rows[0].n === 300);
+      check("Another company never sees the address on A's talk", (await as(userB, "select jobsite_address from public.talk_records where id = $1", [aid])).rows.length === 0);
+    }
+
     // CRM connector (0054): company API keys; a CRM posts a job ID and address; only its own company; revocable.
     {
       const key = (await as(userA, "select public.create_api_key($1, 'Example CRM') as k", [coA])).rows[0].k;
@@ -1486,7 +1496,7 @@ async function main() {
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} isolation checks passed`);
   // Guard against a run that "passes" because checks silently stopped running.
-  const EXPECTED = 519;
+  const EXPECTED = 523;
   if (results.length < EXPECTED) {
     console.error(`Expected at least ${EXPECTED} checks, ran ${results.length}`);
     process.exit(1);

@@ -629,6 +629,9 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   over anything else.
 - Header: a US phone typed as digits prints as (239) 555-0100; a bare license number prints as "License #...".
 - "Language presented" is only the language (the industry was mixed in).
+- "Where" prints the jobsite name and, under it, the jobsite's address as it was when the talk was saved (migration
+  0058; copied like the name, so a later change never changes an old record). Joe chose the jobsite address over a
+  street address looked up from the GPS point (that needs an outside lookup service and a signal, and is approximate).
 - The sign-in sheet heading never prints alone at the bottom of a page: it moves to the next page with its first
   row, which can leave white space on page 1. On purpose.
 

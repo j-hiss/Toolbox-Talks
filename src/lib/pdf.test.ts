@@ -129,6 +129,11 @@ describe("PDF extras", () => {
     expect(pdf).toContain("License #86500000000");
     expect(pdf).not.toMatch(/English {2}· {2}\w/);
   });
+  it("prints the jobsite's address under its name", () => {
+    const pdf = text(rec({ jobsite_address: "1 Example St, Town, ST 00000" }));
+    expect(pdf).toContain("Main office");
+    expect(pdf).toContain("1 Example St, Town, ST 00000");
+  });
   it("the footer keeps the page number apart from the note: no text drawn over another", () => {
     const pdf = text(rec());
     expect(pdf).toMatch(/\(Page 1\) Tj/);

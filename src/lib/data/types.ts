@@ -127,6 +127,8 @@ export type TalkRecord = TalkRecordSummary & {
   presenter_signed_at: string | null;
   latitude: number | null;
   longitude: number | null;
+  /** The jobsite's address when the talk was saved ("" on older records and jobsites with none; migration 0058). */
+  jobsite_address?: string;
   site_notes?: string;
   heat?: { max_heat_index_f: number; level: string; reminder_read: boolean; checked_at: string; source: string; reminder?: { title: string; items: string[]; version: number } } | null;
   /** The weather service forecast for the jobsite at the talk, outdoor and mixed work (migration 0057). */

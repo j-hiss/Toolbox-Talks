@@ -759,7 +759,7 @@ function Sign({
           ...(draft.sinceLast ? { since_last: sinceLastSnapshot(draft.sinceLast) } : {}),
         },
         week,
-        jobsite: jobsite ? { id: jobsite.id, name: jobsite.name } : null,
+        jobsite: jobsite ? { id: jobsite.id, name: jobsite.name, address: jobsite.address } : null,
         team: team ? { id: team.id, name: team.name, leadName: lead?.full_name ?? "" }
           : draft.teamId === "all" ? { id: "", name: "All teams", leadName: "" }
           : draft.teamId === "needs" ? { id: "", name: "Still needed it", leadName: "" }

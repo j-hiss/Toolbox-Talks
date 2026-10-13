@@ -78,7 +78,8 @@ export type RecordInput = {
   content: TalkText & { en?: TalkText };
   /** The plan period this talk belongs to: first week number, first Monday, and how many weeks it covers (1 = weekly). */
   week: { number: number; start: string; scheduledTalkId: string; weeks?: number } | null;
-  jobsite: { id: string; name: string } | null;
+  /** `address`: the jobsite's address when saved, kept on the record like the name (migration 0058). */
+  jobsite: { id: string; name: string; address?: string } | null;
   team: { id: string; name: string; leadName: string } | null;
   presenter: { personId: string | null; name: string; role: string; signature: Signature | null };
   heldAt: string;
@@ -130,6 +131,7 @@ export function recordPayload(r: RecordInput) {
     scheduled_talk_id: r.pretask ? null : r.week?.scheduledTalkId ?? null,
     jobsite_id: r.jobsite?.id ?? null,
     jobsite_name: r.jobsite?.name ?? "",
+    jobsite_address: (r.jobsite?.address ?? "").trim().slice(0, 300),
     team_id: r.team?.id ?? null,
     team_name: r.team?.name ?? "",
     team_lead_name: r.team?.leadName ?? "",

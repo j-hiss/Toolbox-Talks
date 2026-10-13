@@ -52,7 +52,10 @@ describe("building a saved talk", () => {
       heldAt: "2026-11-03T12:00:00Z",
       gps: null,
     });
-    expect(p).toMatchObject({ week_number: 6, scheduled_talk_id: "ppe", jobsite_name: "Smith reroof", presenter_signature: null, latitude: null });
+    expect(p).toMatchObject({ week_number: 6, scheduled_talk_id: "ppe", jobsite_name: "Smith reroof", jobsite_address: "", presenter_signature: null, latitude: null });
+    const withAddress = recordPayload({ companyId: "c1", clientId: "x2", talkId: "fall", language: "en", week: null, content: { title: "T", hook: "H", sections: [], ask: "A" },
+      jobsite: { id: "j1", name: "Smith reroof", address: "  1 Example St, Town, ST 00000 " }, team: null, presenter: { personId: null, name: "Sam", role: "", signature: null }, heldAt: "2026-11-03T12:00:00Z", gps: null });
+    expect(withAddress.jobsite_address).toBe("1 Example St, Town, ST 00000");
   });
 });
 

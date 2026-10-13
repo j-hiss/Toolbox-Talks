@@ -171,7 +171,7 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
   const colW = (CW - 24) / 2, x2 = M + colW + 24;
   const pairs: [string, string][] = [
     ["Date and time", `${held.date}, ${held.time}`],
-    ["Where", r.jobsite_name],
+    ["Where", [r.jobsite_name, r.jobsite_address].filter(Boolean).join("\n")],
     ["Team", r.team_name],
     ["Team lead", r.team_lead_name],
     ["Presented by", r.presenter_name ? `${r.presenter_name}${r.presenter_role ? `, ${r.presenter_role}` : ""}` : ""],
