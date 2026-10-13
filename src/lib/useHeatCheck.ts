@@ -7,6 +7,7 @@
 import { useEffect, useState } from "react";
 import { cachedConditions, checkConditions, checkHeat } from "@/lib/weather";
 import { readDraft, writeDraft, type TalkDraft } from "@/lib/draft";
+import { getLocation } from "@/lib/location";
 import type { Company, Jobsite } from "@/lib/data/types";
 import { workSettingFor } from "@/core/worksetting";
 import { weatherPlaceKey, weatherRecordFrom, type WeatherRecord } from "@/core/weatherRecord";
@@ -36,6 +37,19 @@ export function useHeatCheck(draft: TalkDraft, jobsites: Jobsite[], company: Pic
   const { site, point } = placeOf(draft, jobsites);
   const setting = workSettingFor(company, site);
   const [msg, setMsg] = useState<string | null>(null);
+  // No pin on the jobsite: take the phone's GPS now, quietly, so the heat and weather check runs while the talk is
+  // read (the crew step used to be the first to take it, which was too late for the heat reminder). Same point the
+  // record keeps as "GPS at time of talk"; never blocks the talk.
+  useEffect(() => {
+    if (point) return;
+    let live = true;
+    getLocation(8000).then((g) => {
+      const cur = readDraft(draft.companyId);
+      if (live && cur && !cur.gps) writeDraft({ ...cur, gps: g });
+    }).catch(() => {});
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!point]);
   useEffect(() => {
     if (!point || draft.heat) return;
     let live = true;

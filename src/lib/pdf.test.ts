@@ -25,7 +25,7 @@ const rec = (over: Partial<TalkRecord> = {}): TalkRecord => ({
   ...over,
 });
 
-const text = (r: TalkRecord) => buildRecordPdf(r, co).output().replace(/\\([()\\])/g, "$1"); // un-escape PDF strings
+const text = (r: TalkRecord, c: typeof co = co) => buildRecordPdf(r, c).output().replace(/\\([()\\])/g, "$1"); // un-escape PDF strings
 
 const JPEG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAADAAQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCOiiivmj7A/9k=";
 
@@ -115,10 +115,24 @@ describe("PDF extras", () => {
     const pdf = text(rec({ weather: { v: 1, source: "NWS", checked_at: "2026-10-06T14:05:00Z", place: "Example, FL", work_setting: "outdoor", day: "today",
       now: { temp_f: 88, sky: "Partly Sunny", wind_mph: 12, wind_dir: "SW", rain_pct: 20 }, high_f: 91, low_f: 75, heat_index_max_f: 104, heat_level: "danger",
       rain: null, wind: null, thunder_at: null, alerts: [{ event: "Heat Advisory", severity: "Moderate" }], alerts_unavailable: false, summary: "" } }));
-    expect(pdf).toContain("Weather at the talk");
-    expect(pdf).toContain("88°F, Partly Sunny, wind SW 12 mph, 20% chance of rain");
-    expect(pdf).toContain("Active alerts: Heat Advisory.");
+    expect(pdf).toContain("WEATHER AT THE TALK");
+    expect(pdf).toContain("88°F, Partly Sunny  ·  Wind SW 12 mph  ·  Rain 20% now");
+    expect(pdf).toContain("Heat index up to 104°F (Danger)");
+    expect(pdf).toContain("Alert: Heat Advisory");
     expect(pdf).toContain("not measured on site");
+    // Under the details, before the attendance line and the topics.
+    expect(pdf.indexOf("WEATHER AT THE TALK")).toBeLessThan(pdf.indexOf("Attendance:"));
+  });
+  it("prints the header phone formatted, a bare license number labelled, and only the language as the language", () => {
+    const pdf = text(rec(), { ...co, phone: "12395550100", licenses: "86500000000" });
+    expect(pdf).toContain("(239) 555-0100");
+    expect(pdf).toContain("License #86500000000");
+    expect(pdf).not.toMatch(/English {2}· {2}\w/);
+  });
+  it("the footer keeps the page number apart from the note: no text drawn over another", () => {
+    const pdf = text(rec());
+    expect(pdf).toMatch(/\(Page 1\) Tj/);
+    expect(pdf).toMatch(new RegExp(`\\(${PDF_FOOTER.replace(/\./g, "\\.")}\\) Tj`));
   });
 });
 

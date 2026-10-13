@@ -99,11 +99,24 @@ export function weatherChips(w: WeatherRecord): WeatherChip[] {
   return out;
 }
 
-/** The two short lines the PDF prints (the screen shows the same as icons and chips). */
+/**
+ * What the PDF prints: one compact line of conditions (each part separated by " · ", in the order the screen shows
+ * them) and a small source line. Only what the forecast had.
+ */
 export function weatherPdfLines(w: WeatherRecord): [string, string] {
-  const l = weatherLines(w);
-  const day = [w.high_f != null ? `high ${Math.round(w.high_f)}°F${w.low_f != null ? ` / low ${Math.round(w.low_f)}°F` : ""}` : null, ...weatherChips(w).map((c) => c.label)].filter(Boolean).join(", ");
-  return [`${l.now ?? "Conditions at the time weren't in the forecast"}${day ? `. Day: ${day}` : ""}. ${l.alerts}`, l.source];
+  const level = w.heat_level ? HEAT_LABEL[w.heat_level as keyof typeof HEAT_LABEL] ?? w.heat_level : "";
+  const parts = [
+    w.now ? `${w.now.temp_f}°F, ${w.now.sky}` : "Conditions at the time weren't in the forecast",
+    w.now?.wind_mph != null ? `Wind ${w.now.wind_dir ? `${w.now.wind_dir} ` : ""}${w.now.wind_mph} mph` : null,
+    w.now ? `Rain ${w.now.rain_pct}% now` : null,
+    w.high_f != null ? `${w.day === "tomorrow" ? "Tomorrow h" : "H"}igh ${Math.round(w.high_f)}°F${w.low_f != null ? ` / low ${Math.round(w.low_f)}°F` : ""}` : null,
+    w.heat_index_max_f != null ? `Heat index up to ${w.heat_index_max_f}°F${level ? ` (${level})` : ""}` : null,
+    w.rain && w.rain.max_pct >= 30 ? `Rain up to ${w.rain.max_pct}% around ${siteHour(w.rain.at)}` : null,
+    w.wind && w.wind.max_mph >= 15 ? `Wind up to ${w.wind.max_mph} mph around ${siteHour(w.wind.at)}` : null,
+    w.thunder_at ? `Storms possible from ${siteHour(w.thunder_at)}` : null,
+    w.alerts_unavailable ? "Alerts couldn't be checked" : w.alerts.length ? `Alert: ${w.alerts.map((a) => a.event).join(", ")}` : "No weather alerts",
+  ].filter(Boolean);
+  return [parts.join("  ·  "), `National Weather Service forecast for ${w.place || "the jobsite"}, checked ${timeOf(w.checked_at)}. A forecast for the spot, not measured on site.`];
 }
 
 /** On a makeup: the weather is from when and where it was given, not the week it makes up. */

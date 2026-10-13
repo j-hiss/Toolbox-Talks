@@ -51,7 +51,7 @@ describe("weather on the record, compact", () => {
   });
   it("prints two short lines on the PDF", () => {
     const [main, source] = weatherPdfLines(weatherRecordFrom(check(), "outdoor", now)!);
-    expect(main).toBe("88°F, Sunny, wind SW 5 mph, 10% chance of rain. Day: high 94°F / low 85°F, Heat index 119° · Danger, Rain 70% · 4 PM, Wind 20 mph · 1 PM, Storms from 1 PM. Active alerts: Heat Advisory.");
+    expect(main).toBe("88°F, Sunny  ·  Wind SW 5 mph  ·  Rain 10% now  ·  High 94°F / low 85°F  ·  Heat index up to 119°F (Danger)  ·  Rain up to 70% around 4 PM  ·  Wind up to 20 mph around 1 PM  ·  Storms possible from 1 PM  ·  Alert: Heat Advisory");
     expect(source).toMatch(/not measured on site\.$/);
   });
   it("knows when a talk moved to another place", () => {

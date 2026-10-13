@@ -618,7 +618,19 @@ Every roster person ends as **Signed**, **Not signed**, or **Absent**.
   signal, that place's last check if recent, else none). Never the original week's or another site's weather.
 - **Looks:** compact on the record (Joe: "icons... keep the space to a minimum"): the sky icon, temperature and
   conditions in one row; chips with icons for heat, rain, wind, storms and alerts (red when dangerous); one small
-  source line. Two short lines on the PDF.
+  source line. On the PDF (2026-10-13 review): right under the details, one line of conditions split on " · " and
+  wrapped only between parts, a red makeup note when it's a makeup, and a small source line.
+- **No pin on the jobsite:** the phone's GPS is taken when the talk opens (not at the crew step), so the heat
+  reminder and the weather check run while the talk is read.
+
+## PDF layout rules (2026-10-13 review of a real record)
+- Footer, every portrait PDF: lines stacked from the bottom edge, "Page N" on the right of the first line, the
+  "documents a safety meeting" note on the right of the last line when it fits, else on its own line. Nothing prints
+  over anything else.
+- Header: a US phone typed as digits prints as (239) 555-0100; a bare license number prints as "License #...".
+- "Language presented" is only the language (the industry was mixed in).
+- The sign-in sheet heading never prints alone at the bottom of a page: it moves to the next page with its first
+  row, which can leave white space on page 1. On purpose.
 
 ## CRM connector: jobsites from a job ID and address (built, migration 0054)
 - **Why:** the office already has every job in its CRM. Typing jobsites again is busywork; the CRM can send them.

@@ -4,7 +4,6 @@
 // today matches what was signed. Company header details come from the company's current info.
 import { jsPDF } from "jspdf";
 import { countStatuses, STATUS_LABEL } from "@/core/attendance";
-import { INDUSTRIES } from "@/core/industries";
 import { LANGUAGES } from "@/core/languages";
 import { parseDay, periodLabel, weekLabel } from "@/core/weeks";
 import { weekNumbers } from "@/core/plan";
@@ -19,6 +18,7 @@ import { locationFlagCount, locationNote } from "@/core/checkin";
 import type { ProgramRow, ProgramTemplate } from "@/core/programs";
 import type { Certificate } from "@/core/trainerTools";
 import { certTypeName } from "@/content/certTypes";
+import { formatPhone, licenseLabel } from "@/core/phone";
 import { drawQr } from "./qr";
 import { appWebAddress } from "./webAddress";
 
@@ -62,6 +62,27 @@ function sigLine(doc: jsPDF, co: Company, x: number, y: number, signed: boolean)
   if (signed) { doc.setFillColor(...rgb(printBrand(normalizeTheme(co.theme)))); doc.circle(x + 155, y, 1.8, "F"); }
 }
 
+/**
+ * The footer every portrait PDF prints, bottom-up from the page edge, so nothing ever prints over anything else: the
+ * left lines, "Page N" on the right of the first, and the "documents a safety meeting" note on the right of the last
+ * line when there's room, else on its own line under them.
+ */
+function pageFooter(doc: jsPDF, left: string[], page: number, note: string = PDF_FOOTER, size = 8) {
+  const { W, H, M } = PAGE;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(size); doc.setTextColor(GREY);
+  const rows: [string, string][] = left.map((l, i) => [l, i === 0 ? `Page ${page}` : ""]);
+  const last = rows[rows.length - 1];
+  const room = W - 2 * M - doc.getTextWidth(last[0]) - (last[1] ? doc.getTextWidth(last[1]) + 16 : 0) - 16;
+  if (!last[1] && doc.getTextWidth(note) <= room) last[1] = note;
+  else rows.push([note, ""]);
+  rows.forEach(([l, r], i) => {
+    const y = H - 20 - (rows.length - 1 - i) * 10;
+    doc.text(l, M, y);
+    if (r) doc.text(r, W - M, y, { align: "right" });
+  });
+  doc.setTextColor(0);
+}
+
 /** The company fields a PDF header prints. A shared profile copy (src/core/share.ts) carries just these. */
 export type HeaderCompany = Pick<Company, "name" | "licenses" | "address" | "phone" | "email" | "theme">;
 
@@ -72,7 +93,7 @@ function companyHeader(doc: jsPDF, co: HeaderCompany, label: string, top: number
   doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text(co.name || "Company name not set", M, y + 4);
   doc.setFontSize(9); doc.setTextColor(GREY); doc.text(label, W - M, y + 4, { align: "right" });
   y += 18; doc.setTextColor(60); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-  const coLines = [co.address, [co.phone, co.email].filter(Boolean).join("  ·  "), (co.licenses || "").split(/\n+/).map((s) => s.trim()).filter(Boolean).join("  ·  ")].filter(Boolean);
+  const coLines = [co.address, [formatPhone(co.phone), co.email].filter(Boolean).join("  ·  "), (co.licenses || "").split(/\n+/).map((s) => s.trim()).filter(Boolean).map(licenseLabel).join("  ·  ")].filter(Boolean);
   coLines.forEach((l) => doc.splitTextToSize(l, CW).forEach((x: string) => { doc.text(x, M, y); y += 11; }));
   doc.setTextColor(0); y += 6; doc.setDrawColor(30); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); doc.setLineWidth(0.6); y += 26;
   return y;
@@ -89,11 +110,10 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
   let page = 1;
 
   const footer = () => {
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(GREY);
-    doc.text(`${co.name ? co.name + " · " : ""}Record ${r.id} · Page ${page}`, M, H - 28);
-    if (r.verify_code) doc.text(`Check code ${formatCode(r.verify_code)}${origin ? ` at ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify` : ""}`, M, H - 18);
-    doc.text(PDF_FOOTER, W - M, H - 28, { align: "right" });
-    doc.setTextColor(0);
+    pageFooter(doc, [
+      `${co.name ? co.name + " · " : ""}Record ${r.id}`,
+      ...(r.verify_code ? [`Check code ${formatCode(r.verify_code)}${origin ? ` at ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify` : ""}`] : []),
+    ], page);
     page++;
   };
   const newPageIf = (h: number) => {
@@ -148,7 +168,6 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
   // Details -------------------------------------------------------------------------------------------------------
   const held = stampParts(r.held_at);
   const lang = LANGUAGES.find((l) => l.id === r.language)?.label ?? r.language;
-  const industry = INDUSTRIES.find((i) => i.id === co.industry)?.name;
   const colW = (CW - 24) / 2, x2 = M + colW + 24;
   const pairs: [string, string][] = [
     ["Date and time", `${held.date}, ${held.time}`],
@@ -156,13 +175,34 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
     ["Team", r.team_name],
     ["Team lead", r.team_lead_name],
     ["Presented by", r.presenter_name ? `${r.presenter_name}${r.presenter_role ? `, ${r.presenter_role}` : ""}` : ""],
-    ["Language presented", `${lang}${industry ? `  ·  ${industry}` : ""}`],
+    ["Language presented", lang],
   ];
   if (r.latitude != null && r.longitude != null) pairs.push(["GPS at time of talk", `${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}`]);
   for (let i = 0; i < pairs.length; i += 2) {
     const h1 = kv(pairs[i][0], pairs[i][1], M, colW);
     const h2 = pairs[i + 1] ? kv(pairs[i + 1][0], pairs[i + 1][1], x2, colW) : 0;
     y += Math.max(h1, h2) + 8;
+  }
+
+  // Weather at the talk (outdoor and mixed work): one compact line and its source, under the details ---------------
+  if (r.weather) {
+    const [main, source] = weatherPdfLines(r.weather);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(GREY); doc.text("WEATHER AT THE TALK", M, y);
+    doc.setTextColor(0); doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+    // Wrap between the parts, never inside one ("No weather alerts" stays on one line).
+    const ls = main.split("  ·  ").reduce<string[]>((out, part) => {
+      const tryLine = out.length ? `${out[out.length - 1]}  ·  ${part}` : part;
+      if (out.length && doc.getTextWidth(tryLine) <= CW) out[out.length - 1] = tryLine; else out.push(part);
+      return out;
+    }, []);
+    doc.text(ls, M, y + 12); y += 12 + ls.length * 11.5;
+    if (r.makeup_for_week) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...RED);
+      const mk = doc.splitTextToSize(makeupWeatherNote(r.weather), CW); doc.text(mk, M, y + 1); y += mk.length * 10;
+    }
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(110);
+    const src = doc.splitTextToSize(source, CW); doc.text(src, M, y + 1); y += src.length * 9 + 10;
+    doc.setTextColor(0);
   }
 
   // Attendance summary --------------------------------------------------------------------------------------------
@@ -221,16 +261,6 @@ export function buildRecordPdf(r: TalkRecord, co: Company, issues: Issue[] = [],
       h.reminder.items.forEach((it) => { newPageIf(14); doc.setFont("helvetica", "normal"); doc.text("•", M + 6, y); para(it, false, 18); });
     }
     y += 8;
-  }
-  if (r.weather) {
-    newPageIf(60);
-    const [main, source] = weatherPdfLines(r.weather);
-    para("Weather at the talk", true);
-    para(main, false);
-    if (r.makeup_for_week) para(makeupWeatherNote(r.weather), true);
-    const size = doc.getFontSize();
-    doc.setFontSize(8); doc.setTextColor(110); para(source, false); doc.setTextColor(0); doc.setFontSize(size);
-    y += 6;
   }
   if (issues.length) {
     newPageIf(40);
@@ -376,10 +406,7 @@ export function buildProfilePdf(p: SafetyProfile, co: HeaderCompany, opts: { kin
   const { W, H, M } = PAGE, CW = W - 2 * M;
   let page = 1;
   const footer = () => {
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(GREY);
-    doc.text(`${co.name ? co.name + " · " : ""}Safety program summary · Page ${page}`, M, H - 28);
-    doc.text(PDF_FOOTER, W - M, H - 28, { align: "right" });
-    doc.setTextColor(0);
+    pageFooter(doc, [`${co.name ? co.name + " · " : ""}Safety program summary`], page);
     page++;
   };
   let y = companyHeader(doc, co, opts.kind === "renewal" ? "SAFETY PROGRAM SUMMARY" : "MONTHLY PROGRAM SUMMARY");
@@ -765,11 +792,11 @@ export function buildInspectionPdf(r: InspectionPdfInput, co: HeaderCompany, ori
   const { W, H, M } = PAGE, CW = W - 2 * M;
   let page = 1;
   const footer = () => {
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
-    doc.text(`${co.name ? co.name + " · " : ""}Inspection ${r.id} · Page ${page}`, M, H - 28);
-    if (r.verify_code) doc.text(`Check code ${formatCode(r.verify_code)}${origin ? ` at ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify` : ""}`, M, H - 18);
-    doc.text("Documents an inspection. Does not by itself certify OSHA compliance.", W - M, H - 28, { align: "right" });
-    doc.setTextColor(0); page++;
+    pageFooter(doc, [
+      `${co.name ? co.name + " · " : ""}Inspection ${r.id}`,
+      ...(r.verify_code ? [`Check code ${formatCode(r.verify_code)}${origin ? ` at ${origin.replace(/^https?:\/\//, "").replace(/\/+$/, "")}/verify` : ""}`] : []),
+    ], page, "Documents an inspection. Does not by itself certify OSHA compliance.", 7.5);
+    page++;
   };
   let y = companyHeader(doc, co, "INSPECTION RECORD");
   const next = (h: number) => { if (y + h > H - M - 30) { footer(); doc.addPage(); y = M; return true; } return false; };
@@ -864,10 +891,8 @@ export function buildProgramPdf(t: ProgramTemplate, row: ProgramRow, history: Pr
   const { W, H, M } = PAGE, CW = W - 2 * M;
   let page = 1;
   const footer = () => {
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(GREY);
-    doc.text(`${co.name ? co.name + " · " : ""}${t.title} · version ${row.version} · Page ${page}`, M, H - 28);
-    doc.text("Written by the company. Does not by itself certify OSHA compliance.", W - M, H - 28, { align: "right" });
-    doc.setTextColor(0); page++;
+    pageFooter(doc, [`${co.name ? co.name + " · " : ""}${t.title} · version ${row.version}`], page, "Written by the company. Does not by itself certify OSHA compliance.", 7.5);
+    page++;
   };
   let y = companyHeader(doc, co, "WRITTEN SAFETY PROGRAM");
   const next = (h: number) => { if (y + h > H - M - 30) { footer(); doc.addPage(); y = M; } };
